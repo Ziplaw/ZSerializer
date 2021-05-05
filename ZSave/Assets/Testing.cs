@@ -2,18 +2,42 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine;
 using ZSave;
 
-public class Testing : MonoBehaviour
+
+public class Testing : PersistentMonoBehaviour
 {
-    [Save(0, SaveCycle.None), RetrieveOn(RetrieveCycle.OnStart)] private float num1 = 2;
-    [Save(0, SaveCycle.None), RetrieveOn(RetrieveCycle.OnStart)] private float num2 = 56;
+    private float num1 = 2;
+    private float num2 = 56;
+
+
+    private float timePassed = 0;
 
     private void Start()
     {
-        Debug.Log(num2);
-        CycleSaver.RetrieveValue(ref num2, "num2", this);
+        
+    }
+
+    private void Update()
+    {
+        transform.position = new Vector3(0,Mathf.Sin(Time.time),0);
+        
+        if (timePassed > -1)
+        {
+            timePassed += Time.deltaTime;
+            if (timePassed > 2)
+            {
+                Thread t = new Thread(Retrieve);
+                t.Start();
+                timePassed = -1;
+            }
+        }
+    }
+
+    void Retrieve()
+    {
         Debug.Log(num2);
     }
 }
