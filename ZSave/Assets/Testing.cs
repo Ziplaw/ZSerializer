@@ -6,40 +6,58 @@ using System.Threading;
 using UnityEngine;
 using ZSave;
 
-
-public class Testing : PersistentMonoBehaviour
+public class Testing : MonoBehaviour
 {
-    private float num1 = 2;
-    private float num2 = 56;
+    public float num1 = 2;
+    public float num2 = 56;
 
-
-    private float timePassed = 0;
 
     private void Start()
     {
         
     }
 
-    private void Update()
+    // private float timePassed = 0;
+
+    // private void Start()
+    // {
+    //     Thread t = new Thread(Retrieve);
+    //     t.Start();
+    // }
+    //
+    // void Retrieve()
+    // {
+    //     Debug.Log(num2);
+    // }
+}
+
+[Serializable]
+public class TestingZSaver : ZSaver
+{
+    public float num1;
+    public float num2;
+
+    public Testing _testing;
+
+    public TestingZSaver(Testing testing)
     {
-        transform.position = new Vector3(0,Mathf.Sin(Time.time),0);
-        
-        if (timePassed > -1)
-        {
-            timePassed += Time.deltaTime;
-            if (timePassed > 2)
-            {
-                Thread t = new Thread(Retrieve);
-                t.Start();
-                timePassed = -1;
-            }
-        }
+        num1 = testing.num1;
+        num2 = testing.num2;
+
+        _testing = testing;
     }
 
-    void Retrieve()
+    public void Load()
     {
-        Debug.Log(num2);
+        _testing.num1 = num1;
+        _testing.num2 = num2;
     }
+}
+
+[Serializable]
+public class ZSaver
+{
+    public int id;
 }
 
 
