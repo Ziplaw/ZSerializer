@@ -6,33 +6,15 @@ using System.Threading;
 using UnityEngine;
 using ZSave;
 
+[Persistent]
 public class Testing : MonoBehaviour
 {
     public float num1 = 2;
     public float num2 = 56;
-
-
-    private void Start()
-    {
-        
-    }
-
-    // private float timePassed = 0;
-
-    // private void Start()
-    // {
-    //     Thread t = new Thread(Retrieve);
-    //     t.Start();
-    // }
-    //
-    // void Retrieve()
-    // {
-    //     Debug.Log(num2);
-    // }
 }
 
 [Serializable]
-public class TestingZSaver : ZSaver
+public class TestingZSaver
 {
     public float num1;
     public float num2;
@@ -55,9 +37,14 @@ public class TestingZSaver : ZSaver
 }
 
 [Serializable]
-public class ZSaver
+public class TestingPersister
 {
-    public int id;
+    public Persister<TestingZSaver> _persister;
+
+    public TestingPersister(Persister<TestingZSaver> persister)
+    {
+        _persister = persister;
+    }
 }
 
 

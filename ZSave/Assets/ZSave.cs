@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ZSave
 {
@@ -18,16 +16,44 @@ namespace ZSave
         None = 3
     }
 
-    public class PersisterManager
+    [AttributeUsage(AttributeTargets.Class)]
+    public class PersistentAttribute : Attribute
     {
-        public Persister[] _persisters;
-
-
-        public void Save()
+        [RuntimeInitializeOnLoadMethod]
+        public static void SaveAllObjects()
         {
-            string json = JsonHelper.ToJson(_persisters);
+            var types = PersistanceManager.GetTypesWithPersistentAttribute(Assembly.GetAssembly(typeof(Testing)));
+
+            foreach (var type in types)
+            {
+                var objects = Object.FindObjectsOfType(type);
+
+                var ZSaverType = Type.GetType(type.Name + "ZSaver");
+                var ZSaverArrayType = ZSaverType.MakeArrayType();
+
+                var zsaversArray = Activator.CreateInstance(ZSaverArrayType, new object[] {objects.Length});
+
+                object[] zsavers = (object[]) zsaversArray;
+                
+                for (var i = 0; i < zsavers.Length; i++)
+                {
+                    zsavers[i] = Activator.CreateInstance(ZSaverType, new object[] { objects[i] });
+                }
+
+                var saveMethodInfo = typeof(PersistanceManager).GetMethod(nameof(PersistanceManager.Save));
+                var genericSaveMethodInfo = saveMethodInfo.MakeGenericMethod(ZSaverType);
+                genericSaveMethodInfo.Invoke(null,new object[] {zsavers});
+            }
+        }
+    }
+    
+    public class PersistanceManager
+    {
+        public static void Save<T>(T[] objectsToPersist)
+        {
+            string json = JsonHelper.ToJson(objectsToPersist);
             Debug.Log(json);
-            // WriteToFile("save.save", json);
+            WriteToFile("save.save", json);
         }
 
         public static void Load()
@@ -44,22 +70,38 @@ namespace ZSave
             // fs.Close();
         }
 
-        static void ReadFromFile(string fileName)
+        public static string ReadFromFile(string fileName)
         {
-            FileStream fs = new FileStream(GetFilePath(fileName), FileMode.Open);
-
+            // FileStream fs = new FileStream(GetFilePath(fileName), FileMode.Open);
+            StreamReader reader = new StreamReader(GetFilePath(fileName));
+            string json = reader.ReadLine();
+            reader.Close();
+            return json;
         }
 
         static string GetFilePath(string fileName)
         {
             return Application.persistentDataPath + "/" + fileName;
         }
+        
+        public static IEnumerable<Type> GetTypesWithPersistentAttribute(Assembly assembly) {
+            foreach(Type type in assembly.GetTypes()) {
+                if (type.GetCustomAttributes(typeof(PersistentAttribute), true).Length > 0) {
+                    yield return type;
+                }
+            }
+        }
     }
 
     [Serializable]
-    public class Persister
+    public class Persister<T>
     {
-        public ZSaver[] objectsToPersist;
+        public T[] objectsToPersist;
+        
+        public Persister(T[] objectsToPersist)
+        {
+            this.objectsToPersist = objectsToPersist;
+        }
     }
 
     public static class JsonHelper
