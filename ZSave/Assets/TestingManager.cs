@@ -53,11 +53,11 @@ public class TestingManager : MonoBehaviour
 
     void Load()
     {
-        _zSavers = JsonHelper.FromJson<TestingZSaver>(PersistanceManager.ReadFromFile("save.save"));
-        
-        foreach (var testingZSaver in _zSavers)
-        {
-            testingZSaver.Load();
-        }
+        // _zSavers = JsonHelper.FromJson<TestingZSaver>(PersistanceManager.ReadFromFile("save.save"));
+        //
+        // foreach (var testingZSaver in _zSavers)
+        // {
+        //     // testingZSaver.Load();
+        // }
     }
 }

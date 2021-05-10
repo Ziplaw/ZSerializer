@@ -7,7 +7,7 @@ using System.Threading;
 using UnityEngine;
 using ZSave;
 
-[Persistent]
+[Persistent(SaveType.Component,ExecutionCycle.OnStart)]
 public class Testing : MonoBehaviour
 {
     public float num1 = 2;
@@ -15,30 +15,14 @@ public class Testing : MonoBehaviour
 }
 
 [Serializable]
-public class TestingZSaver
+public class TestingZSaver : ZSaver<Testing>
 {
     public float num1;
     public float num2;
-
-    public Testing _testing;
-    public GameObject _componentParent;
-
-    public TestingZSaver(Testing testing)
+    public TestingZSaver(Testing testing) : base(testing.gameObject, testing)
     {
         num1 = testing.num1;
         num2 = testing.num2;
-
-        _testing = testing;
-        _componentParent = testing.gameObject;
-    }
-
-    public void Load()
-    {
-        Debug.Log("Loading");
-        _testing ??= _componentParent.AddComponent<Testing>();
-        
-        _testing.num1 = num1;
-        _testing.num2 = num2;
     }
 }
 

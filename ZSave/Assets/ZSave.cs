@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
 
 namespace ZSave
@@ -16,9 +18,69 @@ namespace ZSave
         None = 3
     }
 
+    public enum SaveType
+    {
+        Component,
+        GameObject
+    }
+
+    public class ZSaver<T>
+    {
+        public GameObject _componentParent;
+        public T _component;
+
+        public ZSaver(GameObject componentParent, T component)
+        {
+            _componentParent = componentParent;
+            _component = component;
+        }
+        public void Load(Type zSaverType, SaveType saveType)
+        {
+            Debug.Log(typeof(T) + " " + saveType);
+
+            if (!_componentParent)
+            {
+                if (saveType != SaveType.GameObject)
+                {
+                    Debug.LogWarning($"GameObject holding {typeof(T)} was destroyed, change the saving type to \"SaveType.GameObject\" to ensure persistance of this Component ");
+                    return;
+                }
+                
+                // LoadGameObjectPrefab()
+            }
+            
+            // if()
+            
+
+            FieldInfo[] zSaverFields = zSaverType.GetFields();
+            FieldInfo[] componentFields = typeof(T).GetFields();
+
+            for (var i = 0; i < componentFields.Length; i++)
+            {
+                for (var j = 0; j < zSaverFields.Length; j++)
+                {
+                    if (zSaverFields[j].Name == componentFields[i].Name)
+                    {
+                        // object obj = GetType().GetField("_" + typeof(T).Name.ToLower()).GetValue(this);
+                        componentFields[i].SetValue(_component,zSaverFields[j].GetValue(this));
+                    }
+                }
+            }
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Class)]
     public class PersistentAttribute : Attribute
     {
+        private readonly SaveType _saveType;
+        private readonly ExecutionCycle _executionCycle;
+
+        public PersistentAttribute(SaveType saveType, ExecutionCycle dataRecovery)
+        {
+            _saveType = saveType;
+            _executionCycle = dataRecovery;
+        }
+
         public static void SaveAllObjects()
         {
             var types = PersistanceManager.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain.GetAssemblies());
@@ -33,43 +95,46 @@ namespace ZSave
                 var zsaversArray = Activator.CreateInstance(ZSaverArrayType, new object[] {objects.Length});
 
                 object[] zsavers = (object[]) zsaversArray;
-                
+
                 for (var i = 0; i < zsavers.Length; i++)
                 {
-                    zsavers[i] = Activator.CreateInstance(ZSaverType, new object[] { objects[i] });
+                    zsavers[i] = Activator.CreateInstance(ZSaverType, new object[] {objects[i]});
                 }
 
                 var saveMethodInfo = typeof(PersistanceManager).GetMethod(nameof(PersistanceManager.Save));
                 var genericSaveMethodInfo = saveMethodInfo.MakeGenericMethod(ZSaverType);
-                genericSaveMethodInfo.Invoke(null,new object[] {zsavers, type.Name + ".save"});
+                genericSaveMethodInfo.Invoke(null, new object[] {zsavers, type.Name + ".save"});
             }
-            
+
             LoadAllObjects();
         }
 
         [RuntimeInitializeOnLoadMethod]
-        public static void  LoadAllObjects()
+        public static void LoadAllObjects()
         {
             var types = PersistanceManager.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain.GetAssemblies());
-            
+
             foreach (var type in types)
             {
                 var ZSaverType = Type.GetType(type.Name + "ZSaver");
-                MethodInfo FromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson)).MakeGenericMethod(ZSaverType);
-                
-                object[] FromJSONdObjects = (object[])FromJsonMethod.Invoke(null,
+                MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson))
+                    .MakeGenericMethod(ZSaverType);
+
+                object[] FromJSONdObjects = (object[]) fromJsonMethod.Invoke(null,
                     new object[] {PersistanceManager.ReadFromFile(type.Name + ".save")});
-                
+
                 for (var i = 0; i < FromJSONdObjects.Length; i++)
                 {
-                    MethodInfo LoadMethod = ZSaverType.GetMethod("Load", new Type[] {});
-                    LoadMethod.Invoke(FromJSONdObjects[i], new object[]{});
+                    PersistentAttribute attr = (PersistentAttribute)FromJSONdObjects[i].GetType().GetField("_component").GetValue(FromJSONdObjects[i]).GetType().GetCustomAttributes(typeof(PersistentAttribute)).FirstOrDefault(); 
+                    Debug.Log(attr);
+                    
+                    MethodInfo LoadMethod = ZSaverType.GetMethod("Load");
+                    LoadMethod.Invoke(FromJSONdObjects[i], new object[] { ZSaverType, attr._saveType });
                 }
             }
-            
         }
     }
-    
+
     public class PersistanceManager
     {
         public static void Save<T>(T[] objectsToPersist, string fileName)
@@ -81,7 +146,6 @@ namespace ZSave
 
         public static void Load()
         {
-
         }
 
         static void WriteToFile(string fileName, string json)
@@ -106,13 +170,15 @@ namespace ZSave
         {
             return Application.persistentDataPath + "/" + fileName;
         }
-        
+
         public static IEnumerable<Type> GetTypesWithPersistentAttribute(Assembly[] assemblies)
         {
             foreach (var assembly in assemblies)
             {
-                foreach(Type type in assembly.GetTypes()) {
-                    if (type.GetCustomAttributes(typeof(PersistentAttribute), true).Length > 0) {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (type.GetCustomAttributes(typeof(PersistentAttribute), true).Length > 0)
+                    {
                         yield return type;
                     }
                 }
@@ -124,7 +190,7 @@ namespace ZSave
     public class Persister<T>
     {
         public T[] objectsToPersist;
-        
+
         public Persister(T[] objectsToPersist)
         {
             this.objectsToPersist = objectsToPersist;
