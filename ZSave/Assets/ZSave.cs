@@ -19,10 +19,9 @@ namespace ZSave
     [AttributeUsage(AttributeTargets.Class)]
     public class PersistentAttribute : Attribute
     {
-        [RuntimeInitializeOnLoadMethod]
         public static void SaveAllObjects()
         {
-            var types = PersistanceManager.GetTypesWithPersistentAttribute(Assembly.GetAssembly(typeof(Testing)));
+            var types = PersistanceManager.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain.GetAssemblies());
 
             foreach (var type in types)
             {
@@ -42,18 +41,42 @@ namespace ZSave
 
                 var saveMethodInfo = typeof(PersistanceManager).GetMethod(nameof(PersistanceManager.Save));
                 var genericSaveMethodInfo = saveMethodInfo.MakeGenericMethod(ZSaverType);
-                genericSaveMethodInfo.Invoke(null,new object[] {zsavers});
+                genericSaveMethodInfo.Invoke(null,new object[] {zsavers, type.Name + ".save"});
             }
+            
+            LoadAllObjects();
+        }
+
+        [RuntimeInitializeOnLoadMethod]
+        public static void  LoadAllObjects()
+        {
+            var types = PersistanceManager.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain.GetAssemblies());
+            
+            foreach (var type in types)
+            {
+                var ZSaverType = Type.GetType(type.Name + "ZSaver");
+                MethodInfo FromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson)).MakeGenericMethod(ZSaverType);
+                
+                object[] FromJSONdObjects = (object[])FromJsonMethod.Invoke(null,
+                    new object[] {PersistanceManager.ReadFromFile(type.Name + ".save")});
+                
+                for (var i = 0; i < FromJSONdObjects.Length; i++)
+                {
+                    MethodInfo LoadMethod = ZSaverType.GetMethod("Load", new Type[] {});
+                    LoadMethod.Invoke(FromJSONdObjects[i], new object[]{});
+                }
+            }
+            
         }
     }
     
     public class PersistanceManager
     {
-        public static void Save<T>(T[] objectsToPersist)
+        public static void Save<T>(T[] objectsToPersist, string fileName)
         {
             string json = JsonHelper.ToJson(objectsToPersist);
             Debug.Log(json);
-            WriteToFile("save.save", json);
+            WriteToFile(fileName, json);
         }
 
         public static void Load()
@@ -84,10 +107,14 @@ namespace ZSave
             return Application.persistentDataPath + "/" + fileName;
         }
         
-        public static IEnumerable<Type> GetTypesWithPersistentAttribute(Assembly assembly) {
-            foreach(Type type in assembly.GetTypes()) {
-                if (type.GetCustomAttributes(typeof(PersistentAttribute), true).Length > 0) {
-                    yield return type;
+        public static IEnumerable<Type> GetTypesWithPersistentAttribute(Assembly[] assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
+                foreach(Type type in assembly.GetTypes()) {
+                    if (type.GetCustomAttributes(typeof(PersistentAttribute), true).Length > 0) {
+                        yield return type;
+                    }
                 }
             }
         }

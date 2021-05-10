@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
 using ZSave;
@@ -20,6 +21,7 @@ public class TestingZSaver
     public float num2;
 
     public Testing _testing;
+    public GameObject _componentParent;
 
     public TestingZSaver(Testing testing)
     {
@@ -27,10 +29,14 @@ public class TestingZSaver
         num2 = testing.num2;
 
         _testing = testing;
+        _componentParent = testing.gameObject;
     }
 
     public void Load()
     {
+        Debug.Log("Loading");
+        _testing ??= _componentParent.AddComponent<Testing>();
+        
         _testing.num1 = num1;
         _testing.num2 = num2;
     }

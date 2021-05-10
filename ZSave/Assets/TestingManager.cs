@@ -13,7 +13,7 @@ public class TestingManager : MonoBehaviour
 
     void Start()
     {
-        Save();
+        // Save();
         // Load();
         
         // Debug.Log(PersistanceManager.GetTypesWithPersistentAttribute(Assembly.GetAssembly(typeof(Testing))).Count());
@@ -48,7 +48,7 @@ public class TestingManager : MonoBehaviour
         // TestingPersister testingPersister = new TestingPersister(new Persister<TestingZSaver>(_zSavers));
         
         // PersistanceManager.Save(testingPersister._persister);
-        PersistanceManager.Save(_zSavers);
+        // PersistanceManager.Save(_zSavers);
     }
 
     void Load()
