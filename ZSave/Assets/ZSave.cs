@@ -1,150 +1,128 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ZSave
 {
     [Flags]
-    public enum SaveCycle
+    public enum ExecutionCycle
     {
         OnStart = 0,
         OnAwake = 1,
         OnApplicationQuit = 2,
         None = 3
     }
-    
-    [Flags]
-    public enum RetrieveCycle
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class PersistentAttribute : Attribute
     {
-        OnStart = 0,
-        OnAwake = 1,
-        None = 3
-    }
-
-    public struct SaveAttributeInfo
-    {
-        public MemberInfo memberInfo;
-        public SaveAttribute saveAttribute;
-        public object instance;
-
-        public SaveAttributeInfo(MemberInfo memberInfo, SaveAttribute saveAttribute, object instance)
-        {
-            this.memberInfo = memberInfo;
-            this.saveAttribute = saveAttribute;
-            this.instance = instance;
-        }
-    }
-
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class SaveAttribute : Attribute
-    {
-        public int _saveID;
-        public SaveCycle _saveCycle;
-        public object _parent;
-
         [RuntimeInitializeOnLoadMethod]
-        void Init()
+        public static void SaveAllObjects()
         {
-            
-        }
-        public SaveAttribute(int saveID, SaveCycle saveCycle)
-        {
-            _saveID = saveID;
-            _saveCycle = saveCycle;
-        }
-    }
-    
-    class RetrieveOnAttribute : Attribute
-    {
-        // public RetrieveOnAttribute(object onStart)
-        // {
-        //     throw new NotImplementedException();
-        // }
-    }
+            var types = PersistanceManager.GetTypesWithPersistentAttribute(Assembly.GetAssembly(typeof(Testing)));
 
-    public class CycleSaver
-    {
-        private List<SaveAttributeInfo> _saveAttributeInfos;
-        
-        [RuntimeInitializeOnLoadMethod]
-        public static void Init()
-        {
-            // Debug.Log(GetAllMarkedVariables().Count);
-
-            // foreach (var attrInfo in _saveAttributeInfos)
-            // {
-            //     switch (attrInfo.memberInfo.MemberType)
-            //     {
-            //         case MemberTypes.Field:
-            //             FieldInfo field = (FieldInfo) attrInfo.memberInfo;
-            //             break;
-            //     }
-            //     
-            // }
-        }
-
-        public static void RetrieveValue<T,T1>(ref T value, string name, T1 instance)
-        {
-            // List<SaveAttributeInfo> markedFields = new List<SaveAttributeInfo>();
-            
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            for (var i = 0; i < assemblies.Length; i++)
+            foreach (var type in types)
             {
-                foreach (var type in assemblies[i].GetTypes())
+                var objects = Object.FindObjectsOfType(type);
+
+                var ZSaverType = Type.GetType(type.Name + "ZSaver");
+                var ZSaverArrayType = ZSaverType.MakeArrayType();
+
+                var zsaversArray = Activator.CreateInstance(ZSaverArrayType, new object[] {objects.Length});
+
+                object[] zsavers = (object[]) zsaversArray;
+                
+                for (var i = 0; i < zsavers.Length; i++)
                 {
-                    BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-                    MemberInfo[] members = type.GetMembers(flags);
-                    
-                    foreach (var member in members)
-                    {
-                        if (member.CustomAttributes.ToArray().Length > 0)
-                        {
-                            SaveAttribute attr = member.GetCustomAttribute<SaveAttribute>();
-                            if (attr != null && member.Name == name)
-                            {
-                                // markedFields.Add(new SaveAttributeInfo(member,attr,null));
-                                FieldInfo fieldInfo = (FieldInfo) member;
-                                value = (T) fieldInfo.GetValue(instance);
-                            }
-                        }
-                    }
+                    zsavers[i] = Activator.CreateInstance(ZSaverType, new object[] { objects[i] });
                 }
-            }   
+
+                var saveMethodInfo = typeof(PersistanceManager).GetMethod(nameof(PersistanceManager.Save));
+                var genericSaveMethodInfo = saveMethodInfo.MakeGenericMethod(ZSaverType);
+                genericSaveMethodInfo.Invoke(null,new object[] {zsavers});
+            }
+        }
+    }
+    
+    public class PersistanceManager
+    {
+        public static void Save<T>(T[] objectsToPersist)
+        {
+            string json = JsonHelper.ToJson(objectsToPersist);
+            Debug.Log(json);
+            WriteToFile("save.save", json);
+        }
+
+        public static void Load()
+        {
+
+        }
+
+        static void WriteToFile(string fileName, string json)
+        {
+            // FileStream fs = new FileStream(GetFilePath(fileName),FileMode.OpenOrCreate);
+            StreamWriter writer = new StreamWriter(GetFilePath(fileName));
+            writer.WriteLine(json);
+            writer.Close();
+            // fs.Close();
+        }
+
+        public static string ReadFromFile(string fileName)
+        {
+            // FileStream fs = new FileStream(GetFilePath(fileName), FileMode.Open);
+            StreamReader reader = new StreamReader(GetFilePath(fileName));
+            string json = reader.ReadLine();
+            reader.Close();
+            return json;
+        }
+
+        static string GetFilePath(string fileName)
+        {
+            return Application.persistentDataPath + "/" + fileName;
         }
         
-        public static List<SaveAttributeInfo> GetAllMarkedVariables()
-        {
-            List<SaveAttributeInfo> markedFields = new List<SaveAttributeInfo>();
-            
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            for (var i = 0; i < assemblies.Length; i++)
-            {
-                foreach (var type in assemblies[i].GetTypes())
-                {
-                    BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-                    MemberInfo[] members = type.GetMembers(flags);
-                    
-                    foreach (var member in members)
-                    {
-                        if (member.CustomAttributes.ToArray().Length > 0)
-                        {
-                            SaveAttribute attr = member.GetCustomAttribute<SaveAttribute>();
-                            if (attr != null)
-                            {
-                                markedFields.Add(new SaveAttributeInfo(member,attr,null));
-                            }
-                        }
-                    }
+        public static IEnumerable<Type> GetTypesWithPersistentAttribute(Assembly assembly) {
+            foreach(Type type in assembly.GetTypes()) {
+                if (type.GetCustomAttributes(typeof(PersistentAttribute), true).Length > 0) {
+                    yield return type;
                 }
             }
+        }
+    }
 
-            return markedFields;
+    [Serializable]
+    public class Persister<T>
+    {
+        public T[] objectsToPersist;
+        
+        public Persister(T[] objectsToPersist)
+        {
+            this.objectsToPersist = objectsToPersist;
+        }
+    }
+
+    public static class JsonHelper
+    {
+        public static T[] FromJson<T>(string json)
+        {
+            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
+            return wrapper.Items;
+        }
+
+        public static string ToJson<T>(T[] array, bool prettyPrint = false)
+        {
+            Wrapper<T> wrapper = new Wrapper<T>();
+            wrapper.Items = array;
+            return JsonUtility.ToJson(wrapper, prettyPrint);
+        }
+
+        [Serializable]
+        private class Wrapper<T>
+        {
+            public T[] Items;
         }
     }
 }
