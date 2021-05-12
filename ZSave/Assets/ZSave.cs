@@ -43,10 +43,10 @@ namespace ZSave
 
     public class ZSaver<T> where T : Component
     {
-        public int gameObjectInstanceID;
-        public int componentInstanceID;
-        public GameObject _componentParent;
-        public T _component;
+        private int gameObjectInstanceID;
+        private int componentInstanceID;
+        private GameObject _componentParent;
+        private T _component;
         public SaveType _saveType => PersistentAttribute.GetAttributeFromType<PersistentAttribute>(typeof(T)).saveType;
 
         public ZSaver(GameObject componentParent, T component)

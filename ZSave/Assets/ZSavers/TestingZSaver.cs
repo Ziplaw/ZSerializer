@@ -7,10 +7,12 @@ public class TestingZSaver : ZSaver<Testing>
 {
     public System.Single num1;
     public System.Single num2;
+    public UnityEngine.Rigidbody rb;
 
-    public TestingZSaver(Testing testing) : base(testing.gameObject, testing)
+    public TestingZSaver(Testing TestingInstance) : base(TestingInstance.gameObject, TestingInstance)
     {
-         num1 = testing.num1;
-         num2 = testing.num2;
+         num1 = TestingInstance.num1;
+         num2 = TestingInstance.num2;
+         rb = TestingInstance.rb;
     }
 }

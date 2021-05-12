@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,21 +10,29 @@ namespace ZSave.Editor
     {
         private const int fontSize = 20;
         private const int classHeight = 32;
+
+        public enum ClassState
+        {
+            NotMade,
+            NeedsRebuilding,
+            Valid
+        }
         
         struct Class
         {
-            public Class(Type classType, bool hasZSaver)
+            public Class(Type classType, ClassState state)
             {
                 this.classType = classType;
-                this.hasZSaver = hasZSaver;
+                this.state = state;
             }
 
+            public ClassState state;
             public Type classType;
-            public bool hasZSaver;
         }
         
         private Class[] classes;
-        private Texture2D refreshImage;
+        private Texture2D notMadeImage;
+        private Texture2D needsRebuildingImage;
         private Texture2D validImage;
 
         [MenuItem("Tools/ZSave/Persistent Classes Configurator")]
@@ -43,10 +52,21 @@ namespace ZSave.Editor
 
             for (int i = 0; i < types.Length; i++)
             {
-                classes[i] = new Class(types[i],types[i].Assembly.GetType(types[i].Name + "ZSaver") != null);
+                ClassState classState = ClassState.Valid;
+                Type ZSaverType = types[i].Assembly.GetType(types[i].Name + "ZSaver");
+                if (ZSaverType == null) classState = ClassState.NotMade;
+                else
+                {
+                    var fieldsZSaver = ZSaverType.GetFields();
+                    var fieldsType = types[i].GetFields();
+
+                    if (fieldsZSaver.Length != fieldsType.Length) classState = ClassState.NeedsRebuilding;
+                }
+                classes[i] = new Class(types[i],classState);
             }
-            refreshImage = Resources.Load<Texture2D>("not_made");
+            notMadeImage = Resources.Load<Texture2D>("not_made");
             validImage = Resources.Load<Texture2D>("valid");
+            needsRebuildingImage = Resources.Load<Texture2D>("needs_rebuilding");
         }
 
         private void OnGUI()
@@ -63,16 +83,29 @@ namespace ZSave.Editor
                         using (new EditorGUILayout.HorizontalScope("helpbox"))
                         {
                             EditorGUILayout.LabelField(classInstance.classType.Name, new GUIStyle("label"){alignment = TextAnchor.MiddleCenter, fontSize = fontSize},GUILayout.Height(classHeight));
-                            using (new EditorGUI.DisabledGroupScope(classInstance.hasZSaver))
-                                if (GUILayout.Button(classInstance.hasZSaver ? validImage : refreshImage,
+                            using (new EditorGUI.DisabledGroupScope(classInstance.state == ClassState.Valid))
+                            {
+
+                                Texture2D textureToUse = validImage;
+
+                                if (classInstance.state != ClassState.Valid)
+                                {
+                                    textureToUse = classInstance.state == ClassState.NeedsRebuilding
+                                        ? needsRebuildingImage
+                                        : notMadeImage;
+                                }
+
+                                if (GUILayout.Button(textureToUse,
                                     GUILayout.Width(classHeight), GUILayout.Height(classHeight)))
                                 {
                                     string path = EditorUtility.SaveFilePanel(
                                         classInstance.classType.Name + "ZSaver.cs Save Location", "Assets",
-                                        classInstance.classType.Name + "ZSaver","cs");
-                                    
+                                        classInstance.classType.Name + "ZSaver", "cs");
+
                                     PersistanceManager.CreateZSaver(classInstance.classType, path);
+                                    AssetDatabase.Refresh();
                                 }
+                            }
                         }
                     }
             }
