@@ -8,6 +8,11 @@ public class Testing : MonoBehaviour
     public float num1 = 2;
     public float num2 = 56;
     public Rigidbody rb;
+
+    private void Start()
+    {
+        name = gameObject.GetInstanceID().ToString();
+    }
 }
 
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -43,10 +44,10 @@ namespace ZSave
 
     public class ZSaver<T> where T : Component
     {
-        private int gameObjectInstanceID;
-        private int componentInstanceID;
-        private GameObject _componentParent;
-        private T _component;
+        [NonPersistent]public int gameObjectInstanceID;
+        [NonPersistent]public int componentInstanceID;
+        [NonPersistent]public GameObject _componentParent;
+        [NonPersistent]public T _component;
         public SaveType _saveType => PersistentAttribute.GetAttributeFromType<PersistentAttribute>(typeof(T)).saveType;
 
         public ZSaver(GameObject componentParent, T component)
@@ -59,14 +60,18 @@ namespace ZSave
 
         public void Load(Type zSaverType, SaveType saveType)
         {
+            Debug.Log(PersistanceManager.ReadFromFile("Testing.save"));
+            Debug.Log("loading");
             if (_component == null)
             {
+                Debug.Log($"component null for {componentInstanceID}");
                 string prevCOMPInstanceID = componentInstanceID.ToString();
                 string COMPInstanceIDToReplaceString = $"\"componentInstanceID\":{prevCOMPInstanceID}";
                 string COMPInstanceIDToReplace = "\"_component\":{\"instanceID\":" + prevCOMPInstanceID + "}";
 
                 if (_componentParent == null)
                 {
+                    Debug.Log($"component parent: {gameObjectInstanceID} null for {componentInstanceID}");
                     string prevGOInstanceID = gameObjectInstanceID.ToString();
 
                     if (saveType != SaveType.GameObject)
@@ -77,14 +82,14 @@ namespace ZSave
                     }
 
 
-                    string GOInstanceIDToReplaceString = $"\"gameObjectInstanceID\":{prevGOInstanceID}";
+                    string GOInstanceIDToReplaceString = "\"gameObjectInstanceID\":"+prevGOInstanceID;
                     string GOInstanceIDToReplace = "\"_componentParent\":{\"instanceID\":" + prevGOInstanceID + "}";
 
 
                     _componentParent = PersistanceManager.LoadGOfromXML(typeof(T).Name + ".xml", gameObjectInstanceID);
                     gameObjectInstanceID = _componentParent.GetInstanceID();
 
-                    string newGOInstanceIDToReplaceString = $"\"gameObjectInstanceID\":{gameObjectInstanceID}";
+                    string newGOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + gameObjectInstanceID;
                     string newGOInstanceIDToReplace =
                         "\"_componentParent\":{\"instanceID\":" + gameObjectInstanceID + "}";
 
@@ -101,7 +106,7 @@ namespace ZSave
 
                 _component = (T) _componentParent.AddComponent(typeof(T));
                 componentInstanceID = _component.GetInstanceID();
-                string newCOMPInstanceIDToReplaceString = $"\"componentInstanceID\":{componentInstanceID}";
+                string newCOMPInstanceIDToReplaceString = "\"componentInstanceID\":" + componentInstanceID;
                 string newCOMPInstanceIDToReplace = "\"_component\":{\"instanceID\":" + componentInstanceID + "}";
 
                 PersistanceManager.UpdateFile(typeof(T).Name + ".save",
@@ -130,6 +135,11 @@ namespace ZSave
                 }
             }
         }
+    }
+
+    public class NonPersistent : Attribute
+    {
+        
     }
 
     [AttributeUsage(AttributeTargets.Class)]
@@ -167,6 +177,7 @@ namespace ZSave
                 for (var i = 0; i < zsavers.Length; i++)
                 {
                     zsavers[i] = Activator.CreateInstance(ZSaverType, new object[] {objects[i]});
+                    
                     transformsToSave[i] = ((GameObject) ZSaverType.GetField("_componentParent").GetValue(zsavers[i]))
                         .transform;
                 }
@@ -192,12 +203,14 @@ namespace ZSave
                 if (ZSaverType == null) break;
                 MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson))
                     .MakeGenericMethod(ZSaverType);
-
+                
                 object[] FromJSONdObjects = (object[]) fromJsonMethod.Invoke(null,
                     new object[] {PersistanceManager.ReadFromFile(type.Name + ".save")});
 
                 for (var i = 0; i < FromJSONdObjects.Length; i++)
                 {
+                    FromJSONdObjects[i] = ((object[]) fromJsonMethod.Invoke(null,
+                        new object[] {PersistanceManager.ReadFromFile(type.Name + ".save")}))[i];
                     MethodInfo loadMethod = ZSaverType.GetMethod("Load");
                     loadMethod.Invoke(FromJSONdObjects[i],
                         new object[] {ZSaverType, ZSaverType.GetProperty("_saveType").GetValue(FromJSONdObjects[i])});
@@ -240,30 +253,29 @@ namespace ZSave
             StreamWriter sw = new StreamWriter(fileStream);
 
             string script =
-                "using System;\n" +
-                "using UnityEngine;\n" +
                 "using ZSave;\n" +
                 "\n" +
-                "[Serializable]\n" +
+                "[System.Serializable]\n" +
                 $"public class {type.Name}ZSaver : ZSaver<{type.Name}>\n" +
                 "{\n";
 
-            foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+            foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => f.GetCustomAttribute(typeof(NonPersistent)) == null))
             {
                 script +=
                     $"    public {fieldInfo.FieldType} {fieldInfo.Name};\n";
             }
 
-            string lowerCaseClassName = type.Name + "Instance";
+            string className = type.Name + "Instance";
 
             script +=
-                $"\n    public {type.Name}ZSaver({type.Name} {lowerCaseClassName}) : base({lowerCaseClassName}.gameObject, {lowerCaseClassName})\n" +
+                $"\n    public {type.Name}ZSaver({type.Name} {className}) : base({className}.gameObject, {className})\n" +
                 "    {\n";
 
             foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
+                //num1 = (System.Single)typeof(Testing).GetField("num1").GetValue(TestingInstance);
                 script +=
-                    $"         {fieldInfo.Name} = {lowerCaseClassName}.{fieldInfo.Name};\n";
+                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\").GetValue({className});\n";
             }
 
             script += "    }\n}";
@@ -277,18 +289,18 @@ namespace ZSave
         {
             string json = ReadFromFile(fileName);
             string newJson = json;
-
             for (int i = 0; i < previousFields.Length; i++)
             {
-                newJson = json.Replace(previousFields[i], newFields[i]);
+                newJson = newJson.Replace(previousFields[i], newFields[i]);
             }
-
+            
             WriteToFile(fileName, newJson);
         }
 
         public static void Save<T>(T[] objectsToPersist, string fileName)
         {
-            string json = JsonHelper.ToJson(objectsToPersist);
+            string json = JsonHelper.ToJson(objectsToPersist, false);
+            Debug.Log(json + " " + fileName);
             WriteToFile(fileName, json);
         }
 
@@ -357,16 +369,13 @@ namespace ZSave
 
         static void WriteToFile(string fileName, string json)
         {
-            // FileStream fs = new FileStream(GetFilePath(fileName),FileMode.OpenOrCreate);
             StreamWriter writer = new StreamWriter(GetFilePath(fileName));
             writer.WriteLine(json);
             writer.Close();
-            // fs.Close();
         }
 
         public static string ReadFromFile(string fileName)
         {
-            // FileStream fs = new FileStream(GetFilePath(fileName), FileMode.Open);
             StreamReader reader = new StreamReader(GetFilePath(fileName));
             string json = reader.ReadToEnd();
             reader.Close();

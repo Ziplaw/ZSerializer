@@ -1,8 +1,6 @@
-using System;
-using UnityEngine;
 using ZSave;
 
-[Serializable]
+[System.Serializable]
 public class TestingZSaver : ZSaver<Testing>
 {
     public System.Single num1;
@@ -11,8 +9,8 @@ public class TestingZSaver : ZSaver<Testing>
 
     public TestingZSaver(Testing TestingInstance) : base(TestingInstance.gameObject, TestingInstance)
     {
-         num1 = TestingInstance.num1;
-         num2 = TestingInstance.num2;
-         rb = TestingInstance.rb;
+         num1 = (System.Single)typeof(Testing).GetField("num1").GetValue(TestingInstance);
+         num2 = (System.Single)typeof(Testing).GetField("num2").GetValue(TestingInstance);
+         rb = (UnityEngine.Rigidbody)typeof(Testing).GetField("rb").GetValue(TestingInstance);
     }
 }

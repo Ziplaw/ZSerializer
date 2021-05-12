@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -17,7 +19,7 @@ namespace ZSave.Editor
             NeedsRebuilding,
             Valid
         }
-        
+
         struct Class
         {
             public Class(Type classType, ClassState state)
@@ -29,7 +31,7 @@ namespace ZSave.Editor
             public ClassState state;
             public Type classType;
         }
-        
+
         private Class[] classes;
         private Texture2D notMadeImage;
         private Texture2D needsRebuildingImage;
@@ -41,13 +43,13 @@ namespace ZSave.Editor
             var window = GetWindow<ZSaverTypesEditorWindow>();
             window.titleContent = new GUIContent("Persistent Classes");
             window.Show();
-            
         }
+
         private void Init()
         {
             var types = PersistentAttribute.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
                 .GetAssemblies()).ToArray();
-            
+
             classes = new Class[types.Length];
 
             for (int i = 0; i < types.Length; i++)
@@ -57,13 +59,16 @@ namespace ZSave.Editor
                 if (ZSaverType == null) classState = ClassState.NotMade;
                 else
                 {
-                    var fieldsZSaver = ZSaverType.GetFields();
+                    var fieldsZSaver = ZSaverType.GetFields()
+                        .Where(f => f.GetCustomAttribute(typeof(NonPersistent)) == null).ToArray();
                     var fieldsType = types[i].GetFields();
 
                     if (fieldsZSaver.Length != fieldsType.Length) classState = ClassState.NeedsRebuilding;
                 }
-                classes[i] = new Class(types[i],classState);
+
+                classes[i] = new Class(types[i], classState);
             }
+
             notMadeImage = Resources.Load<Texture2D>("not_made");
             validImage = Resources.Load<Texture2D>("valid");
             needsRebuildingImage = Resources.Load<Texture2D>("needs_rebuilding");
@@ -78,14 +83,16 @@ namespace ZSave.Editor
             else
             {
                 if (classes != null)
+                {
                     foreach (var classInstance in classes)
                     {
                         using (new EditorGUILayout.HorizontalScope("helpbox"))
                         {
-                            EditorGUILayout.LabelField(classInstance.classType.Name, new GUIStyle("label"){alignment = TextAnchor.MiddleCenter, fontSize = fontSize},GUILayout.Height(classHeight));
+                            EditorGUILayout.LabelField(classInstance.classType.Name,
+                                new GUIStyle("label") {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
+                                GUILayout.Height(classHeight));
                             using (new EditorGUI.DisabledGroupScope(classInstance.state == ClassState.Valid))
                             {
-
                                 Texture2D textureToUse = validImage;
 
                                 if (classInstance.state != ClassState.Valid)
@@ -98,9 +105,19 @@ namespace ZSave.Editor
                                 if (GUILayout.Button(textureToUse,
                                     GUILayout.Width(classHeight), GUILayout.Height(classHeight)))
                                 {
-                                    string path = EditorUtility.SaveFilePanel(
-                                        classInstance.classType.Name + "ZSaver.cs Save Location", "Assets",
-                                        classInstance.classType.Name + "ZSaver", "cs");
+                                    string path;
+
+                                    if (classInstance.state == ClassState.NotMade)
+                                    {
+                                        path = EditorUtility.SaveFilePanel(
+                                            classInstance.classType.Name + "ZSaver.cs Save Location", "Assets",
+                                            classInstance.classType.Name + "ZSaver", "cs");
+                                    }
+                                    else
+                                    {
+                                        path = Directory.GetFiles("Assets", $"*{classInstance.classType.Name}ZSaver.cs",
+                                            SearchOption.AllDirectories)[0];
+                                    }
 
                                     PersistanceManager.CreateZSaver(classInstance.classType, path);
                                     AssetDatabase.Refresh();
@@ -108,9 +125,8 @@ namespace ZSave.Editor
                             }
                         }
                     }
+                }
             }
         }
-
-        
     }
 }
