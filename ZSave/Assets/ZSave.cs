@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -38,15 +39,22 @@ namespace ZSave
         public int layer;
         public string tag;
 
-        public Component[] components;
+        public ComponentData[] componentDatas;
+    }
+
+    public struct ComponentData
+    {
+        public string typeName;
+        public int numOfProperties;
+        public object[] propertyValues;
     }
 
     public class ZSaver<T> where T : Component
     {
-        [NonPersistent]public int gameObjectInstanceID;
-        [NonPersistent]public int componentInstanceID;
-        [NonPersistent]public GameObject _componentParent;
-        [NonPersistent]public T _component;
+        [NonPersistent] public int gameObjectInstanceID;
+        [NonPersistent] public int componentInstanceID;
+        [NonPersistent] public GameObject _componentParent;
+        [NonPersistent] public T _component;
         public SaveType _saveType => PersistentAttribute.GetAttributeFromType<PersistentAttribute>(typeof(T)).saveType;
 
         public ZSaver(GameObject componentParent, T component)
@@ -56,6 +64,7 @@ namespace ZSave
             gameObjectInstanceID = componentParent.GetInstanceID();
             componentInstanceID = component.GetInstanceID();
         }
+
 
         public void Load(Type zSaverType, SaveType saveType)
         {
@@ -69,7 +78,7 @@ namespace ZSave
                 {
                     string prevGOInstanceID = gameObjectInstanceID.ToString();
 
-                    if (saveType != SaveType.GameObject)
+                    if (saveType == SaveType.Component)
                     {
                         Debug.LogWarning(
                             $"GameObject holding {typeof(T)} was destroyed, change the saving type to \"SaveType.GameObject\" to ensure persistance of this Component if destroying is necessary");
@@ -77,7 +86,7 @@ namespace ZSave
                     }
 
 
-                    string GOInstanceIDToReplaceString = "\"gameObjectInstanceID\":"+prevGOInstanceID;
+                    string GOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + prevGOInstanceID;
                     string GOInstanceIDToReplace = "\"_componentParent\":{\"instanceID\":" + prevGOInstanceID + "}";
 
 
@@ -134,7 +143,6 @@ namespace ZSave
 
     public class NonPersistent : Attribute
     {
-        
     }
 
     [AttributeUsage(AttributeTargets.Class)]
@@ -172,7 +180,7 @@ namespace ZSave
                 for (var i = 0; i < zsavers.Length; i++)
                 {
                     zsavers[i] = Activator.CreateInstance(ZSaverType, new object[] {objects[i]});
-                    
+
                     transformsToSave[i] = ((GameObject) ZSaverType.GetField("_componentParent").GetValue(zsavers[i]))
                         .transform;
                 }
@@ -198,7 +206,7 @@ namespace ZSave
                 if (ZSaverType == null) break;
                 MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson))
                     .MakeGenericMethod(ZSaverType);
-                
+
                 object[] FromJSONdObjects = (object[]) fromJsonMethod.Invoke(null,
                     new object[] {PersistanceManager.ReadFromFile(type.Name + ".save")});
 
@@ -254,7 +262,8 @@ namespace ZSave
                 $"public class {type.Name}ZSaver : ZSaver<{type.Name}>\n" +
                 "{\n";
 
-            foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => f.GetCustomAttribute(typeof(NonPersistent)) == null))
+            foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
+                .Where(f => f.GetCustomAttribute(typeof(NonPersistent)) == null))
             {
                 script +=
                     $"    public {fieldInfo.FieldType} {fieldInfo.Name};\n";
@@ -276,7 +285,7 @@ namespace ZSave
             script += "    }\n}";
 
             sw.Write(script);
-            
+
             sw.Close();
         }
 
@@ -286,14 +295,14 @@ namespace ZSave
                 SearchOption.AllDirectories))
             {
                 string fileName = file.Split('\\').Last();
-                
+
                 string json = ReadFromFile(fileName);
                 string newJson = json;
                 for (int i = 0; i < previousFields.Length; i++)
                 {
                     newJson = newJson.Replace(previousFields[i], newFields[i]);
                 }
-            
+
                 WriteToFile(fileName, newJson);
             }
         }
@@ -306,17 +315,82 @@ namespace ZSave
 
         public static void SaveGOtoXML(Transform[] transforms, string fileName, SaveType saveType)
         {
-            FileStream file = File.Create(GetFilePath(fileName));
+            if (transforms.Length > 0)
+                foreach (var propertyInfo in typeof(Transform).GetProperties()
+                    .Where(p => p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite))
+                {
+                    propertyInfo.SetValue(transforms[0], propertyInfo.GetValue(transforms[0]));
+                }
 
-            DataContractSerializer bf = new DataContractSerializer(typeof(GameObjectData[]));
-            MemoryStream streamer = new MemoryStream();
 
             GameObjectData[] datas = new GameObjectData[transforms.Length];
 
             for (var i = 0; i < datas.Length; i++)
             {
-                Component[] components = transforms[i].GetComponents( saveType == SaveType.GameObject ? typeof(Transform) : typeof(Component));
-                
+                Component[] components = transforms[i].gameObject
+                    .GetComponents(saveType == SaveType.GameObject ? typeof(Transform) : typeof(Component));
+
+                // foreach (var component in components)
+                // {
+                //     Debug.Log(component.GetType());
+                // }
+
+                ComponentData[] componentDatas = new ComponentData[components.Length];
+
+                for (int j = 0; j < componentDatas.Length; j++)
+                {
+                    object[] values =
+                        (from p in components[j].GetType().GetProperties()
+                            where p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite && p.CanRead
+                            select p.GetValue(components[j])).ToArray();
+
+                    componentDatas[j] = new ComponentData()
+                    {
+                        propertyValues = values,
+                        numOfProperties = values.Length,
+                        typeName = components[j].GetType().Name
+                    };
+
+                    try
+                    {
+                        FileStream fileStream = File.Create("test.xml");
+                        DataContractSerializer dataContractSerializer =
+                            new DataContractSerializer(typeof(ComponentData));
+                        MemoryStream stream = new MemoryStream();
+
+                        dataContractSerializer.WriteObject(stream, componentDatas[j]);
+
+                        stream.Seek(0, SeekOrigin.Begin);
+
+                        fileStream.Write(stream.GetBuffer(), 0, stream.GetBuffer().Length);
+                        
+                        fileStream.Dispose();
+
+                    }
+                    catch (InvalidDataContractException e)
+                    {
+                        var list = componentDatas.ToList();
+                        list.RemoveAt(j);
+                        componentDatas = list.ToArray();
+                        
+                        List<Component> componentList = components.ToList();
+                        componentList.RemoveAt(j);
+                        components = componentList.ToArray();
+                        j--;
+                        Debug.Log(components[j] + " " + e);
+                    }
+                    catch (IOException e)
+                    {
+                        Debug.Log(components[j] + " " + e);
+                    }
+                }
+
+                foreach (var componentData in componentDatas)
+                {
+                    Debug.Log(componentData.typeName);
+                }
+
+
                 datas[i] = new GameObjectData()
                 {
                     instanceID = transforms[i].gameObject.GetInstanceID(),
@@ -328,10 +402,15 @@ namespace ZSave
                     layer = transforms[i].gameObject.layer,
                     tag = transforms[i].gameObject.tag,
 
-                    components = components
+                    componentDatas = componentDatas
                 };
             }
 
+
+            FileStream file = File.Create(GetFilePath(fileName));
+
+            DataContractSerializer bf = new DataContractSerializer(typeof(GameObjectData[]));
+            MemoryStream streamer = new MemoryStream();
 
             bf.WriteObject(streamer, datas);
 
@@ -344,7 +423,12 @@ namespace ZSave
 
         public static GameObject LoadGOfromXML(string fileName, int instanceID)
         {
-            DataContractSerializer bf = new DataContractSerializer(typeof(GameObjectData[]));
+            List<Type> knownTypes = typeof(Vector3).Assembly.GetExportedTypes()
+                .Where(t => t.IsValueType && !t.IsGenericType).ToList();
+            knownTypes.Add(typeof(Mesh));
+            
+            DataContractSerializer bf = new DataContractSerializer(typeof(GameObjectData[]),
+                knownTypes);
             XmlReader reader = new XmlTextReader(GetFilePath(fileName));
             GameObjectData[] datas = (GameObjectData[]) bf.ReadObject(reader);
             GameObjectData dataOfObjectToReturn = datas.First(d => d.instanceID == instanceID);
@@ -360,24 +444,49 @@ namespace ZSave
             objToReturn.layer = dataOfObjectToReturn.layer;
             objToReturn.tag = dataOfObjectToReturn.tag;
 
-            var transform = (Transform)dataOfObjectToReturn.components.First(c => c.GetType() == typeof(Transform));
+            int propertyIndex = 0;
 
-            objToReturn.transform.position = transform.position;
-            objToReturn.transform.rotation = transform.rotation;
-            objToReturn.transform.localScale = transform.localScale;
-            
-            foreach (var component in dataOfObjectToReturn.components)
+            foreach (var componentData in dataOfObjectToReturn.componentDatas)
             {
-                objToReturn.AddComponent(component.GetType());
+                Type currentComponentType = AppDomain.CurrentDomain
+                    .GetAssemblies()
+                    .SelectMany(assembly => assembly.GetTypes()).FirstOrDefault(type =>
+                        type.IsSubclassOf(typeof(Component)) && type.Name == componentData.typeName);
 
-                foreach (var fieldInfo in objToReturn.GetComponent(component.GetType()).GetType().GetFields())
+                Debug.Log(componentData.typeName);
+
+                var component = objToReturn.GetComponent(currentComponentType) ??
+                                objToReturn.AddComponent(currentComponentType);
+
+                var propertyInfos = (from p in currentComponentType.GetProperties()
+                    where p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite && p.CanRead
+                    select p).ToArray();
+
+                for (var i = 0; i < propertyInfos.Length; i++)
                 {
-                    foreach (var field in component.GetType().GetFields())
-                    {
-                        fieldInfo.SetValue(component, field.GetValue(component));
-                    }
+                    Debug.Log("setting value: " + propertyInfos[i].Name + " to " + componentData.propertyValues[propertyIndex]);
+                    
+                    propertyInfos[i].SetValue(component, componentData.propertyValues[propertyIndex]);
+                    propertyIndex++;
                 }
             }
+
+            // objToReturn.transform.position = transform.position;
+            // objToReturn.transform.rotation = transform.rotation;
+            // objToReturn.transform.localScale = transform.localScale;
+            //
+            // foreach (var component in (Transform[])dataOfObjectToReturn.components)
+            // {
+            //     objToReturn.AddComponent(component.GetType());
+            //
+            //     foreach (var fieldInfo in objToReturn.GetComponent(component.GetType()).GetType().GetFields())
+            //     {
+            //         foreach (var field in component.GetType().GetFields())
+            //         {
+            //             fieldInfo.SetValue(component, field.GetValue(component));
+            //         }
+            //     }
+            // }
 
             return objToReturn;
         }
