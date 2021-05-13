@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ZSave;
 
-[Persistent(SaveType.Component,ExecutionCycle.None)]
+[Persistent(SaveType.GameObject,ExecutionCycle.None)]
 public class TestingAgain : MonoBehaviour
 {
     public float publicNum;

@@ -23,7 +23,8 @@ namespace ZSave
     public enum SaveType
     {
         Component,
-        GameObject
+        GameObject,
+        GameObjectFull
     }
 
     public struct GameObjectData
@@ -37,9 +38,7 @@ namespace ZSave
         public int layer;
         public string tag;
 
-        public Vector3 position;
-        public Quaternion rotation;
-        public Vector3 localScale;
+        public Component[] components;
     }
 
     public class ZSaver<T> where T : Component
@@ -60,18 +59,14 @@ namespace ZSave
 
         public void Load(Type zSaverType, SaveType saveType)
         {
-            Debug.Log(PersistanceManager.ReadFromFile("Testing.save"));
-            Debug.Log("loading");
             if (_component == null)
             {
-                Debug.Log($"component null for {componentInstanceID}");
                 string prevCOMPInstanceID = componentInstanceID.ToString();
                 string COMPInstanceIDToReplaceString = $"\"componentInstanceID\":{prevCOMPInstanceID}";
                 string COMPInstanceIDToReplace = "\"_component\":{\"instanceID\":" + prevCOMPInstanceID + "}";
 
                 if (_componentParent == null)
                 {
-                    Debug.Log($"component parent: {gameObjectInstanceID} null for {componentInstanceID}");
                     string prevGOInstanceID = gameObjectInstanceID.ToString();
 
                     if (saveType != SaveType.GameObject)
@@ -93,7 +88,7 @@ namespace ZSave
                     string newGOInstanceIDToReplace =
                         "\"_componentParent\":{\"instanceID\":" + gameObjectInstanceID + "}";
 
-                    PersistanceManager.UpdateFile(typeof(T).Name + ".save",
+                    PersistanceManager.UpdateAllJSONFiles(
                         new[]
                         {
                             GOInstanceIDToReplaceString, GOInstanceIDToReplace
@@ -109,7 +104,7 @@ namespace ZSave
                 string newCOMPInstanceIDToReplaceString = "\"componentInstanceID\":" + componentInstanceID;
                 string newCOMPInstanceIDToReplace = "\"_component\":{\"instanceID\":" + componentInstanceID + "}";
 
-                PersistanceManager.UpdateFile(typeof(T).Name + ".save",
+                PersistanceManager.UpdateAllJSONFiles(
                     new[]
                     {
                         COMPInstanceIDToReplaceString, COMPInstanceIDToReplace
@@ -186,9 +181,9 @@ namespace ZSave
                 var saveMethodInfo = typeof(PersistanceManager).GetMethod(nameof(PersistanceManager.Save));
                 var genericSaveMethodInfo = saveMethodInfo.MakeGenericMethod(ZSaverType);
                 genericSaveMethodInfo.Invoke(null, new object[] {zsavers, type.Name + ".save"});
-                if (saveType == SaveType.GameObject)
+                if (saveType == SaveType.GameObject || saveType == SaveType.GameObjectFull)
                 {
-                    PersistanceManager.SaveGOtoXML(transformsToSave, type.Name + ".xml");
+                    PersistanceManager.SaveGOtoXML(transformsToSave, type.Name + ".xml", saveType);
                 }
             }
         }
@@ -285,26 +280,31 @@ namespace ZSave
             sw.Close();
         }
 
-        public static void UpdateFile(string fileName, string[] previousFields, string[] newFields)
+        public static void UpdateAllJSONFiles(string[] previousFields, string[] newFields)
         {
-            string json = ReadFromFile(fileName);
-            string newJson = json;
-            for (int i = 0; i < previousFields.Length; i++)
+            foreach (var file in Directory.GetFiles(Application.persistentDataPath, "*.save",
+                SearchOption.AllDirectories))
             {
-                newJson = newJson.Replace(previousFields[i], newFields[i]);
-            }
+                string fileName = file.Split('\\').Last();
+                
+                string json = ReadFromFile(fileName);
+                string newJson = json;
+                for (int i = 0; i < previousFields.Length; i++)
+                {
+                    newJson = newJson.Replace(previousFields[i], newFields[i]);
+                }
             
-            WriteToFile(fileName, newJson);
+                WriteToFile(fileName, newJson);
+            }
         }
 
         public static void Save<T>(T[] objectsToPersist, string fileName)
         {
             string json = JsonHelper.ToJson(objectsToPersist, false);
-            Debug.Log(json + " " + fileName);
             WriteToFile(fileName, json);
         }
 
-        public static void SaveGOtoXML(Transform[] transforms, string fileName)
+        public static void SaveGOtoXML(Transform[] transforms, string fileName, SaveType saveType)
         {
             FileStream file = File.Create(GetFilePath(fileName));
 
@@ -315,6 +315,8 @@ namespace ZSave
 
             for (var i = 0; i < datas.Length; i++)
             {
+                Component[] components = transforms[i].GetComponents( saveType == SaveType.GameObject ? typeof(Transform) : typeof(Component));
+                
                 datas[i] = new GameObjectData()
                 {
                     instanceID = transforms[i].gameObject.GetInstanceID(),
@@ -326,9 +328,7 @@ namespace ZSave
                     layer = transforms[i].gameObject.layer,
                     tag = transforms[i].gameObject.tag,
 
-                    position = transforms[i].position,
-                    rotation = transforms[i].rotation,
-                    localScale = transforms[i].localScale
+                    components = components
                 };
             }
 
@@ -360,9 +360,24 @@ namespace ZSave
             objToReturn.layer = dataOfObjectToReturn.layer;
             objToReturn.tag = dataOfObjectToReturn.tag;
 
-            objToReturn.transform.position = dataOfObjectToReturn.position;
-            objToReturn.transform.rotation = dataOfObjectToReturn.rotation;
-            objToReturn.transform.localScale = dataOfObjectToReturn.localScale;
+            var transform = (Transform)dataOfObjectToReturn.components.First(c => c.GetType() == typeof(Transform));
+
+            objToReturn.transform.position = transform.position;
+            objToReturn.transform.rotation = transform.rotation;
+            objToReturn.transform.localScale = transform.localScale;
+            
+            foreach (var component in dataOfObjectToReturn.components)
+            {
+                objToReturn.AddComponent(component.GetType());
+
+                foreach (var fieldInfo in objToReturn.GetComponent(component.GetType()).GetType().GetFields())
+                {
+                    foreach (var field in component.GetType().GetFields())
+                    {
+                        fieldInfo.SetValue(component, field.GetValue(component));
+                    }
+                }
+            }
 
             return objToReturn;
         }

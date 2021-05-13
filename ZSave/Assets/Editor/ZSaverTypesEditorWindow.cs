@@ -79,6 +79,7 @@ namespace ZSave.Editor
             if (GUILayout.Button("Refresh"))
             {
                 Init();
+                
             }
             else
             {
@@ -106,6 +107,8 @@ namespace ZSave.Editor
                                     GUILayout.Width(classHeight), GUILayout.Height(classHeight)))
                                 {
                                     string path;
+                                    
+                                   
 
                                     if (classInstance.state == ClassState.NotMade)
                                     {
@@ -115,7 +118,7 @@ namespace ZSave.Editor
                                     }
                                     else
                                     {
-                                        path = Directory.GetFiles("Assets", $"*{classInstance.classType.Name}ZSaver.cs",
+                                        path = Directory.GetFiles("Assets", $"{classInstance.classType.Name}ZSaver.cs",
                                             SearchOption.AllDirectories)[0];
                                     }
 
