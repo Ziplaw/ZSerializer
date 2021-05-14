@@ -344,7 +344,7 @@ namespace ZSave
         public static void Save<T>(T[] objectsToPersist, string fileName)
         {
             string json = JsonHelper.ToJson(objectsToPersist, false);
-            Debug.Log(json);
+            // Debug.Log(json);
             WriteToFile(fileName, json);
         }
 
