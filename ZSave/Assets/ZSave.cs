@@ -24,14 +24,12 @@ namespace ZSave
     public enum SaveType
     {
         Component,
-        GameObject,
-        GameObjectFull
+        GameObject
     }
 
+    [Serializable]
     public struct GameObjectData
     {
-        public int instanceID;
-
         public HideFlags hideFlags;
         public string name;
         public bool active;
@@ -39,7 +37,26 @@ namespace ZSave
         public int layer;
         public string tag;
 
-        public ComponentData[] componentDatas;
+        public Vector3 position;
+        public Quaternion rotation;
+        public Vector3 size;
+
+        public GameObject MakePerfectlyValidGameObject()
+        {
+            GameObject o = new GameObject();
+            o.hideFlags = hideFlags;
+            o.name = name;
+            o.SetActive(active);
+            o.isStatic = isStatic;
+            o.layer = layer;
+            o.tag = tag;
+
+            o.transform.position = position;
+            o.transform.rotation = rotation;
+            o.transform.localScale = size;
+
+            return o;
+        }
     }
 
     public struct ComponentData
@@ -55,6 +72,7 @@ namespace ZSave
         [NonPersistent] public int componentInstanceID;
         [NonPersistent] public GameObject _componentParent;
         [NonPersistent] public T _component;
+        [NonPersistent] public GameObjectData gameObjectData;
         public SaveType _saveType => PersistentAttribute.GetAttributeFromType<PersistentAttribute>(typeof(T)).saveType;
 
         public ZSaver(GameObject componentParent, T component)
@@ -63,6 +81,18 @@ namespace ZSave
             _component = component;
             gameObjectInstanceID = componentParent.GetInstanceID();
             componentInstanceID = component.GetInstanceID();
+            gameObjectData = new GameObjectData()
+            {
+                active = _componentParent.activeSelf,
+                hideFlags = _componentParent.hideFlags,
+                isStatic = _componentParent.isStatic,
+                layer = componentParent.layer,
+                name = _componentParent.name,
+                position = _componentParent.transform.position,
+                rotation = _componentParent.transform.rotation,
+                size = _componentParent.transform.localScale,
+                tag = componentParent.tag
+            };
         }
 
 
@@ -90,7 +120,8 @@ namespace ZSave
                     string GOInstanceIDToReplace = "\"_componentParent\":{\"instanceID\":" + prevGOInstanceID + "}";
 
 
-                    _componentParent = PersistanceManager.LoadGOfromXML(typeof(T).Name + ".xml", gameObjectInstanceID);
+                    // _componentParent = PersistanceManager.LoadGOfromXML(typeof(T).Name + ".xml", gameObjectInstanceID);
+                    _componentParent = gameObjectData.MakePerfectlyValidGameObject();
                     gameObjectInstanceID = _componentParent.GetInstanceID();
 
                     string newGOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + gameObjectInstanceID;
@@ -189,10 +220,13 @@ namespace ZSave
                 var saveMethodInfo = typeof(PersistanceManager).GetMethod(nameof(PersistanceManager.Save));
                 var genericSaveMethodInfo = saveMethodInfo.MakeGenericMethod(ZSaverType);
                 genericSaveMethodInfo.Invoke(null, new object[] {zsavers, type.Name + ".save"});
-                if (saveType == SaveType.GameObject || saveType == SaveType.GameObjectFull)
-                {
-                    PersistanceManager.SaveGOtoXML(transformsToSave, type.Name + ".xml", saveType);
-                }
+                // if (saveType == SaveType.GameObject || saveType == SaveType.GameObjectFull)
+                // {
+                //     PersistanceManager.SaveGOtoXML(transformsToSave, type.Name + ".xml", saveType);
+                // }
+                // {
+                //     PersistanceManager.SaveGOtoXML(transformsToSave, type.Name + ".xml", saveType);
+                // }
             }
         }
 
@@ -310,186 +344,293 @@ namespace ZSave
         public static void Save<T>(T[] objectsToPersist, string fileName)
         {
             string json = JsonHelper.ToJson(objectsToPersist, false);
+            Debug.Log(json);
             WriteToFile(fileName, json);
         }
 
-        public static void SaveGOtoXML(Transform[] transforms, string fileName, SaveType saveType)
-        {
-            if (transforms.Length > 0)
-                foreach (var propertyInfo in typeof(Transform).GetProperties()
-                    .Where(p => p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite))
-                {
-                    propertyInfo.SetValue(transforms[0], propertyInfo.GetValue(transforms[0]));
-                }
+        // public static void SaveGOtoXML(Transform[] transforms, string fileName, SaveType saveType)
+        // {
+        //     if (transforms.Length > 0)
+        //         foreach (var propertyInfo in typeof(Transform).GetProperties()
+        //             .Where(p => p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite))
+        //         {
+        //             propertyInfo.SetValue(transforms[0], propertyInfo.GetValue(transforms[0]));
+        //         }
+        //
+        //
+        //     GameObjectData[] datas = new GameObjectData[transforms.Length];
+        //
+        //     for (var i = 0; i < datas.Length; i++)
+        //     {
+        //         Component[] components = transforms[i].gameObject
+        //             .GetComponents(saveType == SaveType.GameObject ? typeof(Transform) : typeof(Component));
+        //
+        //         // foreach (var component in components)
+        //         // {
+        //         //     Debug.Log(component.GetType());
+        //         // }
+        //
+        //         ComponentData[] componentDatas = new ComponentData[components.Length];
+        //
+        //         for (int j = 0; j < componentDatas.Length; j++)
+        //         {
+        //             object[] values =
+        //                 (from p in components[j].GetType().GetProperties()
+        //                     where p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite && p.CanRead
+        //                     select p.GetValue(components[j])).ToArray();
+        //
+        //             componentDatas[j] = new ComponentData()
+        //             {
+        //                 propertyValues = values,
+        //                 numOfProperties = values.Length,
+        //                 typeName = components[j].GetType().Name
+        //             };
+        //
+        //             try
+        //             {
+        //                 FileStream fileStream = File.Create("test.xml");
+        //                 DataContractSerializer dataContractSerializer =
+        //                     new DataContractSerializer(typeof(ComponentData));
+        //                 MemoryStream stream = new MemoryStream();
+        //
+        //                 dataContractSerializer.WriteObject(stream, componentDatas[j]);
+        //
+        //                 stream.Seek(0, SeekOrigin.Begin);
+        //
+        //                 fileStream.Write(stream.GetBuffer(), 0, stream.GetBuffer().Length);
+        //                 
+        //                 fileStream.Dispose();
+        //
+        //             }
+        //             catch (InvalidDataContractException e)
+        //             {
+        //                 var list = componentDatas.ToList();
+        //                 list.RemoveAt(j);
+        //                 componentDatas = list.ToArray();
+        //                 
+        //                 List<Component> componentList = components.ToList();
+        //                 componentList.RemoveAt(j);
+        //                 components = componentList.ToArray();
+        //                 j--;
+        //                 Debug.Log(components[j] + " " + e);
+        //             }
+        //             catch (IOException e)
+        //             {
+        //                 Debug.Log(components[j] + " " + e);
+        //             }
+        //         }
+        //
+        //         foreach (var componentData in componentDatas)
+        //         {
+        //             Debug.Log(componentData.typeName);
+        //         }
+        //
+        //
+        //         datas[i] = new GameObjectData()
+        //         {
+        //             instanceID = transforms[i].gameObject.GetInstanceID(),
+        //
+        //             hideFlags = transforms[i].gameObject.hideFlags,
+        //             name = transforms[i].gameObject.name,
+        //             active = transforms[i].gameObject.activeSelf,
+        //             isStatic = transforms[i].gameObject.isStatic,
+        //             layer = transforms[i].gameObject.layer,
+        //             tag = transforms[i].gameObject.tag,
+        //
+        //             componentDatas = componentDatas
+        //         };
+        //     }
+        //
+        //
+        //     FileStream file = File.Create(GetFilePath(fileName));
+        //
+        //     DataContractSerializer bf = new DataContractSerializer(typeof(GameObjectData[]));
+        //     MemoryStream streamer = new MemoryStream();
+        //
+        //     bf.WriteObject(streamer, datas);
+        //
+        //     streamer.Seek(0, SeekOrigin.Begin);
+        //
+        //     file.Write(streamer.GetBuffer(), 0, streamer.GetBuffer().Length);
+        //
+        //     file.Close();
+        // }
+        // {
+        //     if (transforms.Length > 0)
+        //         foreach (var propertyInfo in typeof(Transform).GetProperties()
+        //             .Where(p => p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite))
+        //         {
+        //             propertyInfo.SetValue(transforms[0], propertyInfo.GetValue(transforms[0]));
+        //         }
+        //
+        //
+        //     GameObjectData[] datas = new GameObjectData[transforms.Length];
+        //
+        //     for (var i = 0; i < datas.Length; i++)
+        //     {
+        //         Component[] components = transforms[i].gameObject
+        //             .GetComponents(saveType == SaveType.GameObject ? typeof(Transform) : typeof(Component));
+        //
+        //         // foreach (var component in components)
+        //         // {
+        //         //     Debug.Log(component.GetType());
+        //         // }
+        //
+        //         ComponentData[] componentDatas = new ComponentData[components.Length];
+        //
+        //         for (int j = 0; j < componentDatas.Length; j++)
+        //         {
+        //             object[] values =
+        //                 (from p in components[j].GetType().GetProperties()
+        //                     where p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite && p.CanRead
+        //                     select p.GetValue(components[j])).ToArray();
+        //
+        //             componentDatas[j] = new ComponentData()
+        //             {
+        //                 propertyValues = values,
+        //                 numOfProperties = values.Length,
+        //                 typeName = components[j].GetType().Name
+        //             };
+        //
+        //             try
+        //             {
+        //                 FileStream fileStream = File.Create("test.xml");
+        //                 DataContractSerializer dataContractSerializer =
+        //                     new DataContractSerializer(typeof(ComponentData));
+        //                 MemoryStream stream = new MemoryStream();
+        //
+        //                 dataContractSerializer.WriteObject(stream, componentDatas[j]);
+        //
+        //                 stream.Seek(0, SeekOrigin.Begin);
+        //
+        //                 fileStream.Write(stream.GetBuffer(), 0, stream.GetBuffer().Length);
+        //                 
+        //                 fileStream.Dispose();
+        //
+        //             }
+        //             catch (InvalidDataContractException e)
+        //             {
+        //                 var list = componentDatas.ToList();
+        //                 list.RemoveAt(j);
+        //                 componentDatas = list.ToArray();
+        //                 
+        //                 List<Component> componentList = components.ToList();
+        //                 componentList.RemoveAt(j);
+        //                 components = componentList.ToArray();
+        //                 j--;
+        //                 Debug.Log(components[j] + " " + e);
+        //             }
+        //             catch (IOException e)
+        //             {
+        //                 Debug.Log(components[j] + " " + e);
+        //             }
+        //         }
+        //
+        //         foreach (var componentData in componentDatas)
+        //         {
+        //             Debug.Log(componentData.typeName);
+        //         }
+        //
+        //
+        //         datas[i] = new GameObjectData()
+        //         {
+        //             instanceID = transforms[i].gameObject.GetInstanceID(),
+        //
+        //             hideFlags = transforms[i].gameObject.hideFlags,
+        //             name = transforms[i].gameObject.name,
+        //             active = transforms[i].gameObject.activeSelf,
+        //             isStatic = transforms[i].gameObject.isStatic,
+        //             layer = transforms[i].gameObject.layer,
+        //             tag = transforms[i].gameObject.tag,
+        //
+        //             componentDatas = componentDatas
+        //         };
+        //     }
+        //
+        //
+        //     FileStream file = File.Create(GetFilePath(fileName));
+        //
+        //     DataContractSerializer bf = new DataContractSerializer(typeof(GameObjectData[]));
+        //     MemoryStream streamer = new MemoryStream();
+        //
+        //     bf.WriteObject(streamer, datas);
+        //
+        //     streamer.Seek(0, SeekOrigin.Begin);
+        //
+        //     file.Write(streamer.GetBuffer(), 0, streamer.GetBuffer().Length);
+        //
+        //     file.Close();
+        // }
 
-
-            GameObjectData[] datas = new GameObjectData[transforms.Length];
-
-            for (var i = 0; i < datas.Length; i++)
-            {
-                Component[] components = transforms[i].gameObject
-                    .GetComponents(saveType == SaveType.GameObject ? typeof(Transform) : typeof(Component));
-
-                // foreach (var component in components)
-                // {
-                //     Debug.Log(component.GetType());
-                // }
-
-                ComponentData[] componentDatas = new ComponentData[components.Length];
-
-                for (int j = 0; j < componentDatas.Length; j++)
-                {
-                    object[] values =
-                        (from p in components[j].GetType().GetProperties()
-                            where p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite && p.CanRead
-                            select p.GetValue(components[j])).ToArray();
-
-                    componentDatas[j] = new ComponentData()
-                    {
-                        propertyValues = values,
-                        numOfProperties = values.Length,
-                        typeName = components[j].GetType().Name
-                    };
-
-                    try
-                    {
-                        FileStream fileStream = File.Create("test.xml");
-                        DataContractSerializer dataContractSerializer =
-                            new DataContractSerializer(typeof(ComponentData));
-                        MemoryStream stream = new MemoryStream();
-
-                        dataContractSerializer.WriteObject(stream, componentDatas[j]);
-
-                        stream.Seek(0, SeekOrigin.Begin);
-
-                        fileStream.Write(stream.GetBuffer(), 0, stream.GetBuffer().Length);
-                        
-                        fileStream.Dispose();
-
-                    }
-                    catch (InvalidDataContractException e)
-                    {
-                        var list = componentDatas.ToList();
-                        list.RemoveAt(j);
-                        componentDatas = list.ToArray();
-                        
-                        List<Component> componentList = components.ToList();
-                        componentList.RemoveAt(j);
-                        components = componentList.ToArray();
-                        j--;
-                        Debug.Log(components[j] + " " + e);
-                    }
-                    catch (IOException e)
-                    {
-                        Debug.Log(components[j] + " " + e);
-                    }
-                }
-
-                foreach (var componentData in componentDatas)
-                {
-                    Debug.Log(componentData.typeName);
-                }
-
-
-                datas[i] = new GameObjectData()
-                {
-                    instanceID = transforms[i].gameObject.GetInstanceID(),
-
-                    hideFlags = transforms[i].gameObject.hideFlags,
-                    name = transforms[i].gameObject.name,
-                    active = transforms[i].gameObject.activeSelf,
-                    isStatic = transforms[i].gameObject.isStatic,
-                    layer = transforms[i].gameObject.layer,
-                    tag = transforms[i].gameObject.tag,
-
-                    componentDatas = componentDatas
-                };
-            }
-
-
-            FileStream file = File.Create(GetFilePath(fileName));
-
-            DataContractSerializer bf = new DataContractSerializer(typeof(GameObjectData[]));
-            MemoryStream streamer = new MemoryStream();
-
-            bf.WriteObject(streamer, datas);
-
-            streamer.Seek(0, SeekOrigin.Begin);
-
-            file.Write(streamer.GetBuffer(), 0, streamer.GetBuffer().Length);
-
-            file.Close();
-        }
-
-        public static GameObject LoadGOfromXML(string fileName, int instanceID)
-        {
-            List<Type> knownTypes = typeof(Vector3).Assembly.GetExportedTypes()
-                .Where(t => t.IsValueType && !t.IsGenericType).ToList();
-            knownTypes.Add(typeof(Mesh));
-            
-            DataContractSerializer bf = new DataContractSerializer(typeof(GameObjectData[]),
-                knownTypes);
-            XmlReader reader = new XmlTextReader(GetFilePath(fileName));
-            GameObjectData[] datas = (GameObjectData[]) bf.ReadObject(reader);
-            GameObjectData dataOfObjectToReturn = datas.First(d => d.instanceID == instanceID);
-
-            GameObject objToReturn = new GameObject();
-
-            objToReturn.hideFlags = dataOfObjectToReturn.hideFlags;
-
-            objToReturn.hideFlags = dataOfObjectToReturn.hideFlags;
-            objToReturn.name = dataOfObjectToReturn.name;
-            objToReturn.SetActive(dataOfObjectToReturn.active);
-            objToReturn.isStatic = dataOfObjectToReturn.isStatic;
-            objToReturn.layer = dataOfObjectToReturn.layer;
-            objToReturn.tag = dataOfObjectToReturn.tag;
-
-            int propertyIndex = 0;
-
-            foreach (var componentData in dataOfObjectToReturn.componentDatas)
-            {
-                Type currentComponentType = AppDomain.CurrentDomain
-                    .GetAssemblies()
-                    .SelectMany(assembly => assembly.GetTypes()).FirstOrDefault(type =>
-                        type.IsSubclassOf(typeof(Component)) && type.Name == componentData.typeName);
-
-                Debug.Log(componentData.typeName);
-
-                var component = objToReturn.GetComponent(currentComponentType) ??
-                                objToReturn.AddComponent(currentComponentType);
-
-                var propertyInfos = (from p in currentComponentType.GetProperties()
-                    where p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite && p.CanRead
-                    select p).ToArray();
-
-                for (var i = 0; i < propertyInfos.Length; i++)
-                {
-                    Debug.Log("setting value: " + propertyInfos[i].Name + " to " + componentData.propertyValues[propertyIndex]);
-                    
-                    propertyInfos[i].SetValue(component, componentData.propertyValues[propertyIndex]);
-                    propertyIndex++;
-                }
-            }
-
-            // objToReturn.transform.position = transform.position;
-            // objToReturn.transform.rotation = transform.rotation;
-            // objToReturn.transform.localScale = transform.localScale;
-            //
-            // foreach (var component in (Transform[])dataOfObjectToReturn.components)
-            // {
-            //     objToReturn.AddComponent(component.GetType());
-            //
-            //     foreach (var fieldInfo in objToReturn.GetComponent(component.GetType()).GetType().GetFields())
-            //     {
-            //         foreach (var field in component.GetType().GetFields())
-            //         {
-            //             fieldInfo.SetValue(component, field.GetValue(component));
-            //         }
-            //     }
-            // }
-
-            return objToReturn;
-        }
+        // public static GameObject LoadGOfromXML(string fileName, int instanceID)
+        // {
+        //     List<Type> knownTypes = typeof(Vector3).Assembly.GetExportedTypes()
+        //         .Where(t => t.IsValueType && !t.IsGenericType).ToList();
+        //     knownTypes.Add(typeof(Mesh));
+        //     
+        //     DataContractSerializer bf = new DataContractSerializer(typeof(GameObjectData[]),
+        //         knownTypes);
+        //     XmlReader reader = new XmlTextReader(GetFilePath(fileName));
+        //     GameObjectData[] datas = (GameObjectData[]) bf.ReadObject(reader);
+        //     GameObjectData dataOfObjectToReturn = datas.First(d => d.instanceID == instanceID);
+        //
+        //     GameObject objToReturn = new GameObject();
+        //
+        //     objToReturn.hideFlags = dataOfObjectToReturn.hideFlags;
+        //
+        //     objToReturn.hideFlags = dataOfObjectToReturn.hideFlags;
+        //     objToReturn.name = dataOfObjectToReturn.name;
+        //     objToReturn.SetActive(dataOfObjectToReturn.active);
+        //     objToReturn.isStatic = dataOfObjectToReturn.isStatic;
+        //     objToReturn.layer = dataOfObjectToReturn.layer;
+        //     objToReturn.tag = dataOfObjectToReturn.tag;
+        //
+        //     int propertyIndex = 0;
+        //
+        //     foreach (var componentData in dataOfObjectToReturn.componentDatas)
+        //     {
+        //         Type currentComponentType = AppDomain.CurrentDomain
+        //             .GetAssemblies()
+        //             .SelectMany(assembly => assembly.GetTypes()).FirstOrDefault(type =>
+        //                 type.IsSubclassOf(typeof(Component)) && type.Name == componentData.typeName);
+        //
+        //         Debug.Log(componentData.typeName);
+        //
+        //         var component = objToReturn.GetComponent(currentComponentType) ??
+        //                         objToReturn.AddComponent(currentComponentType);
+        //
+        //         var propertyInfos = (from p in currentComponentType.GetProperties()
+        //             where p.GetCustomAttribute<ObsoleteAttribute>() == null && p.CanWrite && p.CanRead
+        //             select p).ToArray();
+        //
+        //         for (var i = 0; i < propertyInfos.Length; i++)
+        //         {
+        //             Debug.Log("setting value: " + propertyInfos[i].Name + " to " + componentData.propertyValues[propertyIndex]);
+        //             
+        //             propertyInfos[i].SetValue(component, componentData.propertyValues[propertyIndex]);
+        //             propertyIndex++;
+        //         }
+        //     }
+        //
+        //     // objToReturn.transform.position = transform.position;
+        //     // objToReturn.transform.rotation = transform.rotation;
+        //     // objToReturn.transform.localScale = transform.localScale;
+        //     //
+        //     // foreach (var component in (Transform[])dataOfObjectToReturn.components)
+        //     // {
+        //     //     objToReturn.AddComponent(component.GetType());
+        //     //
+        //     //     foreach (var fieldInfo in objToReturn.GetComponent(component.GetType()).GetType().GetFields())
+        //     //     {
+        //     //         foreach (var field in component.GetType().GetFields())
+        //     //         {
+        //     //             fieldInfo.SetValue(component, field.GetValue(component));
+        //     //         }
+        //     //     }
+        //     // }
+        //
+        //     return objToReturn;
+        // }
 
         static void WriteToFile(string fileName, string json)
         {

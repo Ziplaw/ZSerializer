@@ -18,17 +18,17 @@ public class Testing : MonoBehaviour
     public float num1 = 2;
     public float num2 = 56;
     public float num3 = 248;
-    public Rigidbody rb;
+    public TestingAgain mf;
 
     private void Start()
     {
-        MeshRenderer mr = GetComponent<MeshRenderer>();
-
-
-        foreach (var propertyInfo in typeof(MeshFilter).GetProperties().Where(p=> p.GetCustomAttribute<ObsoleteAttribute>() == null))
-        {
-            Debug.Log(propertyInfo.Name);
-        }
+        // MeshRenderer mr = GetComponent<MeshRenderer>();
+        //
+        //
+        // foreach (var propertyInfo in typeof(MeshFilter).GetProperties().Where(p=> p.GetCustomAttribute<ObsoleteAttribute>() == null))
+        // {
+        //     Debug.Log(propertyInfo.Name);
+        // }
 
 
         // Transform tf = transform;

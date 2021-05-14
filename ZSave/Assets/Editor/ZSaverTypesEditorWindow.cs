@@ -63,7 +63,21 @@ namespace ZSave.Editor
                         .Where(f => f.GetCustomAttribute(typeof(NonPersistent)) == null).ToArray();
                     var fieldsType = types[i].GetFields();
 
-                    if (fieldsZSaver.Length != fieldsType.Length) classState = ClassState.NeedsRebuilding;
+                    if (fieldsZSaver.Length == fieldsType.Length)
+                    {
+                        for (int j = 0; j < fieldsZSaver.Length; j++)
+                        {
+                            if (fieldsZSaver[j].Name != fieldsType[j].Name || fieldsZSaver[j].FieldType != fieldsType[j].FieldType)
+                            {
+                                classState = ClassState.NeedsRebuilding;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        classState = ClassState.NeedsRebuilding;
+                    }
                 }
 
                 classes[i] = new Class(types[i], classState);
