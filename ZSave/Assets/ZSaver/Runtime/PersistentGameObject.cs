@@ -42,6 +42,8 @@ public class PersistentGameObject : MonoBehaviour
     }
     private void Start()
     {
+        name = gameObject.GetInstanceID().ToString();
+
         // LightProbeGroup lpb = gameObject.AddComponent<LightProbeGroup>();
         // lpb.dering = true;
 
@@ -154,10 +156,10 @@ public class PersistentGameObject : MonoBehaviour
                 ((GameObjectData) x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder).ToArray();
             
             MethodInfo cast = typeof(Enumerable).GetMethod("Cast")
-                .MakeGenericMethod(new Type[] {typeof(PersistentGameObjectZSaver)});
+                .MakeGenericMethod(new Type[] {ZSaverType});
             
             MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray")
-                .MakeGenericMethod(new Type[] {typeof(PersistentGameObjectZSaver)});
+                .MakeGenericMethod(new Type[] {ZSaverType});
             
             object result = cast.Invoke(zSavers, new object[] {zSavers});
             
@@ -171,7 +173,8 @@ public class PersistentGameObject : MonoBehaviour
 
     public static void LoadAllPersistentGameObjects()
     {
-        var types = ComponentSerializableTypes;
+        var types = ComponentSerializableTypes.OrderByDescending(x => x.Name.Contains("PersistentGameObject"))
+            .ToArray();
 
         List<Component> alreadySeenComponents = new List<Component>();
 
@@ -256,6 +259,7 @@ public class PersistentGameObject : MonoBehaviour
                         .SetValue(FromJSONdObjects[i], componentInGameObject.GetInstanceID());
 
                     string newCOMPInstanceIDToReplaceString = "instanceID\":" + componentInstanceID;
+                    Debug.LogWarning("Updating " + componentInGameObject);
 
                     PersistanceManager.UpdateAllJSONFiles(
                         new[]
@@ -280,6 +284,10 @@ public class PersistentGameObject : MonoBehaviour
     static void CopyFieldsToProperties(Type type, List<Component> alreadySeenComponents, Component c,
         Type ZSaverType, object FromJSONdObject, GameObject gameObject)
     {
+        string[] blackListForThisComponent = {" "};
+
+        if(ComponentBlackList.ContainsKey(type)) ComponentBlackList.TryGetValue(type, out blackListForThisComponent);
+        
         foreach (var propertyInfo in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(
                 c =>
@@ -287,6 +295,8 @@ public class PersistentGameObject : MonoBehaviour
                     c.CanRead &&
                     c.CanWrite))
         {
+            
+            if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
             propertyInfo.SetValue(c,
                 ZSaverType.GetFields().First(f => f.Name == propertyInfo.Name)
                     .GetValue(FromJSONdObject));

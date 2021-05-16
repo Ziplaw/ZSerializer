@@ -59,6 +59,7 @@ namespace ZSave
             o.transform.rotation = rotation;
             o.transform.localScale = size;
             Debug.LogWarning(parent + " " + o.name);
+            Debug.Log(parent);
             o.transform.SetParent(parent != null ? parent.transform : null);
 
             return o;
@@ -161,7 +162,7 @@ namespace ZSave
                 _component = (T) _componentParent.AddComponent(typeof(T));
                 componentinstanceID = _component.GetInstanceID();
                 string newCOMPInstanceIDToReplaceString = "instanceID\":" + componentinstanceID;
-
+                Debug.LogWarning("Updating " + _component);
                 PersistanceManager.UpdateAllJSONFiles(
                     new[]
                     {
@@ -437,6 +438,9 @@ public class " + type.Name + @"Editor : Editor
             PersistentGameObject.LoadAllPersistentGameObjects();
             PersistentAttribute.LoadAllObjects(0);
             PersistentAttribute.LoadAllObjects(0);
+            
+            
+            SaveAllObjectsAndComponents();
         }
 
         public static void UpdateAllJSONFiles(string[] previousFields, string[] newFields)
