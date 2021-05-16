@@ -31,6 +31,7 @@ namespace ZSave
     [Serializable]
     public struct GameObjectData
     {
+        public int loadingOrder;
         public HideFlags hideFlags;
         public string name;
         public bool active;
@@ -41,6 +42,8 @@ namespace ZSave
         public Vector3 position;
         public Quaternion rotation;
         public Vector3 size;
+
+        public GameObject parent;
 
         public GameObject MakePerfectlyValidGameObject()
         {
@@ -55,6 +58,8 @@ namespace ZSave
             o.transform.position = position;
             o.transform.rotation = rotation;
             o.transform.localScale = size;
+            Debug.LogWarning(parent + " " + o.name);
+            o.transform.SetParent(parent != null ? parent.transform : null);
 
             return o;
         }
@@ -84,6 +89,7 @@ namespace ZSave
             componentinstanceID = component.GetInstanceID();
             gameObjectData = new GameObjectData()
             {
+                loadingOrder = CountParents(componentParent.transform),
                 active = _componentParent.activeSelf,
                 hideFlags = _componentParent.hideFlags,
                 isStatic = _componentParent.isStatic,
@@ -92,8 +98,20 @@ namespace ZSave
                 position = _componentParent.transform.position,
                 rotation = _componentParent.transform.rotation,
                 size = _componentParent.transform.localScale,
-                tag = componentParent.tag
+                tag = componentParent.tag,
+                parent = componentParent.transform.parent != null ? componentParent.transform.parent.gameObject : null
             };
+        }
+
+        int CountParents(Transform transform)
+        {
+            int totalParents = 1;
+            if (transform.parent != null)
+            {
+                totalParents += CountParents(transform.parent);
+            }
+
+            return totalParents;
         }
 
 
@@ -119,23 +137,24 @@ namespace ZSave
 
                     string GOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + prevGOInstanceID;
                     string GOInstanceIDToReplace = "\"_componentParent\":{\"instanceID\":" + prevGOInstanceID + "}";
+                    string GOInstanceIDToReplaceParent = "\"parent\":{\"instanceID\":" + prevGOInstanceID + "}";
 
 
                     _componentParent = gameObjectData.MakePerfectlyValidGameObject();
                     gameObjectInstanceID = _componentParent.GetInstanceID();
 
                     string newGOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + gameObjectInstanceID;
-                    string newGOInstanceIDToReplace =
-                        "\"_componentParent\":{\"instanceID\":" + gameObjectInstanceID + "}";
+                    string newGOInstanceIDToReplace = "\"_componentParent\":{\"instanceID\":" + gameObjectInstanceID + "}";
+                    string newGOInstanceIDToReplaceParent = "\"parent\":{\"instanceID\":" + gameObjectInstanceID + "}";
 
                     PersistanceManager.UpdateAllJSONFiles(
                         new[]
                         {
-                            GOInstanceIDToReplaceString, GOInstanceIDToReplace
+                            GOInstanceIDToReplaceString, GOInstanceIDToReplace, GOInstanceIDToReplaceParent
                         },
                         new[]
                         {
-                            newGOInstanceIDToReplaceString, newGOInstanceIDToReplace
+                            newGOInstanceIDToReplaceString, newGOInstanceIDToReplace, newGOInstanceIDToReplaceParent
                         });
                 }
 

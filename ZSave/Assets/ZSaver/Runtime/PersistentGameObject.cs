@@ -19,9 +19,45 @@ public class PersistentGameObject : MonoBehaviour
             t != typeof(Transform) &&
             t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible))).ToArray();
 
+    int CountParents(Transform transform)
+    {
+        int totalParents = 1;
+        if (transform.parent != null)
+        {
+            totalParents += CountParents(transform.parent);
+        }
 
+        return totalParents;
+    }
     private void Start()
     {
+        // name = CountParents(transform).ToString();
+        // object[] obj = {new PersistentGameObjectZSaver(this)};
+        // obj = obj.OrderBy(x => ((PersistentGameObjectZSaver)x).name).ToArray();
+        //
+        // Debug.Log( obj.GetType());
+        //
+        // MethodInfo cast = typeof(Enumerable).GetMethod("Cast")
+        //     .MakeGenericMethod(new Type[] {typeof(PersistentGameObjectZSaver)});
+        //
+        // MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray")
+        //     .MakeGenericMethod(new Type[] {typeof(PersistentGameObjectZSaver)});
+        //
+        //
+        // object result = cast.Invoke(obj, new object[] {obj});
+        //
+        // obj = (object[]) toArrayMethod.Invoke(result, new object[] {result});
+        //
+        //
+        //
+        //
+        //
+        //
+        // Debug.Log(toArrayMethod);
+        //
+        // // obj = result;
+        //
+        // Debug.Log(obj.GetType());
         // Debug.Log(Type.GetType("MeshRendererZSaver"));
 
         // SaveAllPersistentGameObjects();
@@ -100,6 +136,19 @@ public class PersistentGameObject : MonoBehaviour
                 zSavers[i] = Activator.CreateInstance(ZSaverType, new object[] {componentsOfGivenType[i]});
             }
 
+            zSavers = zSavers.OrderBy(x =>
+                ((GameObjectData) x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder).ToArray();
+            
+            MethodInfo cast = typeof(Enumerable).GetMethod("Cast")
+                .MakeGenericMethod(new Type[] {typeof(PersistentGameObjectZSaver)});
+            
+            MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray")
+                .MakeGenericMethod(new Type[] {typeof(PersistentGameObjectZSaver)});
+            
+            object result = cast.Invoke(zSavers, new object[] {zSavers});
+            
+            zSavers = (object[]) toArrayMethod.Invoke(result, new object[] {result});
+
             var saveMethodInfo = typeof(PersistanceManager).GetMethod(nameof(PersistanceManager.Save));
             var genericSaveMethodInfo = saveMethodInfo.MakeGenericMethod(ZSaverType);
             genericSaveMethodInfo.Invoke(null, new object[] {zSavers, componentType.Name + "GameObject.save"});
@@ -121,12 +170,16 @@ public class PersistentGameObject : MonoBehaviour
                 .MakeGenericMethod(ZSaverType);
 
 
-            object[] FromJSONdObjects = (object[]) fromJsonMethod.Invoke(null,
-                new object[] {PersistanceManager.ReadFromFile(type.Name + "GameObject.save")});
+            object[] FromJSONdObjects = ((object[]) fromJsonMethod.Invoke(null,
+                new object[] {PersistanceManager.ReadFromFile(type.Name + "GameObject.save")}))/*.OrderByDescending(x =>
+                ((GameObjectData) x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder).ToArray()*/;
 
 
             for (var i = 0; i < FromJSONdObjects.Length; i++)
             {
+                FromJSONdObjects[i] = ((object[]) fromJsonMethod.Invoke(null,
+                    new object[] {PersistanceManager.ReadFromFile(type.Name + "GameObject.save")}))[i];
+                
                 GameObject gameObject =
                     (GameObject) ZSaverType.GetField("_componentParent").GetValue(FromJSONdObjects[i]);
 
@@ -149,6 +202,7 @@ public class PersistentGameObject : MonoBehaviour
                         string prevGOInstanceID = gameObjectInstanceID.ToString();
                         string GOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + prevGOInstanceID;
                         string GOInstanceIDToReplace = "\"_componentParent\":{\"instanceID\":" + prevGOInstanceID + "}";
+                        string GOInstanceIDToReplaceParent = "\"parent\":{\"instanceID\":" + prevGOInstanceID + "}";
 
                         GameObjectData gameObjectData =
                             (GameObjectData) ZSaverType.GetField("gameObjectData").GetValue(FromJSONdObjects[i]);
@@ -157,27 +211,22 @@ public class PersistentGameObject : MonoBehaviour
                         gameObject.AddComponent<PersistentGameObject>();
                         gameObjectInstanceID = gameObject.GetInstanceID();
                         
-                        Debug.Log(ZSaverType.GetField("gameObjectInstanceID"));
-                        Debug.Log(FromJSONdObjects[i]);
-                        Debug.Log(gameObject);
-                        Debug.Log(gameObject.GetInstanceID());
-                        
 
                         ZSaverType.GetField("gameObjectInstanceID")
                             .SetValue(FromJSONdObjects[i], gameObject.GetInstanceID());
 
                         string newGOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + gameObjectInstanceID;
-                        string newGOInstanceIDToReplace =
-                            "\"_componentParent\":{\"instanceID\":" + gameObjectInstanceID + "}";
+                        string newGOInstanceIDToReplace = "\"_componentParent\":{\"instanceID\":" + gameObjectInstanceID + "}";
+                        string newGOInstanceIDToReplaceParent = "\"parent\":{\"instanceID\":" + gameObjectInstanceID + "}";
 
                         PersistanceManager.UpdateAllJSONFiles(
                             new[]
                             {
-                                GOInstanceIDToReplaceString, GOInstanceIDToReplace
+                                GOInstanceIDToReplaceString, GOInstanceIDToReplace, GOInstanceIDToReplaceParent
                             },
                             new[]
                             {
-                                newGOInstanceIDToReplaceString, newGOInstanceIDToReplace
+                                newGOInstanceIDToReplaceString, newGOInstanceIDToReplace, newGOInstanceIDToReplaceParent
                             });
                     }
 
@@ -193,9 +242,6 @@ public class PersistentGameObject : MonoBehaviour
                         .SetValue(FromJSONdObjects[i], componentInGameObject.GetInstanceID());
 
                     string newCOMPInstanceIDToReplaceString = "instanceID\":" + componentInstanceID;
-
-                    Debug.Log(newCOMPInstanceIDToReplaceString);
-                    Debug.Log(COMPInstanceIDToReplaceString);
 
                     PersistanceManager.UpdateAllJSONFiles(
                         new[]
