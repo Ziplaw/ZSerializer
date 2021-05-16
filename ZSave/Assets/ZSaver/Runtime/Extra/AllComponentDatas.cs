@@ -1273,8 +1273,6 @@ public class LightZSaver : ZSave.ZSaver<UnityEngine.Light> {
     public System.Int32 cullingMask;
     public System.Int32 renderingLayerMask;
     public UnityEngine.LightShadowCasterMode lightShadowCasterMode;
-    public System.Single shadowRadius;
-    public System.Single shadowAngle;
     public UnityEngine.LightShadows shadows;
     public System.Single shadowStrength;
     public UnityEngine.Rendering.LightShadowResolution shadowResolution;
@@ -1282,8 +1280,6 @@ public class LightZSaver : ZSave.ZSaver<UnityEngine.Light> {
     public System.Single cookieSize;
     public UnityEngine.Texture cookie;
     public UnityEngine.LightRenderMode renderMode;
-    public UnityEngine.Vector2 areaSize;
-    public UnityEngine.LightmapBakeType lightmapBakeType;
     public System.Boolean enabled;
     public System.String tag;
     public System.String name;
@@ -1313,8 +1309,6 @@ public class LightZSaver : ZSave.ZSaver<UnityEngine.Light> {
         cullingMask = Light.cullingMask;
         renderingLayerMask = Light.renderingLayerMask;
         lightShadowCasterMode = Light.lightShadowCasterMode;
-        shadowRadius = Light.shadowRadius;
-        shadowAngle = Light.shadowAngle;
         shadows = Light.shadows;
         shadowStrength = Light.shadowStrength;
         shadowResolution = Light.shadowResolution;
@@ -1322,8 +1316,6 @@ public class LightZSaver : ZSave.ZSaver<UnityEngine.Light> {
         cookieSize = Light.cookieSize;
         cookie = Light.cookie;
         renderMode = Light.renderMode;
-        areaSize = Light.areaSize;
-        lightmapBakeType = Light.lightmapBakeType;
         enabled = Light.enabled;
         tag = Light.tag;
         name = Light.name;
@@ -1476,9 +1468,6 @@ public class SkinnedMeshRendererZSaver : ZSave.ZSaver<UnityEngine.SkinnedMeshRen
 public class MeshRendererZSaver : ZSave.ZSaver<UnityEngine.MeshRenderer> {
     public UnityEngine.Mesh additionalVertexStreams;
     public UnityEngine.Mesh enlightenVertexStream;
-    public System.Single scaleInLightmap;
-    public UnityEngine.ReceiveGI receiveGI;
-    public System.Boolean stitchLightmapSeams;
     public System.Boolean enabled;
     public UnityEngine.Rendering.ShadowCastingMode shadowCastingMode;
     public System.Boolean receiveShadows;
@@ -1509,9 +1498,6 @@ public class MeshRendererZSaver : ZSave.ZSaver<UnityEngine.MeshRenderer> {
     public MeshRendererZSaver (UnityEngine.MeshRenderer MeshRenderer) : base(MeshRenderer.gameObject, MeshRenderer) {
         additionalVertexStreams = MeshRenderer.additionalVertexStreams;
         enlightenVertexStream = MeshRenderer.enlightenVertexStream;
-        scaleInLightmap = MeshRenderer.scaleInLightmap;
-        receiveGI = MeshRenderer.receiveGI;
-        stitchLightmapSeams = MeshRenderer.stitchLightmapSeams;
         enabled = MeshRenderer.enabled;
         shadowCastingMode = MeshRenderer.shadowCastingMode;
         receiveShadows = MeshRenderer.receiveShadows;
@@ -1544,14 +1530,12 @@ public class MeshRendererZSaver : ZSave.ZSaver<UnityEngine.MeshRenderer> {
 [System.Serializable]
 public class LightProbeGroupZSaver : ZSave.ZSaver<UnityEngine.LightProbeGroup> {
     public UnityEngine.Vector3[] probePositions;
-    public System.Boolean dering;
     public System.Boolean enabled;
     public System.String tag;
     public System.String name;
     public UnityEngine.HideFlags hideFlags;
     public LightProbeGroupZSaver (UnityEngine.LightProbeGroup LightProbeGroup) : base(LightProbeGroup.gameObject, LightProbeGroup) {
         probePositions = LightProbeGroup.probePositions;
-        dering = LightProbeGroup.dering;
         enabled = LightProbeGroup.enabled;
         tag = LightProbeGroup.tag;
         name = LightProbeGroup.name;
@@ -1590,23 +1574,6 @@ public class BehaviourZSaver : ZSave.ZSaver<UnityEngine.Behaviour> {
         tag = Behaviour.tag;
         name = Behaviour.name;
         hideFlags = Behaviour.hideFlags;
-    }
-}
-[System.Serializable]
-public class MonoBehaviourZSaver : ZSave.ZSaver<UnityEngine.MonoBehaviour> {
-    public System.Boolean useGUILayout;
-    public System.Boolean runInEditMode;
-    public System.Boolean enabled;
-    public System.String tag;
-    public System.String name;
-    public UnityEngine.HideFlags hideFlags;
-    public MonoBehaviourZSaver (UnityEngine.MonoBehaviour MonoBehaviour) : base(MonoBehaviour.gameObject, MonoBehaviour) {
-        useGUILayout = MonoBehaviour.useGUILayout;
-        runInEditMode = MonoBehaviour.runInEditMode;
-        enabled = MonoBehaviour.enabled;
-        tag = MonoBehaviour.tag;
-        name = MonoBehaviour.name;
-        hideFlags = MonoBehaviour.hideFlags;
     }
 }
 [System.Serializable]
@@ -3628,8 +3595,6 @@ public class TerrainZSaver : ZSave.ZSaver<UnityEngine.Terrain> {
     public System.Single treeLODBiasMultiplier;
     public System.Boolean collectDetailPatches;
     public UnityEngine.TerrainRenderFlags editorRenderFlags;
-    public System.Boolean bakeLightProbesForTrees;
-    public System.Boolean deringLightProbesForTrees;
     public System.Boolean preserveTreePrototypeLayers;
     public System.UInt32 renderingLayerMask;
     public System.Boolean enabled;
@@ -3664,8 +3629,6 @@ public class TerrainZSaver : ZSave.ZSaver<UnityEngine.Terrain> {
         treeLODBiasMultiplier = Terrain.treeLODBiasMultiplier;
         collectDetailPatches = Terrain.collectDetailPatches;
         editorRenderFlags = Terrain.editorRenderFlags;
-        bakeLightProbesForTrees = Terrain.bakeLightProbesForTrees;
-        deringLightProbesForTrees = Terrain.deringLightProbesForTrees;
         preserveTreePrototypeLayers = Terrain.preserveTreePrototypeLayers;
         renderingLayerMask = Terrain.renderingLayerMask;
         enabled = Terrain.enabled;
@@ -4124,14 +4087,12 @@ public class WindZoneZSaver : ZSave.ZSaver<UnityEngine.WindZone> {
 [System.Serializable]
 public class PersistentGameObjectZSaver : ZSave.ZSaver<PersistentGameObject> {
     public System.Boolean useGUILayout;
-    public System.Boolean runInEditMode;
     public System.Boolean enabled;
     public System.String tag;
     public System.String name;
     public UnityEngine.HideFlags hideFlags;
     public PersistentGameObjectZSaver (PersistentGameObject PersistentGameObject) : base(PersistentGameObject.gameObject, PersistentGameObject) {
         useGUILayout = PersistentGameObject.useGUILayout;
-        runInEditMode = PersistentGameObject.runInEditMode;
         enabled = PersistentGameObject.enabled;
         tag = PersistentGameObject.tag;
         name = PersistentGameObject.name;

@@ -15,9 +15,20 @@ public class PersistentGameObject : MonoBehaviour
     public static Type[] ComponentSerializableTypes => AppDomain.CurrentDomain.GetAssemblies().SelectMany(a =>
         a.GetTypes().Where(t =>
             (t == typeof(PersistentGameObject)) || (
-            t.IsSubclassOf(typeof(Component)) && !t.IsSubclassOf(typeof(MonoBehaviour)) &&
+            t.IsSubclassOf(typeof(Component)) &&
+            !t.IsSubclassOf(typeof(MonoBehaviour)) &&
             t != typeof(Transform) &&
+            t != typeof(MonoBehaviour) &&
             t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible))).ToArray();
+
+    public static readonly Dictionary<Type,string[]> ComponentBlackList = new Dictionary<Type, string[]>()
+    {
+        {typeof(LightProbeGroup),new []{"dering"}},
+        {typeof(Light),new []{"shadowRadius","shadowAngle","areaSize","lightmapBakeType"}},
+        {typeof(MeshRenderer),new []{"scaleInLightmap","receiveGI","stitchLightmapSeams"}},
+        {typeof(Terrain),new []{"bakeLightProbesForTrees","deringLightProbesForTrees"}},
+        {typeof(PersistentGameObject),new []{"runInEditMode"}},
+    };
 
     int CountParents(Transform transform)
     {
@@ -31,6 +42,9 @@ public class PersistentGameObject : MonoBehaviour
     }
     private void Start()
     {
+        // LightProbeGroup lpb = gameObject.AddComponent<LightProbeGroup>();
+        // lpb.dering = true;
+
         // name = CountParents(transform).ToString();
         // object[] obj = {new PersistentGameObjectZSaver(this)};
         // obj = obj.OrderBy(x => ((PersistentGameObjectZSaver)x).name).ToArray();
@@ -278,6 +292,8 @@ public class PersistentGameObject : MonoBehaviour
                     .GetValue(FromJSONdObject));
         }
     }
+    
+    #if UNITY_EDITOR
 
     [ContextMenu("Generate Class Thingy")]
     public void GenerateUnityComponentClasses()
@@ -287,6 +303,11 @@ public class PersistentGameObject : MonoBehaviour
         Type[] types = ComponentSerializableTypes;
         foreach (var type in types)
         {
+            string[] blackListForThisComponent = {" "};
+
+            if(ComponentBlackList.ContainsKey(type)) ComponentBlackList.TryGetValue(type, out blackListForThisComponent);
+            
+            
             longScript +=
                 "[System.Serializable]\npublic class " + type.Name + "ZSaver : ZSave.ZSaver<" + type.FullName +
                 "> {\n";
@@ -298,6 +319,8 @@ public class PersistentGameObject : MonoBehaviour
                     c.CanRead &&
                     c.CanWrite))
             {
+                if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
+                
                 longScript +=
                     $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
                     ";\n";
@@ -312,6 +335,8 @@ public class PersistentGameObject : MonoBehaviour
                     c.CanRead &&
                     c.CanWrite))
             {
+                if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
+                
                 longScript +=
                     $"        " + propertyInfo.Name + " = " + type.Name + "." + propertyInfo.Name + ";\n";
             }
@@ -329,32 +354,6 @@ public class PersistentGameObject : MonoBehaviour
         
         AssetDatabase.Refresh();
     }
-}
-
-[CustomEditor(typeof(PersistentGameObject))]
-public class PersistentGameObjectEditor : Editor
-{
-    private PersistentGameObject manager;
-
-    private void OnEnable()
-    {
-        manager = target as PersistentGameObject;
-    }
-
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-        // GUILayout.Space(60);
-        //
-        // MeshRenderer renderer = manager.Mrenderer;
-        //
-        // SerializedObject obj = new SerializedObject(renderer);
-        //
-        // foreach (var propertyInfo in typeof(MeshRenderer).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-        //     .Where(r =>
-        //         r.GetCustomAttributes<ObsoleteAttribute>() == null && r.CanRead && r.CanWrite))
-        // {
-        //     EditorGUILayout.PropertyField(obj.FindProperty(propertyInfo.Name));
-        // }
-    }
+    
+    #endif
 }
