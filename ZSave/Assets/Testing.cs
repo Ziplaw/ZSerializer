@@ -4,14 +4,13 @@ using UnityEngine;
 using ZSave;
 using SaveType = ZSave.SaveType;
 
-[Persistent(SaveType.Component, ExecutionCycle.OnStart)]
+[Persistent(ExecutionCycle.OnStart)]
 public class Testing : MonoBehaviour
 {
     public float num1 = 2;
     public float num2 = 56;
-    public int num3 = 248;
-
-    public GameObject[] allEnemies;
+    public MeshRenderer renderer;
+    public MeshFilter filter;
     private void Start()
     {
         // Debug.Log(Type.GetType()  );

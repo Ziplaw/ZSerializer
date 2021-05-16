@@ -1,7 +1,7 @@
 using ZSave;
 
 [System.Serializable]
-public class EnemyZSaver : ZSaver<Enemy>
+public class EnemyZSaver : ZSave.ZSaver<Enemy>
 {
     public UnityEngine.Material mat;
     public UnityEngine.Mesh mesh;

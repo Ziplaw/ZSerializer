@@ -74,7 +74,6 @@ namespace ZSave
         [OmitSerializableCheck] public GameObject _componentParent;
         [OmitSerializableCheck] public T _component;
         [OmitSerializableCheck] public GameObjectData gameObjectData;
-        [OmitSerializableCheck] public ComponentData[] components;
         public SaveType _saveType => PersistentAttribute.GetAttributeFromType<PersistentAttribute>(typeof(T)).saveType;
 
         public ZSaver(GameObject componentParent, T component)
@@ -95,25 +94,11 @@ namespace ZSave
                 size = _componentParent.transform.localScale,
                 tag = componentParent.tag
             };
-
-            var allComponents = _componentParent.GetComponents<Component>();
-            components = new ComponentData[allComponents.Length];
-            for (var i = 0; i < allComponents.Length; i++)
-            {
-                components[i] = new ComponentData()
-                {
-                    componentData = allComponents[i],
-                    //typeof(MeshFilter)+ ", " + typeof(MeshFilter).Assembly)
-                    componentTypeName = allComponents[i].GetType() + ", " + allComponents[i].GetType().Assembly
-                };
-            }
         }
 
 
         public void Load(Type zSaverType, SaveType saveType)
         {
-            bool gameObjectCreationNeeded = false;
-
             if (_component == null)
             {
                 string prevCOMPInstanceID = componentInstanceID.ToString();
@@ -122,7 +107,6 @@ namespace ZSave
 
                 if (_componentParent == null)
                 {
-                    gameObjectCreationNeeded = true;
                     string prevGOInstanceID = gameObjectInstanceID.ToString();
 
                     if (saveType == SaveType.Component)
@@ -186,36 +170,6 @@ namespace ZSave
                     }
                 }
             }
-
-            if (saveType == SaveType.GameObject)
-            {
-                for (var i = 0; i < components.Length; i++)
-                {
-                    if (components[i].GetType().GetCustomAttribute<PersistentAttribute>() == null)
-                    {
-                        if (components[i].GetType() != typeof(Transform))
-                        {
-                            if (gameObjectCreationNeeded)
-                            {
-                                // typeof(GameObject).GetMethod(nameof(GameObject.AddComponent)).Invoke(_componentParentnew object[]{})
-
-                                Type currentType = Type.GetType(components[i].componentTypeName);
-                                if (currentType.GetCustomAttribute<PersistentAttribute>() == null &&
-                                    currentType != typeof(Transform))
-                                    _componentParent.AddComponent(currentType);
-
-                                // PersistanceManager.CopyValuesFromTo(components[i],
-                                //     ref addedComponent);
-                            }
-                            else
-                            {
-                                // PersistanceManager.CopyValuesFromTo(components[i],
-                                //     ref _componentParent.GetComponents<Component>()[i]);
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -230,9 +184,9 @@ namespace ZSave
         public readonly SaveType saveType;
         private readonly ExecutionCycle _executionCycle;
 
-        public PersistentAttribute(SaveType saveType, ExecutionCycle dataRecovery)
+        public PersistentAttribute(ExecutionCycle dataRecovery)
         {
-            this.saveType = saveType;
+            saveType = SaveType.Component;
             _executionCycle = dataRecovery;
         }
 
@@ -245,7 +199,7 @@ namespace ZSave
                 var objects = Object.FindObjectsOfType(type);
 
                 var ZSaverType = Type.GetType(type.Name + "ZSaver");
-                if (ZSaverType == null) break;
+                if (ZSaverType == null) continue;
                 var ZSaverArrayType = ZSaverType.MakeArrayType();
 
                 var zsaversArray = Activator.CreateInstance(ZSaverArrayType, new object[] {objects.Length});
@@ -272,7 +226,7 @@ namespace ZSave
             foreach (var type in types)
             {
                 var ZSaverType = Type.GetType(type.Name + "ZSaver");
-                if (ZSaverType == null) break;
+                if (ZSaverType == null) continue;
                 MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson))
                     .MakeGenericMethod(ZSaverType);
 
@@ -447,6 +401,25 @@ public class " + type.Name + @"Editor : Editor
         }
 
 #endif
+
+        public static void SaveAllObjectsAndComponents()
+        {
+            string[] files = Directory.GetFiles(Application.persistentDataPath);
+            foreach (string file in files)
+            {
+                File.Delete(file);
+            }
+            
+            PersistentGameObject.SaveAllPersistentGameObjects();
+            PersistentAttribute.SaveAllObjects(0);
+            
+        }
+        
+        public static void LoadAllObjectsAndComponents()
+        {
+            PersistentGameObject.LoadAllPersistentGameObjects();
+            PersistentAttribute.LoadAllObjects(0);
+        }
 
         public static void UpdateAllJSONFiles(string[] previousFields, string[] newFields)
         {
