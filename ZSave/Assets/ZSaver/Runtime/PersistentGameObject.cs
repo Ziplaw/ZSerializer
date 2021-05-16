@@ -14,9 +14,10 @@ public class PersistentGameObject : MonoBehaviour
 {
     public static Type[] ComponentSerializableTypes => AppDomain.CurrentDomain.GetAssemblies().SelectMany(a =>
         a.GetTypes().Where(t =>
+            (t == typeof(PersistentGameObject)) || (
             t.IsSubclassOf(typeof(Component)) && !t.IsSubclassOf(typeof(MonoBehaviour)) &&
             t != typeof(Transform) &&
-            t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible)).ToArray();
+            t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible))).ToArray();
 
 
     private void Start()
@@ -63,7 +64,7 @@ public class PersistentGameObject : MonoBehaviour
         foreach (var persistentGameObject in objects)
         {
             foreach (var component in persistentGameObject.GetComponents<Component>()
-                .Where(c => !c.GetType().IsSubclassOf(typeof(MonoBehaviour))))
+                .Where(c => (c.GetType() == typeof(PersistentGameObject)) || (!c.GetType().IsSubclassOf(typeof(MonoBehaviour)) && c.GetType() != typeof(Transform))))
             {
                 var componentType = component.GetType();
                 bool isRepeated = false;
@@ -133,16 +134,15 @@ public class PersistentGameObject : MonoBehaviour
                     (Component) ZSaverType.GetField("_component").GetValue(FromJSONdObjects[i]);
 
                 int componentInstanceID =
-                    (int) ZSaverType.GetField("componentInstanceID").GetValue(FromJSONdObjects[i]);
+                    (int) ZSaverType.GetField("componentinstanceID").GetValue(FromJSONdObjects[i]);
                 int gameObjectInstanceID =
                     (int) ZSaverType.GetField("gameObjectInstanceID").GetValue(FromJSONdObjects[i]);
 
                 if (componentInGameObject == null)
                 {
-                    Debug.Log("componentInGameObject Null");
                     string prevCOMPInstanceID = componentInstanceID.ToString();
-                    string COMPInstanceIDToReplaceString = $"\"componentInstanceID\":{prevCOMPInstanceID}";
-                    string COMPInstanceIDToReplace = "\"_component\":{\"instanceID\":" + prevCOMPInstanceID + "}";
+                    string COMPInstanceIDToReplaceString = $"instanceID\":{prevCOMPInstanceID}";
+
 
                     if (gameObject == null)
                     {
@@ -156,10 +156,15 @@ public class PersistentGameObject : MonoBehaviour
                         gameObject = gameObjectData.MakePerfectlyValidGameObject();
                         gameObject.AddComponent<PersistentGameObject>();
                         gameObjectInstanceID = gameObject.GetInstanceID();
+                        
+                        Debug.Log(ZSaverType.GetField("gameObjectInstanceID"));
+                        Debug.Log(FromJSONdObjects[i]);
+                        Debug.Log(gameObject);
+                        Debug.Log(gameObject.GetInstanceID());
+                        
 
                         ZSaverType.GetField("gameObjectInstanceID")
-                            .SetValue(FromJSONdObjects[i], componentInGameObject.GetInstanceID());
-                        componentInstanceID = componentInGameObject.GetInstanceID();
+                            .SetValue(FromJSONdObjects[i], gameObject.GetInstanceID());
 
                         string newGOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + gameObjectInstanceID;
                         string newGOInstanceIDToReplace =
@@ -176,28 +181,30 @@ public class PersistentGameObject : MonoBehaviour
                             });
                     }
 
-                    componentInGameObject = gameObject.AddComponent(type);
+                    if (type == typeof(PersistentGameObject)) componentInGameObject = gameObject.GetComponent<PersistentGameObject>();
+                    else componentInGameObject = gameObject.AddComponent(type);
+                    
                     CopyFieldsToProperties(type, alreadySeenComponents, componentInGameObject, ZSaverType,
                         FromJSONdObjects[i], gameObject);
                     alreadySeenComponents.Add(componentInGameObject);
 
-                    Debug.Log(FromJSONdObjects[i] + " " + componentInGameObject);
-
                     componentInstanceID = componentInGameObject.GetInstanceID();
-                    ZSaverType.GetField("componentInstanceID")
+                    ZSaverType.GetField("componentinstanceID")
                         .SetValue(FromJSONdObjects[i], componentInGameObject.GetInstanceID());
 
-                    string newCOMPInstanceIDToReplaceString = "\"componentInstanceID\":" + componentInstanceID;
-                    string newCOMPInstanceIDToReplace = "\"_component\":{\"instanceID\":" + componentInstanceID + "}";
+                    string newCOMPInstanceIDToReplaceString = "instanceID\":" + componentInstanceID;
+
+                    Debug.Log(newCOMPInstanceIDToReplaceString);
+                    Debug.Log(COMPInstanceIDToReplaceString);
 
                     PersistanceManager.UpdateAllJSONFiles(
                         new[]
                         {
-                            COMPInstanceIDToReplaceString, COMPInstanceIDToReplace
+                            COMPInstanceIDToReplaceString
                         },
                         new[]
                         {
-                            newCOMPInstanceIDToReplaceString, newCOMPInstanceIDToReplace
+                            newCOMPInstanceIDToReplaceString
                         });
                 }
                 else
@@ -226,50 +233,45 @@ public class PersistentGameObject : MonoBehaviour
         }
     }
 
-    void GenerateUnityComponentClasses()
+    [ContextMenu("Generate Class Thingy")]
+    public void GenerateUnityComponentClasses()
     {
         string longScript = "";
 
-        //use ComponentSerializableTypes next time.
-
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        Type[] types = ComponentSerializableTypes;
+        foreach (var type in types)
         {
-            foreach (var type in assembly.GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(Component)) && !t.IsSubclassOf(typeof(MonoBehaviour)) &&
-                            t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible))
+            longScript +=
+                "[System.Serializable]\npublic class " + type.Name + "ZSaver : ZSave.ZSaver<" + type.FullName +
+                "> {\n";
+
+
+            foreach (var propertyInfo in type
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(c =>
+                    c.GetCustomAttribute<ObsoleteAttribute>() == null &&
+                    c.CanRead &&
+                    c.CanWrite))
             {
                 longScript +=
-                    "[System.Serializable]\npublic class " + type.Name + "ZSaver : ZSave.ZSaver<" + type.FullName +
-                    "> {\n";
-
-
-                foreach (var propertyInfo in type
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(c =>
-                        c.GetCustomAttribute<ObsoleteAttribute>() == null &&
-                        c.CanRead &&
-                        c.CanWrite))
-                {
-                    longScript +=
-                        $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
-                        ";\n";
-                }
-
-                longScript += "    public " + type.Name + "ZSaver (" + type.FullName + " " + type.Name + ") : base(" +
-                              type.Name + ".gameObject, " + type.Name + ") {\n";
-
-                foreach (var propertyInfo in type
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(c =>
-                        c.GetCustomAttribute<ObsoleteAttribute>() == null &&
-                        c.CanRead &&
-                        c.CanWrite))
-                {
-                    longScript +=
-                        $"        " + propertyInfo.Name + " = " + type.Name + "." + propertyInfo.Name + ";\n";
-                }
-
-                longScript += "    }\n";
-                longScript += "}\n";
+                    $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
+                    ";\n";
             }
+
+            longScript += "    public " + type.Name + "ZSaver (" + type.FullName + " " + type.Name + ") : base(" +
+                          type.Name + ".gameObject, " + type.Name + ") {\n";
+
+            foreach (var propertyInfo in type
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(c =>
+                    c.GetCustomAttribute<ObsoleteAttribute>() == null &&
+                    c.CanRead &&
+                    c.CanWrite))
+            {
+                longScript +=
+                    $"        " + propertyInfo.Name + " = " + type.Name + "." + propertyInfo.Name + ";\n";
+            }
+
+            longScript += "    }\n";
+            longScript += "}\n";
         }
 
         FileStream fs = new FileStream(Application.dataPath + "/ZSaver/Runtime/Extra/AllComponentDatas.cs",
@@ -278,6 +280,8 @@ public class PersistentGameObject : MonoBehaviour
 
         sw.Write(longScript);
         sw.Close();
+        
+        AssetDatabase.Refresh();
     }
 }
 

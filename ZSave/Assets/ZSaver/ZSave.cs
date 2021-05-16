@@ -70,7 +70,7 @@ namespace ZSave
     public abstract class ZSaver<T> where T : Component
     {
         [OmitSerializableCheck] public int gameObjectInstanceID;
-        [OmitSerializableCheck] public int componentInstanceID;
+        [OmitSerializableCheck] public int componentinstanceID;
         [OmitSerializableCheck] public GameObject _componentParent;
         [OmitSerializableCheck] public T _component;
         [OmitSerializableCheck] public GameObjectData gameObjectData;
@@ -81,7 +81,7 @@ namespace ZSave
             _componentParent = componentParent;
             _component = component;
             gameObjectInstanceID = componentParent.GetInstanceID();
-            componentInstanceID = component.GetInstanceID();
+            componentinstanceID = component.GetInstanceID();
             gameObjectData = new GameObjectData()
             {
                 active = _componentParent.activeSelf,
@@ -101,9 +101,8 @@ namespace ZSave
         {
             if (_component == null)
             {
-                string prevCOMPInstanceID = componentInstanceID.ToString();
-                string COMPInstanceIDToReplaceString = $"\"componentInstanceID\":{prevCOMPInstanceID}";
-                string COMPInstanceIDToReplace = "\"_component\":{\"instanceID\":" + prevCOMPInstanceID + "}";
+                string prevCOMPInstanceID = componentinstanceID.ToString();
+                string COMPInstanceIDToReplaceString = $"instanceID\":{prevCOMPInstanceID}";
 
                 if (_componentParent == null)
                 {
@@ -141,18 +140,17 @@ namespace ZSave
                 }
 
                 _component = (T) _componentParent.AddComponent(typeof(T));
-                componentInstanceID = _component.GetInstanceID();
-                string newCOMPInstanceIDToReplaceString = "\"componentInstanceID\":" + componentInstanceID;
-                string newCOMPInstanceIDToReplace = "\"_component\":{\"instanceID\":" + componentInstanceID + "}";
+                componentinstanceID = _component.GetInstanceID();
+                string newCOMPInstanceIDToReplaceString = "instanceID\":" + componentinstanceID;
 
                 PersistanceManager.UpdateAllJSONFiles(
                     new[]
                     {
-                        COMPInstanceIDToReplaceString, COMPInstanceIDToReplace
+                        COMPInstanceIDToReplaceString
                     },
                     new[]
                     {
-                        newCOMPInstanceIDToReplaceString, newCOMPInstanceIDToReplace
+                        newCOMPInstanceIDToReplaceString
                     });
             }
 
@@ -419,10 +417,12 @@ public class " + type.Name + @"Editor : Editor
         {
             PersistentGameObject.LoadAllPersistentGameObjects();
             PersistentAttribute.LoadAllObjects(0);
+            PersistentAttribute.LoadAllObjects(0);
         }
 
         public static void UpdateAllJSONFiles(string[] previousFields, string[] newFields)
         {
+            Debug.Log("-------------------------------------------------------------");
             foreach (var file in Directory.GetFiles(Application.persistentDataPath, "*.save",
                 SearchOption.AllDirectories))
             {
@@ -436,6 +436,8 @@ public class " + type.Name + @"Editor : Editor
                 }
 
                 WriteToFile(fileName, newJson);
+                
+                Debug.Log(fileName + " " +newJson);
             }
         }
 

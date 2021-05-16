@@ -7,10 +7,8 @@ using SaveType = ZSave.SaveType;
 [Persistent(ExecutionCycle.OnStart)]
 public class Testing : MonoBehaviour
 {
-    public float num1 = 2;
-    public float num2 = 56;
-    public MeshRenderer renderer;
-    public MeshFilter filter;
+    public Testing otherTesting;
+    public Rigidbody rb;
     private void Start()
     {
         // Debug.Log(Type.GetType()  );

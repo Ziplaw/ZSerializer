@@ -1663,43 +1663,6 @@ public class RectTransformZSaver : ZSave.ZSaver<UnityEngine.RectTransform> {
     }
 }
 [System.Serializable]
-public class TransformZSaver : ZSave.ZSaver<UnityEngine.Transform> {
-    public UnityEngine.Vector3 position;
-    public UnityEngine.Vector3 localPosition;
-    public UnityEngine.Vector3 eulerAngles;
-    public UnityEngine.Vector3 localEulerAngles;
-    public UnityEngine.Vector3 right;
-    public UnityEngine.Vector3 up;
-    public UnityEngine.Vector3 forward;
-    public UnityEngine.Quaternion rotation;
-    public UnityEngine.Quaternion localRotation;
-    public UnityEngine.Vector3 localScale;
-    public UnityEngine.Transform parent;
-    public System.Boolean hasChanged;
-    public System.Int32 hierarchyCapacity;
-    public System.String tag;
-    public System.String name;
-    public UnityEngine.HideFlags hideFlags;
-    public TransformZSaver (UnityEngine.Transform Transform) : base(Transform.gameObject, Transform) {
-        position = Transform.position;
-        localPosition = Transform.localPosition;
-        eulerAngles = Transform.eulerAngles;
-        localEulerAngles = Transform.localEulerAngles;
-        right = Transform.right;
-        up = Transform.up;
-        forward = Transform.forward;
-        rotation = Transform.rotation;
-        localRotation = Transform.localRotation;
-        localScale = Transform.localScale;
-        parent = Transform.parent;
-        hasChanged = Transform.hasChanged;
-        hierarchyCapacity = Transform.hierarchyCapacity;
-        tag = Transform.tag;
-        name = Transform.name;
-        hideFlags = Transform.hideFlags;
-    }
-}
-[System.Serializable]
 public class SpriteRendererZSaver : ZSave.ZSaver<UnityEngine.SpriteRenderer> {
     public UnityEngine.Sprite sprite;
     public UnityEngine.SpriteDrawMode drawMode;
@@ -4156,5 +4119,22 @@ public class WindZoneZSaver : ZSave.ZSaver<UnityEngine.WindZone> {
         tag = WindZone.tag;
         name = WindZone.name;
         hideFlags = WindZone.hideFlags;
+    }
+}
+[System.Serializable]
+public class PersistentGameObjectZSaver : ZSave.ZSaver<PersistentGameObject> {
+    public System.Boolean useGUILayout;
+    public System.Boolean runInEditMode;
+    public System.Boolean enabled;
+    public System.String tag;
+    public System.String name;
+    public UnityEngine.HideFlags hideFlags;
+    public PersistentGameObjectZSaver (PersistentGameObject PersistentGameObject) : base(PersistentGameObject.gameObject, PersistentGameObject) {
+        useGUILayout = PersistentGameObject.useGUILayout;
+        runInEditMode = PersistentGameObject.runInEditMode;
+        enabled = PersistentGameObject.enabled;
+        tag = PersistentGameObject.tag;
+        name = PersistentGameObject.name;
+        hideFlags = PersistentGameObject.hideFlags;
     }
 }

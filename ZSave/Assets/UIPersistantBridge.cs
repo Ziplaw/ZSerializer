@@ -15,6 +15,7 @@ public class UIPersistantBridge : MonoBehaviour
     {
         // PersistentAttribute.LoadAllObjects(groupID);
         PersistanceManager.LoadAllObjectsAndComponents();
+        PersistanceManager.SaveAllObjectsAndComponents();
 
     }
 }
