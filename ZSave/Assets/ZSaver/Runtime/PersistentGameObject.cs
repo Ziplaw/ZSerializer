@@ -9,7 +9,7 @@ using UnityEngine;
 using ZSave;
 using SaveType = ZSave.SaveType;
 
-// [Persistent(SaveType.GameObject, ExecutionCycle.None)]
+[AddComponentMenu("ZSaver/Persistent GameObject")]
 public class PersistentGameObject : MonoBehaviour
 {
     public static Type[] ComponentSerializableTypes => AppDomain.CurrentDomain.GetAssemblies().SelectMany(a =>

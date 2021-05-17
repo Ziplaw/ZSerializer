@@ -1,7 +1,7 @@
 using ZSave;
 
 [System.Serializable]
-public class TestingAgainZSaver : ZSave.ZSaver<TestingAgain>
+public class TestingAgainZSaver : ZSaver<TestingAgain>
 {
     public System.Single publicNum;
     public System.Single publicNum1;

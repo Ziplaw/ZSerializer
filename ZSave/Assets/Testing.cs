@@ -10,4 +10,5 @@ using SaveType = ZSave.SaveType;
 public class Testing : MonoBehaviour
 {
     public float num1;
+    public float num2;
 }

@@ -371,21 +371,30 @@ namespace ZSave
             string editorScript =
                 @"using UnityEditor;
 using ZSave.Editor;
+using UnityEditor.Callbacks;
 
 [CustomEditor(typeof(" + type.Name + @"))]
 public class " + type.Name + @"Editor : Editor
 {
     private " + type.Name + @" manager;
     private bool editMode;
+    private static ZSaverStyler styler;
 
     private void OnEnable()
     {
         manager = target as " + type.Name + @";
+        styler = new ZSaverStyler();
+    }
+
+    [DidReloadScripts]
+    static void OnDatabaseReload()
+    {
+        styler = new ZSaverStyler();
     }
 
     public override void OnInspectorGUI()
     {
-        ZSaverEditor.BuildPersistentComponentEditor(manager, ref editMode);
+        ZSaverEditor.BuildPersistentComponentEditor(manager, ref editMode, styler);
         base.OnInspectorGUI();
     }
 }";
@@ -395,6 +404,7 @@ public class " + type.Name + @"Editor : Editor
                 .Reverse().ToArray());
             Debug.Log("Editor script being created at " + newPath + "Editor");
             string relativePath = "Assets" + newPath.Substring(Application.dataPath.Length);
+
 
             if (!AssetDatabase.IsValidFolder(relativePath + "Editor"))
             {

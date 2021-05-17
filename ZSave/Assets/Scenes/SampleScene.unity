@@ -133,8 +133,9 @@ GameObject:
   m_Component:
   - component: {fileID: 217262877}
   - component: {fileID: 217262874}
+  - component: {fileID: 217262875}
   m_Layer: 0
-  m_Name: Persistent (1)
+  m_Name: dwadaw
   m_TagString: Untagged
   m_Icon: {fileID: -5397416234189338067, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -152,6 +153,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &217262875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 217262873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f52daf2222f9b5641ab6c073f2a56765, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  num1: 0
+  num2: 0
 --- !u!4 &217262877
 Transform:
   m_ObjectHideFlags: 0

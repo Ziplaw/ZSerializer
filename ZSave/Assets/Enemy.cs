@@ -8,8 +8,6 @@ using ZSave;
 [Persistent( ExecutionCycle.None)]
 public class Enemy : MonoBehaviour
 {
-    public Material mat;
-    public Mesh mesh;
     void Start()
     {
         // PersistanceManager.SaveAllObjectsAndComponents();
