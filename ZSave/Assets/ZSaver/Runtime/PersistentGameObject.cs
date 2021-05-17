@@ -207,11 +207,15 @@ public class PersistentGameObject : MonoBehaviour
                     (int) ZSaverType.GetField("componentinstanceID").GetValue(FromJSONdObjects[i]);
                 int gameObjectInstanceID =
                     (int) ZSaverType.GetField("gameObjectInstanceID").GetValue(FromJSONdObjects[i]);
+                
+                GameObjectData gameObjectData =
+                    (GameObjectData) ZSaverType.GetField("gameObjectData").GetValue(FromJSONdObjects[i]);
 
                 if (componentInGameObject == null)
                 {
                     string prevCOMPInstanceID = componentInstanceID.ToString();
                     string COMPInstanceIDToReplaceString = $"instanceID\":{prevCOMPInstanceID}";
+                    
 
 
                     if (gameObject == null)
@@ -221,8 +225,7 @@ public class PersistentGameObject : MonoBehaviour
                         string GOInstanceIDToReplace = "\"_componentParent\":{\"instanceID\":" + prevGOInstanceID + "}";
                         string GOInstanceIDToReplaceParent = "\"parent\":{\"instanceID\":" + prevGOInstanceID + "}";
 
-                        GameObjectData gameObjectData =
-                            (GameObjectData) ZSaverType.GetField("gameObjectData").GetValue(FromJSONdObjects[i]);
+                        
 
                         gameObject = gameObjectData.MakePerfectlyValidGameObject();
                         gameObject.AddComponent<PersistentGameObject>();
@@ -276,6 +279,10 @@ public class PersistentGameObject : MonoBehaviour
                     CopyFieldsToProperties(type, alreadySeenComponents, componentInGameObject, ZSaverType,
                         FromJSONdObjects[i], gameObject);
                     alreadySeenComponents.Add(componentInGameObject);
+                    
+                    gameObject.transform.position = gameObjectData.position;
+                    gameObject.transform.rotation = gameObjectData.rotation;
+                    gameObject.transform.localScale = gameObjectData.size;
                 }
             }
         }

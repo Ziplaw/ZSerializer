@@ -66,13 +66,6 @@ namespace ZSave
         }
     }
 
-    [Serializable]
-    public struct ComponentData
-    {
-        public Component componentData;
-        public string componentTypeName;
-    }
-
     public abstract class ZSaver<T> where T : Component
     {
         [OmitSerializableCheck] public int gameObjectInstanceID;
