@@ -11,6 +11,7 @@ namespace ZSave
 {
     public class PersistanceManager
     {
+        public static string mainAssembly = "Assembly-CSharp";
         public static Type[] ComponentSerializableTypes => AppDomain.CurrentDomain.GetAssemblies().SelectMany(a =>
             a.GetTypes().Where(t =>
                 (t == typeof(PersistentGameObject)) || (
@@ -35,7 +36,9 @@ namespace ZSave
                    fieldInfo.CanRead &&
                    fieldInfo.CanWrite &&
                    fieldInfo.Name != "material" &&
-                   fieldInfo.Name != "materials";
+                   fieldInfo.Name != "materials" &&
+                   fieldInfo.Name != "mesh";
+
         }
         
         public static IEnumerable<Type> GetTypesWithPersistentAttribute(Assembly[] assemblies)
@@ -60,8 +63,7 @@ namespace ZSave
             foreach (var type in types)
             {
                 var objects = Object.FindObjectsOfType(type);
-
-                var ZSaverType = Type.GetType(type.Name + "ZSaver");
+                var ZSaverType = Type.GetType(type.Name + "ZSaver, " + mainAssembly);
                 if (ZSaverType == null) continue;
                 var ZSaverArrayType = ZSaverType.MakeArrayType();
 
@@ -84,23 +86,26 @@ namespace ZSave
 
         public static void LoadAllObjects()
         {
-            var types = GetTypesWithPersistentAttribute(AppDomain.CurrentDomain.GetAssemblies())
-                .Where(t => Object.FindObjectOfType(t) != null);
+            var types = GetTypesWithPersistentAttribute(AppDomain.CurrentDomain.GetAssemblies());
 
             foreach (var type in types)
             {
-                var ZSaverType = Type.GetType(type.Name + "ZSaver");
+                var ZSaverType = Type.GetType(type.Name + "ZSaver, " + mainAssembly);
                 if (ZSaverType == null) continue;
                 MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson))
                     .MakeGenericMethod(ZSaverType);
 
+                string file = Application.persistentDataPath + "/" + type.Name + ".save";
+
+                if (!File.Exists(file)) continue;
+
                 object[] FromJSONdObjects = (object[]) fromJsonMethod.Invoke(null,
-                    new object[] {PersistanceManager.ReadFromFile(type.Name + ".save")});
+                    new object[] {ReadFromFile(type.Name + ".save")});
 
                 for (var i = 0; i < FromJSONdObjects.Length; i++)
                 {
                     FromJSONdObjects[i] = ((object[]) fromJsonMethod.Invoke(null,
-                        new object[] {PersistanceManager.ReadFromFile(type.Name + ".save")}))[i];
+                        new object[] {ReadFromFile(type.Name + ".save")}))[i];
                     MethodInfo loadMethod = ZSaverType.GetMethod("LoadComponent");
                     loadMethod.Invoke(FromJSONdObjects[i],
                         new object[] {ZSaverType});

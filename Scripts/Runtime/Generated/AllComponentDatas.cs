@@ -1355,13 +1355,11 @@ public class SkyboxZSaver : ZSave.ZSaver<UnityEngine.Skybox> {
 [System.Serializable]
 public class MeshFilterZSaver : ZSave.ZSaver<UnityEngine.MeshFilter> {
     public UnityEngine.Mesh sharedMesh;
-    public UnityEngine.Mesh mesh;
     public System.String tag;
     public System.String name;
     public UnityEngine.HideFlags hideFlags;
     public MeshFilterZSaver (UnityEngine.MeshFilter MeshFilterInstance) : base(MeshFilterInstance.gameObject, MeshFilterInstance ) {
         sharedMesh = MeshFilterInstance.sharedMesh;
-        mesh = MeshFilterInstance.mesh;
         tag = MeshFilterInstance.tag;
         name = MeshFilterInstance.name;
         hideFlags = MeshFilterInstance.hideFlags;
@@ -1841,7 +1839,6 @@ public class ParticleSystemRendererZSaver : ZSave.ZSaver<UnityEngine.ParticleSys
     public System.Boolean allowRoll;
     public System.Boolean freeformStretching;
     public System.Boolean rotateWithStretchDirection;
-    public UnityEngine.Mesh mesh;
     public System.Boolean enabled;
     public UnityEngine.Rendering.ShadowCastingMode shadowCastingMode;
     public System.Boolean receiveShadows;
@@ -1887,7 +1884,6 @@ public class ParticleSystemRendererZSaver : ZSave.ZSaver<UnityEngine.ParticleSys
         allowRoll = ParticleSystemRendererInstance.allowRoll;
         freeformStretching = ParticleSystemRendererInstance.freeformStretching;
         rotateWithStretchDirection = ParticleSystemRendererInstance.rotateWithStretchDirection;
-        mesh = ParticleSystemRendererInstance.mesh;
         enabled = ParticleSystemRendererInstance.enabled;
         shadowCastingMode = ParticleSystemRendererInstance.shadowCastingMode;
         receiveShadows = ParticleSystemRendererInstance.receiveShadows;

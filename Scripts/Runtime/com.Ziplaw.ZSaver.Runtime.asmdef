@@ -1,3 +1,14 @@
 {
-	"name": "com.Ziplaw.ZSaver.Runtime"
+    "name": "com.Ziplaw.ZSaver.Runtime",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
