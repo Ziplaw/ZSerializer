@@ -1,0 +1,12 @@
+{
+  "name": "com.ziplaw.zsaver",
+  "displayName": "ZSaver",
+  "version": "1.0.0",
+  "unity": "2020.3",
+  "description": "A fast and easy way to serialize anything in Unity",
+  "author": {
+    "name": "Ziplaw",
+    "email": "afrgplus@gmail.com",
+    "url": "https://youtube.com/c/ZiplawDev"
+  }
+}
