@@ -29,12 +29,10 @@ namespace ZSave
     public class PersistentAttribute : Attribute
     {
         public readonly SaveType saveType;
-        private readonly ExecutionCycle _executionCycle;
 
-        public PersistentAttribute(ExecutionCycle dataRecovery)
+        public PersistentAttribute()
         {
             saveType = SaveType.Component;
-            _executionCycle = dataRecovery;
         }
     }
 }
