@@ -25,31 +25,31 @@ public static class ZSaverEditor
             .Where(f => f.GetCustomAttribute(typeof(OmitSerializableCheck)) == null))
         {
             var fieldType = fieldInfo.FieldType;
-            
+
             if (fieldInfo.FieldType.IsArray)
             {
                 fieldType = fieldInfo.FieldType.GetElementType();
             }
-                
-            
+
+
             int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
             script +=
                 $"    public {fieldInfo.FieldType} {fieldInfo.Name};\n".Replace('+', '.');
-            
+
             if (genericParameterAmount > 0)
             {
                 string oldString = $"`{genericParameterAmount}[";
                 string newString = "<";
 
                 var genericArguments = fieldType.GenericTypeArguments;
-                
+
                 for (var i = 0; i < genericArguments.Length; i++)
                 {
-                    oldString += genericArguments[i] + (i == genericArguments.Length-1 ? "]":",");
-                    newString += genericArguments[i] + (i == genericArguments.Length-1 ? ">":",");
+                    oldString += genericArguments[i] + (i == genericArguments.Length - 1 ? "]" : ",");
+                    newString += genericArguments[i] + (i == genericArguments.Length - 1 ? ">" : ",");
                 }
-                
+
                 script = script.Replace(oldString, newString);
             }
         }
@@ -63,32 +63,32 @@ public static class ZSaverEditor
         foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
         {
             var fieldType = fieldInfo.FieldType;
-            
+
             if (fieldInfo.FieldType.IsArray)
             {
                 fieldType = fieldInfo.FieldType.GetElementType();
             }
-                
-            
+
+
             int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
             script +=
                 $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\").GetValue({className});\n"
                     .Replace('+', '.');
-            
+
             if (genericParameterAmount > 0)
             {
                 string oldString = $"`{genericParameterAmount}[";
                 string newString = "<";
 
                 var genericArguments = fieldType.GenericTypeArguments;
-                
+
                 for (var i = 0; i < genericArguments.Length; i++)
                 {
-                    oldString += genericArguments[i] + (i == genericArguments.Length-1 ? "]":",");
-                    newString += genericArguments[i] + (i == genericArguments.Length-1 ? ">":",");
+                    oldString += genericArguments[i] + (i == genericArguments.Length - 1 ? "]" : ",");
+                    newString += genericArguments[i] + (i == genericArguments.Length - 1 ? ">" : ",");
                 }
-                
+
                 script = script.Replace(oldString, newString);
             }
         }
@@ -102,8 +102,23 @@ public static class ZSaverEditor
         sw.Close();
     }
 
+    static Type[] typesImplementingCustomEditor = AppDomain.CurrentDomain.GetAssemblies().SelectMany(ass =>
+        ass.GetTypes()
+            .Where(t => t.GetCustomAttribute<CustomEditor>() != null && !t.FullName.Contains("UnityEngine.") &&
+                        !t.FullName.Contains("UnityEditor.")).Select(t =>
+                t.GetCustomAttribute<CustomEditor>().GetType()
+                    .GetField("m_InspectedType", BindingFlags.NonPublic | BindingFlags.Instance)
+                    ?.GetValue(t.GetCustomAttribute<CustomEditor>()) as Type)
+            .Where(t => t.IsSubclassOf(typeof(MonoBehaviour)))).ToArray();
+
     public static void CreateEditorScript(Type type, string path)
     {
+        if (typesImplementingCustomEditor.Contains(type))
+        {
+            Debug.Log($"{type} already implements a Custom Editor, and another one won´t be created");
+            return;
+        }
+        
         string editorScript =
             @"using UnityEditor;
 using ZSave.Editor;
