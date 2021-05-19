@@ -24,11 +24,34 @@ public static class ZSaverEditor
         foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
             .Where(f => f.GetCustomAttribute(typeof(OmitSerializableCheck)) == null))
         {
-            int genericParameterAmount = fieldInfo.FieldType.GenericTypeArguments.Length;
+            var fieldType = fieldInfo.FieldType;
+            
+            if (fieldInfo.FieldType.IsArray)
+            {
+                fieldType = fieldInfo.FieldType.GetElementType();
+            }
+                
+            
+            int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
             script +=
-                $"    public {fieldInfo.FieldType} {fieldInfo.Name};\n".Replace('+', '.').Replace('[', '<')
-                    .Replace(']', '>').Replace($"`{genericParameterAmount}", "");
+                $"    public {fieldInfo.FieldType} {fieldInfo.Name};\n".Replace('+', '.');
+            
+            if (genericParameterAmount > 0)
+            {
+                string oldString = $"`{genericParameterAmount}[";
+                string newString = "<";
+
+                var genericArguments = fieldType.GenericTypeArguments;
+                
+                for (var i = 0; i < genericArguments.Length; i++)
+                {
+                    oldString += genericArguments[i] + (i == genericArguments.Length-1 ? "]":",");
+                    newString += genericArguments[i] + (i == genericArguments.Length-1 ? ">":",");
+                }
+                
+                script = script.Replace(oldString, newString);
+            }
         }
 
         string className = type.Name + "Instance";
@@ -39,11 +62,35 @@ public static class ZSaverEditor
 
         foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
         {
-            int genericParameterAmount = fieldInfo.FieldType.GenericTypeArguments.Length;
+            var fieldType = fieldInfo.FieldType;
+            
+            if (fieldInfo.FieldType.IsArray)
+            {
+                fieldType = fieldInfo.FieldType.GetElementType();
+            }
+                
+            
+            int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
             script +=
-                $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\").GetValue({className});\n".Replace('+', '.').Replace('[', '<')
-                    .Replace(']', '>').Replace($"`{genericParameterAmount}", "");
+                $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\").GetValue({className});\n"
+                    .Replace('+', '.');
+            
+            if (genericParameterAmount > 0)
+            {
+                string oldString = $"`{genericParameterAmount}[";
+                string newString = "<";
+
+                var genericArguments = fieldType.GenericTypeArguments;
+                
+                for (var i = 0; i < genericArguments.Length; i++)
+                {
+                    oldString += genericArguments[i] + (i == genericArguments.Length-1 ? "]":",");
+                    newString += genericArguments[i] + (i == genericArguments.Length-1 ? ">":",");
+                }
+                
+                script = script.Replace(oldString, newString);
+            }
         }
 
         Debug.Log("ZSaver script being created at " + path);
