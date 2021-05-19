@@ -3,12 +3,51 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEngine;
 using ZSave;
 using ZSave.Editor;
 
 public static class ZSaverEditor
 {
+    [DidReloadScripts]
+    static void TryRebuildZSavers()
+    {
+        ZSaverStyler styler = new ZSaverStyler();
+        if (styler.settings.autoRebuildZSavers)
+        {
+            
+            var types = PersistanceManager.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
+                .GetAssemblies()).ToArray();
+
+            Class[] classes = new Class[types.Length];
+
+            for (int i = 0; i < types.Length; i++)
+            {
+                classes[i] = new Class(types[i], ZSaverEditor.GetClassState(types[i]));
+            }
+            
+            string path;
+
+            foreach (var c in classes)
+            {
+                ClassState state = c.state;
+
+                if (state == ClassState.NeedsRebuilding)
+                {
+                    path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSaver.cs",
+                        SearchOption.AllDirectories)[0];
+                    path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
+                           path.Replace('\\', '/');
+
+
+                    CreateZSaver(c.classType, path);
+                    AssetDatabase.Refresh();
+                }
+            }
+        }
+    }
+
     public static void CreateZSaver(Type type, string path)
     {
         FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);

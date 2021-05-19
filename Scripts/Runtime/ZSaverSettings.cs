@@ -9,6 +9,7 @@ namespace ZSave
         public static ZSaverSettings instance;
         
         public bool debugMode;
+        public bool autoRebuildZSavers;
 
         private void OnEnable()
         {

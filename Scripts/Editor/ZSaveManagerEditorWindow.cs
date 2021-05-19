@@ -102,7 +102,7 @@ namespace ZSave.Editor
 
                 using (new EditorGUILayout.HorizontalScope("helpbox"))
                 {
-                    EditorGUILayout.LabelField("Remake All",
+                    EditorGUILayout.LabelField("Save All",
                         new GUIStyle("label") {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
                         GUILayout.Height(classHeight));
 
