@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   debugMode: 1
   autoRebuildZSavers: 1
-  selectedSaveFile: 4
+  selectedSaveFile: 0

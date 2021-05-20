@@ -366,11 +366,11 @@ public class " + type.Name + @"Editor : Editor
     {
         FieldInfo[] fieldInfos = typeof(ZSaverSettings).GetFields(BindingFlags.Instance | BindingFlags.Public);
         SerializedObject serializedObject = new SerializedObject(styler.settings);
-        if (GUILayout.Button("Open Savefile Directory"))
+        if (GUILayout.Button("Open Save file Directory"))
         {
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.WindowStyle = ProcessWindowStyle.Normal;
             startInfo.FileName = "cmd.exe";
             string _path = Application.persistentDataPath;
             startInfo.Arguments = $"/C start {_path}";
@@ -399,17 +399,16 @@ public class " + type.Name + @"Editor : Editor
             {
                 string[] blackListForThisComponent = {" "};
 
-                if (ZSaver.ZSave.ComponentBlackList.ContainsKey(type))
-                    ZSaver.ZSave.ComponentBlackList.TryGetValue(type, out blackListForThisComponent);
+                if (ZSave.ComponentBlackList.ContainsKey(type))
+                    ZSave.ComponentBlackList.TryGetValue(type, out blackListForThisComponent);
 
 
                 longScript +=
-                    "[System.Serializable]\npublic class " + type.Name + "ZSaver : ZSave.ZSaver<" + type.FullName +
+                    "[System.Serializable]\npublic class " + type.Name + "ZSaver : ZSaver.ZSaver<" + type.FullName +
                     "> {\n";
-
-
+                
                 foreach (var propertyInfo in type
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(ZSaver.ZSave.FieldIsSuitableForAssignment))
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(ZSave.FieldIsSuitableForAssignment))
                 {
                     if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
 
@@ -417,25 +416,70 @@ public class " + type.Name + @"Editor : Editor
                         $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
                         ";\n";
                 }
+                foreach (var fieldInfo in type
+                    .GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
+                {
+                    if (blackListForThisComponent.Contains(fieldInfo.Name)) continue;
+                    
+                    var fieldType = fieldInfo.FieldType;
+
+                    if (fieldInfo.FieldType.IsArray)
+                    {
+                        fieldType = fieldInfo.FieldType.GetElementType();
+                    }
+                    
+                    int genericParameterAmount = fieldType.GenericTypeArguments.Length;
+                    
+
+                    longScript +=
+                        $"    public {fieldInfo.FieldType.ToString().Replace('+', '.')} " + fieldInfo.Name +
+                        ";\n";
+                    
+                    if (genericParameterAmount > 0)
+                    {
+                        string oldString = $"`{genericParameterAmount}[";
+                        string newString = "<";
+                    
+                        var genericArguments = fieldType.GenericTypeArguments;
+                    
+                        for (var i = 0; i < genericArguments.Length; i++)
+                        {
+                            oldString += genericArguments[i] + (i == genericArguments.Length - 1 ? "]" : ",");
+                            newString += genericArguments[i] + (i == genericArguments.Length - 1 ? ">" : ",");
+                        }
+                    
+                        longScript = longScript.Replace(oldString, newString);
+                    }
+                    
+                    
+                }
                 if(type == typeof(PersistentGameObject)) 
                     longScript +=
-                    $"    public ZSave.GameObjectData gameObjectData;\n";
+                    $"    public ZSaver.GameObjectData gameObjectData;\n";
 
                 longScript += "    public " + type.Name + "ZSaver (" + type.FullName + " " + type.Name +"Instance) : base(" +
                               type.Name + "Instance.gameObject, " + type.Name +"Instance ) {\n";
 
                 foreach (var propertyInfo in type
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(ZSaver.ZSave.FieldIsSuitableForAssignment))
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(ZSave.FieldIsSuitableForAssignment))
                 {
                     if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
 
                     longScript +=
                         $"        " + propertyInfo.Name + " = " + type.Name + "Instance." + propertyInfo.Name + ";\n";
                 }
+                foreach (var fieldInfo in type
+                    .GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
+                {
+                    if (blackListForThisComponent.Contains(fieldInfo.Name)) continue;
+
+                    longScript +=
+                        $"        " + fieldInfo.Name + " = " + type.Name + "Instance." + fieldInfo.Name + ";\n";
+                }
 
                 if (type == typeof(PersistentGameObject))
                     longScript +=
-                        @"        gameObjectData =new ZSave.GameObjectData()
+                        @"        gameObjectData =new ZSaver.GameObjectData()
         {
             loadingOrder = PersistentGameObject.CountParents(PersistentGameObjectInstance.transform),
             active = _componentParent.activeSelf,

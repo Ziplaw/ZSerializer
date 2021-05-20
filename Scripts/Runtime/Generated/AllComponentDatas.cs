@@ -3551,6 +3551,7 @@ public class VisualEffectZSaver : ZSaver.ZSaver<UnityEngine.VFX.VisualEffect> {
     public UnityEngine.VFX.VisualEffectAsset visualEffectAsset;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
+    public System.Action<UnityEngine.VFX.VFXOutputEventArgs> outputEventReceived;
     public VisualEffectZSaver (UnityEngine.VFX.VisualEffect VisualEffectInstance) : base(VisualEffectInstance.gameObject, VisualEffectInstance ) {
         pause = VisualEffectInstance.pause;
         playRate = VisualEffectInstance.playRate;
@@ -3561,6 +3562,7 @@ public class VisualEffectZSaver : ZSaver.ZSaver<UnityEngine.VFX.VisualEffect> {
         visualEffectAsset = VisualEffectInstance.visualEffectAsset;
         enabled = VisualEffectInstance.enabled;
         hideFlags = VisualEffectInstance.hideFlags;
+        outputEventReceived = VisualEffectInstance.outputEventReceived;
 
     }
 }
@@ -3691,11 +3693,13 @@ public class PersistentGameObjectZSaver : ZSaver.ZSaver<PersistentGameObject> {
     public System.Boolean useGUILayout;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
+    public UnityEngine.UI.Text text;
     public ZSaver.GameObjectData gameObjectData;
     public PersistentGameObjectZSaver (PersistentGameObject PersistentGameObjectInstance) : base(PersistentGameObjectInstance.gameObject, PersistentGameObjectInstance ) {
         useGUILayout = PersistentGameObjectInstance.useGUILayout;
         enabled = PersistentGameObjectInstance.enabled;
         hideFlags = PersistentGameObjectInstance.hideFlags;
+        text = PersistentGameObjectInstance.text;
         gameObjectData =new ZSaver.GameObjectData()
         {
             loadingOrder = PersistentGameObject.CountParents(PersistentGameObjectInstance.transform),

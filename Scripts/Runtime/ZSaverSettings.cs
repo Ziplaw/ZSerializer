@@ -12,9 +12,10 @@ namespace ZSaver
         public bool autoRebuildZSavers;
         public int selectedSaveFile;
 
-        private void OnEnable()
+        [RuntimeInitializeOnLoadMethod]
+        static void Init()
         {
-            instance = instance ? instance : this;
+            instance = Resources.Load<ZSaverSettings>("ZSaverSettings");
         }
     }
 }
