@@ -2,7 +2,9 @@
 ZSaver is an easy, all-in-one Serialization solution for Unity. It supports serialization for every one of Unity's built in Components, and an easy way of Serializing your own!
 ## Installation
 To get started, simply [right click me and select "Copy this link address"](https://github.com/Ziplaw/ZSave.git), go into the **Package Manager**, click on the **+** icon and select "Add package frpm git URL..."
+
  ![no image :(](Scripts/Editor/Resources/README/package_manager_tut.png)
+
  Paste the link you copied inside the text box that will appear and click **Add**.
 You're done :)
 ## Instructions
@@ -20,7 +22,9 @@ using ZSaver;
 public class Testing : MonoBehaviour {
 ```
 Then go to ```Tools/ZSaver/Persistent Classes Configurator``` in the Unity Toolbar and this window will open up
+
  ![no image :(](Scripts/Editor/Resources/README/configurator_tut.png)
+
 Then, click on the red button next to the class name you want to make persistent.
 You will be prompted to select a folder, this is where your Serializable class or "ZSavers" will be stored. (You won't need to be touching these files, so I recommend you save them in Assets/ZSavers.)
 And you're done! Your class is now serializable and ready to be used.
@@ -40,6 +44,7 @@ If you open the **Persistent Classes configurator**, you'll see that at the end 
  #### The PersistentGameObject Component
 The Persistent GameObject Component is even easier to use!
 Simply add the Persistent GameObject Component to the GameObject you wont to retain and you're good to go.
+
 ![no image :(](Scripts/Editor/Resources/README/persistent_go_tut.png)
 
 ### Loading and saving
@@ -53,7 +58,7 @@ ZSave.LoadAllObjectsAndComponents();
 ```
 That's it :)
 
-###Settings
+### Settings
 If you open the **Persistent Classes Configurator**, you'll see a button with this icon: ![no image :(](Scripts/Editor/Resources/cog.png)
 If you click it, the settings panel will open up. In here you can change some settings about the tool and how it behaves.
  - Debug Mode
