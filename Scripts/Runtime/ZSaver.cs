@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using UnityEngine;
 using ZSave;
+using Object = UnityEngine.Object;
 
 namespace ZSave
 {
@@ -35,6 +36,7 @@ namespace ZSave
             o.transform.position = position;
             o.transform.rotation = rotation;
             o.transform.localScale = size;
+            
             o.transform.SetParent(parent != null ? parent.transform : null);
 
             return o;
@@ -55,50 +57,51 @@ namespace ZSave
             componentinstanceID = component.GetInstanceID();
         }
 
-        public void LoadComponent(Type zSaverType)
-        {
-            if (_component == null)
-            {
-                string prevCOMPInstanceID = componentinstanceID.ToString();
-                string COMPInstanceIDToReplaceString = $"instanceID\":{prevCOMPInstanceID}";
-
-                if (_componentParent == null)
-                {
-                    if (ZSaverSettings.instance.debugMode)
-                        Debug.LogWarning(
-                            $"GameObject holding {typeof(T)} was destroyed, change the saving type to \"SaveType.GameObject\" to ensure persistance of this Component if destroying is necessary");
-                    return;
-                }
-
-                _component = (T) _componentParent.AddComponent(typeof(T));
-                componentinstanceID = _component.GetInstanceID();
-                string newCOMPInstanceIDToReplaceString = "instanceID\":" + componentinstanceID;
-                Debug.LogWarning("Updating " + _component);
-                PersistanceManager.UpdateAllJSONFiles(
-                    new[]
-                    {
-                        COMPInstanceIDToReplaceString
-                    },
-                    new[]
-                    {
-                        newCOMPInstanceIDToReplaceString
-                    });
-            }
-
-
-            FieldInfo[] zSaverFields = zSaverType.GetFields();
-            FieldInfo[] componentFields = typeof(T).GetFields();
-
-            for (var i = 0; i < componentFields.Length; i++)
-            {
-                for (var j = 0; j < zSaverFields.Length; j++)
-                {
-                    if (zSaverFields[j].Name == componentFields[i].Name)
-                    {
-                        componentFields[i].SetValue(_component, zSaverFields[j].GetValue(this));
-                    }
-                }
-            }
-        }
+        // public void LoadComponent(Type zSaverType)
+        // {
+        //     if (_component == null)
+        //     {
+        //         string prevCOMPInstanceID = componentinstanceID.ToString();
+        //         string COMPInstanceIDToReplaceString = $"instanceID\":{prevCOMPInstanceID}";
+        //
+        //         if (_componentParent == null)
+        //         {
+        //             if (ZSaverSettings.instance.debugMode)
+        //                 Debug.LogWarning(
+        //                     $"GameObject holding {typeof(T)} was destroyed, add the Persistent GameObject component to said GameObject if persistence was intended");
+        //             return;
+        //         }
+        //         
+        //         _component = (T) _componentParent.AddComponent(typeof(T));
+        //         componentinstanceID = _component.GetInstanceID();
+        //         
+        //         string newCOMPInstanceIDToReplaceString = "instanceID\":" + componentinstanceID;
+        //         
+        //         PersistanceManager.UpdateAllJSONFiles(
+        //             new[]
+        //             {
+        //                 COMPInstanceIDToReplaceString
+        //             },
+        //             new[]
+        //             {
+        //                 newCOMPInstanceIDToReplaceString
+        //             });
+        //     }
+        //
+        //
+        //     FieldInfo[] zSaverFields = zSaverType.GetFields();
+        //     FieldInfo[] componentFields = typeof(T).GetFields();
+        //
+        //     for (var i = 0; i < componentFields.Length; i++)
+        //     {
+        //         for (var j = 0; j < zSaverFields.Length; j++)
+        //         {
+        //             if (zSaverFields[j].Name == componentFields[i].Name)
+        //             {
+        //                 componentFields[i].SetValue(_component, zSaverFields[j].GetValue(this));
+        //             }
+        //         }
+        //     }
+        // }
     }
 }

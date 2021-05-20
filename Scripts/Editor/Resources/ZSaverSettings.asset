@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: ZSaverSettings
   m_EditorClassIdentifier: 
   debugMode: 1
-  autoRebuildZSavers: 0
+  autoRebuildZSavers: 1
