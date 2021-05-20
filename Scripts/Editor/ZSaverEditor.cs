@@ -56,7 +56,7 @@ public static class ZSaverEditor
         StreamWriter sw = new StreamWriter(fileStream);
 
         string script =
-            "using ZSave;\n" +
+            "using ZSaver;\n" +
             "\n" +
             "[System.Serializable]\n" +
             $"public class {type.Name}ZSaver : ZSaver<{type.Name}>\n" +
@@ -162,7 +162,7 @@ public static class ZSaverEditor
         
         string editorScript =
             @"using UnityEditor;
-using ZSave.Editor;
+using ZSaver.Editor;
 using UnityEditor.Callbacks;
 
 [CustomEditor(typeof(" + type.Name + @"))]
