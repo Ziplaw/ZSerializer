@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Object = UnityEngine.Object;
 
-namespace ZSave
+namespace ZSaver
 {
     [Flags]
     public enum ExecutionCycle

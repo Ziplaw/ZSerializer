@@ -5,13 +5,19 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
-namespace ZSave
+namespace ZSaver
 {
-    public class PersistanceManager
+    public class ZSave
     {
         #region Big boys
+
+        private static MethodInfo castMethod = typeof(Enumerable).GetMethod("Cast");
+        private static MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray");
+        private static MethodInfo saveMethod = typeof(ZSave).GetMethod(nameof(Save));
+        private static MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson));
 
         public static string mainAssembly = "Assembly-CSharp";
 
@@ -62,12 +68,18 @@ namespace ZSave
         #endregion
 
         #region HelperFunctions
+
+        static int GetCurrentScene()
+        {
+            return SceneManager.GetActiveScene().buildIndex;
+        }
+
         public static Object FindObjectFromInstanceID(int instanceID)
         {
-            return (Object)typeof(Object)
-                .GetMethod("FindObjectFromInstanceID", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
-                ?.Invoke(null, new object[] { instanceID });
- 
+            return (Object) typeof(Object)
+                .GetMethod("FindObjectFromInstanceID",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+                ?.Invoke(null, new object[] {instanceID});
         }
 
         static List<Type> GetAllPersistentComponents(PersistentGameObject[] objects)
@@ -113,22 +125,19 @@ namespace ZSave
             zSavers = zSavers.OrderBy(x =>
                 ((GameObjectData) x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder).ToArray();
 
-            MethodInfo cast = typeof(Enumerable).GetMethod("Cast")
-                .MakeGenericMethod(new Type[] {ZSaverType});
+            MethodInfo cast = castMethod.MakeGenericMethod(new Type[] {ZSaverType});
 
-            MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray")
-                .MakeGenericMethod(new Type[] {ZSaverType});
+            MethodInfo toArray = toArrayMethod.MakeGenericMethod(new Type[] {ZSaverType});
 
             object result = cast.Invoke(zSavers, new object[] {zSavers});
 
-            return (object[]) toArrayMethod.Invoke(result, new object[] {result});
+            return (object[]) toArray.Invoke(result, new object[] {result});
         }
 
         static void ReflectedSave(object[] zsavers, string fileName)
         {
             Type ZSaverType = zsavers.GetType().GetElementType();
-            var saveMethodInfo = typeof(PersistanceManager).GetMethod(nameof(Save));
-            var genericSaveMethodInfo = saveMethodInfo.MakeGenericMethod(ZSaverType);
+            var genericSaveMethodInfo = saveMethod.MakeGenericMethod(ZSaverType);
             genericSaveMethodInfo.Invoke(null, new object[] {zsavers, fileName});
         }
 
@@ -163,7 +172,6 @@ namespace ZSave
                     if (propertyInfos[j].Name == fieldInfos[i].Name)
                     {
                         propertyInfos[j].SetValue(c, fieldInfos[i].GetValue(FromJSONdObject));
-                        // Debug.LogWarning($"Setting {propertyInfos[j]}");
                     }
                 }
             }
@@ -190,7 +198,7 @@ namespace ZSave
                 if (ZSaverSettings.instance.debugMode) Debug.Log(fileName + " " + newJson);
             }
         }
-        
+
         static void UpdateComponentInstanceIDs(int prevComponentInstanceID, int newComponentInstanceID)
         {
             string COMPInstanceIDToReplaceString = $"instanceID\":{prevComponentInstanceID}";
@@ -282,8 +290,6 @@ namespace ZSave
 
         #region Load
 
-        
-
         static void LoadDestroyedGameObject(int gameObjectInstanceID, out GameObject gameObject, Type ZSaverType,
             object FromJSONdObject)
         {
@@ -317,7 +323,7 @@ namespace ZSave
             if (componentInGameObject == null)
             {
                 int prevCOMPInstanceID = componentInstanceID;
-                
+
                 if (gameObject == null)
                 {
                     if (componentType != typeof(PersistentGameObject))
@@ -336,9 +342,8 @@ namespace ZSave
                 else componentInGameObject = gameObject.AddComponent(componentType);
                 if (componentInGameObject == null) return;
                 componentInstanceID = componentInGameObject.GetInstanceID();
-                
 
-                
+
                 UpdateComponentInstanceIDs(prevCOMPInstanceID, componentInstanceID);
             }
 
@@ -366,25 +371,19 @@ namespace ZSave
             {
                 var ZSaverType = Type.GetType(type.Name + "ZSaver, " + mainAssembly);
                 if (ZSaverType == null) continue;
-                MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson))
-                    .MakeGenericMethod(ZSaverType);
+               
+                    var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
 
-                string file = Application.persistentDataPath + "/" + type.Name + ".save";
+                if (!File.Exists(GetFilePath(type.Name + ".save"))) continue;
 
-                if (!File.Exists(file)) continue;
-
-                object[] FromJSONdObjects = (object[]) fromJsonMethod.Invoke(null,
+                object[] FromJSONdObjects = (object[]) fromJson.Invoke(null,
                     new object[] {ReadFromFile(type.Name + ".save")});
 
                 for (var i = 0; i < FromJSONdObjects.Length; i++)
                 {
                     LoadObjectsDynamically(ZSaverType, type, FromJSONdObjects[i]);
-                    FromJSONdObjects[i] = ((object[]) fromJsonMethod.Invoke(null,
+                    FromJSONdObjects[i] = ((object[]) fromJson.Invoke(null,
                         new object[] {ReadFromFile(type.Name + ".save")}))[i];
-                    // MethodInfo loadMethod = ZSaverType.GetMethod("LoadComponent");
-                    // loadMethod.Invoke(FromJSONdObjects[i],
-                    //     new object[] {ZSaverType});
-
                 }
             }
         }
@@ -396,27 +395,30 @@ namespace ZSave
 
             foreach (var type in types)
             {
-                if (!File.Exists(Application.persistentDataPath + "/" + type.Name + "GameObject.save")) continue;
+                
+                if (!File.Exists(GetFilePath(type.Name + "GameObject.save"))) continue;
                 var ZSaverType = Type.GetType(type.Name + "ZSaver");
                 if (ZSaverType == null) continue;
-                MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson))
-                    .MakeGenericMethod(ZSaverType);
+                
+                var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
 
 
-                object[] FromJSONdObjects = (object[]) fromJsonMethod.Invoke(null,
+                object[] FromJSONdObjects = (object[]) fromJson.Invoke(null,
                     new object[]
                         {ReadFromFile(type.Name + "GameObject.save")});
+                
+                Debug.Log(FromJSONdObjects.Length);
 
 
                 for (var i = 0; i < FromJSONdObjects.Length; i++)
                 {
-                    FromJSONdObjects[i] = ((object[]) fromJsonMethod.Invoke(null,
+                    FromJSONdObjects[i] = ((object[]) fromJson.Invoke(null,
                         new object[] {ReadFromFile(type.Name + "GameObject.save")}))[i];
                     LoadObjectsDynamically(ZSaverType, type, FromJSONdObjects[i]);
                 }
             }
         }
-        
+
         private static void LoadReferences()
         {
             var types = ComponentSerializableTypes.OrderByDescending(x => x == typeof(PersistentGameObject))
@@ -424,14 +426,13 @@ namespace ZSave
 
             foreach (var type in types)
             {
-                if (!File.Exists(Application.persistentDataPath + "/" + type.Name + "GameObject.save")) continue;
+                if (!File.Exists(GetFilePath(type.Name + "GameObject.save"))) continue;
                 var ZSaverType = Type.GetType(type.Name + "ZSaver");
                 if (ZSaverType == null) continue;
-                MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson))
-                    .MakeGenericMethod(ZSaverType);
+                var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType).MakeGenericMethod(ZSaverType);
 
 
-                object[] FromJSONdObjects = (object[]) fromJsonMethod.Invoke(null,
+                object[] FromJSONdObjects = (object[]) fromJson.Invoke(null,
                     new object[]
                         {ReadFromFile(type.Name + "GameObject.save")});
 
@@ -443,7 +444,6 @@ namespace ZSave
                     CopyFieldsToProperties(type, componentInGameObject, FromJSONdObjects[i]);
                     CopyFieldsToFields(ZSaverType, type, componentInGameObject, FromJSONdObjects[i]);
                 }
-
             }
 
             types = GetTypesWithPersistentAttribute(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
@@ -452,14 +452,11 @@ namespace ZSave
             {
                 var ZSaverType = Type.GetType(type.Name + "ZSaver, " + mainAssembly);
                 if (ZSaverType == null) continue;
-                MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson))
-                    .MakeGenericMethod(ZSaverType);
+                var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType).MakeGenericMethod(ZSaverType);
+                
+                if (!File.Exists(GetFilePath(type.Name + ".save"))) continue;
 
-                string file = Application.persistentDataPath + "/" + type.Name + ".save";
-
-                if (!File.Exists(file)) continue;
-
-                object[] FromJSONdObjects = (object[]) fromJsonMethod.Invoke(null,
+                object[] FromJSONdObjects = (object[]) fromJson.Invoke(null,
                     new object[] {ReadFromFile(type.Name + ".save")});
 
                 for (var i = 0; i < FromJSONdObjects.Length; i++)
@@ -494,11 +491,12 @@ namespace ZSave
             LoadReferences();
 
 
-            SaveAllObjectsAndComponents(); //Temporary fix for objects duping after loading destroyed GOs
+            // SaveAllObjectsAndComponents(); //Temporary fix for objects duping after loading destroyed GOs
         }
 
 
         #region JSON Formatting
+
         public static void Save<T>(T[] objectsToPersist, string fileName)
         {
             string json = JsonHelper.ToJson(objectsToPersist, false);
@@ -523,11 +521,22 @@ namespace ZSave
 
         static string GetFilePath(string fileName)
         {
-            return Application.persistentDataPath + "/" + fileName;
-        }
-        
-        #endregion
+            int currentScene = GetCurrentScene();
+            if (currentScene == SceneManager.sceneCount)
+            {
+                Debug.LogWarning(
+                    "Be careful! You're trying to save data in an unbuilt Scene, and any data saved in other unbuilt Scenes will overwrite this one, and vice-versa.\n" +
+                    "If you want your data to persist properly, add this scene to the list of Scenes In Build in your Build Settings");
+            }
+            
+            string path = Path.Combine(Application.persistentDataPath,
+                ZSaverSettings.instance.selectedSaveFile.ToString(), currentScene.ToString());
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
+            return Path.Combine(path, fileName);
+        }
+
+        #endregion
     }
 
     public static class JsonHelper

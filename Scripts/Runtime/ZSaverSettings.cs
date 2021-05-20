@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace ZSave
+namespace ZSaver
 {
     // [CreateAssetMenu(fileName = "New ZSaver Settings", menuName = "ZSaverSettings", order = 0)]
     public class ZSaverSettings : ScriptableObject
@@ -10,6 +10,7 @@ namespace ZSave
         
         public bool debugMode;
         public bool autoRebuildZSavers;
+        public int selectedSaveFile;
 
         private void OnEnable()
         {

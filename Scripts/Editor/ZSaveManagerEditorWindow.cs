@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-namespace ZSave.Editor
+namespace ZSaver.Editor
 {
     public enum ClassState
     {
@@ -52,7 +52,7 @@ namespace ZSave.Editor
         {
             styler = new ZSaverStyler();
 
-            var types = PersistanceManager.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
+            var types = ZSave.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
                 .GetAssemblies()).ToArray();
 
             classes = new Class[types.Length];

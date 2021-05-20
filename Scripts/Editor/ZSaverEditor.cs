@@ -1,12 +1,14 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
-using ZSave;
-using ZSave.Editor;
+using ZSaver;
+using ZSaver.Editor;
+using Debug = UnityEngine.Debug;
 
 public static class ZSaverEditor
 {
@@ -17,7 +19,7 @@ public static class ZSaverEditor
         if (styler.settings.autoRebuildZSavers)
         {
             
-            var types = PersistanceManager.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
+            var types = ZSaver.ZSave.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
                 .GetAssemblies()).ToArray();
 
             Class[] classes = new Class[types.Length];
@@ -364,6 +366,17 @@ public class " + type.Name + @"Editor : Editor
     {
         FieldInfo[] fieldInfos = typeof(ZSaverSettings).GetFields(BindingFlags.Instance | BindingFlags.Public);
         SerializedObject serializedObject = new SerializedObject(styler.settings);
+        if (GUILayout.Button("Open Savefile Directory"))
+        {
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.FileName = "cmd.exe";
+            string _path = Application.persistentDataPath;
+            startInfo.Arguments = $"/C start {_path}";
+            process.StartInfo = startInfo;
+            process.Start();
+        }
 
         using (new GUILayout.VerticalScope("helpbox"))
         {
@@ -381,13 +394,13 @@ public class " + type.Name + @"Editor : Editor
         {
             string longScript = "";
 
-            Type[] types = PersistanceManager.ComponentSerializableTypes;
+            Type[] types = ZSaver.ZSave.ComponentSerializableTypes;
             foreach (var type in types)
             {
                 string[] blackListForThisComponent = {" "};
 
-                if (PersistanceManager.ComponentBlackList.ContainsKey(type))
-                    PersistanceManager.ComponentBlackList.TryGetValue(type, out blackListForThisComponent);
+                if (ZSaver.ZSave.ComponentBlackList.ContainsKey(type))
+                    ZSaver.ZSave.ComponentBlackList.TryGetValue(type, out blackListForThisComponent);
 
 
                 longScript +=
@@ -396,7 +409,7 @@ public class " + type.Name + @"Editor : Editor
 
 
                 foreach (var propertyInfo in type
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(PersistanceManager.FieldIsSuitableForAssignment))
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(ZSaver.ZSave.FieldIsSuitableForAssignment))
                 {
                     if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
 
@@ -412,7 +425,7 @@ public class " + type.Name + @"Editor : Editor
                               type.Name + "Instance.gameObject, " + type.Name +"Instance ) {\n";
 
                 foreach (var propertyInfo in type
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(PersistanceManager.FieldIsSuitableForAssignment))
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(ZSaver.ZSave.FieldIsSuitableForAssignment))
                 {
                     if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
 

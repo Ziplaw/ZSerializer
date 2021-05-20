@@ -1,10 +1,10 @@
 using System;
 using System.Reflection;
 using UnityEngine;
-using ZSave;
+using ZSaver;
 using Object = UnityEngine.Object;
 
-namespace ZSave
+namespace ZSaver
 {
     [Serializable]
     public struct GameObjectData
@@ -77,7 +77,7 @@ namespace ZSave
         //         
         //         string newCOMPInstanceIDToReplaceString = "instanceID\":" + componentinstanceID;
         //         
-        //         PersistanceManager.UpdateAllJSONFiles(
+        //         ZSave.UpdateAllJSONFiles(
         //             new[]
         //             {
         //                 COMPInstanceIDToReplaceString

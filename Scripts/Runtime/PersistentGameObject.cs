@@ -6,15 +6,15 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using ZSave;
-using SaveType = ZSave.SaveType;
+using ZSaver;
+using SaveType = ZSaver.SaveType;
 
 [AddComponentMenu("ZSaver/Persistent GameObject")]
 public class PersistentGameObject : MonoBehaviour
 {
     private void Start()
     {
-        name = gameObject.GetInstanceID() + " " + GetInstanceID();
+        // name = gameObject.GetInstanceID() + " " + GetInstanceID();
     }
 
     public static int CountParents(Transform transform)
