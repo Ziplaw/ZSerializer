@@ -34,7 +34,9 @@ This Editor Script will put a label on your script to let you know that it is Se
 There are three _states_ in which your component can be:
 
 ![no image :(](Scripts/Editor/Resources/valid.png) <span style="color: green;">Valid:</span> The component is ready to be saved.
+
 ![no image :(](Scripts/Editor/Resources/needs_rebuilding.png) <span style="color: gold;">Needs rebuilding:</span> The component has changed since last build, and it needs to be rebuilt.
+
 ![no image :(](Scripts/Editor/Resources/not_made.png) <span style="color: red;">Not made:</span> The component doesn't have a ZSaver, and one needs to be created.
 
 Thankfully, if you've implemented the Custom Editor into your script, you can simply click on ![no image :(](Scripts/Editor/Resources/needs_rebuilding.png) or ![no image :(](Scripts/Editor/Resources/not_made.png) for your problems to be solved.
