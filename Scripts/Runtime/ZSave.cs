@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,6 +14,9 @@ namespace ZSaver
     public class ZSave
     {
         #region Big boys
+
+        public static Action OnBeforeSave;
+        public static Action OnAfterSave;
 
         private static MethodInfo castMethod = typeof(Enumerable).GetMethod("Cast");
         private static MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray");
@@ -46,6 +50,7 @@ namespace ZSaver
                    fieldInfo.CanWrite &&
                    fieldInfo.Name != "material" &&
                    fieldInfo.Name != "materials" &&
+                   fieldInfo.Name != "sharedMaterial" &&
                    fieldInfo.Name != "mesh" &&
                    fieldInfo.Name != "tag" &&
                    fieldInfo.Name != "name";
@@ -124,10 +129,10 @@ namespace ZSaver
             
             Type ZSaverType = zSavers.GetType().GetElementType();
             
-            Debug.Log(zSavers);
-            Debug.Log(ZSaverType);
-            Debug.Log(zSavers[0].GetType().GetField("gameObjectData"));
-            Debug.Log(zSavers[0].GetType().GetField("gameObjectData").GetValue(zSavers[0]));
+            // Debug.Log(zSavers);
+            // Debug.Log(ZSaverType);
+            // Debug.Log(zSavers[0].GetType().GetField("gameObjectData"));
+            // Debug.Log(zSavers[0].GetType().GetField("gameObjectData").GetValue(zSavers[0]));
             zSavers = zSavers.OrderBy(x =>
                 ((GameObjectData) x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder).ToArray();
 
@@ -166,18 +171,17 @@ namespace ZSaver
 
         static void CopyFieldsToProperties(Type componentType, Component c, object FromJSONdObject)
         {
-            PropertyInfo[] propertyInfos = componentType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            PropertyInfo[] propertyInfos = componentType.GetProperties()
                 .Where(FieldIsSuitableForAssignment).ToArray();
 
-            FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-
+            FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields();
+            
             for (var i = 0; i < fieldInfos.Length; i++)
             {
                 for (var j = 0; j < propertyInfos.Length; j++)
                 {
                     if (propertyInfos[j].Name == fieldInfos[i].Name)
                     {
-                        Debug.Log("Same name " + propertyInfos[j].Name + " " + c + " " + componentType);
                         propertyInfos[j].SetValue(c, fieldInfos[i].GetValue(FromJSONdObject));
                     }
                 }
@@ -368,11 +372,6 @@ namespace ZSaver
                 UpdateComponentInstanceIDs(prevCOMPInstanceID, componentInstanceID);
             }
 
-            // CopyFieldsToFields(ZSaverType, componentType, componentInGameObject, FromJSONdObject);
-            // Debug.Log("Beginning to copy everything for " + gameObject + " " + componentInGameObject);
-            // CopyFieldsToProperties(componentType, componentInGameObject,
-            //     FromJSONdObject);
-
             if (componentType == typeof(PersistentGameObject))
             {
                 GameObjectData gameObjectData =
@@ -495,6 +494,8 @@ namespace ZSaver
 
         public static void SaveAllObjectsAndComponents()
         {
+            OnBeforeSave?.Invoke();
+            
             string[] files = Directory.GetFiles(GetFilePath(""));
             foreach (string file in files)
             {
@@ -503,6 +504,8 @@ namespace ZSaver
 
             SaveAllPersistentGameObjects();
             SaveAllObjects();
+
+            OnAfterSave?.Invoke();
         }
 
         public static void LoadAllObjectsAndComponents()

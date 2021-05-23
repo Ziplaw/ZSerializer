@@ -24,7 +24,7 @@ public class PersistentGameObjectEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        base.OnInspectorGUI();
+        // base.OnInspectorGUI();
         using (new EditorGUILayout.VerticalScope("helpbox"))
             GUILayout.Label("<color=#29cf42>Persistent GameObject</color>", styler.header, GUILayout.MinHeight(32));
 
