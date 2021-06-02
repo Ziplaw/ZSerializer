@@ -11,6 +11,7 @@ namespace ZSaver
         public bool debugMode;
         public bool autoRebuildZSavers;
         public int selectedSaveFile;
+        public bool encryptData;
 
         [RuntimeInitializeOnLoadMethod]
         static void Init()

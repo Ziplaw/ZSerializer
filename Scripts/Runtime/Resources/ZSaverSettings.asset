@@ -15,3 +15,4 @@ MonoBehaviour:
   debugMode: 1
   autoRebuildZSavers: 1
   selectedSaveFile: 0
+  encryptData: 0

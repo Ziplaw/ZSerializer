@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
+using ZSaver;
 using ZSaver.Editor;
 
 
@@ -14,6 +16,14 @@ public class PersistentGameObjectEditor : Editor
     private void OnEnable()
     {
         manager = target as PersistentGameObject;
+        if (!Application.isPlaying && manager._componentDatas == null || manager._componentDatas.Length == 0)
+        {
+            manager._componentDatas =
+                (from c in manager.GetComponents<Component>().Where(c =>
+                        ZSave.ComponentSerializableTypes.Contains(c.GetType()) &&
+                        !c.GetType().IsSubclassOf(typeof(MonoBehaviour)))
+                    select new PersistentGameObject.SerializableComponentData(c.GetType())).ToArray();
+        }
     }
 
     [DidReloadScripts]
@@ -22,11 +32,40 @@ public class PersistentGameObjectEditor : Editor
         styler = new ZSaverStyler();
     }
 
+    private bool showSettings;
+
     public override void OnInspectorGUI()
     {
+        serializedObject.Update();
         // base.OnInspectorGUI();
-        using (new EditorGUILayout.VerticalScope("helpbox"))
+        using (new EditorGUILayout.HorizontalScope("helpbox"))
+        {
             GUILayout.Label("<color=#29cf42>Persistent GameObject</color>", styler.header, GUILayout.MinHeight(32));
+            showSettings = GUILayout.Toggle(showSettings, styler.cogWheel, new GUIStyle("button"),
+                GUILayout.MaxHeight(32), GUILayout.MaxWidth(32));
+        }
 
+        if (showSettings)
+        {
+            var managerComponentDatas = manager._componentDatas;
+            using (new GUILayout.VerticalScope("helpbox"))
+            {
+                using (new GUILayout.VerticalScope("box"))
+                    GUILayout.Label("Components to Serialize", new GUIStyle("label") {alignment = TextAnchor.MiddleCenter});
+                for (var i = 0; i < managerComponentDatas.Length; i++)
+                {
+                    using (new GUILayout.HorizontalScope())
+                    {
+
+                        EditorGUILayout.PropertyField(
+                            serializedObject.FindProperty(nameof(manager._componentDatas)).GetArrayElementAtIndex(i)
+                                .FindPropertyRelative("serialize"), GUIContent.none, GUILayout.MaxWidth(20));
+                        GUILayout.Label(Type.GetType(managerComponentDatas[i].typeName).ToString().Split('.').Last());
+                    }
+                }
+            }
+        }
+
+        serializedObject.ApplyModifiedProperties();
     }
 }

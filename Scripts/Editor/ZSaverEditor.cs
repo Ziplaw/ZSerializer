@@ -394,7 +394,7 @@ public class " + type.Name + @"Editor : Editor
         {
             string longScript = "";
 
-            Type[] types = ZSaver.ZSave.ComponentSerializableTypes;
+            Type[] types = ZSave.ComponentSerializableTypes;
             foreach (var type in types)
             {
                 string[] blackListForThisComponent = {" "};

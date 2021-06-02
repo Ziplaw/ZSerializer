@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,6 +13,28 @@ using Object = UnityEngine.Object;
 
 namespace ZSaver
 {
+    class ZMono : MonoBehaviour
+    {
+        private static ZMono instance;
+
+        [RuntimeInitializeOnLoadMethod]
+        static void Init()
+        {
+            instance = new GameObject("ZMono").AddComponent<ZMono>();
+            DontDestroyOnLoad(instance.gameObject);
+            ZSave.RecordAllPersistentIDs();
+
+            SceneManager.sceneUnloaded += scene => { ZSave.RestoreTempIDs(); };
+
+            SceneManager.sceneLoaded += (scene, mode) => { ZSave.RecordAllPersistentIDs(); };
+        }
+
+        private void OnApplicationQuit()
+        {
+            ZSave.RestoreTempIDs();
+        }
+    }
+
     public class ZSave
     {
         #region Big boys
@@ -24,15 +48,21 @@ namespace ZSaver
         private static MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson));
 
         public static string mainAssembly = "Assembly-CSharp";
+        static Dictionary<int, int> idStorage = new Dictionary<int, int>();
 
         public static Type[] ComponentSerializableTypes => AppDomain.CurrentDomain.GetAssemblies().SelectMany(a =>
-            a.GetTypes().Where(t =>
-                (t == typeof(PersistentGameObject)) || (
-                    t.IsSubclassOf(typeof(Component)) &&
-                    !t.IsSubclassOf(typeof(MonoBehaviour)) &&
-                    t != typeof(Transform) &&
-                    t != typeof(MonoBehaviour) &&
-                    t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible))).ToArray();
+            a.GetTypes().Where(t => t == typeof(PersistentGameObject) ||
+                                    t.IsSubclassOf(typeof(Component)) &&
+                                    !t.IsSubclassOf(typeof(MonoBehaviour)) &&
+                                    t != typeof(Transform) &&
+                                    t != typeof(MonoBehaviour) &&
+                                    t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible &&
+                                    !ManualComponentBlacklist.Contains(t))
+        ).ToArray();
+
+        public static readonly Type[] ManualComponentBlacklist =
+            {typeof(MeshRenderer), typeof(SkinnedMeshRenderer), typeof(SpriteRenderer)};
+
 
         public static readonly Dictionary<Type, string[]> ComponentBlackList = new Dictionary<Type, string[]>()
         {
@@ -46,6 +76,7 @@ namespace ZSaver
         public static bool FieldIsSuitableForAssignment(PropertyInfo fieldInfo)
         {
             return fieldInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&
+                   fieldInfo.GetCustomAttribute<OmitSerializableCheck>() == null &&
                    fieldInfo.CanRead &&
                    fieldInfo.CanWrite &&
                    fieldInfo.Name != "material" &&
@@ -94,10 +125,31 @@ namespace ZSaver
             foreach (var persistentGameObject in objects)
             {
                 foreach (var component in persistentGameObject.GetComponents<Component>()
-                    .Where(c => (c.GetType() == typeof(PersistentGameObject)) ||
-                                (!c.GetType().IsSubclassOf(typeof(MonoBehaviour)) && c.GetType() != typeof(Transform))))
+                    .Where(c =>
+                        c.GetType() == typeof(PersistentGameObject) ||
+                        !c.GetType().IsSubclassOf(typeof(MonoBehaviour)) &&
+                        c.GetType() != typeof(Transform)
+                    ))
                 {
-                    if (!componentTypes.Contains(component.GetType())) componentTypes.Add(component.GetType());
+                    if (!componentTypes.Contains(component.GetType()))
+                    {
+                        if (component.GetType() == typeof(PersistentGameObject))
+                            componentTypes.Add(component.GetType());
+                        else
+                        {
+                            Debug.Log(component.GetType());
+                            var datas = persistentGameObject._componentDatas;
+                            bool componentIsSerialized = false;
+                            foreach (var serializableComponentData in datas)
+                            {
+                                if (Type.GetType(serializableComponentData.typeName) == component.GetType() &&
+                                    serializableComponentData.serialize) componentIsSerialized = true;
+                            }
+
+                            if (componentIsSerialized)
+                                componentTypes.Add(component.GetType());
+                        }
+                    }
                 }
             }
 
@@ -126,9 +178,8 @@ namespace ZSaver
 
         static object[] OrderPersistentGameObjectsByLoadingOrder(object[] zSavers)
         {
-            
             Type ZSaverType = zSavers.GetType().GetElementType();
-            
+
             // Debug.Log(zSavers);
             // Debug.Log(ZSaverType);
             // Debug.Log(zSavers[0].GetType().GetField("gameObjectData"));
@@ -175,7 +226,7 @@ namespace ZSaver
                 .Where(FieldIsSuitableForAssignment).ToArray();
 
             FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields();
-            
+
             for (var i = 0; i < fieldInfos.Length; i++)
             {
                 for (var j = 0; j < propertyInfos.Length; j++)
@@ -210,14 +261,21 @@ namespace ZSaver
             }
         }
 
-        static void UpdateComponentInstanceIDs(int prevComponentInstanceID, int newComponentInstanceID)
+        static void UpdateComponentInstanceIDs(int prevComponentInstanceID, int newComponentInstanceID, bool isRestoring = false)
         {
             string COMPInstanceIDToReplaceString = $"instanceID\":{prevComponentInstanceID}";
             string newCOMPInstanceIDToReplaceString = "instanceID\":" + newComponentInstanceID;
-            
+
             string COMPFileIDToReplaceString = $"m_FileID\":{prevComponentInstanceID}";
             string newCOMPFileIDToReplaceString = "m_FileID\":" + newComponentInstanceID;
+            
+            Debug.LogWarning(COMPInstanceIDToReplaceString);
+            Debug.LogWarning(newCOMPInstanceIDToReplaceString);
 
+            if (!isRestoring)
+            {
+                RecordTempID(prevComponentInstanceID, newComponentInstanceID);
+            }
 
             UpdateAllJSONFiles(
                 new[]
@@ -230,7 +288,7 @@ namespace ZSaver
                 });
         }
 
-        static void UpdateGameObjectInstanceIDs(int prevGameObjectInstanceID, int newGameObjectInstanceID)
+        static void UpdateGameObjectInstanceIDs(int prevGameObjectInstanceID, int newGameObjectInstanceID, bool isRestoring = false)
         {
             Debug.Log(prevGameObjectInstanceID + " " + newGameObjectInstanceID);
             string GOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + prevGameObjectInstanceID;
@@ -248,15 +306,22 @@ namespace ZSaver
                 "\"parent\":{\"instanceID\":" + newGameObjectInstanceID + "}";
             string newFileID = "\"_componentParent\":{\"m_FileID\":" + newGameObjectInstanceID;
             string newParentFileID = "\"parent\":{\"m_FileID\":" + prevGameObjectInstanceID;
+            
+            if (!isRestoring)
+            {
+                RecordTempID(prevGameObjectInstanceID, newGameObjectInstanceID);
+            }
 
             UpdateAllJSONFiles(
                 new[]
                 {
-                    GOInstanceIDToReplaceString, GOInstanceIDToReplace, GOInstanceIDToReplaceParent, oldGOFileID, oldParentFileID
+                    GOInstanceIDToReplaceString, GOInstanceIDToReplace, GOInstanceIDToReplaceParent, oldGOFileID,
+                    oldParentFileID
                 },
                 new[]
                 {
-                    newGOInstanceIDToReplaceString, newGOInstanceIDToReplace, newGOInstanceIDToReplaceParent, newFileID, newParentFileID
+                    newGOInstanceIDToReplaceString, newGOInstanceIDToReplace, newGOInstanceIDToReplaceParent, newFileID,
+                    newParentFileID
                 });
         }
 
@@ -277,6 +342,31 @@ namespace ZSaver
             }
         }
 
+        static Component[] GetSerializedComponentsOfGivenType(PersistentGameObject[] objects, Type componentType)
+        {
+            List<Component> serializedComponentsOfGivenType = new List<Component>();
+
+            var componentsOfGivenType = objects.SelectMany(o => o.GetComponents(componentType)).ToArray();
+
+            foreach (var c in componentsOfGivenType)
+            {
+                var persistentGameObject = c.GetComponent<PersistentGameObject>();
+
+                var datas = persistentGameObject._componentDatas;
+                bool componentIsSerialized = false;
+                foreach (var serializableComponentData in datas)
+                {
+                    if (Type.GetType(serializableComponentData.typeName) == componentType &&
+                        serializableComponentData.serialize) componentIsSerialized = true;
+                }
+
+                if (componentIsSerialized || componentType == typeof(PersistentGameObject))
+                    serializedComponentsOfGivenType.Add(c);
+            }
+
+            return serializedComponentsOfGivenType.ToArray();
+        }
+
         private static void SaveAllPersistentGameObjects()
         {
             var objects = Object.FindObjectsOfType<PersistentGameObject>();
@@ -284,8 +374,8 @@ namespace ZSaver
 
             foreach (var componentType in componentTypes)
             {
-                var componentsOfGivenType = objects.SelectMany(o => o.GetComponents(componentType)).ToArray();
-                SerializeComponents(componentsOfGivenType, Type.GetType(componentType.Name + "ZSaver"),
+                SerializeComponents(GetSerializedComponentsOfGivenType(objects, componentType),
+                    Type.GetType(componentType.Name + "ZSaver"),
                     componentType.Name + "GameObject.save");
             }
         }
@@ -346,7 +436,7 @@ namespace ZSaver
             if (componentInGameObject == null)
             {
                 int prevCOMPInstanceID = componentInstanceID;
-                
+
                 Debug.Log(gameObject);
 
                 if (gameObject == null)
@@ -368,8 +458,13 @@ namespace ZSaver
                 if (componentInGameObject == null) return;
                 componentInstanceID = componentInGameObject.GetInstanceID();
 
-
                 UpdateComponentInstanceIDs(prevCOMPInstanceID, componentInstanceID);
+                
+                for (var i = 0; i < idStorage.Count; i++)
+                {
+                    Debug.Log("Main ID: " + idStorage.Keys.ToArray()[i] + ", TempID: " +
+                              idStorage[idStorage.Keys.ToArray()[i]] + " " + componentType);
+                }
             }
 
             if (componentType == typeof(PersistentGameObject))
@@ -392,8 +487,8 @@ namespace ZSaver
                 Debug.LogWarning("Loading object: " + type);
                 var ZSaverType = Type.GetType(type.Name + "ZSaver, " + mainAssembly);
                 if (ZSaverType == null) continue;
-               
-                    var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
+
+                var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
 
                 if (!File.Exists(GetFilePath(type.Name + ".save"))) continue;
 
@@ -416,11 +511,10 @@ namespace ZSaver
 
             foreach (var type in types)
             {
-                
                 if (!File.Exists(GetFilePath(type.Name + "GameObject.save"))) continue;
                 var ZSaverType = Type.GetType(type.Name + "ZSaver");
                 if (ZSaverType == null) continue;
-                
+
                 var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
 
 
@@ -473,7 +567,7 @@ namespace ZSaver
                 var ZSaverType = Type.GetType(type.Name + "ZSaver, " + mainAssembly);
                 if (ZSaverType == null) continue;
                 var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
-                
+
                 if (!File.Exists(GetFilePath(type.Name + ".save"))) continue;
 
                 object[] FromJSONdObjects = (object[]) fromJson.Invoke(null,
@@ -492,10 +586,55 @@ namespace ZSaver
 
         #endregion
 
+        public static void RecordAllPersistentIDs()
+        {
+            var objs = Object.FindObjectsOfType<PersistentGameObject>();
+            foreach (var persistentGameObject in objs)
+            {
+                int id = persistentGameObject.gameObject.GetInstanceID();
+
+                idStorage.Add(id, id);
+            }
+
+            var componentTypes = GetAllPersistentComponents(objs);
+            foreach (var componentType in componentTypes)
+            {
+                var components = GetSerializedComponentsOfGivenType(objs, componentType);
+
+                int[] ids = components.Select(c => c.GetInstanceID()).ToArray();
+                foreach (var id in ids)
+                {
+                    idStorage.Add(id, id);
+                }
+            }
+        }
+
+        static void RecordTempID(int prevID, int newID)
+        {
+            for (var i = 0; i < idStorage.Count; i++)
+            {
+                if (idStorage[idStorage.Keys.ToArray()[i]] == prevID)
+                {
+                    idStorage[idStorage.Keys.ToArray()[i]] = newID;
+                }
+                Debug.Log("Main ID" + idStorage.Keys.ToArray()[i] + ", TempID" +
+                          idStorage[idStorage.Keys.ToArray()[i]]);
+            }
+        }
+
+        public static void RestoreTempIDs()
+        {
+            for (var i = 0; i < idStorage.Count; i++)
+            {
+                UpdateGameObjectInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i], true);
+                UpdateComponentInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i], true);
+            }
+        }
+
         public static void SaveAllObjectsAndComponents()
         {
             OnBeforeSave?.Invoke();
-            
+
             string[] files = Directory.GetFiles(GetFilePath(""));
             foreach (string file in files)
             {
@@ -514,8 +653,18 @@ namespace ZSaver
             LoadAllObjects();
             LoadReferences();
 
+            // SaveAllObjectsAndComponents(); //Temporary fix for objects duping after loading destroyed GOs
 
-            SaveAllObjectsAndComponents(); //Temporary fix for objects duping after loading destroyed GOs
+            string[]
+                files = Directory.GetFiles(
+                    GetFilePath("")); //Temporary fix for objects duping after loading destroyed GOs
+            foreach (string file in files)
+            {
+                File.Delete(file);
+            }
+
+            SaveAllPersistentGameObjects();
+            SaveAllObjects();
         }
 
 
@@ -530,17 +679,30 @@ namespace ZSaver
 
         static void WriteToFile(string fileName, string json)
         {
-            StreamWriter writer = new StreamWriter(GetFilePath(fileName));
-            writer.WriteLine(json);
-            writer.Close();
+            if (ZSaverSettings.instance.encryptData)
+            {
+                byte[] key =
+                    {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+
+                File.WriteAllBytes(GetFilePath(fileName), EncryptStringToBytes(json, key, key));
+            }
+            else
+            {
+                File.WriteAllText(GetFilePath(fileName), json);
+            }
         }
 
         public static string ReadFromFile(string fileName)
         {
-            StreamReader reader = new StreamReader(GetFilePath(fileName));
-            string json = reader.ReadToEnd();
-            reader.Close();
-            return json;
+            if (ZSaverSettings.instance.encryptData)
+            {
+                byte[] key =
+                    {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+
+                return DecryptStringFromBytes(File.ReadAllBytes(GetFilePath(fileName)), key, key);
+            }
+
+            return File.ReadAllText(GetFilePath(fileName));
         }
 
         static string GetFilePath(string fileName)
@@ -552,12 +714,98 @@ namespace ZSaver
                     "Be careful! You're trying to save data in an unbuilt Scene, and any data saved in other unbuilt Scenes will overwrite this one, and vice-versa.\n" +
                     "If you want your data to persist properly, add this scene to the list of Scenes In Build in your Build Settings");
             }
-            
+
             string path = Path.Combine(Application.persistentDataPath,
                 ZSaverSettings.instance.selectedSaveFile.ToString(), currentScene.ToString());
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
             return Path.Combine(path, fileName);
+        }
+
+        #endregion
+
+        #region Encrypting
+
+        static byte[] EncryptStringToBytes(string plainText, byte[] Key, byte[] IV)
+        {
+            // Check arguments.
+            if (plainText == null || plainText.Length <= 0)
+                throw new ArgumentNullException("plainText");
+            if (Key == null || Key.Length <= 0)
+                throw new ArgumentNullException("Key");
+            if (IV == null || IV.Length <= 0)
+                throw new ArgumentNullException("IV");
+            byte[] encrypted;
+            // Create an RijndaelManaged object
+            // with the specified key and IV.
+            using (RijndaelManaged rijAlg = new RijndaelManaged())
+            {
+                rijAlg.Key = Key;
+                rijAlg.IV = IV;
+
+                // Create an encryptor to perform the stream transform.
+                ICryptoTransform encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
+
+                // Create the streams used for encryption.
+                using (MemoryStream msEncrypt = new MemoryStream())
+                {
+                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                        {
+                            //Write all data to the stream.
+                            swEncrypt.Write(plainText);
+                        }
+
+                        encrypted = msEncrypt.ToArray();
+                    }
+                }
+            }
+
+            // Return the encrypted bytes from the memory stream.
+            return encrypted;
+        }
+
+        static string DecryptStringFromBytes(byte[] cipherText, byte[] Key, byte[] IV)
+        {
+            // Check arguments.
+            if (cipherText == null || cipherText.Length <= 0)
+                throw new ArgumentNullException("cipherText");
+            if (Key == null || Key.Length <= 0)
+                throw new ArgumentNullException("Key");
+            if (IV == null || IV.Length <= 0)
+                throw new ArgumentNullException("IV");
+
+            // Declare the string used to hold
+            // the decrypted text.
+            string plaintext = null;
+
+            // Create an RijndaelManaged object
+            // with the specified key and IV.
+            using (RijndaelManaged rijAlg = new RijndaelManaged())
+            {
+                rijAlg.Key = Key;
+                rijAlg.IV = IV;
+
+                // Create a decryptor to perform the stream transform.
+                ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
+
+                // Create the streams used for decryption.
+                using (MemoryStream msDecrypt = new MemoryStream(cipherText))
+                {
+                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                        {
+                            // Read the decrypted bytes from the decrypting stream
+                            // and place them in a string.
+                            plaintext = srDecrypt.ReadToEnd();
+                        }
+                    }
+                }
+            }
+
+            return plaintext;
         }
 
         #endregion

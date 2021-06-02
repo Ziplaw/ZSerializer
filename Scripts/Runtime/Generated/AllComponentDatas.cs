@@ -1249,126 +1249,6 @@ public class LightProbeProxyVolumeZSaver : ZSaver.ZSaver<UnityEngine.LightProbeP
     }
 }
 [System.Serializable]
-public class SkinnedMeshRendererZSaver : ZSaver.ZSaver<UnityEngine.SkinnedMeshRenderer> {
-    public UnityEngine.SkinQuality quality;
-    public System.Boolean updateWhenOffscreen;
-    public System.Boolean forceMatrixRecalculationPerRender;
-    public UnityEngine.Transform rootBone;
-    public UnityEngine.Transform[] bones;
-    public UnityEngine.Mesh sharedMesh;
-    public System.Boolean skinnedMotionVectors;
-    public UnityEngine.Bounds localBounds;
-    public System.Boolean enabled;
-    public UnityEngine.Rendering.ShadowCastingMode shadowCastingMode;
-    public System.Boolean receiveShadows;
-    public System.Boolean forceRenderingOff;
-    public UnityEngine.MotionVectorGenerationMode motionVectorGenerationMode;
-    public UnityEngine.Rendering.LightProbeUsage lightProbeUsage;
-    public UnityEngine.Rendering.ReflectionProbeUsage reflectionProbeUsage;
-    public System.UInt32 renderingLayerMask;
-    public System.Int32 rendererPriority;
-    public UnityEngine.Experimental.Rendering.RayTracingMode rayTracingMode;
-    public System.String sortingLayerName;
-    public System.Int32 sortingLayerID;
-    public System.Int32 sortingOrder;
-    public System.Boolean allowOcclusionWhenDynamic;
-    public UnityEngine.GameObject lightProbeProxyVolumeOverride;
-    public UnityEngine.Transform probeAnchor;
-    public System.Int32 lightmapIndex;
-    public System.Int32 realtimeLightmapIndex;
-    public UnityEngine.Vector4 lightmapScaleOffset;
-    public UnityEngine.Vector4 realtimeLightmapScaleOffset;
-    public UnityEngine.Material[] sharedMaterials;
-    public UnityEngine.HideFlags hideFlags;
-    public SkinnedMeshRendererZSaver (UnityEngine.SkinnedMeshRenderer SkinnedMeshRendererInstance) : base(SkinnedMeshRendererInstance.gameObject, SkinnedMeshRendererInstance ) {
-        quality = SkinnedMeshRendererInstance.quality;
-        updateWhenOffscreen = SkinnedMeshRendererInstance.updateWhenOffscreen;
-        forceMatrixRecalculationPerRender = SkinnedMeshRendererInstance.forceMatrixRecalculationPerRender;
-        rootBone = SkinnedMeshRendererInstance.rootBone;
-        bones = SkinnedMeshRendererInstance.bones;
-        sharedMesh = SkinnedMeshRendererInstance.sharedMesh;
-        skinnedMotionVectors = SkinnedMeshRendererInstance.skinnedMotionVectors;
-        localBounds = SkinnedMeshRendererInstance.localBounds;
-        enabled = SkinnedMeshRendererInstance.enabled;
-        shadowCastingMode = SkinnedMeshRendererInstance.shadowCastingMode;
-        receiveShadows = SkinnedMeshRendererInstance.receiveShadows;
-        forceRenderingOff = SkinnedMeshRendererInstance.forceRenderingOff;
-        motionVectorGenerationMode = SkinnedMeshRendererInstance.motionVectorGenerationMode;
-        lightProbeUsage = SkinnedMeshRendererInstance.lightProbeUsage;
-        reflectionProbeUsage = SkinnedMeshRendererInstance.reflectionProbeUsage;
-        renderingLayerMask = SkinnedMeshRendererInstance.renderingLayerMask;
-        rendererPriority = SkinnedMeshRendererInstance.rendererPriority;
-        rayTracingMode = SkinnedMeshRendererInstance.rayTracingMode;
-        sortingLayerName = SkinnedMeshRendererInstance.sortingLayerName;
-        sortingLayerID = SkinnedMeshRendererInstance.sortingLayerID;
-        sortingOrder = SkinnedMeshRendererInstance.sortingOrder;
-        allowOcclusionWhenDynamic = SkinnedMeshRendererInstance.allowOcclusionWhenDynamic;
-        lightProbeProxyVolumeOverride = SkinnedMeshRendererInstance.lightProbeProxyVolumeOverride;
-        probeAnchor = SkinnedMeshRendererInstance.probeAnchor;
-        lightmapIndex = SkinnedMeshRendererInstance.lightmapIndex;
-        realtimeLightmapIndex = SkinnedMeshRendererInstance.realtimeLightmapIndex;
-        lightmapScaleOffset = SkinnedMeshRendererInstance.lightmapScaleOffset;
-        realtimeLightmapScaleOffset = SkinnedMeshRendererInstance.realtimeLightmapScaleOffset;
-        sharedMaterials = SkinnedMeshRendererInstance.sharedMaterials;
-        hideFlags = SkinnedMeshRendererInstance.hideFlags;
-
-    }
-}
-[System.Serializable]
-public class MeshRendererZSaver : ZSaver.ZSaver<UnityEngine.MeshRenderer> {
-    public UnityEngine.Mesh additionalVertexStreams;
-    public UnityEngine.Mesh enlightenVertexStream;
-    public System.Boolean enabled;
-    public UnityEngine.Rendering.ShadowCastingMode shadowCastingMode;
-    public System.Boolean receiveShadows;
-    public System.Boolean forceRenderingOff;
-    public UnityEngine.MotionVectorGenerationMode motionVectorGenerationMode;
-    public UnityEngine.Rendering.LightProbeUsage lightProbeUsage;
-    public UnityEngine.Rendering.ReflectionProbeUsage reflectionProbeUsage;
-    public System.UInt32 renderingLayerMask;
-    public System.Int32 rendererPriority;
-    public UnityEngine.Experimental.Rendering.RayTracingMode rayTracingMode;
-    public System.String sortingLayerName;
-    public System.Int32 sortingLayerID;
-    public System.Int32 sortingOrder;
-    public System.Boolean allowOcclusionWhenDynamic;
-    public UnityEngine.GameObject lightProbeProxyVolumeOverride;
-    public UnityEngine.Transform probeAnchor;
-    public System.Int32 lightmapIndex;
-    public System.Int32 realtimeLightmapIndex;
-    public UnityEngine.Vector4 lightmapScaleOffset;
-    public UnityEngine.Vector4 realtimeLightmapScaleOffset;
-    public UnityEngine.Material[] sharedMaterials;
-    public UnityEngine.HideFlags hideFlags;
-    public MeshRendererZSaver (UnityEngine.MeshRenderer MeshRendererInstance) : base(MeshRendererInstance.gameObject, MeshRendererInstance ) {
-        additionalVertexStreams = MeshRendererInstance.additionalVertexStreams;
-        enlightenVertexStream = MeshRendererInstance.enlightenVertexStream;
-        enabled = MeshRendererInstance.enabled;
-        shadowCastingMode = MeshRendererInstance.shadowCastingMode;
-        receiveShadows = MeshRendererInstance.receiveShadows;
-        forceRenderingOff = MeshRendererInstance.forceRenderingOff;
-        motionVectorGenerationMode = MeshRendererInstance.motionVectorGenerationMode;
-        lightProbeUsage = MeshRendererInstance.lightProbeUsage;
-        reflectionProbeUsage = MeshRendererInstance.reflectionProbeUsage;
-        renderingLayerMask = MeshRendererInstance.renderingLayerMask;
-        rendererPriority = MeshRendererInstance.rendererPriority;
-        rayTracingMode = MeshRendererInstance.rayTracingMode;
-        sortingLayerName = MeshRendererInstance.sortingLayerName;
-        sortingLayerID = MeshRendererInstance.sortingLayerID;
-        sortingOrder = MeshRendererInstance.sortingOrder;
-        allowOcclusionWhenDynamic = MeshRendererInstance.allowOcclusionWhenDynamic;
-        lightProbeProxyVolumeOverride = MeshRendererInstance.lightProbeProxyVolumeOverride;
-        probeAnchor = MeshRendererInstance.probeAnchor;
-        lightmapIndex = MeshRendererInstance.lightmapIndex;
-        realtimeLightmapIndex = MeshRendererInstance.realtimeLightmapIndex;
-        lightmapScaleOffset = MeshRendererInstance.lightmapScaleOffset;
-        realtimeLightmapScaleOffset = MeshRendererInstance.realtimeLightmapScaleOffset;
-        sharedMaterials = MeshRendererInstance.sharedMaterials;
-        hideFlags = MeshRendererInstance.hideFlags;
-
-    }
-}
-[System.Serializable]
 public class LightProbeGroupZSaver : ZSaver.ZSaver<UnityEngine.LightProbeGroup> {
     public UnityEngine.Vector3[] probePositions;
     public System.Boolean enabled;
@@ -1455,76 +1335,6 @@ public class RectTransformZSaver : ZSaver.ZSaver<UnityEngine.RectTransform> {
         hasChanged = RectTransformInstance.hasChanged;
         hierarchyCapacity = RectTransformInstance.hierarchyCapacity;
         hideFlags = RectTransformInstance.hideFlags;
-
-    }
-}
-[System.Serializable]
-public class SpriteRendererZSaver : ZSaver.ZSaver<UnityEngine.SpriteRenderer> {
-    public UnityEngine.Sprite sprite;
-    public UnityEngine.SpriteDrawMode drawMode;
-    public UnityEngine.Vector2 size;
-    public System.Single adaptiveModeThreshold;
-    public UnityEngine.SpriteTileMode tileMode;
-    public UnityEngine.Color color;
-    public UnityEngine.SpriteMaskInteraction maskInteraction;
-    public System.Boolean flipX;
-    public System.Boolean flipY;
-    public UnityEngine.SpriteSortPoint spriteSortPoint;
-    public System.Boolean enabled;
-    public UnityEngine.Rendering.ShadowCastingMode shadowCastingMode;
-    public System.Boolean receiveShadows;
-    public System.Boolean forceRenderingOff;
-    public UnityEngine.MotionVectorGenerationMode motionVectorGenerationMode;
-    public UnityEngine.Rendering.LightProbeUsage lightProbeUsage;
-    public UnityEngine.Rendering.ReflectionProbeUsage reflectionProbeUsage;
-    public System.UInt32 renderingLayerMask;
-    public System.Int32 rendererPriority;
-    public UnityEngine.Experimental.Rendering.RayTracingMode rayTracingMode;
-    public System.String sortingLayerName;
-    public System.Int32 sortingLayerID;
-    public System.Int32 sortingOrder;
-    public System.Boolean allowOcclusionWhenDynamic;
-    public UnityEngine.GameObject lightProbeProxyVolumeOverride;
-    public UnityEngine.Transform probeAnchor;
-    public System.Int32 lightmapIndex;
-    public System.Int32 realtimeLightmapIndex;
-    public UnityEngine.Vector4 lightmapScaleOffset;
-    public UnityEngine.Vector4 realtimeLightmapScaleOffset;
-    public UnityEngine.Material[] sharedMaterials;
-    public UnityEngine.HideFlags hideFlags;
-    public SpriteRendererZSaver (UnityEngine.SpriteRenderer SpriteRendererInstance) : base(SpriteRendererInstance.gameObject, SpriteRendererInstance ) {
-        sprite = SpriteRendererInstance.sprite;
-        drawMode = SpriteRendererInstance.drawMode;
-        size = SpriteRendererInstance.size;
-        adaptiveModeThreshold = SpriteRendererInstance.adaptiveModeThreshold;
-        tileMode = SpriteRendererInstance.tileMode;
-        color = SpriteRendererInstance.color;
-        maskInteraction = SpriteRendererInstance.maskInteraction;
-        flipX = SpriteRendererInstance.flipX;
-        flipY = SpriteRendererInstance.flipY;
-        spriteSortPoint = SpriteRendererInstance.spriteSortPoint;
-        enabled = SpriteRendererInstance.enabled;
-        shadowCastingMode = SpriteRendererInstance.shadowCastingMode;
-        receiveShadows = SpriteRendererInstance.receiveShadows;
-        forceRenderingOff = SpriteRendererInstance.forceRenderingOff;
-        motionVectorGenerationMode = SpriteRendererInstance.motionVectorGenerationMode;
-        lightProbeUsage = SpriteRendererInstance.lightProbeUsage;
-        reflectionProbeUsage = SpriteRendererInstance.reflectionProbeUsage;
-        renderingLayerMask = SpriteRendererInstance.renderingLayerMask;
-        rendererPriority = SpriteRendererInstance.rendererPriority;
-        rayTracingMode = SpriteRendererInstance.rayTracingMode;
-        sortingLayerName = SpriteRendererInstance.sortingLayerName;
-        sortingLayerID = SpriteRendererInstance.sortingLayerID;
-        sortingOrder = SpriteRendererInstance.sortingOrder;
-        allowOcclusionWhenDynamic = SpriteRendererInstance.allowOcclusionWhenDynamic;
-        lightProbeProxyVolumeOverride = SpriteRendererInstance.lightProbeProxyVolumeOverride;
-        probeAnchor = SpriteRendererInstance.probeAnchor;
-        lightmapIndex = SpriteRendererInstance.lightmapIndex;
-        realtimeLightmapIndex = SpriteRendererInstance.realtimeLightmapIndex;
-        lightmapScaleOffset = SpriteRendererInstance.lightmapScaleOffset;
-        realtimeLightmapScaleOffset = SpriteRendererInstance.realtimeLightmapScaleOffset;
-        sharedMaterials = SpriteRendererInstance.sharedMaterials;
-        hideFlags = SpriteRendererInstance.hideFlags;
 
     }
 }
@@ -3637,11 +3447,13 @@ public class PersistentGameObjectZSaver : ZSaver.ZSaver<PersistentGameObject> {
     public System.Boolean useGUILayout;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
+    public PersistentGameObject.SerializableComponentData[] _componentDatas;
     public ZSaver.GameObjectData gameObjectData;
     public PersistentGameObjectZSaver (PersistentGameObject PersistentGameObjectInstance) : base(PersistentGameObjectInstance.gameObject, PersistentGameObjectInstance ) {
         useGUILayout = PersistentGameObjectInstance.useGUILayout;
         enabled = PersistentGameObjectInstance.enabled;
         hideFlags = PersistentGameObjectInstance.hideFlags;
+        _componentDatas = PersistentGameObjectInstance._componentDatas;
         gameObjectData =new ZSaver.GameObjectData()
         {
             loadingOrder = PersistentGameObject.CountParents(PersistentGameObjectInstance.transform),
