@@ -100,17 +100,17 @@ namespace ZSaver
         
         internal static void Log(object obj)
         {
-            if (ZSaverSettings.instance.debugMode) Debug.Log(obj);
+            if (ZSaverSettings.Instance.debugMode) Debug.Log(obj);
         }
 
         internal static void LogWarning(object obj)
         {
-            if (ZSaverSettings.instance.debugMode) Debug.LogWarning(obj);
+            if (ZSaverSettings.Instance.debugMode) Debug.LogWarning(obj);
         }
 
         internal static void LogError(object obj)
         {
-            if (ZSaverSettings.instance.debugMode) Debug.LogError(obj);
+            if (ZSaverSettings.Instance.debugMode) Debug.LogError(obj);
         }
         
         static int GetCurrentScene()
@@ -669,7 +669,7 @@ namespace ZSaver
 
         static void WriteToFile(string fileName, string json)
         {
-            if (ZSaverSettings.instance.encryptData)
+            if (ZSaverSettings.Instance.encryptData)
             {
                 byte[] key =
                     {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
@@ -684,7 +684,7 @@ namespace ZSaver
 
         static string ReadFromFile(string fileName)
         {
-            if (ZSaverSettings.instance.encryptData)
+            if (ZSaverSettings.Instance.encryptData)
             {
                 byte[] key =
                     {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
@@ -706,7 +706,7 @@ namespace ZSaver
             }
 
             string path = Path.Combine(Application.persistentDataPath,
-                ZSaverSettings.instance.selectedSaveFile.ToString(), currentScene.ToString());
+                ZSaverSettings.Instance.selectedSaveFile.ToString(), currentScene.ToString());
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
             return Path.Combine(path, fileName);

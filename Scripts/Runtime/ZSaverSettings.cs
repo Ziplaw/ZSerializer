@@ -6,12 +6,16 @@ namespace ZSaver
     // [CreateAssetMenu(fileName = "New ZSaver Settings", menuName = "ZSaverSettings", order = 0)]
     public class ZSaverSettings : ScriptableObject
     {
-        public static ZSaverSettings instance;
+        private static ZSaverSettings instance;
         
+        public static ZSaverSettings Instance => instance ? instance : Resources.Load<ZSaverSettings>("ZSaverSettings");
+
         public bool debugMode;
         public bool autoRebuildZSavers;
         public int selectedSaveFile;
         public bool encryptData;
+
+        
 
         [RuntimeInitializeOnLoadMethod]
         static void Init()
