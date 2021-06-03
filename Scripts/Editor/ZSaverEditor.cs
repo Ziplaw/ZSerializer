@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,158 +11,157 @@ using ZSaver;
 using ZSaver.Editor;
 using Debug = UnityEngine.Debug;
 
-public static class ZSaverEditor
-{
-    [DidReloadScripts]
-    static void TryRebuildZSavers()
+    public static class ZSaverEditor
     {
-        ZSaverStyler styler = new ZSaverStyler();
-        if (styler.settings.autoRebuildZSavers)
+        [DidReloadScripts]
+        static void TryRebuildZSavers()
         {
-            
-            var types = ZSaver.ZSave.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
-                .GetAssemblies()).ToArray();
-
-            Class[] classes = new Class[types.Length];
-
-            for (int i = 0; i < types.Length; i++)
+            ZSaverStyler styler = new ZSaverStyler();
+            if (styler.settings.autoRebuildZSavers)
             {
-                classes[i] = new Class(types[i], ZSaverEditor.GetClassState(types[i]));
-            }
-            
-            string path;
+                var types = ZSaver.ZSave.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
+                    .GetAssemblies()).ToArray();
 
-            foreach (var c in classes)
-            {
-                ClassState state = c.state;
+                Class[] classes = new Class[types.Length];
 
-                if (state == ClassState.NeedsRebuilding)
+                for (int i = 0; i < types.Length; i++)
                 {
-                    path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSaver.cs",
-                        SearchOption.AllDirectories)[0];
-                    path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
-                           path.Replace('\\', '/');
+                    classes[i] = new Class(types[i], ZSaverEditor.GetClassState(types[i]));
+                }
+
+                string path;
+
+                foreach (var c in classes)
+                {
+                    ClassState state = c.state;
+
+                    if (state == ClassState.NeedsRebuilding)
+                    {
+                        path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSaver.cs",
+                            SearchOption.AllDirectories)[0];
+                        path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
+                               path.Replace('\\', '/');
 
 
-                    CreateZSaver(c.classType, path);
-                    AssetDatabase.Refresh();
+                        CreateZSaver(c.classType, path);
+                        AssetDatabase.Refresh();
+                    }
                 }
             }
         }
-    }
 
-    public static void CreateZSaver(Type type, string path)
-    {
-        FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
-        StreamWriter sw = new StreamWriter(fileStream);
-
-        string script =
-            "using ZSaver;\n" +
-            "\n" +
-            "[System.Serializable]\n" +
-            $"public class {type.Name}ZSaver : ZSaver<{type.Name}>\n" +
-            "{\n";
-
-        foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-            .Where(f => f.GetCustomAttribute(typeof(OmitSerializableCheck)) == null))
+        public static void CreateZSaver(Type type, string path)
         {
-            var fieldType = fieldInfo.FieldType;
+            FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fileStream);
 
-            if (fieldInfo.FieldType.IsArray)
+            string script =
+                "using ZSaver;\n" +
+                "\n" +
+                "[System.Serializable]\n" +
+                $"public class {type.Name}ZSaver : ZSaver<{type.Name}>\n" +
+                "{\n";
+
+            foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
+                .Where(f => f.GetCustomAttribute(typeof(OmitSerializableCheck)) == null))
             {
-                fieldType = fieldInfo.FieldType.GetElementType();
+                var fieldType = fieldInfo.FieldType;
+
+                if (fieldInfo.FieldType.IsArray)
+                {
+                    fieldType = fieldInfo.FieldType.GetElementType();
+                }
+
+
+                int genericParameterAmount = fieldType.GenericTypeArguments.Length;
+
+                script +=
+                    $"    public {fieldInfo.FieldType} {fieldInfo.Name};\n".Replace('+', '.');
+
+                if (genericParameterAmount > 0)
+                {
+                    string oldString = $"`{genericParameterAmount}[";
+                    string newString = "<";
+
+                    var genericArguments = fieldType.GenericTypeArguments;
+
+                    for (var i = 0; i < genericArguments.Length; i++)
+                    {
+                        oldString += genericArguments[i] + (i == genericArguments.Length - 1 ? "]" : ",");
+                        newString += genericArguments[i] + (i == genericArguments.Length - 1 ? ">" : ",");
+                    }
+
+                    script = script.Replace(oldString, newString);
+                }
             }
 
-
-            int genericParameterAmount = fieldType.GenericTypeArguments.Length;
+            string className = type.Name + "Instance";
 
             script +=
-                $"    public {fieldInfo.FieldType} {fieldInfo.Name};\n".Replace('+', '.');
+                $"\n    public {type.Name}ZSaver({type.Name} {className}) : base({className}.gameObject, {className})\n" +
+                "    {\n";
 
-            if (genericParameterAmount > 0)
+            foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
-                string oldString = $"`{genericParameterAmount}[";
-                string newString = "<";
+                var fieldType = fieldInfo.FieldType;
 
-                var genericArguments = fieldType.GenericTypeArguments;
-
-                for (var i = 0; i < genericArguments.Length; i++)
+                if (fieldInfo.FieldType.IsArray)
                 {
-                    oldString += genericArguments[i] + (i == genericArguments.Length - 1 ? "]" : ",");
-                    newString += genericArguments[i] + (i == genericArguments.Length - 1 ? ">" : ",");
+                    fieldType = fieldInfo.FieldType.GetElementType();
                 }
 
-                script = script.Replace(oldString, newString);
-            }
-        }
 
-        string className = type.Name + "Instance";
+                int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
-        script +=
-            $"\n    public {type.Name}ZSaver({type.Name} {className}) : base({className}.gameObject, {className})\n" +
-            "    {\n";
+                script +=
+                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\").GetValue({className});\n"
+                        .Replace('+', '.');
 
-        foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
-        {
-            var fieldType = fieldInfo.FieldType;
-
-            if (fieldInfo.FieldType.IsArray)
-            {
-                fieldType = fieldInfo.FieldType.GetElementType();
-            }
-
-
-            int genericParameterAmount = fieldType.GenericTypeArguments.Length;
-
-            script +=
-                $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\").GetValue({className});\n"
-                    .Replace('+', '.');
-
-            if (genericParameterAmount > 0)
-            {
-                string oldString = $"`{genericParameterAmount}[";
-                string newString = "<";
-
-                var genericArguments = fieldType.GenericTypeArguments;
-
-                for (var i = 0; i < genericArguments.Length; i++)
+                if (genericParameterAmount > 0)
                 {
-                    oldString += genericArguments[i] + (i == genericArguments.Length - 1 ? "]" : ",");
-                    newString += genericArguments[i] + (i == genericArguments.Length - 1 ? ">" : ",");
+                    string oldString = $"`{genericParameterAmount}[";
+                    string newString = "<";
+
+                    var genericArguments = fieldType.GenericTypeArguments;
+
+                    for (var i = 0; i < genericArguments.Length; i++)
+                    {
+                        oldString += genericArguments[i] + (i == genericArguments.Length - 1 ? "]" : ",");
+                        newString += genericArguments[i] + (i == genericArguments.Length - 1 ? ">" : ",");
+                    }
+
+                    script = script.Replace(oldString, newString);
                 }
-
-                script = script.Replace(oldString, newString);
             }
+
+            ZSave.Log("ZSaver script being created at " + path);
+
+            script += "    }\n}";
+
+            sw.Write(script);
+
+            sw.Close();
         }
 
-        Debug.Log("ZSaver script being created at " + path);
+        static Type[] typesImplementingCustomEditor = AppDomain.CurrentDomain.GetAssemblies().SelectMany(ass =>
+            ass.GetTypes()
+                .Where(t => t.GetCustomAttribute<CustomEditor>() != null && !t.FullName.Contains("UnityEngine.") &&
+                            !t.FullName.Contains("UnityEditor.")).Select(t =>
+                    t.GetCustomAttribute<CustomEditor>().GetType()
+                        .GetField("m_InspectedType", BindingFlags.NonPublic | BindingFlags.Instance)
+                        ?.GetValue(t.GetCustomAttribute<CustomEditor>()) as Type)
+                .Where(t => t.IsSubclassOf(typeof(MonoBehaviour)))).ToArray();
 
-        script += "    }\n}";
-
-        sw.Write(script);
-
-        sw.Close();
-    }
-
-    static Type[] typesImplementingCustomEditor = AppDomain.CurrentDomain.GetAssemblies().SelectMany(ass =>
-        ass.GetTypes()
-            .Where(t => t.GetCustomAttribute<CustomEditor>() != null && !t.FullName.Contains("UnityEngine.") &&
-                        !t.FullName.Contains("UnityEditor.")).Select(t =>
-                t.GetCustomAttribute<CustomEditor>().GetType()
-                    .GetField("m_InspectedType", BindingFlags.NonPublic | BindingFlags.Instance)
-                    ?.GetValue(t.GetCustomAttribute<CustomEditor>()) as Type)
-            .Where(t => t.IsSubclassOf(typeof(MonoBehaviour)))).ToArray();
-
-    public static void CreateEditorScript(Type type, string path)
-    {
-        if (typesImplementingCustomEditor.Contains(type))
+        public static void CreateEditorScript(Type type, string path)
         {
-            Debug.Log($"{type} already implements a Custom Editor, and another one won´t be created");
-            return;
-        }
-        
-        string editorScript =
-            @"using UnityEditor;
+            if (typesImplementingCustomEditor.Contains(type))
+            {
+                Debug.Log($"{type} already implements a Custom Editor, and another one won´t be created");
+                return;
+            }
+
+            string editorScript =
+                @"using UnityEditor;
 using ZSaver.Editor;
 using UnityEditor.Callbacks;
 
@@ -192,204 +192,204 @@ public class " + type.Name + @"Editor : Editor
 }";
 
 
-        string newPath = new string((new string(path.Reverse().ToArray())).Substring(path.Split('/').Last().Length)
-            .Reverse().ToArray());
-        Debug.Log("Editor script being created at " + newPath + "Editor");
-        string relativePath = "Assets" + newPath.Substring(Application.dataPath.Length);
+            string newPath = new string((new string(path.Reverse().ToArray())).Substring(path.Split('/').Last().Length)
+                .Reverse().ToArray());
+            Debug.Log("Editor script being created at " + newPath + "Editor");
+            string relativePath = "Assets" + newPath.Substring(Application.dataPath.Length);
 
 
-        if (!AssetDatabase.IsValidFolder(relativePath + "Editor"))
-        {
-            Directory.CreateDirectory(newPath + "Editor");
+            if (!AssetDatabase.IsValidFolder(relativePath + "Editor"))
+            {
+                Directory.CreateDirectory(newPath + "Editor");
+            }
+
+
+            string newNewPath = newPath + "Editor/" + type.Name + "Editor.cs";
+            FileStream fileStream = new FileStream(newNewPath, FileMode.Create, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fileStream);
+            sw.Write(editorScript);
+            sw.Close();
+
+            AssetDatabase.Refresh();
         }
 
 
-        string newNewPath = newPath + "Editor/" + type.Name + "Editor.cs";
-        FileStream fileStream = new FileStream(newNewPath, FileMode.Create, FileAccess.Write);
-        StreamWriter sw = new StreamWriter(fileStream);
-        sw.Write(editorScript);
-        sw.Close();
-
-        AssetDatabase.Refresh();
-    }
-
-
-    public static ClassState GetClassState(Type type)
-    {
-        Type ZSaverType = type.Assembly.GetType(type.Name + "ZSaver");
-        if (ZSaverType == null) return ClassState.NotMade;
-
-        var fieldsZSaver = ZSaverType.GetFields()
-            .Where(f => f.GetCustomAttribute(typeof(OmitSerializableCheck)) == null).ToArray();
-        var fieldsType = type.GetFields();
-
-        if (fieldsZSaver.Length == fieldsType.Length)
+        public static ClassState GetClassState(Type type)
         {
-            for (int j = 0; j < fieldsZSaver.Length; j++)
+            Type ZSaverType = type.Assembly.GetType(type.Name + "ZSaver");
+            if (ZSaverType == null) return ClassState.NotMade;
+
+            var fieldsZSaver = ZSaverType.GetFields()
+                .Where(f => f.GetCustomAttribute(typeof(OmitSerializableCheck)) == null).ToArray();
+            var fieldsType = type.GetFields();
+
+            if (fieldsZSaver.Length == fieldsType.Length)
             {
-                if (fieldsZSaver[j].Name != fieldsType[j].Name ||
-                    fieldsZSaver[j].FieldType != fieldsType[j].FieldType)
+                for (int j = 0; j < fieldsZSaver.Length; j++)
                 {
-                    return ClassState.NeedsRebuilding;
+                    if (fieldsZSaver[j].Name != fieldsType[j].Name ||
+                        fieldsZSaver[j].FieldType != fieldsType[j].FieldType)
+                    {
+                        return ClassState.NeedsRebuilding;
+                    }
+                }
+
+                return ClassState.Valid;
+            }
+
+            return ClassState.NeedsRebuilding;
+        }
+
+        public static void BuildButton(Type type, int width, ZSaverStyler styler)
+        {
+            ClassState state = GetClassState(type);
+            if (styler.validImage == null) styler.GetEveryResource();
+
+            using (new EditorGUI.DisabledGroupScope(state == ClassState.Valid))
+            {
+                Texture2D textureToUse = styler.validImage;
+
+                if (state != ClassState.Valid)
+                {
+                    textureToUse = state == ClassState.NeedsRebuilding
+                        ? styler.needsRebuildingImage
+                        : styler.notMadeImage;
+                }
+
+                if (GUILayout.Button(textureToUse,
+                    GUILayout.MaxWidth(width), GUILayout.Height(width)))
+                {
+                    string path;
+
+
+                    if (state == ClassState.NotMade)
+                    {
+                        path = EditorUtility.SaveFilePanel(
+                            type.Name + "ZSaver.cs Save Location", "Assets",
+                            type.Name + "ZSaver", "cs");
+                    }
+                    else
+                    {
+                        path = Directory.GetFiles("Assets", $"{type.Name}ZSaver.cs",
+                            SearchOption.AllDirectories)[0];
+                        path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
+                               path.Replace('\\', '/');
+                    }
+
+                    CreateZSaver(type, path);
+                    if (state == ClassState.NotMade)
+                        CreateEditorScript(type, path);
+                    AssetDatabase.Refresh();
                 }
             }
-
-            return ClassState.Valid;
         }
 
-        return ClassState.NeedsRebuilding;
-    }
-
-    public static void BuildButton(Type type, int width, ZSaverStyler styler)
-    {
-        ClassState state = GetClassState(type);
-        if (styler.validImage == null) styler.GetEveryResource();
-
-        using (new EditorGUI.DisabledGroupScope(state == ClassState.Valid))
+        public static void BuildButtonAll(Class[] classes, int width, ZSaverStyler styler)
         {
-            Texture2D textureToUse = styler.validImage;
-
-            if (state != ClassState.Valid)
-            {
-                textureToUse = state == ClassState.NeedsRebuilding
-                    ? styler.needsRebuildingImage
-                    : styler.notMadeImage;
-            }
+            Texture2D textureToUse = styler.refreshImage;
 
             if (GUILayout.Button(textureToUse,
                 GUILayout.MaxWidth(width), GUILayout.Height(width)))
             {
                 string path;
 
+                string folderPath = EditorUtility.SaveFolderPanel("ZSaver.cs Save Locations", "Assets", "");
 
-                if (state == ClassState.NotMade)
+                foreach (var c in classes)
                 {
-                    path = EditorUtility.SaveFilePanel(
-                        type.Name + "ZSaver.cs Save Location", "Assets",
-                        type.Name + "ZSaver", "cs");
-                }
-                else
-                {
-                    path = Directory.GetFiles("Assets", $"{type.Name}ZSaver.cs",
-                        SearchOption.AllDirectories)[0];
-                    path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
-                           path.Replace('\\', '/');
-                }
+                    ClassState state = c.state;
 
-                CreateZSaver(type, path);
-                if (state == ClassState.NotMade)
-                    CreateEditorScript(type, path);
-                AssetDatabase.Refresh();
-            }
-        }
-    }
+                    path = folderPath + $"/{c.classType.Name}ZSaver.cs";
 
-    public static void BuildButtonAll(Class[] classes, int width, ZSaverStyler styler)
-    {
-        Texture2D textureToUse = styler.refreshImage;
-
-        if (GUILayout.Button(textureToUse,
-            GUILayout.MaxWidth(width), GUILayout.Height(width)))
-        {
-            string path;
-
-            string folderPath = EditorUtility.SaveFolderPanel("ZSaver.cs Save Locations", "Assets", "");
-
-            foreach (var c in classes)
-            {
-                ClassState state = c.state;
-
-                path = folderPath + $"/{c.classType.Name}ZSaver.cs";
-
-                if (state != ClassState.NotMade)
-                {
-                    path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSaver.cs",
-                        SearchOption.AllDirectories)[0];
-                    path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
-                           path.Replace('\\', '/');
-                }
-
-                CreateZSaver(c.classType, path);
-                CreateEditorScript(c.classType, path);
-                AssetDatabase.Refresh();
-            }
-        }
-    }
-
-
-    public static void BuildPersistentComponentEditor<T>(T manager, ref bool editMode, ZSaverStyler styler)
-    {
-        Texture2D cogwheel = Resources.Load<Texture2D>("cog");
-
-        using (new GUILayout.HorizontalScope("helpbox"))
-        {
-            GUILayout.Label("Persistent " + manager.GetType().GetCustomAttribute<PersistentAttribute>().saveType,
-                styler.header, GUILayout.Height(28));
-            using (new EditorGUI.DisabledScope(GetClassState(manager.GetType()) != ClassState.Valid))
-                editMode = GUILayout.Toggle(editMode, cogwheel, new GUIStyle("button"), GUILayout.MaxWidth(28),
-                    GUILayout.Height(28));
-
-            BuildButton(manager.GetType(), 28, styler);
-        }
-    }
-
-    public static void BuildEditModeEditor<T>(SerializedObject serializedObject, T manager, bool editMode,
-        ref bool[] persistentFields, Action OnInspectorGUI)
-    {
-        if (editMode)
-        {
-            GUILayout.Label("Select fields to serialize",
-                new GUIStyle("helpbox") {alignment = TextAnchor.MiddleCenter}, GUILayout.Height(18));
-            var fields = manager.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-
-            for (var i = 0; i < fields.Length; i++)
-            {
-                using (new GUILayout.HorizontalScope())
-                {
-                    using (new EditorGUI.DisabledScope(true))
+                    if (state != ClassState.NotMade)
                     {
-                        SerializedProperty prop = serializedObject.FindProperty(fields[i].Name);
-                        EditorGUILayout.PropertyField(prop);
+                        path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSaver.cs",
+                            SearchOption.AllDirectories)[0];
+                        path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
+                               path.Replace('\\', '/');
                     }
 
-                    persistentFields[i] = GUILayout.Toggle(persistentFields[i], "", GUILayout.MaxWidth(15));
+                    CreateZSaver(c.classType, path);
+                    CreateEditorScript(c.classType, path);
+                    AssetDatabase.Refresh();
                 }
             }
         }
-        else
-        {
-            OnInspectorGUI.Invoke();
-        }
-    }
 
-    public static void BuildSettingsEditor(ZSaverStyler styler)
-    {
-        FieldInfo[] fieldInfos = typeof(ZSaverSettings).GetFields(BindingFlags.Instance | BindingFlags.Public);
-        SerializedObject serializedObject = new SerializedObject(styler.settings);
-        if (GUILayout.Button("Open Save file Directory"))
-        {
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.WindowStyle = ProcessWindowStyle.Normal;
-            startInfo.FileName = "cmd.exe";
-            string _path = Application.persistentDataPath;
-            startInfo.Arguments = $"/C start {_path}";
-            process.StartInfo = startInfo;
-            process.Start();
-        }
 
-        using (new GUILayout.VerticalScope("helpbox"))
+        public static void BuildPersistentComponentEditor<T>(T manager, ref bool editMode, ZSaverStyler styler)
         {
-            foreach (var fieldInfo in fieldInfos)
+            Texture2D cogwheel = Resources.Load<Texture2D>("cog");
+
+            using (new GUILayout.HorizontalScope("helpbox"))
             {
-                serializedObject.Update();
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
-                serializedObject.ApplyModifiedProperties();
+                GUILayout.Label("Persistent " + manager.GetType().GetCustomAttribute<PersistentAttribute>().saveType,
+                    styler.header, GUILayout.Height(28));
+                using (new EditorGUI.DisabledScope(GetClassState(manager.GetType()) != ClassState.Valid))
+                    editMode = GUILayout.Toggle(editMode, cogwheel, new GUIStyle("button"), GUILayout.MaxWidth(28),
+                        GUILayout.Height(28));
+
+                BuildButton(manager.GetType(), 28, styler);
             }
         }
-    }
-    
-    [MenuItem("Assets/Create/Generate Unity Component ZSavers")]
+
+        public static void BuildEditModeEditor<T>(SerializedObject serializedObject, T manager, bool editMode,
+            ref bool[] persistentFields, Action OnInspectorGUI)
+        {
+            if (editMode)
+            {
+                GUILayout.Label("Select fields to serialize",
+                    new GUIStyle("helpbox") {alignment = TextAnchor.MiddleCenter}, GUILayout.Height(18));
+                var fields = manager.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+                for (var i = 0; i < fields.Length; i++)
+                {
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        using (new EditorGUI.DisabledScope(true))
+                        {
+                            SerializedProperty prop = serializedObject.FindProperty(fields[i].Name);
+                            EditorGUILayout.PropertyField(prop);
+                        }
+
+                        persistentFields[i] = GUILayout.Toggle(persistentFields[i], "", GUILayout.MaxWidth(15));
+                    }
+                }
+            }
+            else
+            {
+                OnInspectorGUI.Invoke();
+            }
+        }
+
+        public static void BuildSettingsEditor(ZSaverStyler styler)
+        {
+            FieldInfo[] fieldInfos = typeof(ZSaverSettings).GetFields(BindingFlags.Instance | BindingFlags.Public);
+            SerializedObject serializedObject = new SerializedObject(styler.settings);
+            if (GUILayout.Button("Open Save file Directory"))
+            {
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                startInfo.FileName = "cmd.exe";
+                string _path = Application.persistentDataPath;
+                startInfo.Arguments = $"/C start {_path}";
+                process.StartInfo = startInfo;
+                process.Start();
+            }
+
+            using (new GUILayout.VerticalScope("helpbox"))
+            {
+                foreach (var fieldInfo in fieldInfos)
+                {
+                    serializedObject.Update();
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
+                    serializedObject.ApplyModifiedProperties();
+                }
+            }
+        }
+
+        [MenuItem("Assets/Create/Generate Unity Component ZSavers")]
         public static void GenerateUnityComponentClasses()
         {
             string longScript = "";
@@ -406,9 +406,10 @@ public class " + type.Name + @"Editor : Editor
                 longScript +=
                     "[System.Serializable]\npublic class " + type.Name + "ZSaver : ZSaver.ZSaver<" + type.FullName +
                     "> {\n";
-                
+
                 foreach (var propertyInfo in type
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(ZSave.FieldIsSuitableForAssignment))
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(ZSave.FieldIsSuitableForAssignment))
                 {
                     if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
 
@@ -416,60 +417,66 @@ public class " + type.Name + @"Editor : Editor
                         $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
                         ";\n";
                 }
+
                 foreach (var fieldInfo in type
-                    .GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
+                    .GetFields(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
                 {
                     if (blackListForThisComponent.Contains(fieldInfo.Name)) continue;
-                    
+
                     var fieldType = fieldInfo.FieldType;
 
                     if (fieldInfo.FieldType.IsArray)
                     {
                         fieldType = fieldInfo.FieldType.GetElementType();
                     }
-                    
+
                     int genericParameterAmount = fieldType.GenericTypeArguments.Length;
-                    
 
                     longScript +=
                         $"    public {fieldInfo.FieldType.ToString().Replace('+', '.')} " + fieldInfo.Name +
                         ";\n";
-                    
+
                     if (genericParameterAmount > 0)
                     {
                         string oldString = $"`{genericParameterAmount}[";
                         string newString = "<";
-                    
+
                         var genericArguments = fieldType.GenericTypeArguments;
-                    
+
                         for (var i = 0; i < genericArguments.Length; i++)
                         {
-                            oldString += genericArguments[i] + (i == genericArguments.Length - 1 ? "]" : ",");
-                            newString += genericArguments[i] + (i == genericArguments.Length - 1 ? ">" : ",");
+                            oldString += genericArguments[i].ToString().Replace('+', '.') +
+                                         (i == genericArguments.Length - 1 ? "]" : ",");
+                            newString += genericArguments[i].ToString().Replace('+', '.') +
+                                         (i == genericArguments.Length - 1 ? ">" : ",");
                         }
-                    
+
                         longScript = longScript.Replace(oldString, newString);
                     }
-                    
-                    
                 }
-                if(type == typeof(PersistentGameObject)) 
-                    longScript +=
-                    $"    public ZSaver.GameObjectData gameObjectData;\n";
 
-                longScript += "    public " + type.Name + "ZSaver (" + type.FullName + " " + type.Name +"Instance) : base(" +
-                              type.Name + "Instance.gameObject, " + type.Name +"Instance ) {\n";
+                if (type == typeof(PersistentGameObject))
+                    longScript +=
+                        $"    public ZSaver.GameObjectData gameObjectData;\n";
+
+                longScript += "    public " + type.Name + "ZSaver (" + type.FullName + " " + type.Name +
+                              "Instance) : base(" +
+                              type.Name + "Instance.gameObject, " + type.Name + "Instance ) {\n";
 
                 foreach (var propertyInfo in type
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(ZSave.FieldIsSuitableForAssignment))
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(ZSave.FieldIsSuitableForAssignment))
                 {
                     if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
 
                     longScript +=
                         $"        " + propertyInfo.Name + " = " + type.Name + "Instance." + propertyInfo.Name + ";\n";
                 }
+
                 foreach (var fieldInfo in type
-                    .GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
+                    .GetFields(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
                 {
                     if (blackListForThisComponent.Contains(fieldInfo.Name)) continue;
 
@@ -498,7 +505,8 @@ public class " + type.Name + @"Editor : Editor
                 longScript += "}\n";
             }
 
-            FileStream fs = new FileStream(Application.dataPath + "/com.Ziplaw.ZSaver/Scripts/Runtime/Generated/AllComponentDatas.cs",
+            FileStream fs = new FileStream(
+                Application.dataPath + "/com.Ziplaw.ZSaver/Scripts/Runtime/Generated/AllComponentDatas.cs",
                 FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
 
@@ -507,4 +515,4 @@ public class " + type.Name + @"Editor : Editor
 
             AssetDatabase.Refresh();
         }
-}
+    }

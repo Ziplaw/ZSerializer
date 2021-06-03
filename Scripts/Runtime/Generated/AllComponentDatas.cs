@@ -3447,7 +3447,7 @@ public class PersistentGameObjectZSaver : ZSaver.ZSaver<PersistentGameObject> {
     public System.Boolean useGUILayout;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public PersistentGameObject.SerializableComponentData[] _componentDatas;
+    public System.Collections.Generic.List<PersistentGameObject.SerializableComponentData> _componentDatas;
     public ZSaver.GameObjectData gameObjectData;
     public PersistentGameObjectZSaver (PersistentGameObject PersistentGameObjectInstance) : base(PersistentGameObjectInstance.gameObject, PersistentGameObjectInstance ) {
         useGUILayout = PersistentGameObjectInstance.useGUILayout;

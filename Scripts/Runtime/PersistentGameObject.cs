@@ -1,15 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using ZSaver;
-using SaveType = ZSaver.SaveType;
+using Component = UnityEngine.Component;
 
 [AddComponentMenu("ZSaver/Persistent GameObject"), DisallowMultipleComponent]
 public class PersistentGameObject : MonoBehaviour
@@ -26,13 +20,37 @@ public class PersistentGameObject : MonoBehaviour
             serialize = true;
         }
     }
-    
-    public SerializableComponentData[] _componentDatas;
 
-    private void Start()
+    public List<SerializableComponentData> _componentDatas = new List<SerializableComponentData>();
+    public void UpdateSerializableComponents()
     {
-        name = gameObject.GetInstanceID().ToString();
+        if (!Application.isPlaying)
+        {
+            var componentTypes = GetComponents<Component>().Select(c => c.GetType()).Where(type =>
+                ZSave.ComponentSerializableTypes.Contains(type) &&
+                !type.IsSubclassOf(typeof(MonoBehaviour))).ToArray();
+
+            var serializableComponentTypes = _componentDatas.Select(c => Type.GetType(c.typeName)).ToArray();
+
+            for (var i = 0; i < serializableComponentTypes.Length; i++)
+            {
+                if (!componentTypes.Contains(serializableComponentTypes[i]))
+                {
+                    _componentDatas.RemoveAt(i);
+                }
+            }
+
+            for (var i = 0; i < componentTypes.Length; i++)
+            {
+                if (!serializableComponentTypes.Contains(componentTypes[i]))
+                {
+                    _componentDatas.Add(new SerializableComponentData(componentTypes[i]));
+                }
+            }
+        }
     }
+    
+
     public static int CountParents(Transform transform)
     {
         int totalParents = 1;

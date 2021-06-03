@@ -2,7 +2,7 @@
     "name": "com.Ziplaw.ZSaver.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:e5fa03744e9aa5245b165de3d9c815d4"
+        "GUID:c7d027357badef34cbfffba719cd855d"
     ],
     "includePlatforms": [
         "Editor"
