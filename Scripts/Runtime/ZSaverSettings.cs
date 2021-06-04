@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ZSaver
 {
-    // [CreateAssetMenu(fileName = "New ZSaver Settings", menuName = "ZSaverSettings", order = 0)]
+    // [CreateAssetMenu(fileName = "New ZSerializer Settings", menuName = "ZSaverSettings", order = 0)]
     public class ZSaverSettings : ScriptableObject
     {
         private static ZSaverSettings instance;

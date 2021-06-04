@@ -42,14 +42,14 @@ namespace ZSaver
             return o;
         }
     }
-    public abstract class ZSaver<T> where T : Component
+    public abstract class ZSerializer<T> where T : Component
     {
         [OmitSerializableCheck] public int gameObjectInstanceID;
         [OmitSerializableCheck] public int componentinstanceID;
         [OmitSerializableCheck] public GameObject _componentParent;
         [OmitSerializableCheck] public T _component;
 
-        public ZSaver(GameObject componentParent, T component)
+        public ZSerializer(GameObject componentParent, T component)
         {
             _componentParent = componentParent;
             _component = component;

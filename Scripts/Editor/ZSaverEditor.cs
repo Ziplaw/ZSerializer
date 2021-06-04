@@ -37,7 +37,7 @@ using Debug = UnityEngine.Debug;
 
                     if (state == ClassState.NeedsRebuilding)
                     {
-                        path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSaver.cs",
+                        path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSerializer.cs",
                             SearchOption.AllDirectories)[0];
                         path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                                path.Replace('\\', '/');
@@ -59,7 +59,7 @@ using Debug = UnityEngine.Debug;
                 "using ZSaver;\n" +
                 "\n" +
                 "[System.Serializable]\n" +
-                $"public class {type.Name}ZSaver : ZSaver<{type.Name}>\n" +
+                $"public class {type.Name}ZSerializer : ZSerializer<{type.Name}>\n" +
                 "{\n";
 
             foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
@@ -98,7 +98,7 @@ using Debug = UnityEngine.Debug;
             string className = type.Name + "Instance";
 
             script +=
-                $"\n    public {type.Name}ZSaver({type.Name} {className}) : base({className}.gameObject, {className})\n" +
+                $"\n    public {type.Name}ZSerializer({type.Name} {className}) : base({className}.gameObject, {className})\n" +
                 "    {\n";
 
             foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
@@ -134,7 +134,7 @@ using Debug = UnityEngine.Debug;
                 }
             }
 
-            ZSave.Log("ZSaver script being created at " + path);
+            ZSave.Log("ZSerializer script being created at " + path);
 
             script += "    }\n}";
 
@@ -216,7 +216,7 @@ public class " + type.Name + @"Editor : Editor
 
         public static ClassState GetClassState(Type type)
         {
-            Type ZSaverType = type.Assembly.GetType(type.Name + "ZSaver");
+            Type ZSaverType = type.Assembly.GetType(type.Name + "ZSerializer");
             if (ZSaverType == null) return ClassState.NotMade;
 
             var fieldsZSaver = ZSaverType.GetFields()
@@ -265,12 +265,12 @@ public class " + type.Name + @"Editor : Editor
                     if (state == ClassState.NotMade)
                     {
                         path = EditorUtility.SaveFilePanel(
-                            type.Name + "ZSaver.cs Save Location", "Assets",
-                            type.Name + "ZSaver", "cs");
+                            type.Name + "ZSerializer.cs Save Location", "Assets",
+                            type.Name + "ZSerializer", "cs");
                     }
                     else
                     {
-                        path = Directory.GetFiles("Assets", $"{type.Name}ZSaver.cs",
+                        path = Directory.GetFiles("Assets", $"{type.Name}ZSerializer.cs",
                             SearchOption.AllDirectories)[0];
                         path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                                path.Replace('\\', '/');
@@ -293,17 +293,17 @@ public class " + type.Name + @"Editor : Editor
             {
                 string path;
 
-                string folderPath = EditorUtility.SaveFolderPanel("ZSaver.cs Save Locations", "Assets", "");
+                string folderPath = EditorUtility.SaveFolderPanel("ZSerializer.cs Save Locations", "Assets", "");
 
                 foreach (var c in classes)
                 {
                     ClassState state = c.state;
 
-                    path = folderPath + $"/{c.classType.Name}ZSaver.cs";
+                    path = folderPath + $"/{c.classType.Name}ZSerializer.cs";
 
                     if (state != ClassState.NotMade)
                     {
-                        path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSaver.cs",
+                        path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSerializer.cs",
                             SearchOption.AllDirectories)[0];
                         path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                                path.Replace('\\', '/');
@@ -404,7 +404,7 @@ public class " + type.Name + @"Editor : Editor
 
 
                 longScript +=
-                    "[System.Serializable]\npublic class " + type.Name + "ZSaver : ZSaver.ZSaver<" + type.FullName +
+                    "[System.Serializable]\npublic class " + type.Name + "ZSerializer : ZSaver.ZSerializer<" + type.FullName +
                     "> {\n";
 
                 foreach (var propertyInfo in type
@@ -460,7 +460,7 @@ public class " + type.Name + @"Editor : Editor
                     longScript +=
                         $"    public ZSaver.GameObjectData gameObjectData;\n";
 
-                longScript += "    public " + type.Name + "ZSaver (" + type.FullName + " " + type.Name +
+                longScript += "    public " + type.Name + "ZSerializer (" + type.FullName + " " + type.Name +
                               "Instance) : base(" +
                               type.Name + "Instance.gameObject, " + type.Name + "Instance ) {\n";
 

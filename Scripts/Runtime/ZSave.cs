@@ -341,7 +341,7 @@ namespace ZSaver
             foreach (var type in types)
             {
                 var objects = Object.FindObjectsOfType(type);
-                SerializeComponents((Component[]) objects, Type.GetType(type.Name + "ZSaver, " + mainAssembly),
+                SerializeComponents((Component[]) objects, Type.GetType(type.Name + "ZSerializer, " + mainAssembly),
                     type.Name + ".save");
             }
         }
@@ -379,7 +379,7 @@ namespace ZSaver
             foreach (var componentType in componentTypes)
             {
                 SerializeComponents(GetSerializedComponentsOfGivenType(objects, componentType),
-                    Type.GetType(componentType.Name + "ZSaver"),
+                    Type.GetType(componentType.Name + "ZSerializer"),
                     componentType.Name + "GameObject.save");
             }
         }
@@ -390,7 +390,7 @@ namespace ZSaver
 
             object[] zSavers = CreateArrayOfZSavers(components, zSaverType);
 
-            if (zSaverType == typeof(PersistentGameObjectZSaver))
+            if (zSaverType == typeof(PersistentGameObjectZSerializer))
             {
                 zSavers = OrderPersistentGameObjectsByLoadingOrder(zSavers);
             }
@@ -479,7 +479,7 @@ namespace ZSaver
 
             foreach (var type in types)
             {
-                var ZSaverType = Type.GetType(type.Name + "ZSaver, " + mainAssembly);
+                var ZSaverType = Type.GetType(type.Name + "ZSerializer, " + mainAssembly);
                 if (ZSaverType == null) continue;
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
@@ -506,7 +506,7 @@ namespace ZSaver
             foreach (var type in types)
             {
                 if (!File.Exists(GetFilePath(type.Name + "GameObject.save"))) continue;
-                var ZSaverType = Type.GetType(type.Name + "ZSaver");
+                var ZSaverType = Type.GetType(type.Name + "ZSerializer");
                 if (ZSaverType == null) continue;
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
@@ -533,7 +533,7 @@ namespace ZSaver
             foreach (var type in types)
             {
                 if (!File.Exists(GetFilePath(type.Name + "GameObject.save"))) continue;
-                var ZSaverType = Type.GetType(type.Name + "ZSaver");
+                var ZSaverType = Type.GetType(type.Name + "ZSerializer");
                 if (ZSaverType == null) continue;
                 var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
 
@@ -556,7 +556,7 @@ namespace ZSaver
 
             foreach (var type in types)
             {
-                var ZSaverType = Type.GetType(type.Name + "ZSaver, " + mainAssembly);
+                var ZSaverType = Type.GetType(type.Name + "ZSerializer, " + mainAssembly);
                 if (ZSaverType == null) continue;
                 var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
 

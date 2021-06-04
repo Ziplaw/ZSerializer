@@ -1,5 +1,5 @@
 [System.Serializable]
-public class NavMeshAgentZSaver : ZSaver.ZSaver<UnityEngine.AI.NavMeshAgent> {
+public class NavMeshAgentZSerializer : ZSaver.ZSerializer<UnityEngine.AI.NavMeshAgent> {
     public UnityEngine.Vector3 destination;
     public System.Single stoppingDistance;
     public UnityEngine.Vector3 velocity;
@@ -24,7 +24,7 @@ public class NavMeshAgentZSaver : ZSaver.ZSaver<UnityEngine.AI.NavMeshAgent> {
     public System.Int32 avoidancePriority;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public NavMeshAgentZSaver (UnityEngine.AI.NavMeshAgent NavMeshAgentInstance) : base(NavMeshAgentInstance.gameObject, NavMeshAgentInstance ) {
+    public NavMeshAgentZSerializer (UnityEngine.AI.NavMeshAgent NavMeshAgentInstance) : base(NavMeshAgentInstance.gameObject, NavMeshAgentInstance ) {
         destination = NavMeshAgentInstance.destination;
         stoppingDistance = NavMeshAgentInstance.stoppingDistance;
         velocity = NavMeshAgentInstance.velocity;
@@ -53,7 +53,7 @@ public class NavMeshAgentZSaver : ZSaver.ZSaver<UnityEngine.AI.NavMeshAgent> {
     }
 }
 [System.Serializable]
-public class NavMeshObstacleZSaver : ZSaver.ZSaver<UnityEngine.AI.NavMeshObstacle> {
+public class NavMeshObstacleZSerializer : ZSaver.ZSerializer<UnityEngine.AI.NavMeshObstacle> {
     public System.Single height;
     public System.Single radius;
     public UnityEngine.Vector3 velocity;
@@ -66,7 +66,7 @@ public class NavMeshObstacleZSaver : ZSaver.ZSaver<UnityEngine.AI.NavMeshObstacl
     public UnityEngine.Vector3 size;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public NavMeshObstacleZSaver (UnityEngine.AI.NavMeshObstacle NavMeshObstacleInstance) : base(NavMeshObstacleInstance.gameObject, NavMeshObstacleInstance ) {
+    public NavMeshObstacleZSerializer (UnityEngine.AI.NavMeshObstacle NavMeshObstacleInstance) : base(NavMeshObstacleInstance.gameObject, NavMeshObstacleInstance ) {
         height = NavMeshObstacleInstance.height;
         radius = NavMeshObstacleInstance.radius;
         velocity = NavMeshObstacleInstance.velocity;
@@ -83,7 +83,7 @@ public class NavMeshObstacleZSaver : ZSaver.ZSaver<UnityEngine.AI.NavMeshObstacl
     }
 }
 [System.Serializable]
-public class OffMeshLinkZSaver : ZSaver.ZSaver<UnityEngine.AI.OffMeshLink> {
+public class OffMeshLinkZSerializer : ZSaver.ZSerializer<UnityEngine.AI.OffMeshLink> {
     public System.Boolean activated;
     public System.Single costOverride;
     public System.Boolean biDirectional;
@@ -93,7 +93,7 @@ public class OffMeshLinkZSaver : ZSaver.ZSaver<UnityEngine.AI.OffMeshLink> {
     public UnityEngine.Transform endTransform;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public OffMeshLinkZSaver (UnityEngine.AI.OffMeshLink OffMeshLinkInstance) : base(OffMeshLinkInstance.gameObject, OffMeshLinkInstance ) {
+    public OffMeshLinkZSerializer (UnityEngine.AI.OffMeshLink OffMeshLinkInstance) : base(OffMeshLinkInstance.gameObject, OffMeshLinkInstance ) {
         activated = OffMeshLinkInstance.activated;
         costOverride = OffMeshLinkInstance.costOverride;
         biDirectional = OffMeshLinkInstance.biDirectional;
@@ -107,7 +107,7 @@ public class OffMeshLinkZSaver : ZSaver.ZSaver<UnityEngine.AI.OffMeshLink> {
     }
 }
 [System.Serializable]
-public class AnimatorZSaver : ZSaver.ZSaver<UnityEngine.Animator> {
+public class AnimatorZSerializer : ZSaver.ZSerializer<UnityEngine.Animator> {
     public UnityEngine.Vector3 rootPosition;
     public UnityEngine.Quaternion rootRotation;
     public System.Boolean applyRootMotion;
@@ -129,7 +129,7 @@ public class AnimatorZSaver : ZSaver.ZSaver<UnityEngine.Animator> {
     public System.Boolean keepAnimatorControllerStateOnDisable;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AnimatorZSaver (UnityEngine.Animator AnimatorInstance) : base(AnimatorInstance.gameObject, AnimatorInstance ) {
+    public AnimatorZSerializer (UnityEngine.Animator AnimatorInstance) : base(AnimatorInstance.gameObject, AnimatorInstance ) {
         rootPosition = AnimatorInstance.rootPosition;
         rootRotation = AnimatorInstance.rootRotation;
         applyRootMotion = AnimatorInstance.applyRootMotion;
@@ -155,7 +155,7 @@ public class AnimatorZSaver : ZSaver.ZSaver<UnityEngine.Animator> {
     }
 }
 [System.Serializable]
-public class AnimationZSaver : ZSaver.ZSaver<UnityEngine.Animation> {
+public class AnimationZSerializer : ZSaver.ZSerializer<UnityEngine.Animation> {
     public UnityEngine.AnimationClip clip;
     public System.Boolean playAutomatically;
     public UnityEngine.WrapMode wrapMode;
@@ -164,7 +164,7 @@ public class AnimationZSaver : ZSaver.ZSaver<UnityEngine.Animation> {
     public UnityEngine.Bounds localBounds;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AnimationZSaver (UnityEngine.Animation AnimationInstance) : base(AnimationInstance.gameObject, AnimationInstance ) {
+    public AnimationZSerializer (UnityEngine.Animation AnimationInstance) : base(AnimationInstance.gameObject, AnimationInstance ) {
         clip = AnimationInstance.clip;
         playAutomatically = AnimationInstance.playAutomatically;
         wrapMode = AnimationInstance.wrapMode;
@@ -177,7 +177,7 @@ public class AnimationZSaver : ZSaver.ZSaver<UnityEngine.Animation> {
     }
 }
 [System.Serializable]
-public class AimConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.AimConstraint> {
+public class AimConstraintZSerializer : ZSaver.ZSerializer<UnityEngine.Animations.AimConstraint> {
     public System.Single weight;
     public System.Boolean constraintActive;
     public System.Boolean locked;
@@ -191,7 +191,7 @@ public class AimConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.AimConst
     public UnityEngine.Animations.AimConstraint.WorldUpType worldUpType;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AimConstraintZSaver (UnityEngine.Animations.AimConstraint AimConstraintInstance) : base(AimConstraintInstance.gameObject, AimConstraintInstance ) {
+    public AimConstraintZSerializer (UnityEngine.Animations.AimConstraint AimConstraintInstance) : base(AimConstraintInstance.gameObject, AimConstraintInstance ) {
         weight = AimConstraintInstance.weight;
         constraintActive = AimConstraintInstance.constraintActive;
         locked = AimConstraintInstance.locked;
@@ -209,7 +209,7 @@ public class AimConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.AimConst
     }
 }
 [System.Serializable]
-public class PositionConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.PositionConstraint> {
+public class PositionConstraintZSerializer : ZSaver.ZSerializer<UnityEngine.Animations.PositionConstraint> {
     public System.Single weight;
     public UnityEngine.Vector3 translationAtRest;
     public UnityEngine.Vector3 translationOffset;
@@ -218,7 +218,7 @@ public class PositionConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.Pos
     public System.Boolean locked;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public PositionConstraintZSaver (UnityEngine.Animations.PositionConstraint PositionConstraintInstance) : base(PositionConstraintInstance.gameObject, PositionConstraintInstance ) {
+    public PositionConstraintZSerializer (UnityEngine.Animations.PositionConstraint PositionConstraintInstance) : base(PositionConstraintInstance.gameObject, PositionConstraintInstance ) {
         weight = PositionConstraintInstance.weight;
         translationAtRest = PositionConstraintInstance.translationAtRest;
         translationOffset = PositionConstraintInstance.translationOffset;
@@ -231,7 +231,7 @@ public class PositionConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.Pos
     }
 }
 [System.Serializable]
-public class RotationConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.RotationConstraint> {
+public class RotationConstraintZSerializer : ZSaver.ZSerializer<UnityEngine.Animations.RotationConstraint> {
     public System.Single weight;
     public UnityEngine.Vector3 rotationAtRest;
     public UnityEngine.Vector3 rotationOffset;
@@ -240,7 +240,7 @@ public class RotationConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.Rot
     public System.Boolean locked;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public RotationConstraintZSaver (UnityEngine.Animations.RotationConstraint RotationConstraintInstance) : base(RotationConstraintInstance.gameObject, RotationConstraintInstance ) {
+    public RotationConstraintZSerializer (UnityEngine.Animations.RotationConstraint RotationConstraintInstance) : base(RotationConstraintInstance.gameObject, RotationConstraintInstance ) {
         weight = RotationConstraintInstance.weight;
         rotationAtRest = RotationConstraintInstance.rotationAtRest;
         rotationOffset = RotationConstraintInstance.rotationOffset;
@@ -253,7 +253,7 @@ public class RotationConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.Rot
     }
 }
 [System.Serializable]
-public class ScaleConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.ScaleConstraint> {
+public class ScaleConstraintZSerializer : ZSaver.ZSerializer<UnityEngine.Animations.ScaleConstraint> {
     public System.Single weight;
     public UnityEngine.Vector3 scaleAtRest;
     public UnityEngine.Vector3 scaleOffset;
@@ -262,7 +262,7 @@ public class ScaleConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.ScaleC
     public System.Boolean locked;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public ScaleConstraintZSaver (UnityEngine.Animations.ScaleConstraint ScaleConstraintInstance) : base(ScaleConstraintInstance.gameObject, ScaleConstraintInstance ) {
+    public ScaleConstraintZSerializer (UnityEngine.Animations.ScaleConstraint ScaleConstraintInstance) : base(ScaleConstraintInstance.gameObject, ScaleConstraintInstance ) {
         weight = ScaleConstraintInstance.weight;
         scaleAtRest = ScaleConstraintInstance.scaleAtRest;
         scaleOffset = ScaleConstraintInstance.scaleOffset;
@@ -275,7 +275,7 @@ public class ScaleConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.ScaleC
     }
 }
 [System.Serializable]
-public class LookAtConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.LookAtConstraint> {
+public class LookAtConstraintZSerializer : ZSaver.ZSerializer<UnityEngine.Animations.LookAtConstraint> {
     public System.Single weight;
     public System.Single roll;
     public System.Boolean constraintActive;
@@ -286,7 +286,7 @@ public class LookAtConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.LookA
     public System.Boolean useUpObject;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public LookAtConstraintZSaver (UnityEngine.Animations.LookAtConstraint LookAtConstraintInstance) : base(LookAtConstraintInstance.gameObject, LookAtConstraintInstance ) {
+    public LookAtConstraintZSerializer (UnityEngine.Animations.LookAtConstraint LookAtConstraintInstance) : base(LookAtConstraintInstance.gameObject, LookAtConstraintInstance ) {
         weight = LookAtConstraintInstance.weight;
         roll = LookAtConstraintInstance.roll;
         constraintActive = LookAtConstraintInstance.constraintActive;
@@ -301,7 +301,7 @@ public class LookAtConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.LookA
     }
 }
 [System.Serializable]
-public class ParentConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.ParentConstraint> {
+public class ParentConstraintZSerializer : ZSaver.ZSerializer<UnityEngine.Animations.ParentConstraint> {
     public System.Single weight;
     public System.Boolean constraintActive;
     public System.Boolean locked;
@@ -313,7 +313,7 @@ public class ParentConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.Paren
     public UnityEngine.Animations.Axis rotationAxis;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public ParentConstraintZSaver (UnityEngine.Animations.ParentConstraint ParentConstraintInstance) : base(ParentConstraintInstance.gameObject, ParentConstraintInstance ) {
+    public ParentConstraintZSerializer (UnityEngine.Animations.ParentConstraint ParentConstraintInstance) : base(ParentConstraintInstance.gameObject, ParentConstraintInstance ) {
         weight = ParentConstraintInstance.weight;
         constraintActive = ParentConstraintInstance.constraintActive;
         locked = ParentConstraintInstance.locked;
@@ -329,7 +329,7 @@ public class ParentConstraintZSaver : ZSaver.ZSaver<UnityEngine.Animations.Paren
     }
 }
 [System.Serializable]
-public class AudioSourceZSaver : ZSaver.ZSaver<UnityEngine.AudioSource> {
+public class AudioSourceZSerializer : ZSaver.ZSerializer<UnityEngine.AudioSource> {
     public System.Single volume;
     public System.Single pitch;
     public System.Single time;
@@ -358,7 +358,7 @@ public class AudioSourceZSaver : ZSaver.ZSaver<UnityEngine.AudioSource> {
     public UnityEngine.AudioRolloffMode rolloffMode;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioSourceZSaver (UnityEngine.AudioSource AudioSourceInstance) : base(AudioSourceInstance.gameObject, AudioSourceInstance ) {
+    public AudioSourceZSerializer (UnityEngine.AudioSource AudioSourceInstance) : base(AudioSourceInstance.gameObject, AudioSourceInstance ) {
         volume = AudioSourceInstance.volume;
         pitch = AudioSourceInstance.pitch;
         time = AudioSourceInstance.time;
@@ -391,13 +391,13 @@ public class AudioSourceZSaver : ZSaver.ZSaver<UnityEngine.AudioSource> {
     }
 }
 [System.Serializable]
-public class AudioLowPassFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioLowPassFilter> {
+public class AudioLowPassFilterZSerializer : ZSaver.ZSerializer<UnityEngine.AudioLowPassFilter> {
     public UnityEngine.AnimationCurve customCutoffCurve;
     public System.Single cutoffFrequency;
     public System.Single lowpassResonanceQ;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioLowPassFilterZSaver (UnityEngine.AudioLowPassFilter AudioLowPassFilterInstance) : base(AudioLowPassFilterInstance.gameObject, AudioLowPassFilterInstance ) {
+    public AudioLowPassFilterZSerializer (UnityEngine.AudioLowPassFilter AudioLowPassFilterInstance) : base(AudioLowPassFilterInstance.gameObject, AudioLowPassFilterInstance ) {
         customCutoffCurve = AudioLowPassFilterInstance.customCutoffCurve;
         cutoffFrequency = AudioLowPassFilterInstance.cutoffFrequency;
         lowpassResonanceQ = AudioLowPassFilterInstance.lowpassResonanceQ;
@@ -407,12 +407,12 @@ public class AudioLowPassFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioLowPassFi
     }
 }
 [System.Serializable]
-public class AudioHighPassFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioHighPassFilter> {
+public class AudioHighPassFilterZSerializer : ZSaver.ZSerializer<UnityEngine.AudioHighPassFilter> {
     public System.Single cutoffFrequency;
     public System.Single highpassResonanceQ;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioHighPassFilterZSaver (UnityEngine.AudioHighPassFilter AudioHighPassFilterInstance) : base(AudioHighPassFilterInstance.gameObject, AudioHighPassFilterInstance ) {
+    public AudioHighPassFilterZSerializer (UnityEngine.AudioHighPassFilter AudioHighPassFilterInstance) : base(AudioHighPassFilterInstance.gameObject, AudioHighPassFilterInstance ) {
         cutoffFrequency = AudioHighPassFilterInstance.cutoffFrequency;
         highpassResonanceQ = AudioHighPassFilterInstance.highpassResonanceQ;
         enabled = AudioHighPassFilterInstance.enabled;
@@ -421,7 +421,7 @@ public class AudioHighPassFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioHighPass
     }
 }
 [System.Serializable]
-public class AudioReverbFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioReverbFilter> {
+public class AudioReverbFilterZSerializer : ZSaver.ZSerializer<UnityEngine.AudioReverbFilter> {
     public UnityEngine.AudioReverbPreset reverbPreset;
     public System.Single dryLevel;
     public System.Single room;
@@ -439,7 +439,7 @@ public class AudioReverbFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioReverbFilt
     public System.Single lfReference;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioReverbFilterZSaver (UnityEngine.AudioReverbFilter AudioReverbFilterInstance) : base(AudioReverbFilterInstance.gameObject, AudioReverbFilterInstance ) {
+    public AudioReverbFilterZSerializer (UnityEngine.AudioReverbFilter AudioReverbFilterInstance) : base(AudioReverbFilterInstance.gameObject, AudioReverbFilterInstance ) {
         reverbPreset = AudioReverbFilterInstance.reverbPreset;
         dryLevel = AudioReverbFilterInstance.dryLevel;
         room = AudioReverbFilterInstance.room;
@@ -461,21 +461,21 @@ public class AudioReverbFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioReverbFilt
     }
 }
 [System.Serializable]
-public class AudioBehaviourZSaver : ZSaver.ZSaver<UnityEngine.AudioBehaviour> {
+public class AudioBehaviourZSerializer : ZSaver.ZSerializer<UnityEngine.AudioBehaviour> {
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioBehaviourZSaver (UnityEngine.AudioBehaviour AudioBehaviourInstance) : base(AudioBehaviourInstance.gameObject, AudioBehaviourInstance ) {
+    public AudioBehaviourZSerializer (UnityEngine.AudioBehaviour AudioBehaviourInstance) : base(AudioBehaviourInstance.gameObject, AudioBehaviourInstance ) {
         enabled = AudioBehaviourInstance.enabled;
         hideFlags = AudioBehaviourInstance.hideFlags;
 
     }
 }
 [System.Serializable]
-public class AudioListenerZSaver : ZSaver.ZSaver<UnityEngine.AudioListener> {
+public class AudioListenerZSerializer : ZSaver.ZSerializer<UnityEngine.AudioListener> {
     public UnityEngine.AudioVelocityUpdateMode velocityUpdateMode;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioListenerZSaver (UnityEngine.AudioListener AudioListenerInstance) : base(AudioListenerInstance.gameObject, AudioListenerInstance ) {
+    public AudioListenerZSerializer (UnityEngine.AudioListener AudioListenerInstance) : base(AudioListenerInstance.gameObject, AudioListenerInstance ) {
         velocityUpdateMode = AudioListenerInstance.velocityUpdateMode;
         enabled = AudioListenerInstance.enabled;
         hideFlags = AudioListenerInstance.hideFlags;
@@ -483,7 +483,7 @@ public class AudioListenerZSaver : ZSaver.ZSaver<UnityEngine.AudioListener> {
     }
 }
 [System.Serializable]
-public class AudioReverbZoneZSaver : ZSaver.ZSaver<UnityEngine.AudioReverbZone> {
+public class AudioReverbZoneZSerializer : ZSaver.ZSerializer<UnityEngine.AudioReverbZone> {
     public System.Single minDistance;
     public System.Single maxDistance;
     public UnityEngine.AudioReverbPreset reverbPreset;
@@ -502,7 +502,7 @@ public class AudioReverbZoneZSaver : ZSaver.ZSaver<UnityEngine.AudioReverbZone> 
     public System.Single density;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioReverbZoneZSaver (UnityEngine.AudioReverbZone AudioReverbZoneInstance) : base(AudioReverbZoneInstance.gameObject, AudioReverbZoneInstance ) {
+    public AudioReverbZoneZSerializer (UnityEngine.AudioReverbZone AudioReverbZoneInstance) : base(AudioReverbZoneInstance.gameObject, AudioReverbZoneInstance ) {
         minDistance = AudioReverbZoneInstance.minDistance;
         maxDistance = AudioReverbZoneInstance.maxDistance;
         reverbPreset = AudioReverbZoneInstance.reverbPreset;
@@ -525,11 +525,11 @@ public class AudioReverbZoneZSaver : ZSaver.ZSaver<UnityEngine.AudioReverbZone> 
     }
 }
 [System.Serializable]
-public class AudioDistortionFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioDistortionFilter> {
+public class AudioDistortionFilterZSerializer : ZSaver.ZSerializer<UnityEngine.AudioDistortionFilter> {
     public System.Single distortionLevel;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioDistortionFilterZSaver (UnityEngine.AudioDistortionFilter AudioDistortionFilterInstance) : base(AudioDistortionFilterInstance.gameObject, AudioDistortionFilterInstance ) {
+    public AudioDistortionFilterZSerializer (UnityEngine.AudioDistortionFilter AudioDistortionFilterInstance) : base(AudioDistortionFilterInstance.gameObject, AudioDistortionFilterInstance ) {
         distortionLevel = AudioDistortionFilterInstance.distortionLevel;
         enabled = AudioDistortionFilterInstance.enabled;
         hideFlags = AudioDistortionFilterInstance.hideFlags;
@@ -537,14 +537,14 @@ public class AudioDistortionFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioDistor
     }
 }
 [System.Serializable]
-public class AudioEchoFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioEchoFilter> {
+public class AudioEchoFilterZSerializer : ZSaver.ZSerializer<UnityEngine.AudioEchoFilter> {
     public System.Single delay;
     public System.Single decayRatio;
     public System.Single dryMix;
     public System.Single wetMix;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioEchoFilterZSaver (UnityEngine.AudioEchoFilter AudioEchoFilterInstance) : base(AudioEchoFilterInstance.gameObject, AudioEchoFilterInstance ) {
+    public AudioEchoFilterZSerializer (UnityEngine.AudioEchoFilter AudioEchoFilterInstance) : base(AudioEchoFilterInstance.gameObject, AudioEchoFilterInstance ) {
         delay = AudioEchoFilterInstance.delay;
         decayRatio = AudioEchoFilterInstance.decayRatio;
         dryMix = AudioEchoFilterInstance.dryMix;
@@ -555,7 +555,7 @@ public class AudioEchoFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioEchoFilter> 
     }
 }
 [System.Serializable]
-public class AudioChorusFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioChorusFilter> {
+public class AudioChorusFilterZSerializer : ZSaver.ZSerializer<UnityEngine.AudioChorusFilter> {
     public System.Single dryMix;
     public System.Single wetMix1;
     public System.Single wetMix2;
@@ -565,7 +565,7 @@ public class AudioChorusFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioChorusFilt
     public System.Single depth;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AudioChorusFilterZSaver (UnityEngine.AudioChorusFilter AudioChorusFilterInstance) : base(AudioChorusFilterInstance.gameObject, AudioChorusFilterInstance ) {
+    public AudioChorusFilterZSerializer (UnityEngine.AudioChorusFilter AudioChorusFilterInstance) : base(AudioChorusFilterInstance.gameObject, AudioChorusFilterInstance ) {
         dryMix = AudioChorusFilterInstance.dryMix;
         wetMix1 = AudioChorusFilterInstance.wetMix1;
         wetMix2 = AudioChorusFilterInstance.wetMix2;
@@ -579,7 +579,7 @@ public class AudioChorusFilterZSaver : ZSaver.ZSaver<UnityEngine.AudioChorusFilt
     }
 }
 [System.Serializable]
-public class ClothZSaver : ZSaver.ZSaver<UnityEngine.Cloth> {
+public class ClothZSerializer : ZSaver.ZSerializer<UnityEngine.Cloth> {
     public UnityEngine.ClothSkinningCoefficient[] coefficients;
     public UnityEngine.CapsuleCollider[] capsuleColliders;
     public UnityEngine.ClothSphereColliderPair[] sphereColliders;
@@ -603,7 +603,7 @@ public class ClothZSaver : ZSaver.ZSaver<UnityEngine.Cloth> {
     public System.Single selfCollisionDistance;
     public System.Single selfCollisionStiffness;
     public UnityEngine.HideFlags hideFlags;
-    public ClothZSaver (UnityEngine.Cloth ClothInstance) : base(ClothInstance.gameObject, ClothInstance ) {
+    public ClothZSerializer (UnityEngine.Cloth ClothInstance) : base(ClothInstance.gameObject, ClothInstance ) {
         coefficients = ClothInstance.coefficients;
         capsuleColliders = ClothInstance.capsuleColliders;
         sphereColliders = ClothInstance.sphereColliders;
@@ -631,7 +631,7 @@ public class ClothZSaver : ZSaver.ZSaver<UnityEngine.Cloth> {
     }
 }
 [System.Serializable]
-public class CameraZSaver : ZSaver.ZSaver<UnityEngine.Camera> {
+public class CameraZSerializer : ZSaver.ZSerializer<UnityEngine.Camera> {
     public System.Single nearClipPlane;
     public System.Single farClipPlane;
     public System.Single fieldOfView;
@@ -678,7 +678,7 @@ public class CameraZSaver : ZSaver.ZSaver<UnityEngine.Camera> {
     public UnityEngine.StereoTargetEyeMask stereoTargetEye;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public CameraZSaver (UnityEngine.Camera CameraInstance) : base(CameraInstance.gameObject, CameraInstance ) {
+    public CameraZSerializer (UnityEngine.Camera CameraInstance) : base(CameraInstance.gameObject, CameraInstance ) {
         nearClipPlane = CameraInstance.nearClipPlane;
         farClipPlane = CameraInstance.farClipPlane;
         fieldOfView = CameraInstance.fieldOfView;
@@ -729,17 +729,17 @@ public class CameraZSaver : ZSaver.ZSaver<UnityEngine.Camera> {
     }
 }
 [System.Serializable]
-public class FlareLayerZSaver : ZSaver.ZSaver<UnityEngine.FlareLayer> {
+public class FlareLayerZSerializer : ZSaver.ZSerializer<UnityEngine.FlareLayer> {
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public FlareLayerZSaver (UnityEngine.FlareLayer FlareLayerInstance) : base(FlareLayerInstance.gameObject, FlareLayerInstance ) {
+    public FlareLayerZSerializer (UnityEngine.FlareLayer FlareLayerInstance) : base(FlareLayerInstance.gameObject, FlareLayerInstance ) {
         enabled = FlareLayerInstance.enabled;
         hideFlags = FlareLayerInstance.hideFlags;
 
     }
 }
 [System.Serializable]
-public class ReflectionProbeZSaver : ZSaver.ZSaver<UnityEngine.ReflectionProbe> {
+public class ReflectionProbeZSerializer : ZSaver.ZSerializer<UnityEngine.ReflectionProbe> {
     public UnityEngine.Vector3 size;
     public UnityEngine.Vector3 center;
     public System.Single nearClipPlane;
@@ -763,7 +763,7 @@ public class ReflectionProbeZSaver : ZSaver.ZSaver<UnityEngine.ReflectionProbe> 
     public UnityEngine.RenderTexture realtimeTexture;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public ReflectionProbeZSaver (UnityEngine.ReflectionProbe ReflectionProbeInstance) : base(ReflectionProbeInstance.gameObject, ReflectionProbeInstance ) {
+    public ReflectionProbeZSerializer (UnityEngine.ReflectionProbe ReflectionProbeInstance) : base(ReflectionProbeInstance.gameObject, ReflectionProbeInstance ) {
         size = ReflectionProbeInstance.size;
         center = ReflectionProbeInstance.center;
         nearClipPlane = ReflectionProbeInstance.nearClipPlane;
@@ -791,7 +791,7 @@ public class ReflectionProbeZSaver : ZSaver.ZSaver<UnityEngine.ReflectionProbe> 
     }
 }
 [System.Serializable]
-public class BillboardRendererZSaver : ZSaver.ZSaver<UnityEngine.BillboardRenderer> {
+public class BillboardRendererZSerializer : ZSaver.ZSerializer<UnityEngine.BillboardRenderer> {
     public UnityEngine.BillboardAsset billboard;
     public System.Boolean enabled;
     public UnityEngine.Rendering.ShadowCastingMode shadowCastingMode;
@@ -815,7 +815,7 @@ public class BillboardRendererZSaver : ZSaver.ZSaver<UnityEngine.BillboardRender
     public UnityEngine.Vector4 realtimeLightmapScaleOffset;
     public UnityEngine.Material[] sharedMaterials;
     public UnityEngine.HideFlags hideFlags;
-    public BillboardRendererZSaver (UnityEngine.BillboardRenderer BillboardRendererInstance) : base(BillboardRendererInstance.gameObject, BillboardRendererInstance ) {
+    public BillboardRendererZSerializer (UnityEngine.BillboardRenderer BillboardRendererInstance) : base(BillboardRendererInstance.gameObject, BillboardRendererInstance ) {
         billboard = BillboardRendererInstance.billboard;
         enabled = BillboardRendererInstance.enabled;
         shadowCastingMode = BillboardRendererInstance.shadowCastingMode;
@@ -843,7 +843,7 @@ public class BillboardRendererZSaver : ZSaver.ZSaver<UnityEngine.BillboardRender
     }
 }
 [System.Serializable]
-public class RendererZSaver : ZSaver.ZSaver<UnityEngine.Renderer> {
+public class RendererZSerializer : ZSaver.ZSerializer<UnityEngine.Renderer> {
     public System.Boolean enabled;
     public UnityEngine.Rendering.ShadowCastingMode shadowCastingMode;
     public System.Boolean receiveShadows;
@@ -866,7 +866,7 @@ public class RendererZSaver : ZSaver.ZSaver<UnityEngine.Renderer> {
     public UnityEngine.Vector4 realtimeLightmapScaleOffset;
     public UnityEngine.Material[] sharedMaterials;
     public UnityEngine.HideFlags hideFlags;
-    public RendererZSaver (UnityEngine.Renderer RendererInstance) : base(RendererInstance.gameObject, RendererInstance ) {
+    public RendererZSerializer (UnityEngine.Renderer RendererInstance) : base(RendererInstance.gameObject, RendererInstance ) {
         enabled = RendererInstance.enabled;
         shadowCastingMode = RendererInstance.shadowCastingMode;
         receiveShadows = RendererInstance.receiveShadows;
@@ -893,7 +893,7 @@ public class RendererZSaver : ZSaver.ZSaver<UnityEngine.Renderer> {
     }
 }
 [System.Serializable]
-public class ProjectorZSaver : ZSaver.ZSaver<UnityEngine.Projector> {
+public class ProjectorZSerializer : ZSaver.ZSerializer<UnityEngine.Projector> {
     public System.Single nearClipPlane;
     public System.Single farClipPlane;
     public System.Single fieldOfView;
@@ -903,7 +903,7 @@ public class ProjectorZSaver : ZSaver.ZSaver<UnityEngine.Projector> {
     public System.Int32 ignoreLayers;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public ProjectorZSaver (UnityEngine.Projector ProjectorInstance) : base(ProjectorInstance.gameObject, ProjectorInstance ) {
+    public ProjectorZSerializer (UnityEngine.Projector ProjectorInstance) : base(ProjectorInstance.gameObject, ProjectorInstance ) {
         nearClipPlane = ProjectorInstance.nearClipPlane;
         farClipPlane = ProjectorInstance.farClipPlane;
         fieldOfView = ProjectorInstance.fieldOfView;
@@ -917,7 +917,7 @@ public class ProjectorZSaver : ZSaver.ZSaver<UnityEngine.Projector> {
     }
 }
 [System.Serializable]
-public class TrailRendererZSaver : ZSaver.ZSaver<UnityEngine.TrailRenderer> {
+public class TrailRendererZSerializer : ZSaver.ZSerializer<UnityEngine.TrailRenderer> {
     public System.Single time;
     public System.Single startWidth;
     public System.Single endWidth;
@@ -957,7 +957,7 @@ public class TrailRendererZSaver : ZSaver.ZSaver<UnityEngine.TrailRenderer> {
     public UnityEngine.Vector4 realtimeLightmapScaleOffset;
     public UnityEngine.Material[] sharedMaterials;
     public UnityEngine.HideFlags hideFlags;
-    public TrailRendererZSaver (UnityEngine.TrailRenderer TrailRendererInstance) : base(TrailRendererInstance.gameObject, TrailRendererInstance ) {
+    public TrailRendererZSerializer (UnityEngine.TrailRenderer TrailRendererInstance) : base(TrailRendererInstance.gameObject, TrailRendererInstance ) {
         time = TrailRendererInstance.time;
         startWidth = TrailRendererInstance.startWidth;
         endWidth = TrailRendererInstance.endWidth;
@@ -1001,7 +1001,7 @@ public class TrailRendererZSaver : ZSaver.ZSaver<UnityEngine.TrailRenderer> {
     }
 }
 [System.Serializable]
-public class LineRendererZSaver : ZSaver.ZSaver<UnityEngine.LineRenderer> {
+public class LineRendererZSerializer : ZSaver.ZSerializer<UnityEngine.LineRenderer> {
     public System.Single startWidth;
     public System.Single endWidth;
     public System.Single widthMultiplier;
@@ -1040,7 +1040,7 @@ public class LineRendererZSaver : ZSaver.ZSaver<UnityEngine.LineRenderer> {
     public UnityEngine.Vector4 realtimeLightmapScaleOffset;
     public UnityEngine.Material[] sharedMaterials;
     public UnityEngine.HideFlags hideFlags;
-    public LineRendererZSaver (UnityEngine.LineRenderer LineRendererInstance) : base(LineRendererInstance.gameObject, LineRendererInstance ) {
+    public LineRendererZSerializer (UnityEngine.LineRenderer LineRendererInstance) : base(LineRendererInstance.gameObject, LineRendererInstance ) {
         startWidth = LineRendererInstance.startWidth;
         endWidth = LineRendererInstance.endWidth;
         widthMultiplier = LineRendererInstance.widthMultiplier;
@@ -1083,21 +1083,21 @@ public class LineRendererZSaver : ZSaver.ZSaver<UnityEngine.LineRenderer> {
     }
 }
 [System.Serializable]
-public class OcclusionPortalZSaver : ZSaver.ZSaver<UnityEngine.OcclusionPortal> {
+public class OcclusionPortalZSerializer : ZSaver.ZSerializer<UnityEngine.OcclusionPortal> {
     public System.Boolean open;
     public UnityEngine.HideFlags hideFlags;
-    public OcclusionPortalZSaver (UnityEngine.OcclusionPortal OcclusionPortalInstance) : base(OcclusionPortalInstance.gameObject, OcclusionPortalInstance ) {
+    public OcclusionPortalZSerializer (UnityEngine.OcclusionPortal OcclusionPortalInstance) : base(OcclusionPortalInstance.gameObject, OcclusionPortalInstance ) {
         open = OcclusionPortalInstance.open;
         hideFlags = OcclusionPortalInstance.hideFlags;
 
     }
 }
 [System.Serializable]
-public class OcclusionAreaZSaver : ZSaver.ZSaver<UnityEngine.OcclusionArea> {
+public class OcclusionAreaZSerializer : ZSaver.ZSerializer<UnityEngine.OcclusionArea> {
     public UnityEngine.Vector3 center;
     public UnityEngine.Vector3 size;
     public UnityEngine.HideFlags hideFlags;
-    public OcclusionAreaZSaver (UnityEngine.OcclusionArea OcclusionAreaInstance) : base(OcclusionAreaInstance.gameObject, OcclusionAreaInstance ) {
+    public OcclusionAreaZSerializer (UnityEngine.OcclusionArea OcclusionAreaInstance) : base(OcclusionAreaInstance.gameObject, OcclusionAreaInstance ) {
         center = OcclusionAreaInstance.center;
         size = OcclusionAreaInstance.size;
         hideFlags = OcclusionAreaInstance.hideFlags;
@@ -1105,14 +1105,14 @@ public class OcclusionAreaZSaver : ZSaver.ZSaver<UnityEngine.OcclusionArea> {
     }
 }
 [System.Serializable]
-public class LensFlareZSaver : ZSaver.ZSaver<UnityEngine.LensFlare> {
+public class LensFlareZSerializer : ZSaver.ZSerializer<UnityEngine.LensFlare> {
     public System.Single brightness;
     public System.Single fadeSpeed;
     public UnityEngine.Color color;
     public UnityEngine.Flare flare;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public LensFlareZSaver (UnityEngine.LensFlare LensFlareInstance) : base(LensFlareInstance.gameObject, LensFlareInstance ) {
+    public LensFlareZSerializer (UnityEngine.LensFlare LensFlareInstance) : base(LensFlareInstance.gameObject, LensFlareInstance ) {
         brightness = LensFlareInstance.brightness;
         fadeSpeed = LensFlareInstance.fadeSpeed;
         color = LensFlareInstance.color;
@@ -1123,7 +1123,7 @@ public class LensFlareZSaver : ZSaver.ZSaver<UnityEngine.LensFlare> {
     }
 }
 [System.Serializable]
-public class LightZSaver : ZSaver.ZSaver<UnityEngine.Light> {
+public class LightZSerializer : ZSaver.ZSerializer<UnityEngine.Light> {
     public UnityEngine.LightType type;
     public UnityEngine.LightShape shape;
     public System.Single spotAngle;
@@ -1157,7 +1157,7 @@ public class LightZSaver : ZSaver.ZSaver<UnityEngine.Light> {
     public UnityEngine.LightRenderMode renderMode;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public LightZSaver (UnityEngine.Light LightInstance) : base(LightInstance.gameObject, LightInstance ) {
+    public LightZSerializer (UnityEngine.Light LightInstance) : base(LightInstance.gameObject, LightInstance ) {
         type = LightInstance.type;
         shape = LightInstance.shape;
         spotAngle = LightInstance.spotAngle;
@@ -1195,27 +1195,27 @@ public class LightZSaver : ZSaver.ZSaver<UnityEngine.Light> {
     }
 }
 [System.Serializable]
-public class SkyboxZSaver : ZSaver.ZSaver<UnityEngine.Skybox> {
+public class SkyboxZSerializer : ZSaver.ZSerializer<UnityEngine.Skybox> {
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public SkyboxZSaver (UnityEngine.Skybox SkyboxInstance) : base(SkyboxInstance.gameObject, SkyboxInstance ) {
+    public SkyboxZSerializer (UnityEngine.Skybox SkyboxInstance) : base(SkyboxInstance.gameObject, SkyboxInstance ) {
         enabled = SkyboxInstance.enabled;
         hideFlags = SkyboxInstance.hideFlags;
 
     }
 }
 [System.Serializable]
-public class MeshFilterZSaver : ZSaver.ZSaver<UnityEngine.MeshFilter> {
+public class MeshFilterZSerializer : ZSaver.ZSerializer<UnityEngine.MeshFilter> {
     public UnityEngine.Mesh sharedMesh;
     public UnityEngine.HideFlags hideFlags;
-    public MeshFilterZSaver (UnityEngine.MeshFilter MeshFilterInstance) : base(MeshFilterInstance.gameObject, MeshFilterInstance ) {
+    public MeshFilterZSerializer (UnityEngine.MeshFilter MeshFilterInstance) : base(MeshFilterInstance.gameObject, MeshFilterInstance ) {
         sharedMesh = MeshFilterInstance.sharedMesh;
         hideFlags = MeshFilterInstance.hideFlags;
 
     }
 }
 [System.Serializable]
-public class LightProbeProxyVolumeZSaver : ZSaver.ZSaver<UnityEngine.LightProbeProxyVolume> {
+public class LightProbeProxyVolumeZSerializer : ZSaver.ZSerializer<UnityEngine.LightProbeProxyVolume> {
     public UnityEngine.Vector3 sizeCustom;
     public UnityEngine.Vector3 originCustom;
     public System.Single probeDensity;
@@ -1230,7 +1230,7 @@ public class LightProbeProxyVolumeZSaver : ZSaver.ZSaver<UnityEngine.LightProbeP
     public UnityEngine.LightProbeProxyVolume.DataFormat dataFormat;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public LightProbeProxyVolumeZSaver (UnityEngine.LightProbeProxyVolume LightProbeProxyVolumeInstance) : base(LightProbeProxyVolumeInstance.gameObject, LightProbeProxyVolumeInstance ) {
+    public LightProbeProxyVolumeZSerializer (UnityEngine.LightProbeProxyVolume LightProbeProxyVolumeInstance) : base(LightProbeProxyVolumeInstance.gameObject, LightProbeProxyVolumeInstance ) {
         sizeCustom = LightProbeProxyVolumeInstance.sizeCustom;
         originCustom = LightProbeProxyVolumeInstance.originCustom;
         probeDensity = LightProbeProxyVolumeInstance.probeDensity;
@@ -1249,11 +1249,11 @@ public class LightProbeProxyVolumeZSaver : ZSaver.ZSaver<UnityEngine.LightProbeP
     }
 }
 [System.Serializable]
-public class LightProbeGroupZSaver : ZSaver.ZSaver<UnityEngine.LightProbeGroup> {
+public class LightProbeGroupZSerializer : ZSaver.ZSerializer<UnityEngine.LightProbeGroup> {
     public UnityEngine.Vector3[] probePositions;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public LightProbeGroupZSaver (UnityEngine.LightProbeGroup LightProbeGroupInstance) : base(LightProbeGroupInstance.gameObject, LightProbeGroupInstance ) {
+    public LightProbeGroupZSerializer (UnityEngine.LightProbeGroup LightProbeGroupInstance) : base(LightProbeGroupInstance.gameObject, LightProbeGroupInstance ) {
         probePositions = LightProbeGroupInstance.probePositions;
         enabled = LightProbeGroupInstance.enabled;
         hideFlags = LightProbeGroupInstance.hideFlags;
@@ -1261,14 +1261,14 @@ public class LightProbeGroupZSaver : ZSaver.ZSaver<UnityEngine.LightProbeGroup> 
     }
 }
 [System.Serializable]
-public class LODGroupZSaver : ZSaver.ZSaver<UnityEngine.LODGroup> {
+public class LODGroupZSerializer : ZSaver.ZSerializer<UnityEngine.LODGroup> {
     public UnityEngine.Vector3 localReferencePoint;
     public System.Single size;
     public UnityEngine.LODFadeMode fadeMode;
     public System.Boolean animateCrossFading;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public LODGroupZSaver (UnityEngine.LODGroup LODGroupInstance) : base(LODGroupInstance.gameObject, LODGroupInstance ) {
+    public LODGroupZSerializer (UnityEngine.LODGroup LODGroupInstance) : base(LODGroupInstance.gameObject, LODGroupInstance ) {
         localReferencePoint = LODGroupInstance.localReferencePoint;
         size = LODGroupInstance.size;
         fadeMode = LODGroupInstance.fadeMode;
@@ -1279,17 +1279,17 @@ public class LODGroupZSaver : ZSaver.ZSaver<UnityEngine.LODGroup> {
     }
 }
 [System.Serializable]
-public class BehaviourZSaver : ZSaver.ZSaver<UnityEngine.Behaviour> {
+public class BehaviourZSerializer : ZSaver.ZSerializer<UnityEngine.Behaviour> {
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public BehaviourZSaver (UnityEngine.Behaviour BehaviourInstance) : base(BehaviourInstance.gameObject, BehaviourInstance ) {
+    public BehaviourZSerializer (UnityEngine.Behaviour BehaviourInstance) : base(BehaviourInstance.gameObject, BehaviourInstance ) {
         enabled = BehaviourInstance.enabled;
         hideFlags = BehaviourInstance.hideFlags;
 
     }
 }
 [System.Serializable]
-public class RectTransformZSaver : ZSaver.ZSaver<UnityEngine.RectTransform> {
+public class RectTransformZSerializer : ZSaver.ZSerializer<UnityEngine.RectTransform> {
     public UnityEngine.Vector2 anchorMin;
     public UnityEngine.Vector2 anchorMax;
     public UnityEngine.Vector2 anchoredPosition;
@@ -1312,7 +1312,7 @@ public class RectTransformZSaver : ZSaver.ZSaver<UnityEngine.RectTransform> {
     public System.Boolean hasChanged;
     public System.Int32 hierarchyCapacity;
     public UnityEngine.HideFlags hideFlags;
-    public RectTransformZSaver (UnityEngine.RectTransform RectTransformInstance) : base(RectTransformInstance.gameObject, RectTransformInstance ) {
+    public RectTransformZSerializer (UnityEngine.RectTransform RectTransformInstance) : base(RectTransformInstance.gameObject, RectTransformInstance ) {
         anchorMin = RectTransformInstance.anchorMin;
         anchorMax = RectTransformInstance.anchorMax;
         anchoredPosition = RectTransformInstance.anchoredPosition;
@@ -1339,13 +1339,13 @@ public class RectTransformZSaver : ZSaver.ZSaver<UnityEngine.RectTransform> {
     }
 }
 [System.Serializable]
-public class SortingGroupZSaver : ZSaver.ZSaver<UnityEngine.Rendering.SortingGroup> {
+public class SortingGroupZSerializer : ZSaver.ZSerializer<UnityEngine.Rendering.SortingGroup> {
     public System.String sortingLayerName;
     public System.Int32 sortingLayerID;
     public System.Int32 sortingOrder;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public SortingGroupZSaver (UnityEngine.Rendering.SortingGroup SortingGroupInstance) : base(SortingGroupInstance.gameObject, SortingGroupInstance ) {
+    public SortingGroupZSerializer (UnityEngine.Rendering.SortingGroup SortingGroupInstance) : base(SortingGroupInstance.gameObject, SortingGroupInstance ) {
         sortingLayerName = SortingGroupInstance.sortingLayerName;
         sortingLayerID = SortingGroupInstance.sortingLayerID;
         sortingOrder = SortingGroupInstance.sortingOrder;
@@ -1355,7 +1355,7 @@ public class SortingGroupZSaver : ZSaver.ZSaver<UnityEngine.Rendering.SortingGro
     }
 }
 [System.Serializable]
-public class PlayableDirectorZSaver : ZSaver.ZSaver<UnityEngine.Playables.PlayableDirector> {
+public class PlayableDirectorZSerializer : ZSaver.ZSerializer<UnityEngine.Playables.PlayableDirector> {
     public UnityEngine.Playables.DirectorWrapMode extrapolationMode;
     public UnityEngine.Playables.PlayableAsset playableAsset;
     public System.Boolean playOnAwake;
@@ -1364,7 +1364,7 @@ public class PlayableDirectorZSaver : ZSaver.ZSaver<UnityEngine.Playables.Playab
     public System.Double initialTime;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public PlayableDirectorZSaver (UnityEngine.Playables.PlayableDirector PlayableDirectorInstance) : base(PlayableDirectorInstance.gameObject, PlayableDirectorInstance ) {
+    public PlayableDirectorZSerializer (UnityEngine.Playables.PlayableDirector PlayableDirectorInstance) : base(PlayableDirectorInstance.gameObject, PlayableDirectorInstance ) {
         extrapolationMode = PlayableDirectorInstance.extrapolationMode;
         playableAsset = PlayableDirectorInstance.playableAsset;
         playOnAwake = PlayableDirectorInstance.playOnAwake;
@@ -1377,14 +1377,14 @@ public class PlayableDirectorZSaver : ZSaver.ZSaver<UnityEngine.Playables.Playab
     }
 }
 [System.Serializable]
-public class GridZSaver : ZSaver.ZSaver<UnityEngine.Grid> {
+public class GridZSerializer : ZSaver.ZSerializer<UnityEngine.Grid> {
     public UnityEngine.Vector3 cellSize;
     public UnityEngine.Vector3 cellGap;
     public UnityEngine.GridLayout.CellLayout cellLayout;
     public UnityEngine.GridLayout.CellSwizzle cellSwizzle;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public GridZSaver (UnityEngine.Grid GridInstance) : base(GridInstance.gameObject, GridInstance ) {
+    public GridZSerializer (UnityEngine.Grid GridInstance) : base(GridInstance.gameObject, GridInstance ) {
         cellSize = GridInstance.cellSize;
         cellGap = GridInstance.cellGap;
         cellLayout = GridInstance.cellLayout;
@@ -1395,22 +1395,22 @@ public class GridZSaver : ZSaver.ZSaver<UnityEngine.Grid> {
     }
 }
 [System.Serializable]
-public class GridLayoutZSaver : ZSaver.ZSaver<UnityEngine.GridLayout> {
+public class GridLayoutZSerializer : ZSaver.ZSerializer<UnityEngine.GridLayout> {
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public GridLayoutZSaver (UnityEngine.GridLayout GridLayoutInstance) : base(GridLayoutInstance.gameObject, GridLayoutInstance ) {
+    public GridLayoutZSerializer (UnityEngine.GridLayout GridLayoutInstance) : base(GridLayoutInstance.gameObject, GridLayoutInstance ) {
         enabled = GridLayoutInstance.enabled;
         hideFlags = GridLayoutInstance.hideFlags;
 
     }
 }
 [System.Serializable]
-public class ParticleSystemZSaver : ZSaver.ZSaver<UnityEngine.ParticleSystem> {
+public class ParticleSystemZSerializer : ZSaver.ZSerializer<UnityEngine.ParticleSystem> {
     public System.Single time;
     public System.UInt32 randomSeed;
     public System.Boolean useAutoRandomSeed;
     public UnityEngine.HideFlags hideFlags;
-    public ParticleSystemZSaver (UnityEngine.ParticleSystem ParticleSystemInstance) : base(ParticleSystemInstance.gameObject, ParticleSystemInstance ) {
+    public ParticleSystemZSerializer (UnityEngine.ParticleSystem ParticleSystemInstance) : base(ParticleSystemInstance.gameObject, ParticleSystemInstance ) {
         time = ParticleSystemInstance.time;
         randomSeed = ParticleSystemInstance.randomSeed;
         useAutoRandomSeed = ParticleSystemInstance.useAutoRandomSeed;
@@ -1419,7 +1419,7 @@ public class ParticleSystemZSaver : ZSaver.ZSaver<UnityEngine.ParticleSystem> {
     }
 }
 [System.Serializable]
-public class ParticleSystemRendererZSaver : ZSaver.ZSaver<UnityEngine.ParticleSystemRenderer> {
+public class ParticleSystemRendererZSerializer : ZSaver.ZSerializer<UnityEngine.ParticleSystemRenderer> {
     public UnityEngine.ParticleSystemRenderSpace alignment;
     public UnityEngine.ParticleSystemRenderMode renderMode;
     public UnityEngine.ParticleSystemSortMode sortMode;
@@ -1461,7 +1461,7 @@ public class ParticleSystemRendererZSaver : ZSaver.ZSaver<UnityEngine.ParticleSy
     public UnityEngine.Vector4 realtimeLightmapScaleOffset;
     public UnityEngine.Material[] sharedMaterials;
     public UnityEngine.HideFlags hideFlags;
-    public ParticleSystemRendererZSaver (UnityEngine.ParticleSystemRenderer ParticleSystemRendererInstance) : base(ParticleSystemRendererInstance.gameObject, ParticleSystemRendererInstance ) {
+    public ParticleSystemRendererZSerializer (UnityEngine.ParticleSystemRenderer ParticleSystemRendererInstance) : base(ParticleSystemRendererInstance.gameObject, ParticleSystemRendererInstance ) {
         alignment = ParticleSystemRendererInstance.alignment;
         renderMode = ParticleSystemRendererInstance.renderMode;
         sortMode = ParticleSystemRendererInstance.sortMode;
@@ -1507,7 +1507,7 @@ public class ParticleSystemRendererZSaver : ZSaver.ZSaver<UnityEngine.ParticleSy
     }
 }
 [System.Serializable]
-public class ParticleSystemForceFieldZSaver : ZSaver.ZSaver<UnityEngine.ParticleSystemForceField> {
+public class ParticleSystemForceFieldZSerializer : ZSaver.ZSerializer<UnityEngine.ParticleSystemForceField> {
     public UnityEngine.ParticleSystemForceFieldShape shape;
     public System.Single startRange;
     public System.Single endRange;
@@ -1527,7 +1527,7 @@ public class ParticleSystemForceFieldZSaver : ZSaver.ZSaver<UnityEngine.Particle
     public UnityEngine.ParticleSystem.MinMaxCurve vectorFieldSpeed;
     public UnityEngine.ParticleSystem.MinMaxCurve vectorFieldAttraction;
     public UnityEngine.HideFlags hideFlags;
-    public ParticleSystemForceFieldZSaver (UnityEngine.ParticleSystemForceField ParticleSystemForceFieldInstance) : base(ParticleSystemForceFieldInstance.gameObject, ParticleSystemForceFieldInstance ) {
+    public ParticleSystemForceFieldZSerializer (UnityEngine.ParticleSystemForceField ParticleSystemForceFieldInstance) : base(ParticleSystemForceFieldInstance.gameObject, ParticleSystemForceFieldInstance ) {
         shape = ParticleSystemForceFieldInstance.shape;
         startRange = ParticleSystemForceFieldInstance.startRange;
         endRange = ParticleSystemForceFieldInstance.endRange;
@@ -1551,7 +1551,7 @@ public class ParticleSystemForceFieldZSaver : ZSaver.ZSaver<UnityEngine.Particle
     }
 }
 [System.Serializable]
-public class RigidbodyZSaver : ZSaver.ZSaver<UnityEngine.Rigidbody> {
+public class RigidbodyZSerializer : ZSaver.ZSerializer<UnityEngine.Rigidbody> {
     public UnityEngine.Vector3 velocity;
     public UnityEngine.Vector3 angularVelocity;
     public System.Single drag;
@@ -1575,7 +1575,7 @@ public class RigidbodyZSaver : ZSaver.ZSaver<UnityEngine.Rigidbody> {
     public System.Single maxAngularVelocity;
     public System.Int32 solverVelocityIterations;
     public UnityEngine.HideFlags hideFlags;
-    public RigidbodyZSaver (UnityEngine.Rigidbody RigidbodyInstance) : base(RigidbodyInstance.gameObject, RigidbodyInstance ) {
+    public RigidbodyZSerializer (UnityEngine.Rigidbody RigidbodyInstance) : base(RigidbodyInstance.gameObject, RigidbodyInstance ) {
         velocity = RigidbodyInstance.velocity;
         angularVelocity = RigidbodyInstance.angularVelocity;
         drag = RigidbodyInstance.drag;
@@ -1603,12 +1603,12 @@ public class RigidbodyZSaver : ZSaver.ZSaver<UnityEngine.Rigidbody> {
     }
 }
 [System.Serializable]
-public class ColliderZSaver : ZSaver.ZSaver<UnityEngine.Collider> {
+public class ColliderZSerializer : ZSaver.ZSerializer<UnityEngine.Collider> {
     public System.Boolean enabled;
     public System.Boolean isTrigger;
     public System.Single contactOffset;
     public UnityEngine.HideFlags hideFlags;
-    public ColliderZSaver (UnityEngine.Collider ColliderInstance) : base(ColliderInstance.gameObject, ColliderInstance ) {
+    public ColliderZSerializer (UnityEngine.Collider ColliderInstance) : base(ColliderInstance.gameObject, ColliderInstance ) {
         enabled = ColliderInstance.enabled;
         isTrigger = ColliderInstance.isTrigger;
         contactOffset = ColliderInstance.contactOffset;
@@ -1617,7 +1617,7 @@ public class ColliderZSaver : ZSaver.ZSaver<UnityEngine.Collider> {
     }
 }
 [System.Serializable]
-public class CharacterControllerZSaver : ZSaver.ZSaver<UnityEngine.CharacterController> {
+public class CharacterControllerZSerializer : ZSaver.ZSerializer<UnityEngine.CharacterController> {
     public System.Single radius;
     public System.Single height;
     public UnityEngine.Vector3 center;
@@ -1631,7 +1631,7 @@ public class CharacterControllerZSaver : ZSaver.ZSaver<UnityEngine.CharacterCont
     public System.Boolean isTrigger;
     public System.Single contactOffset;
     public UnityEngine.HideFlags hideFlags;
-    public CharacterControllerZSaver (UnityEngine.CharacterController CharacterControllerInstance) : base(CharacterControllerInstance.gameObject, CharacterControllerInstance ) {
+    public CharacterControllerZSerializer (UnityEngine.CharacterController CharacterControllerInstance) : base(CharacterControllerInstance.gameObject, CharacterControllerInstance ) {
         radius = CharacterControllerInstance.radius;
         height = CharacterControllerInstance.height;
         center = CharacterControllerInstance.center;
@@ -1649,7 +1649,7 @@ public class CharacterControllerZSaver : ZSaver.ZSaver<UnityEngine.CharacterCont
     }
 }
 [System.Serializable]
-public class MeshColliderZSaver : ZSaver.ZSaver<UnityEngine.MeshCollider> {
+public class MeshColliderZSerializer : ZSaver.ZSerializer<UnityEngine.MeshCollider> {
     public UnityEngine.Mesh sharedMesh;
     public System.Boolean convex;
     public UnityEngine.MeshColliderCookingOptions cookingOptions;
@@ -1657,7 +1657,7 @@ public class MeshColliderZSaver : ZSaver.ZSaver<UnityEngine.MeshCollider> {
     public System.Boolean isTrigger;
     public System.Single contactOffset;
     public UnityEngine.HideFlags hideFlags;
-    public MeshColliderZSaver (UnityEngine.MeshCollider MeshColliderInstance) : base(MeshColliderInstance.gameObject, MeshColliderInstance ) {
+    public MeshColliderZSerializer (UnityEngine.MeshCollider MeshColliderInstance) : base(MeshColliderInstance.gameObject, MeshColliderInstance ) {
         sharedMesh = MeshColliderInstance.sharedMesh;
         convex = MeshColliderInstance.convex;
         cookingOptions = MeshColliderInstance.cookingOptions;
@@ -1669,7 +1669,7 @@ public class MeshColliderZSaver : ZSaver.ZSaver<UnityEngine.MeshCollider> {
     }
 }
 [System.Serializable]
-public class CapsuleColliderZSaver : ZSaver.ZSaver<UnityEngine.CapsuleCollider> {
+public class CapsuleColliderZSerializer : ZSaver.ZSerializer<UnityEngine.CapsuleCollider> {
     public UnityEngine.Vector3 center;
     public System.Single radius;
     public System.Single height;
@@ -1678,7 +1678,7 @@ public class CapsuleColliderZSaver : ZSaver.ZSaver<UnityEngine.CapsuleCollider> 
     public System.Boolean isTrigger;
     public System.Single contactOffset;
     public UnityEngine.HideFlags hideFlags;
-    public CapsuleColliderZSaver (UnityEngine.CapsuleCollider CapsuleColliderInstance) : base(CapsuleColliderInstance.gameObject, CapsuleColliderInstance ) {
+    public CapsuleColliderZSerializer (UnityEngine.CapsuleCollider CapsuleColliderInstance) : base(CapsuleColliderInstance.gameObject, CapsuleColliderInstance ) {
         center = CapsuleColliderInstance.center;
         radius = CapsuleColliderInstance.radius;
         height = CapsuleColliderInstance.height;
@@ -1691,14 +1691,14 @@ public class CapsuleColliderZSaver : ZSaver.ZSaver<UnityEngine.CapsuleCollider> 
     }
 }
 [System.Serializable]
-public class BoxColliderZSaver : ZSaver.ZSaver<UnityEngine.BoxCollider> {
+public class BoxColliderZSerializer : ZSaver.ZSerializer<UnityEngine.BoxCollider> {
     public UnityEngine.Vector3 center;
     public UnityEngine.Vector3 size;
     public System.Boolean enabled;
     public System.Boolean isTrigger;
     public System.Single contactOffset;
     public UnityEngine.HideFlags hideFlags;
-    public BoxColliderZSaver (UnityEngine.BoxCollider BoxColliderInstance) : base(BoxColliderInstance.gameObject, BoxColliderInstance ) {
+    public BoxColliderZSerializer (UnityEngine.BoxCollider BoxColliderInstance) : base(BoxColliderInstance.gameObject, BoxColliderInstance ) {
         center = BoxColliderInstance.center;
         size = BoxColliderInstance.size;
         enabled = BoxColliderInstance.enabled;
@@ -1709,14 +1709,14 @@ public class BoxColliderZSaver : ZSaver.ZSaver<UnityEngine.BoxCollider> {
     }
 }
 [System.Serializable]
-public class SphereColliderZSaver : ZSaver.ZSaver<UnityEngine.SphereCollider> {
+public class SphereColliderZSerializer : ZSaver.ZSerializer<UnityEngine.SphereCollider> {
     public UnityEngine.Vector3 center;
     public System.Single radius;
     public System.Boolean enabled;
     public System.Boolean isTrigger;
     public System.Single contactOffset;
     public UnityEngine.HideFlags hideFlags;
-    public SphereColliderZSaver (UnityEngine.SphereCollider SphereColliderInstance) : base(SphereColliderInstance.gameObject, SphereColliderInstance ) {
+    public SphereColliderZSerializer (UnityEngine.SphereCollider SphereColliderInstance) : base(SphereColliderInstance.gameObject, SphereColliderInstance ) {
         center = SphereColliderInstance.center;
         radius = SphereColliderInstance.radius;
         enabled = SphereColliderInstance.enabled;
@@ -1727,14 +1727,14 @@ public class SphereColliderZSaver : ZSaver.ZSaver<UnityEngine.SphereCollider> {
     }
 }
 [System.Serializable]
-public class ConstantForceZSaver : ZSaver.ZSaver<UnityEngine.ConstantForce> {
+public class ConstantForceZSerializer : ZSaver.ZSerializer<UnityEngine.ConstantForce> {
     public UnityEngine.Vector3 force;
     public UnityEngine.Vector3 relativeForce;
     public UnityEngine.Vector3 torque;
     public UnityEngine.Vector3 relativeTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public ConstantForceZSaver (UnityEngine.ConstantForce ConstantForceInstance) : base(ConstantForceInstance.gameObject, ConstantForceInstance ) {
+    public ConstantForceZSerializer (UnityEngine.ConstantForce ConstantForceInstance) : base(ConstantForceInstance.gameObject, ConstantForceInstance ) {
         force = ConstantForceInstance.force;
         relativeForce = ConstantForceInstance.relativeForce;
         torque = ConstantForceInstance.torque;
@@ -1745,7 +1745,7 @@ public class ConstantForceZSaver : ZSaver.ZSaver<UnityEngine.ConstantForce> {
     }
 }
 [System.Serializable]
-public class JointZSaver : ZSaver.ZSaver<UnityEngine.Joint> {
+public class JointZSerializer : ZSaver.ZSerializer<UnityEngine.Joint> {
     public UnityEngine.Rigidbody connectedBody;
     public UnityEngine.ArticulationBody connectedArticulationBody;
     public UnityEngine.Vector3 axis;
@@ -1759,7 +1759,7 @@ public class JointZSaver : ZSaver.ZSaver<UnityEngine.Joint> {
     public System.Single massScale;
     public System.Single connectedMassScale;
     public UnityEngine.HideFlags hideFlags;
-    public JointZSaver (UnityEngine.Joint JointInstance) : base(JointInstance.gameObject, JointInstance ) {
+    public JointZSerializer (UnityEngine.Joint JointInstance) : base(JointInstance.gameObject, JointInstance ) {
         connectedBody = JointInstance.connectedBody;
         connectedArticulationBody = JointInstance.connectedArticulationBody;
         axis = JointInstance.axis;
@@ -1777,7 +1777,7 @@ public class JointZSaver : ZSaver.ZSaver<UnityEngine.Joint> {
     }
 }
 [System.Serializable]
-public class HingeJointZSaver : ZSaver.ZSaver<UnityEngine.HingeJoint> {
+public class HingeJointZSerializer : ZSaver.ZSerializer<UnityEngine.HingeJoint> {
     public UnityEngine.JointMotor motor;
     public UnityEngine.JointLimits limits;
     public UnityEngine.JointSpring spring;
@@ -1797,7 +1797,7 @@ public class HingeJointZSaver : ZSaver.ZSaver<UnityEngine.HingeJoint> {
     public System.Single massScale;
     public System.Single connectedMassScale;
     public UnityEngine.HideFlags hideFlags;
-    public HingeJointZSaver (UnityEngine.HingeJoint HingeJointInstance) : base(HingeJointInstance.gameObject, HingeJointInstance ) {
+    public HingeJointZSerializer (UnityEngine.HingeJoint HingeJointInstance) : base(HingeJointInstance.gameObject, HingeJointInstance ) {
         motor = HingeJointInstance.motor;
         limits = HingeJointInstance.limits;
         spring = HingeJointInstance.spring;
@@ -1821,7 +1821,7 @@ public class HingeJointZSaver : ZSaver.ZSaver<UnityEngine.HingeJoint> {
     }
 }
 [System.Serializable]
-public class SpringJointZSaver : ZSaver.ZSaver<UnityEngine.SpringJoint> {
+public class SpringJointZSerializer : ZSaver.ZSerializer<UnityEngine.SpringJoint> {
     public System.Single spring;
     public System.Single damper;
     public System.Single minDistance;
@@ -1840,7 +1840,7 @@ public class SpringJointZSaver : ZSaver.ZSaver<UnityEngine.SpringJoint> {
     public System.Single massScale;
     public System.Single connectedMassScale;
     public UnityEngine.HideFlags hideFlags;
-    public SpringJointZSaver (UnityEngine.SpringJoint SpringJointInstance) : base(SpringJointInstance.gameObject, SpringJointInstance ) {
+    public SpringJointZSerializer (UnityEngine.SpringJoint SpringJointInstance) : base(SpringJointInstance.gameObject, SpringJointInstance ) {
         spring = SpringJointInstance.spring;
         damper = SpringJointInstance.damper;
         minDistance = SpringJointInstance.minDistance;
@@ -1863,7 +1863,7 @@ public class SpringJointZSaver : ZSaver.ZSaver<UnityEngine.SpringJoint> {
     }
 }
 [System.Serializable]
-public class FixedJointZSaver : ZSaver.ZSaver<UnityEngine.FixedJoint> {
+public class FixedJointZSerializer : ZSaver.ZSerializer<UnityEngine.FixedJoint> {
     public UnityEngine.Rigidbody connectedBody;
     public UnityEngine.ArticulationBody connectedArticulationBody;
     public UnityEngine.Vector3 axis;
@@ -1877,7 +1877,7 @@ public class FixedJointZSaver : ZSaver.ZSaver<UnityEngine.FixedJoint> {
     public System.Single massScale;
     public System.Single connectedMassScale;
     public UnityEngine.HideFlags hideFlags;
-    public FixedJointZSaver (UnityEngine.FixedJoint FixedJointInstance) : base(FixedJointInstance.gameObject, FixedJointInstance ) {
+    public FixedJointZSerializer (UnityEngine.FixedJoint FixedJointInstance) : base(FixedJointInstance.gameObject, FixedJointInstance ) {
         connectedBody = FixedJointInstance.connectedBody;
         connectedArticulationBody = FixedJointInstance.connectedArticulationBody;
         axis = FixedJointInstance.axis;
@@ -1895,7 +1895,7 @@ public class FixedJointZSaver : ZSaver.ZSaver<UnityEngine.FixedJoint> {
     }
 }
 [System.Serializable]
-public class CharacterJointZSaver : ZSaver.ZSaver<UnityEngine.CharacterJoint> {
+public class CharacterJointZSerializer : ZSaver.ZSerializer<UnityEngine.CharacterJoint> {
     public UnityEngine.Vector3 swingAxis;
     public UnityEngine.SoftJointLimitSpring twistLimitSpring;
     public UnityEngine.SoftJointLimitSpring swingLimitSpring;
@@ -1919,7 +1919,7 @@ public class CharacterJointZSaver : ZSaver.ZSaver<UnityEngine.CharacterJoint> {
     public System.Single massScale;
     public System.Single connectedMassScale;
     public UnityEngine.HideFlags hideFlags;
-    public CharacterJointZSaver (UnityEngine.CharacterJoint CharacterJointInstance) : base(CharacterJointInstance.gameObject, CharacterJointInstance ) {
+    public CharacterJointZSerializer (UnityEngine.CharacterJoint CharacterJointInstance) : base(CharacterJointInstance.gameObject, CharacterJointInstance ) {
         swingAxis = CharacterJointInstance.swingAxis;
         twistLimitSpring = CharacterJointInstance.twistLimitSpring;
         swingLimitSpring = CharacterJointInstance.swingLimitSpring;
@@ -1947,7 +1947,7 @@ public class CharacterJointZSaver : ZSaver.ZSaver<UnityEngine.CharacterJoint> {
     }
 }
 [System.Serializable]
-public class ConfigurableJointZSaver : ZSaver.ZSaver<UnityEngine.ConfigurableJoint> {
+public class ConfigurableJointZSerializer : ZSaver.ZSerializer<UnityEngine.ConfigurableJoint> {
     public UnityEngine.Vector3 secondaryAxis;
     public UnityEngine.ConfigurableJointMotion xMotion;
     public UnityEngine.ConfigurableJointMotion yMotion;
@@ -1992,7 +1992,7 @@ public class ConfigurableJointZSaver : ZSaver.ZSaver<UnityEngine.ConfigurableJoi
     public System.Single massScale;
     public System.Single connectedMassScale;
     public UnityEngine.HideFlags hideFlags;
-    public ConfigurableJointZSaver (UnityEngine.ConfigurableJoint ConfigurableJointInstance) : base(ConfigurableJointInstance.gameObject, ConfigurableJointInstance ) {
+    public ConfigurableJointZSerializer (UnityEngine.ConfigurableJoint ConfigurableJointInstance) : base(ConfigurableJointInstance.gameObject, ConfigurableJointInstance ) {
         secondaryAxis = ConfigurableJointInstance.secondaryAxis;
         xMotion = ConfigurableJointInstance.xMotion;
         yMotion = ConfigurableJointInstance.yMotion;
@@ -2041,7 +2041,7 @@ public class ConfigurableJointZSaver : ZSaver.ZSaver<UnityEngine.ConfigurableJoi
     }
 }
 [System.Serializable]
-public class ArticulationBodyZSaver : ZSaver.ZSaver<UnityEngine.ArticulationBody> {
+public class ArticulationBodyZSerializer : ZSaver.ZSerializer<UnityEngine.ArticulationBody> {
     public UnityEngine.ArticulationJointType jointType;
     public UnityEngine.Vector3 anchorPosition;
     public UnityEngine.Vector3 parentAnchorPosition;
@@ -2080,7 +2080,7 @@ public class ArticulationBodyZSaver : ZSaver.ZSaver<UnityEngine.ArticulationBody
     public UnityEngine.ArticulationReducedSpace jointForce;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public ArticulationBodyZSaver (UnityEngine.ArticulationBody ArticulationBodyInstance) : base(ArticulationBodyInstance.gameObject, ArticulationBodyInstance ) {
+    public ArticulationBodyZSerializer (UnityEngine.ArticulationBody ArticulationBodyInstance) : base(ArticulationBodyInstance.gameObject, ArticulationBodyInstance ) {
         jointType = ArticulationBodyInstance.jointType;
         anchorPosition = ArticulationBodyInstance.anchorPosition;
         parentAnchorPosition = ArticulationBodyInstance.parentAnchorPosition;
@@ -2123,7 +2123,7 @@ public class ArticulationBodyZSaver : ZSaver.ZSaver<UnityEngine.ArticulationBody
     }
 }
 [System.Serializable]
-public class Rigidbody2DZSaver : ZSaver.ZSaver<UnityEngine.Rigidbody2D> {
+public class Rigidbody2DZSerializer : ZSaver.ZSerializer<UnityEngine.Rigidbody2D> {
     public UnityEngine.Vector2 position;
     public System.Single rotation;
     public UnityEngine.Vector2 velocity;
@@ -2145,7 +2145,7 @@ public class Rigidbody2DZSaver : ZSaver.ZSaver<UnityEngine.Rigidbody2D> {
     public UnityEngine.RigidbodySleepMode2D sleepMode;
     public UnityEngine.CollisionDetectionMode2D collisionDetectionMode;
     public UnityEngine.HideFlags hideFlags;
-    public Rigidbody2DZSaver (UnityEngine.Rigidbody2D Rigidbody2DInstance) : base(Rigidbody2DInstance.gameObject, Rigidbody2DInstance ) {
+    public Rigidbody2DZSerializer (UnityEngine.Rigidbody2D Rigidbody2DInstance) : base(Rigidbody2DInstance.gameObject, Rigidbody2DInstance ) {
         position = Rigidbody2DInstance.position;
         rotation = Rigidbody2DInstance.rotation;
         velocity = Rigidbody2DInstance.velocity;
@@ -2171,7 +2171,7 @@ public class Rigidbody2DZSaver : ZSaver.ZSaver<UnityEngine.Rigidbody2D> {
     }
 }
 [System.Serializable]
-public class Collider2DZSaver : ZSaver.ZSaver<UnityEngine.Collider2D> {
+public class Collider2DZSerializer : ZSaver.ZSerializer<UnityEngine.Collider2D> {
     public System.Single density;
     public System.Boolean isTrigger;
     public System.Boolean usedByEffector;
@@ -2179,7 +2179,7 @@ public class Collider2DZSaver : ZSaver.ZSaver<UnityEngine.Collider2D> {
     public UnityEngine.Vector2 offset;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public Collider2DZSaver (UnityEngine.Collider2D Collider2DInstance) : base(Collider2DInstance.gameObject, Collider2DInstance ) {
+    public Collider2DZSerializer (UnityEngine.Collider2D Collider2DInstance) : base(Collider2DInstance.gameObject, Collider2DInstance ) {
         density = Collider2DInstance.density;
         isTrigger = Collider2DInstance.isTrigger;
         usedByEffector = Collider2DInstance.usedByEffector;
@@ -2191,7 +2191,7 @@ public class Collider2DZSaver : ZSaver.ZSaver<UnityEngine.Collider2D> {
     }
 }
 [System.Serializable]
-public class CircleCollider2DZSaver : ZSaver.ZSaver<UnityEngine.CircleCollider2D> {
+public class CircleCollider2DZSerializer : ZSaver.ZSerializer<UnityEngine.CircleCollider2D> {
     public System.Single radius;
     public System.Single density;
     public System.Boolean isTrigger;
@@ -2200,7 +2200,7 @@ public class CircleCollider2DZSaver : ZSaver.ZSaver<UnityEngine.CircleCollider2D
     public UnityEngine.Vector2 offset;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public CircleCollider2DZSaver (UnityEngine.CircleCollider2D CircleCollider2DInstance) : base(CircleCollider2DInstance.gameObject, CircleCollider2DInstance ) {
+    public CircleCollider2DZSerializer (UnityEngine.CircleCollider2D CircleCollider2DInstance) : base(CircleCollider2DInstance.gameObject, CircleCollider2DInstance ) {
         radius = CircleCollider2DInstance.radius;
         density = CircleCollider2DInstance.density;
         isTrigger = CircleCollider2DInstance.isTrigger;
@@ -2213,7 +2213,7 @@ public class CircleCollider2DZSaver : ZSaver.ZSaver<UnityEngine.CircleCollider2D
     }
 }
 [System.Serializable]
-public class CapsuleCollider2DZSaver : ZSaver.ZSaver<UnityEngine.CapsuleCollider2D> {
+public class CapsuleCollider2DZSerializer : ZSaver.ZSerializer<UnityEngine.CapsuleCollider2D> {
     public UnityEngine.Vector2 size;
     public UnityEngine.CapsuleDirection2D direction;
     public System.Single density;
@@ -2223,7 +2223,7 @@ public class CapsuleCollider2DZSaver : ZSaver.ZSaver<UnityEngine.CapsuleCollider
     public UnityEngine.Vector2 offset;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public CapsuleCollider2DZSaver (UnityEngine.CapsuleCollider2D CapsuleCollider2DInstance) : base(CapsuleCollider2DInstance.gameObject, CapsuleCollider2DInstance ) {
+    public CapsuleCollider2DZSerializer (UnityEngine.CapsuleCollider2D CapsuleCollider2DInstance) : base(CapsuleCollider2DInstance.gameObject, CapsuleCollider2DInstance ) {
         size = CapsuleCollider2DInstance.size;
         direction = CapsuleCollider2DInstance.direction;
         density = CapsuleCollider2DInstance.density;
@@ -2237,7 +2237,7 @@ public class CapsuleCollider2DZSaver : ZSaver.ZSaver<UnityEngine.CapsuleCollider
     }
 }
 [System.Serializable]
-public class EdgeCollider2DZSaver : ZSaver.ZSaver<UnityEngine.EdgeCollider2D> {
+public class EdgeCollider2DZSerializer : ZSaver.ZSerializer<UnityEngine.EdgeCollider2D> {
     public System.Single edgeRadius;
     public UnityEngine.Vector2[] points;
     public System.Boolean useAdjacentStartPoint;
@@ -2251,7 +2251,7 @@ public class EdgeCollider2DZSaver : ZSaver.ZSaver<UnityEngine.EdgeCollider2D> {
     public UnityEngine.Vector2 offset;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public EdgeCollider2DZSaver (UnityEngine.EdgeCollider2D EdgeCollider2DInstance) : base(EdgeCollider2DInstance.gameObject, EdgeCollider2DInstance ) {
+    public EdgeCollider2DZSerializer (UnityEngine.EdgeCollider2D EdgeCollider2DInstance) : base(EdgeCollider2DInstance.gameObject, EdgeCollider2DInstance ) {
         edgeRadius = EdgeCollider2DInstance.edgeRadius;
         points = EdgeCollider2DInstance.points;
         useAdjacentStartPoint = EdgeCollider2DInstance.useAdjacentStartPoint;
@@ -2269,7 +2269,7 @@ public class EdgeCollider2DZSaver : ZSaver.ZSaver<UnityEngine.EdgeCollider2D> {
     }
 }
 [System.Serializable]
-public class BoxCollider2DZSaver : ZSaver.ZSaver<UnityEngine.BoxCollider2D> {
+public class BoxCollider2DZSerializer : ZSaver.ZSerializer<UnityEngine.BoxCollider2D> {
     public UnityEngine.Vector2 size;
     public System.Single edgeRadius;
     public System.Boolean autoTiling;
@@ -2280,7 +2280,7 @@ public class BoxCollider2DZSaver : ZSaver.ZSaver<UnityEngine.BoxCollider2D> {
     public UnityEngine.Vector2 offset;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public BoxCollider2DZSaver (UnityEngine.BoxCollider2D BoxCollider2DInstance) : base(BoxCollider2DInstance.gameObject, BoxCollider2DInstance ) {
+    public BoxCollider2DZSerializer (UnityEngine.BoxCollider2D BoxCollider2DInstance) : base(BoxCollider2DInstance.gameObject, BoxCollider2DInstance ) {
         size = BoxCollider2DInstance.size;
         edgeRadius = BoxCollider2DInstance.edgeRadius;
         autoTiling = BoxCollider2DInstance.autoTiling;
@@ -2295,7 +2295,7 @@ public class BoxCollider2DZSaver : ZSaver.ZSaver<UnityEngine.BoxCollider2D> {
     }
 }
 [System.Serializable]
-public class PolygonCollider2DZSaver : ZSaver.ZSaver<UnityEngine.PolygonCollider2D> {
+public class PolygonCollider2DZSerializer : ZSaver.ZSerializer<UnityEngine.PolygonCollider2D> {
     public System.Boolean autoTiling;
     public UnityEngine.Vector2[] points;
     public System.Int32 pathCount;
@@ -2306,7 +2306,7 @@ public class PolygonCollider2DZSaver : ZSaver.ZSaver<UnityEngine.PolygonCollider
     public UnityEngine.Vector2 offset;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public PolygonCollider2DZSaver (UnityEngine.PolygonCollider2D PolygonCollider2DInstance) : base(PolygonCollider2DInstance.gameObject, PolygonCollider2DInstance ) {
+    public PolygonCollider2DZSerializer (UnityEngine.PolygonCollider2D PolygonCollider2DInstance) : base(PolygonCollider2DInstance.gameObject, PolygonCollider2DInstance ) {
         autoTiling = PolygonCollider2DInstance.autoTiling;
         points = PolygonCollider2DInstance.points;
         pathCount = PolygonCollider2DInstance.pathCount;
@@ -2321,7 +2321,7 @@ public class PolygonCollider2DZSaver : ZSaver.ZSaver<UnityEngine.PolygonCollider
     }
 }
 [System.Serializable]
-public class CompositeCollider2DZSaver : ZSaver.ZSaver<UnityEngine.CompositeCollider2D> {
+public class CompositeCollider2DZSerializer : ZSaver.ZSerializer<UnityEngine.CompositeCollider2D> {
     public UnityEngine.CompositeCollider2D.GeometryType geometryType;
     public UnityEngine.CompositeCollider2D.GenerationType generationType;
     public System.Single vertexDistance;
@@ -2334,7 +2334,7 @@ public class CompositeCollider2DZSaver : ZSaver.ZSaver<UnityEngine.CompositeColl
     public UnityEngine.Vector2 offset;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public CompositeCollider2DZSaver (UnityEngine.CompositeCollider2D CompositeCollider2DInstance) : base(CompositeCollider2DInstance.gameObject, CompositeCollider2DInstance ) {
+    public CompositeCollider2DZSerializer (UnityEngine.CompositeCollider2D CompositeCollider2DInstance) : base(CompositeCollider2DInstance.gameObject, CompositeCollider2DInstance ) {
         geometryType = CompositeCollider2DInstance.geometryType;
         generationType = CompositeCollider2DInstance.generationType;
         vertexDistance = CompositeCollider2DInstance.vertexDistance;
@@ -2351,14 +2351,14 @@ public class CompositeCollider2DZSaver : ZSaver.ZSaver<UnityEngine.CompositeColl
     }
 }
 [System.Serializable]
-public class Joint2DZSaver : ZSaver.ZSaver<UnityEngine.Joint2D> {
+public class Joint2DZSerializer : ZSaver.ZSerializer<UnityEngine.Joint2D> {
     public UnityEngine.Rigidbody2D connectedBody;
     public System.Boolean enableCollision;
     public System.Single breakForce;
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public Joint2DZSaver (UnityEngine.Joint2D Joint2DInstance) : base(Joint2DInstance.gameObject, Joint2DInstance ) {
+    public Joint2DZSerializer (UnityEngine.Joint2D Joint2DInstance) : base(Joint2DInstance.gameObject, Joint2DInstance ) {
         connectedBody = Joint2DInstance.connectedBody;
         enableCollision = Joint2DInstance.enableCollision;
         breakForce = Joint2DInstance.breakForce;
@@ -2369,7 +2369,7 @@ public class Joint2DZSaver : ZSaver.ZSaver<UnityEngine.Joint2D> {
     }
 }
 [System.Serializable]
-public class AnchoredJoint2DZSaver : ZSaver.ZSaver<UnityEngine.AnchoredJoint2D> {
+public class AnchoredJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.AnchoredJoint2D> {
     public UnityEngine.Vector2 anchor;
     public UnityEngine.Vector2 connectedAnchor;
     public System.Boolean autoConfigureConnectedAnchor;
@@ -2379,7 +2379,7 @@ public class AnchoredJoint2DZSaver : ZSaver.ZSaver<UnityEngine.AnchoredJoint2D> 
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AnchoredJoint2DZSaver (UnityEngine.AnchoredJoint2D AnchoredJoint2DInstance) : base(AnchoredJoint2DInstance.gameObject, AnchoredJoint2DInstance ) {
+    public AnchoredJoint2DZSerializer (UnityEngine.AnchoredJoint2D AnchoredJoint2DInstance) : base(AnchoredJoint2DInstance.gameObject, AnchoredJoint2DInstance ) {
         anchor = AnchoredJoint2DInstance.anchor;
         connectedAnchor = AnchoredJoint2DInstance.connectedAnchor;
         autoConfigureConnectedAnchor = AnchoredJoint2DInstance.autoConfigureConnectedAnchor;
@@ -2393,7 +2393,7 @@ public class AnchoredJoint2DZSaver : ZSaver.ZSaver<UnityEngine.AnchoredJoint2D> 
     }
 }
 [System.Serializable]
-public class SpringJoint2DZSaver : ZSaver.ZSaver<UnityEngine.SpringJoint2D> {
+public class SpringJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.SpringJoint2D> {
     public System.Boolean autoConfigureDistance;
     public System.Single distance;
     public System.Single dampingRatio;
@@ -2407,7 +2407,7 @@ public class SpringJoint2DZSaver : ZSaver.ZSaver<UnityEngine.SpringJoint2D> {
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public SpringJoint2DZSaver (UnityEngine.SpringJoint2D SpringJoint2DInstance) : base(SpringJoint2DInstance.gameObject, SpringJoint2DInstance ) {
+    public SpringJoint2DZSerializer (UnityEngine.SpringJoint2D SpringJoint2DInstance) : base(SpringJoint2DInstance.gameObject, SpringJoint2DInstance ) {
         autoConfigureDistance = SpringJoint2DInstance.autoConfigureDistance;
         distance = SpringJoint2DInstance.distance;
         dampingRatio = SpringJoint2DInstance.dampingRatio;
@@ -2425,7 +2425,7 @@ public class SpringJoint2DZSaver : ZSaver.ZSaver<UnityEngine.SpringJoint2D> {
     }
 }
 [System.Serializable]
-public class DistanceJoint2DZSaver : ZSaver.ZSaver<UnityEngine.DistanceJoint2D> {
+public class DistanceJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.DistanceJoint2D> {
     public System.Boolean autoConfigureDistance;
     public System.Single distance;
     public System.Boolean maxDistanceOnly;
@@ -2438,7 +2438,7 @@ public class DistanceJoint2DZSaver : ZSaver.ZSaver<UnityEngine.DistanceJoint2D> 
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public DistanceJoint2DZSaver (UnityEngine.DistanceJoint2D DistanceJoint2DInstance) : base(DistanceJoint2DInstance.gameObject, DistanceJoint2DInstance ) {
+    public DistanceJoint2DZSerializer (UnityEngine.DistanceJoint2D DistanceJoint2DInstance) : base(DistanceJoint2DInstance.gameObject, DistanceJoint2DInstance ) {
         autoConfigureDistance = DistanceJoint2DInstance.autoConfigureDistance;
         distance = DistanceJoint2DInstance.distance;
         maxDistanceOnly = DistanceJoint2DInstance.maxDistanceOnly;
@@ -2455,7 +2455,7 @@ public class DistanceJoint2DZSaver : ZSaver.ZSaver<UnityEngine.DistanceJoint2D> 
     }
 }
 [System.Serializable]
-public class FrictionJoint2DZSaver : ZSaver.ZSaver<UnityEngine.FrictionJoint2D> {
+public class FrictionJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.FrictionJoint2D> {
     public System.Single maxForce;
     public System.Single maxTorque;
     public UnityEngine.Vector2 anchor;
@@ -2467,7 +2467,7 @@ public class FrictionJoint2DZSaver : ZSaver.ZSaver<UnityEngine.FrictionJoint2D> 
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public FrictionJoint2DZSaver (UnityEngine.FrictionJoint2D FrictionJoint2DInstance) : base(FrictionJoint2DInstance.gameObject, FrictionJoint2DInstance ) {
+    public FrictionJoint2DZSerializer (UnityEngine.FrictionJoint2D FrictionJoint2DInstance) : base(FrictionJoint2DInstance.gameObject, FrictionJoint2DInstance ) {
         maxForce = FrictionJoint2DInstance.maxForce;
         maxTorque = FrictionJoint2DInstance.maxTorque;
         anchor = FrictionJoint2DInstance.anchor;
@@ -2483,7 +2483,7 @@ public class FrictionJoint2DZSaver : ZSaver.ZSaver<UnityEngine.FrictionJoint2D> 
     }
 }
 [System.Serializable]
-public class HingeJoint2DZSaver : ZSaver.ZSaver<UnityEngine.HingeJoint2D> {
+public class HingeJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.HingeJoint2D> {
     public System.Boolean useMotor;
     public System.Boolean useLimits;
     public UnityEngine.JointMotor2D motor;
@@ -2497,7 +2497,7 @@ public class HingeJoint2DZSaver : ZSaver.ZSaver<UnityEngine.HingeJoint2D> {
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public HingeJoint2DZSaver (UnityEngine.HingeJoint2D HingeJoint2DInstance) : base(HingeJoint2DInstance.gameObject, HingeJoint2DInstance ) {
+    public HingeJoint2DZSerializer (UnityEngine.HingeJoint2D HingeJoint2DInstance) : base(HingeJoint2DInstance.gameObject, HingeJoint2DInstance ) {
         useMotor = HingeJoint2DInstance.useMotor;
         useLimits = HingeJoint2DInstance.useLimits;
         motor = HingeJoint2DInstance.motor;
@@ -2515,7 +2515,7 @@ public class HingeJoint2DZSaver : ZSaver.ZSaver<UnityEngine.HingeJoint2D> {
     }
 }
 [System.Serializable]
-public class RelativeJoint2DZSaver : ZSaver.ZSaver<UnityEngine.RelativeJoint2D> {
+public class RelativeJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.RelativeJoint2D> {
     public System.Single maxForce;
     public System.Single maxTorque;
     public System.Single correctionScale;
@@ -2528,7 +2528,7 @@ public class RelativeJoint2DZSaver : ZSaver.ZSaver<UnityEngine.RelativeJoint2D> 
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public RelativeJoint2DZSaver (UnityEngine.RelativeJoint2D RelativeJoint2DInstance) : base(RelativeJoint2DInstance.gameObject, RelativeJoint2DInstance ) {
+    public RelativeJoint2DZSerializer (UnityEngine.RelativeJoint2D RelativeJoint2DInstance) : base(RelativeJoint2DInstance.gameObject, RelativeJoint2DInstance ) {
         maxForce = RelativeJoint2DInstance.maxForce;
         maxTorque = RelativeJoint2DInstance.maxTorque;
         correctionScale = RelativeJoint2DInstance.correctionScale;
@@ -2545,7 +2545,7 @@ public class RelativeJoint2DZSaver : ZSaver.ZSaver<UnityEngine.RelativeJoint2D> 
     }
 }
 [System.Serializable]
-public class SliderJoint2DZSaver : ZSaver.ZSaver<UnityEngine.SliderJoint2D> {
+public class SliderJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.SliderJoint2D> {
     public System.Boolean autoConfigureAngle;
     public System.Single angle;
     public System.Boolean useMotor;
@@ -2561,7 +2561,7 @@ public class SliderJoint2DZSaver : ZSaver.ZSaver<UnityEngine.SliderJoint2D> {
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public SliderJoint2DZSaver (UnityEngine.SliderJoint2D SliderJoint2DInstance) : base(SliderJoint2DInstance.gameObject, SliderJoint2DInstance ) {
+    public SliderJoint2DZSerializer (UnityEngine.SliderJoint2D SliderJoint2DInstance) : base(SliderJoint2DInstance.gameObject, SliderJoint2DInstance ) {
         autoConfigureAngle = SliderJoint2DInstance.autoConfigureAngle;
         angle = SliderJoint2DInstance.angle;
         useMotor = SliderJoint2DInstance.useMotor;
@@ -2581,7 +2581,7 @@ public class SliderJoint2DZSaver : ZSaver.ZSaver<UnityEngine.SliderJoint2D> {
     }
 }
 [System.Serializable]
-public class TargetJoint2DZSaver : ZSaver.ZSaver<UnityEngine.TargetJoint2D> {
+public class TargetJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.TargetJoint2D> {
     public UnityEngine.Vector2 anchor;
     public UnityEngine.Vector2 target;
     public System.Boolean autoConfigureTarget;
@@ -2594,7 +2594,7 @@ public class TargetJoint2DZSaver : ZSaver.ZSaver<UnityEngine.TargetJoint2D> {
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public TargetJoint2DZSaver (UnityEngine.TargetJoint2D TargetJoint2DInstance) : base(TargetJoint2DInstance.gameObject, TargetJoint2DInstance ) {
+    public TargetJoint2DZSerializer (UnityEngine.TargetJoint2D TargetJoint2DInstance) : base(TargetJoint2DInstance.gameObject, TargetJoint2DInstance ) {
         anchor = TargetJoint2DInstance.anchor;
         target = TargetJoint2DInstance.target;
         autoConfigureTarget = TargetJoint2DInstance.autoConfigureTarget;
@@ -2611,7 +2611,7 @@ public class TargetJoint2DZSaver : ZSaver.ZSaver<UnityEngine.TargetJoint2D> {
     }
 }
 [System.Serializable]
-public class FixedJoint2DZSaver : ZSaver.ZSaver<UnityEngine.FixedJoint2D> {
+public class FixedJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.FixedJoint2D> {
     public System.Single dampingRatio;
     public System.Single frequency;
     public UnityEngine.Vector2 anchor;
@@ -2623,7 +2623,7 @@ public class FixedJoint2DZSaver : ZSaver.ZSaver<UnityEngine.FixedJoint2D> {
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public FixedJoint2DZSaver (UnityEngine.FixedJoint2D FixedJoint2DInstance) : base(FixedJoint2DInstance.gameObject, FixedJoint2DInstance ) {
+    public FixedJoint2DZSerializer (UnityEngine.FixedJoint2D FixedJoint2DInstance) : base(FixedJoint2DInstance.gameObject, FixedJoint2DInstance ) {
         dampingRatio = FixedJoint2DInstance.dampingRatio;
         frequency = FixedJoint2DInstance.frequency;
         anchor = FixedJoint2DInstance.anchor;
@@ -2639,7 +2639,7 @@ public class FixedJoint2DZSaver : ZSaver.ZSaver<UnityEngine.FixedJoint2D> {
     }
 }
 [System.Serializable]
-public class WheelJoint2DZSaver : ZSaver.ZSaver<UnityEngine.WheelJoint2D> {
+public class WheelJoint2DZSerializer : ZSaver.ZSerializer<UnityEngine.WheelJoint2D> {
     public UnityEngine.JointSuspension2D suspension;
     public System.Boolean useMotor;
     public UnityEngine.JointMotor2D motor;
@@ -2652,7 +2652,7 @@ public class WheelJoint2DZSaver : ZSaver.ZSaver<UnityEngine.WheelJoint2D> {
     public System.Single breakTorque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public WheelJoint2DZSaver (UnityEngine.WheelJoint2D WheelJoint2DInstance) : base(WheelJoint2DInstance.gameObject, WheelJoint2DInstance ) {
+    public WheelJoint2DZSerializer (UnityEngine.WheelJoint2D WheelJoint2DInstance) : base(WheelJoint2DInstance.gameObject, WheelJoint2DInstance ) {
         suspension = WheelJoint2DInstance.suspension;
         useMotor = WheelJoint2DInstance.useMotor;
         motor = WheelJoint2DInstance.motor;
@@ -2669,12 +2669,12 @@ public class WheelJoint2DZSaver : ZSaver.ZSaver<UnityEngine.WheelJoint2D> {
     }
 }
 [System.Serializable]
-public class Effector2DZSaver : ZSaver.ZSaver<UnityEngine.Effector2D> {
+public class Effector2DZSerializer : ZSaver.ZSerializer<UnityEngine.Effector2D> {
     public System.Boolean useColliderMask;
     public System.Int32 colliderMask;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public Effector2DZSaver (UnityEngine.Effector2D Effector2DInstance) : base(Effector2DInstance.gameObject, Effector2DInstance ) {
+    public Effector2DZSerializer (UnityEngine.Effector2D Effector2DInstance) : base(Effector2DInstance.gameObject, Effector2DInstance ) {
         useColliderMask = Effector2DInstance.useColliderMask;
         colliderMask = Effector2DInstance.colliderMask;
         enabled = Effector2DInstance.enabled;
@@ -2683,7 +2683,7 @@ public class Effector2DZSaver : ZSaver.ZSaver<UnityEngine.Effector2D> {
     }
 }
 [System.Serializable]
-public class AreaEffector2DZSaver : ZSaver.ZSaver<UnityEngine.AreaEffector2D> {
+public class AreaEffector2DZSerializer : ZSaver.ZSerializer<UnityEngine.AreaEffector2D> {
     public System.Single forceAngle;
     public System.Boolean useGlobalAngle;
     public System.Single forceMagnitude;
@@ -2695,7 +2695,7 @@ public class AreaEffector2DZSaver : ZSaver.ZSaver<UnityEngine.AreaEffector2D> {
     public System.Int32 colliderMask;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public AreaEffector2DZSaver (UnityEngine.AreaEffector2D AreaEffector2DInstance) : base(AreaEffector2DInstance.gameObject, AreaEffector2DInstance ) {
+    public AreaEffector2DZSerializer (UnityEngine.AreaEffector2D AreaEffector2DInstance) : base(AreaEffector2DInstance.gameObject, AreaEffector2DInstance ) {
         forceAngle = AreaEffector2DInstance.forceAngle;
         useGlobalAngle = AreaEffector2DInstance.useGlobalAngle;
         forceMagnitude = AreaEffector2DInstance.forceMagnitude;
@@ -2711,7 +2711,7 @@ public class AreaEffector2DZSaver : ZSaver.ZSaver<UnityEngine.AreaEffector2D> {
     }
 }
 [System.Serializable]
-public class BuoyancyEffector2DZSaver : ZSaver.ZSaver<UnityEngine.BuoyancyEffector2D> {
+public class BuoyancyEffector2DZSerializer : ZSaver.ZSerializer<UnityEngine.BuoyancyEffector2D> {
     public System.Single surfaceLevel;
     public System.Single density;
     public System.Single linearDrag;
@@ -2723,7 +2723,7 @@ public class BuoyancyEffector2DZSaver : ZSaver.ZSaver<UnityEngine.BuoyancyEffect
     public System.Int32 colliderMask;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public BuoyancyEffector2DZSaver (UnityEngine.BuoyancyEffector2D BuoyancyEffector2DInstance) : base(BuoyancyEffector2DInstance.gameObject, BuoyancyEffector2DInstance ) {
+    public BuoyancyEffector2DZSerializer (UnityEngine.BuoyancyEffector2D BuoyancyEffector2DInstance) : base(BuoyancyEffector2DInstance.gameObject, BuoyancyEffector2DInstance ) {
         surfaceLevel = BuoyancyEffector2DInstance.surfaceLevel;
         density = BuoyancyEffector2DInstance.density;
         linearDrag = BuoyancyEffector2DInstance.linearDrag;
@@ -2739,7 +2739,7 @@ public class BuoyancyEffector2DZSaver : ZSaver.ZSaver<UnityEngine.BuoyancyEffect
     }
 }
 [System.Serializable]
-public class PointEffector2DZSaver : ZSaver.ZSaver<UnityEngine.PointEffector2D> {
+public class PointEffector2DZSerializer : ZSaver.ZSerializer<UnityEngine.PointEffector2D> {
     public System.Single forceMagnitude;
     public System.Single forceVariation;
     public System.Single distanceScale;
@@ -2752,7 +2752,7 @@ public class PointEffector2DZSaver : ZSaver.ZSaver<UnityEngine.PointEffector2D> 
     public System.Int32 colliderMask;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public PointEffector2DZSaver (UnityEngine.PointEffector2D PointEffector2DInstance) : base(PointEffector2DInstance.gameObject, PointEffector2DInstance ) {
+    public PointEffector2DZSerializer (UnityEngine.PointEffector2D PointEffector2DInstance) : base(PointEffector2DInstance.gameObject, PointEffector2DInstance ) {
         forceMagnitude = PointEffector2DInstance.forceMagnitude;
         forceVariation = PointEffector2DInstance.forceVariation;
         distanceScale = PointEffector2DInstance.distanceScale;
@@ -2769,7 +2769,7 @@ public class PointEffector2DZSaver : ZSaver.ZSaver<UnityEngine.PointEffector2D> 
     }
 }
 [System.Serializable]
-public class PlatformEffector2DZSaver : ZSaver.ZSaver<UnityEngine.PlatformEffector2D> {
+public class PlatformEffector2DZSerializer : ZSaver.ZSerializer<UnityEngine.PlatformEffector2D> {
     public System.Boolean useOneWay;
     public System.Boolean useOneWayGrouping;
     public System.Boolean useSideFriction;
@@ -2781,7 +2781,7 @@ public class PlatformEffector2DZSaver : ZSaver.ZSaver<UnityEngine.PlatformEffect
     public System.Int32 colliderMask;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public PlatformEffector2DZSaver (UnityEngine.PlatformEffector2D PlatformEffector2DInstance) : base(PlatformEffector2DInstance.gameObject, PlatformEffector2DInstance ) {
+    public PlatformEffector2DZSerializer (UnityEngine.PlatformEffector2D PlatformEffector2DInstance) : base(PlatformEffector2DInstance.gameObject, PlatformEffector2DInstance ) {
         useOneWay = PlatformEffector2DInstance.useOneWay;
         useOneWayGrouping = PlatformEffector2DInstance.useOneWayGrouping;
         useSideFriction = PlatformEffector2DInstance.useSideFriction;
@@ -2797,7 +2797,7 @@ public class PlatformEffector2DZSaver : ZSaver.ZSaver<UnityEngine.PlatformEffect
     }
 }
 [System.Serializable]
-public class SurfaceEffector2DZSaver : ZSaver.ZSaver<UnityEngine.SurfaceEffector2D> {
+public class SurfaceEffector2DZSerializer : ZSaver.ZSerializer<UnityEngine.SurfaceEffector2D> {
     public System.Single speed;
     public System.Single speedVariation;
     public System.Single forceScale;
@@ -2808,7 +2808,7 @@ public class SurfaceEffector2DZSaver : ZSaver.ZSaver<UnityEngine.SurfaceEffector
     public System.Int32 colliderMask;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public SurfaceEffector2DZSaver (UnityEngine.SurfaceEffector2D SurfaceEffector2DInstance) : base(SurfaceEffector2DInstance.gameObject, SurfaceEffector2DInstance ) {
+    public SurfaceEffector2DZSerializer (UnityEngine.SurfaceEffector2D SurfaceEffector2DInstance) : base(SurfaceEffector2DInstance.gameObject, SurfaceEffector2DInstance ) {
         speed = SurfaceEffector2DInstance.speed;
         speedVariation = SurfaceEffector2DInstance.speedVariation;
         forceScale = SurfaceEffector2DInstance.forceScale;
@@ -2823,23 +2823,23 @@ public class SurfaceEffector2DZSaver : ZSaver.ZSaver<UnityEngine.SurfaceEffector
     }
 }
 [System.Serializable]
-public class PhysicsUpdateBehaviour2DZSaver : ZSaver.ZSaver<UnityEngine.PhysicsUpdateBehaviour2D> {
+public class PhysicsUpdateBehaviour2DZSerializer : ZSaver.ZSerializer<UnityEngine.PhysicsUpdateBehaviour2D> {
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public PhysicsUpdateBehaviour2DZSaver (UnityEngine.PhysicsUpdateBehaviour2D PhysicsUpdateBehaviour2DInstance) : base(PhysicsUpdateBehaviour2DInstance.gameObject, PhysicsUpdateBehaviour2DInstance ) {
+    public PhysicsUpdateBehaviour2DZSerializer (UnityEngine.PhysicsUpdateBehaviour2D PhysicsUpdateBehaviour2DInstance) : base(PhysicsUpdateBehaviour2DInstance.gameObject, PhysicsUpdateBehaviour2DInstance ) {
         enabled = PhysicsUpdateBehaviour2DInstance.enabled;
         hideFlags = PhysicsUpdateBehaviour2DInstance.hideFlags;
 
     }
 }
 [System.Serializable]
-public class ConstantForce2DZSaver : ZSaver.ZSaver<UnityEngine.ConstantForce2D> {
+public class ConstantForce2DZSerializer : ZSaver.ZSerializer<UnityEngine.ConstantForce2D> {
     public UnityEngine.Vector2 force;
     public UnityEngine.Vector2 relativeForce;
     public System.Single torque;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public ConstantForce2DZSaver (UnityEngine.ConstantForce2D ConstantForce2DInstance) : base(ConstantForce2DInstance.gameObject, ConstantForce2DInstance ) {
+    public ConstantForce2DZSerializer (UnityEngine.ConstantForce2D ConstantForce2DInstance) : base(ConstantForce2DInstance.gameObject, ConstantForce2DInstance ) {
         force = ConstantForce2DInstance.force;
         relativeForce = ConstantForce2DInstance.relativeForce;
         torque = ConstantForce2DInstance.torque;
@@ -2849,7 +2849,7 @@ public class ConstantForce2DZSaver : ZSaver.ZSaver<UnityEngine.ConstantForce2D> 
     }
 }
 [System.Serializable]
-public class SpriteMaskZSaver : ZSaver.ZSaver<UnityEngine.SpriteMask> {
+public class SpriteMaskZSerializer : ZSaver.ZSerializer<UnityEngine.SpriteMask> {
     public System.Int32 frontSortingLayerID;
     public System.Int32 frontSortingOrder;
     public System.Int32 backSortingLayerID;
@@ -2880,7 +2880,7 @@ public class SpriteMaskZSaver : ZSaver.ZSaver<UnityEngine.SpriteMask> {
     public UnityEngine.Vector4 realtimeLightmapScaleOffset;
     public UnityEngine.Material[] sharedMaterials;
     public UnityEngine.HideFlags hideFlags;
-    public SpriteMaskZSaver (UnityEngine.SpriteMask SpriteMaskInstance) : base(SpriteMaskInstance.gameObject, SpriteMaskInstance ) {
+    public SpriteMaskZSerializer (UnityEngine.SpriteMask SpriteMaskInstance) : base(SpriteMaskInstance.gameObject, SpriteMaskInstance ) {
         frontSortingLayerID = SpriteMaskInstance.frontSortingLayerID;
         frontSortingOrder = SpriteMaskInstance.frontSortingOrder;
         backSortingLayerID = SpriteMaskInstance.backSortingLayerID;
@@ -2915,7 +2915,7 @@ public class SpriteMaskZSaver : ZSaver.ZSaver<UnityEngine.SpriteMask> {
     }
 }
 [System.Serializable]
-public class SpriteShapeRendererZSaver : ZSaver.ZSaver<UnityEngine.U2D.SpriteShapeRenderer> {
+public class SpriteShapeRendererZSerializer : ZSaver.ZSerializer<UnityEngine.U2D.SpriteShapeRenderer> {
     public UnityEngine.Color color;
     public UnityEngine.SpriteMaskInteraction maskInteraction;
     public System.Boolean enabled;
@@ -2940,7 +2940,7 @@ public class SpriteShapeRendererZSaver : ZSaver.ZSaver<UnityEngine.U2D.SpriteSha
     public UnityEngine.Vector4 realtimeLightmapScaleOffset;
     public UnityEngine.Material[] sharedMaterials;
     public UnityEngine.HideFlags hideFlags;
-    public SpriteShapeRendererZSaver (UnityEngine.U2D.SpriteShapeRenderer SpriteShapeRendererInstance) : base(SpriteShapeRendererInstance.gameObject, SpriteShapeRendererInstance ) {
+    public SpriteShapeRendererZSerializer (UnityEngine.U2D.SpriteShapeRenderer SpriteShapeRendererInstance) : base(SpriteShapeRendererInstance.gameObject, SpriteShapeRendererInstance ) {
         color = SpriteShapeRendererInstance.color;
         maskInteraction = SpriteShapeRendererInstance.maskInteraction;
         enabled = SpriteShapeRendererInstance.enabled;
@@ -2969,11 +2969,11 @@ public class SpriteShapeRendererZSaver : ZSaver.ZSaver<UnityEngine.U2D.SpriteSha
     }
 }
 [System.Serializable]
-public class StreamingControllerZSaver : ZSaver.ZSaver<UnityEngine.StreamingController> {
+public class StreamingControllerZSerializer : ZSaver.ZSerializer<UnityEngine.StreamingController> {
     public System.Single streamingMipmapBias;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public StreamingControllerZSaver (UnityEngine.StreamingController StreamingControllerInstance) : base(StreamingControllerInstance.gameObject, StreamingControllerInstance ) {
+    public StreamingControllerZSerializer (UnityEngine.StreamingController StreamingControllerInstance) : base(StreamingControllerInstance.gameObject, StreamingControllerInstance ) {
         streamingMipmapBias = StreamingControllerInstance.streamingMipmapBias;
         enabled = StreamingControllerInstance.enabled;
         hideFlags = StreamingControllerInstance.hideFlags;
@@ -2981,7 +2981,7 @@ public class StreamingControllerZSaver : ZSaver.ZSaver<UnityEngine.StreamingCont
     }
 }
 [System.Serializable]
-public class TerrainZSaver : ZSaver.ZSaver<UnityEngine.Terrain> {
+public class TerrainZSerializer : ZSaver.ZSerializer<UnityEngine.Terrain> {
     public UnityEngine.TerrainData terrainData;
     public System.Single treeDistance;
     public System.Single treeBillboardDistance;
@@ -3013,7 +3013,7 @@ public class TerrainZSaver : ZSaver.ZSaver<UnityEngine.Terrain> {
     public System.UInt32 renderingLayerMask;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public TerrainZSaver (UnityEngine.Terrain TerrainInstance) : base(TerrainInstance.gameObject, TerrainInstance ) {
+    public TerrainZSerializer (UnityEngine.Terrain TerrainInstance) : base(TerrainInstance.gameObject, TerrainInstance ) {
         terrainData = TerrainInstance.terrainData;
         treeDistance = TerrainInstance.treeDistance;
         treeBillboardDistance = TerrainInstance.treeBillboardDistance;
@@ -3049,23 +3049,23 @@ public class TerrainZSaver : ZSaver.ZSaver<UnityEngine.Terrain> {
     }
 }
 [System.Serializable]
-public class TreeZSaver : ZSaver.ZSaver<UnityEngine.Tree> {
+public class TreeZSerializer : ZSaver.ZSerializer<UnityEngine.Tree> {
     public UnityEngine.ScriptableObject data;
     public UnityEngine.HideFlags hideFlags;
-    public TreeZSaver (UnityEngine.Tree TreeInstance) : base(TreeInstance.gameObject, TreeInstance ) {
+    public TreeZSerializer (UnityEngine.Tree TreeInstance) : base(TreeInstance.gameObject, TreeInstance ) {
         data = TreeInstance.data;
         hideFlags = TreeInstance.hideFlags;
 
     }
 }
 [System.Serializable]
-public class TerrainColliderZSaver : ZSaver.ZSaver<UnityEngine.TerrainCollider> {
+public class TerrainColliderZSerializer : ZSaver.ZSerializer<UnityEngine.TerrainCollider> {
     public UnityEngine.TerrainData terrainData;
     public System.Boolean enabled;
     public System.Boolean isTrigger;
     public System.Single contactOffset;
     public UnityEngine.HideFlags hideFlags;
-    public TerrainColliderZSaver (UnityEngine.TerrainCollider TerrainColliderInstance) : base(TerrainColliderInstance.gameObject, TerrainColliderInstance ) {
+    public TerrainColliderZSerializer (UnityEngine.TerrainCollider TerrainColliderInstance) : base(TerrainColliderInstance.gameObject, TerrainColliderInstance ) {
         terrainData = TerrainColliderInstance.terrainData;
         enabled = TerrainColliderInstance.enabled;
         isTrigger = TerrainColliderInstance.isTrigger;
@@ -3075,7 +3075,7 @@ public class TerrainColliderZSaver : ZSaver.ZSaver<UnityEngine.TerrainCollider> 
     }
 }
 [System.Serializable]
-public class TextMeshZSaver : ZSaver.ZSaver<UnityEngine.TextMesh> {
+public class TextMeshZSerializer : ZSaver.ZSerializer<UnityEngine.TextMesh> {
     public System.String text;
     public UnityEngine.Font font;
     public System.Int32 fontSize;
@@ -3089,7 +3089,7 @@ public class TextMeshZSaver : ZSaver.ZSaver<UnityEngine.TextMesh> {
     public System.Boolean richText;
     public UnityEngine.Color color;
     public UnityEngine.HideFlags hideFlags;
-    public TextMeshZSaver (UnityEngine.TextMesh TextMeshInstance) : base(TextMeshInstance.gameObject, TextMeshInstance ) {
+    public TextMeshZSerializer (UnityEngine.TextMesh TextMeshInstance) : base(TextMeshInstance.gameObject, TextMeshInstance ) {
         text = TextMeshInstance.text;
         font = TextMeshInstance.font;
         fontSize = TextMeshInstance.fontSize;
@@ -3107,7 +3107,7 @@ public class TextMeshZSaver : ZSaver.ZSaver<UnityEngine.TextMesh> {
     }
 }
 [System.Serializable]
-public class TilemapZSaver : ZSaver.ZSaver<UnityEngine.Tilemaps.Tilemap> {
+public class TilemapZSerializer : ZSaver.ZSerializer<UnityEngine.Tilemaps.Tilemap> {
     public System.Single animationFrameRate;
     public UnityEngine.Color color;
     public UnityEngine.Vector3Int origin;
@@ -3117,7 +3117,7 @@ public class TilemapZSaver : ZSaver.ZSaver<UnityEngine.Tilemaps.Tilemap> {
     public UnityEngine.Matrix4x4 orientationMatrix;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public TilemapZSaver (UnityEngine.Tilemaps.Tilemap TilemapInstance) : base(TilemapInstance.gameObject, TilemapInstance ) {
+    public TilemapZSerializer (UnityEngine.Tilemaps.Tilemap TilemapInstance) : base(TilemapInstance.gameObject, TilemapInstance ) {
         animationFrameRate = TilemapInstance.animationFrameRate;
         color = TilemapInstance.color;
         origin = TilemapInstance.origin;
@@ -3131,7 +3131,7 @@ public class TilemapZSaver : ZSaver.ZSaver<UnityEngine.Tilemaps.Tilemap> {
     }
 }
 [System.Serializable]
-public class TilemapRendererZSaver : ZSaver.ZSaver<UnityEngine.Tilemaps.TilemapRenderer> {
+public class TilemapRendererZSerializer : ZSaver.ZSerializer<UnityEngine.Tilemaps.TilemapRenderer> {
     public UnityEngine.Vector3Int chunkSize;
     public UnityEngine.Vector3 chunkCullingBounds;
     public System.Int32 maxChunkCount;
@@ -3162,7 +3162,7 @@ public class TilemapRendererZSaver : ZSaver.ZSaver<UnityEngine.Tilemaps.TilemapR
     public UnityEngine.Vector4 realtimeLightmapScaleOffset;
     public UnityEngine.Material[] sharedMaterials;
     public UnityEngine.HideFlags hideFlags;
-    public TilemapRendererZSaver (UnityEngine.Tilemaps.TilemapRenderer TilemapRendererInstance) : base(TilemapRendererInstance.gameObject, TilemapRendererInstance ) {
+    public TilemapRendererZSerializer (UnityEngine.Tilemaps.TilemapRenderer TilemapRendererInstance) : base(TilemapRendererInstance.gameObject, TilemapRendererInstance ) {
         chunkSize = TilemapRendererInstance.chunkSize;
         chunkCullingBounds = TilemapRendererInstance.chunkCullingBounds;
         maxChunkCount = TilemapRendererInstance.maxChunkCount;
@@ -3197,7 +3197,7 @@ public class TilemapRendererZSaver : ZSaver.ZSaver<UnityEngine.Tilemaps.TilemapR
     }
 }
 [System.Serializable]
-public class TilemapCollider2DZSaver : ZSaver.ZSaver<UnityEngine.Tilemaps.TilemapCollider2D> {
+public class TilemapCollider2DZSerializer : ZSaver.ZSerializer<UnityEngine.Tilemaps.TilemapCollider2D> {
     public System.UInt32 maximumTileChangeCount;
     public System.Single extrusionFactor;
     public System.Single density;
@@ -3207,7 +3207,7 @@ public class TilemapCollider2DZSaver : ZSaver.ZSaver<UnityEngine.Tilemaps.Tilema
     public UnityEngine.Vector2 offset;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public TilemapCollider2DZSaver (UnityEngine.Tilemaps.TilemapCollider2D TilemapCollider2DInstance) : base(TilemapCollider2DInstance.gameObject, TilemapCollider2DInstance ) {
+    public TilemapCollider2DZSerializer (UnityEngine.Tilemaps.TilemapCollider2D TilemapCollider2DInstance) : base(TilemapCollider2DInstance.gameObject, TilemapCollider2DInstance ) {
         maximumTileChangeCount = TilemapCollider2DInstance.maximumTileChangeCount;
         extrusionFactor = TilemapCollider2DInstance.extrusionFactor;
         density = TilemapCollider2DInstance.density;
@@ -3221,14 +3221,14 @@ public class TilemapCollider2DZSaver : ZSaver.ZSaver<UnityEngine.Tilemaps.Tilema
     }
 }
 [System.Serializable]
-public class CanvasGroupZSaver : ZSaver.ZSaver<UnityEngine.CanvasGroup> {
+public class CanvasGroupZSerializer : ZSaver.ZSerializer<UnityEngine.CanvasGroup> {
     public System.Single alpha;
     public System.Boolean interactable;
     public System.Boolean blocksRaycasts;
     public System.Boolean ignoreParentGroups;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public CanvasGroupZSaver (UnityEngine.CanvasGroup CanvasGroupInstance) : base(CanvasGroupInstance.gameObject, CanvasGroupInstance ) {
+    public CanvasGroupZSerializer (UnityEngine.CanvasGroup CanvasGroupInstance) : base(CanvasGroupInstance.gameObject, CanvasGroupInstance ) {
         alpha = CanvasGroupInstance.alpha;
         interactable = CanvasGroupInstance.interactable;
         blocksRaycasts = CanvasGroupInstance.blocksRaycasts;
@@ -3239,7 +3239,7 @@ public class CanvasGroupZSaver : ZSaver.ZSaver<UnityEngine.CanvasGroup> {
     }
 }
 [System.Serializable]
-public class CanvasRendererZSaver : ZSaver.ZSaver<UnityEngine.CanvasRenderer> {
+public class CanvasRendererZSerializer : ZSaver.ZSerializer<UnityEngine.CanvasRenderer> {
     public System.Boolean hasPopInstruction;
     public System.Int32 materialCount;
     public System.Int32 popMaterialCount;
@@ -3247,7 +3247,7 @@ public class CanvasRendererZSaver : ZSaver.ZSaver<UnityEngine.CanvasRenderer> {
     public System.Boolean cull;
     public UnityEngine.Vector2 clippingSoftness;
     public UnityEngine.HideFlags hideFlags;
-    public CanvasRendererZSaver (UnityEngine.CanvasRenderer CanvasRendererInstance) : base(CanvasRendererInstance.gameObject, CanvasRendererInstance ) {
+    public CanvasRendererZSerializer (UnityEngine.CanvasRenderer CanvasRendererInstance) : base(CanvasRendererInstance.gameObject, CanvasRendererInstance ) {
         hasPopInstruction = CanvasRendererInstance.hasPopInstruction;
         materialCount = CanvasRendererInstance.materialCount;
         popMaterialCount = CanvasRendererInstance.popMaterialCount;
@@ -3259,7 +3259,7 @@ public class CanvasRendererZSaver : ZSaver.ZSaver<UnityEngine.CanvasRenderer> {
     }
 }
 [System.Serializable]
-public class CanvasZSaver : ZSaver.ZSaver<UnityEngine.Canvas> {
+public class CanvasZSerializer : ZSaver.ZSerializer<UnityEngine.Canvas> {
     public UnityEngine.RenderMode renderMode;
     public System.Single scaleFactor;
     public System.Single referencePixelsPerUnit;
@@ -3276,7 +3276,7 @@ public class CanvasZSaver : ZSaver.ZSaver<UnityEngine.Canvas> {
     public System.Single normalizedSortingGridSize;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public CanvasZSaver (UnityEngine.Canvas CanvasInstance) : base(CanvasInstance.gameObject, CanvasInstance ) {
+    public CanvasZSerializer (UnityEngine.Canvas CanvasInstance) : base(CanvasInstance.gameObject, CanvasInstance ) {
         renderMode = CanvasInstance.renderMode;
         scaleFactor = CanvasInstance.scaleFactor;
         referencePixelsPerUnit = CanvasInstance.referencePixelsPerUnit;
@@ -3297,7 +3297,7 @@ public class CanvasZSaver : ZSaver.ZSaver<UnityEngine.Canvas> {
     }
 }
 [System.Serializable]
-public class VisualEffectZSaver : ZSaver.ZSaver<UnityEngine.VFX.VisualEffect> {
+public class VisualEffectZSerializer : ZSaver.ZSerializer<UnityEngine.VFX.VisualEffect> {
     public System.Boolean pause;
     public System.Single playRate;
     public System.UInt32 startSeed;
@@ -3308,7 +3308,7 @@ public class VisualEffectZSaver : ZSaver.ZSaver<UnityEngine.VFX.VisualEffect> {
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
     public System.Action<UnityEngine.VFX.VFXOutputEventArgs> outputEventReceived;
-    public VisualEffectZSaver (UnityEngine.VFX.VisualEffect VisualEffectInstance) : base(VisualEffectInstance.gameObject, VisualEffectInstance ) {
+    public VisualEffectZSerializer (UnityEngine.VFX.VisualEffect VisualEffectInstance) : base(VisualEffectInstance.gameObject, VisualEffectInstance ) {
         pause = VisualEffectInstance.pause;
         playRate = VisualEffectInstance.playRate;
         startSeed = VisualEffectInstance.startSeed;
@@ -3323,7 +3323,7 @@ public class VisualEffectZSaver : ZSaver.ZSaver<UnityEngine.VFX.VisualEffect> {
     }
 }
 [System.Serializable]
-public class WheelColliderZSaver : ZSaver.ZSaver<UnityEngine.WheelCollider> {
+public class WheelColliderZSerializer : ZSaver.ZSerializer<UnityEngine.WheelCollider> {
     public UnityEngine.Vector3 center;
     public System.Single radius;
     public System.Single suspensionDistance;
@@ -3342,7 +3342,7 @@ public class WheelColliderZSaver : ZSaver.ZSaver<UnityEngine.WheelCollider> {
     public System.Boolean isTrigger;
     public System.Single contactOffset;
     public UnityEngine.HideFlags hideFlags;
-    public WheelColliderZSaver (UnityEngine.WheelCollider WheelColliderInstance) : base(WheelColliderInstance.gameObject, WheelColliderInstance ) {
+    public WheelColliderZSerializer (UnityEngine.WheelCollider WheelColliderInstance) : base(WheelColliderInstance.gameObject, WheelColliderInstance ) {
         center = WheelColliderInstance.center;
         radius = WheelColliderInstance.radius;
         suspensionDistance = WheelColliderInstance.suspensionDistance;
@@ -3365,7 +3365,7 @@ public class WheelColliderZSaver : ZSaver.ZSaver<UnityEngine.WheelCollider> {
     }
 }
 [System.Serializable]
-public class VideoPlayerZSaver : ZSaver.ZSaver<UnityEngine.Video.VideoPlayer> {
+public class VideoPlayerZSerializer : ZSaver.ZSerializer<UnityEngine.Video.VideoPlayer> {
     public UnityEngine.Video.VideoSource source;
     public System.String url;
     public UnityEngine.Video.VideoClip clip;
@@ -3392,7 +3392,7 @@ public class VideoPlayerZSaver : ZSaver.ZSaver<UnityEngine.Video.VideoPlayer> {
     public System.Boolean sendFrameReadyEvents;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public VideoPlayerZSaver (UnityEngine.Video.VideoPlayer VideoPlayerInstance) : base(VideoPlayerInstance.gameObject, VideoPlayerInstance ) {
+    public VideoPlayerZSerializer (UnityEngine.Video.VideoPlayer VideoPlayerInstance) : base(VideoPlayerInstance.gameObject, VideoPlayerInstance ) {
         source = VideoPlayerInstance.source;
         url = VideoPlayerInstance.url;
         clip = VideoPlayerInstance.clip;
@@ -3423,7 +3423,7 @@ public class VideoPlayerZSaver : ZSaver.ZSaver<UnityEngine.Video.VideoPlayer> {
     }
 }
 [System.Serializable]
-public class WindZoneZSaver : ZSaver.ZSaver<UnityEngine.WindZone> {
+public class WindZoneZSerializer : ZSaver.ZSerializer<UnityEngine.WindZone> {
     public UnityEngine.WindZoneMode mode;
     public System.Single radius;
     public System.Single windMain;
@@ -3431,7 +3431,7 @@ public class WindZoneZSaver : ZSaver.ZSaver<UnityEngine.WindZone> {
     public System.Single windPulseMagnitude;
     public System.Single windPulseFrequency;
     public UnityEngine.HideFlags hideFlags;
-    public WindZoneZSaver (UnityEngine.WindZone WindZoneInstance) : base(WindZoneInstance.gameObject, WindZoneInstance ) {
+    public WindZoneZSerializer (UnityEngine.WindZone WindZoneInstance) : base(WindZoneInstance.gameObject, WindZoneInstance ) {
         mode = WindZoneInstance.mode;
         radius = WindZoneInstance.radius;
         windMain = WindZoneInstance.windMain;
@@ -3443,13 +3443,13 @@ public class WindZoneZSaver : ZSaver.ZSaver<UnityEngine.WindZone> {
     }
 }
 [System.Serializable]
-public class PersistentGameObjectZSaver : ZSaver.ZSaver<PersistentGameObject> {
+public class PersistentGameObjectZSerializer : ZSaver.ZSerializer<PersistentGameObject> {
     public System.Boolean useGUILayout;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
     public System.Collections.Generic.List<PersistentGameObject.SerializableComponentData> _componentDatas;
     public ZSaver.GameObjectData gameObjectData;
-    public PersistentGameObjectZSaver (PersistentGameObject PersistentGameObjectInstance) : base(PersistentGameObjectInstance.gameObject, PersistentGameObjectInstance ) {
+    public PersistentGameObjectZSerializer (PersistentGameObject PersistentGameObjectInstance) : base(PersistentGameObjectInstance.gameObject, PersistentGameObjectInstance ) {
         useGUILayout = PersistentGameObjectInstance.useGUILayout;
         enabled = PersistentGameObjectInstance.enabled;
         hideFlags = PersistentGameObjectInstance.hideFlags;
