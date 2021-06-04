@@ -34,7 +34,7 @@ public class PersistentGameObject : MonoBehaviour
 
             for (var i = 0; i < serializableComponentTypes.Length; i++)
             {
-                if (!componentTypes.Contains(serializableComponentTypes[i]))
+                if (!componentTypes.Contains(serializableComponentTypes[i]) && i < _componentDatas.Count)
                 {
                     _componentDatas.RemoveAt(i);
                 }

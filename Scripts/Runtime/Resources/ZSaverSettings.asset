@@ -16,3 +16,7 @@ MonoBehaviour:
   autoRebuildZSavers: 1
   selectedSaveFile: 0
   encryptData: 1
+  addedAssemblyNames:
+  - com.Ziplaw.ZSaver.Runtime
+  - UnityEngine.CoreModule
+  - Assembly-CSharp

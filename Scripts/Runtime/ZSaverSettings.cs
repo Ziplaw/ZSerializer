@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace ZSaver
@@ -14,6 +17,10 @@ namespace ZSaver
         public bool autoRebuildZSavers;
         public int selectedSaveFile;
         public bool encryptData;
+        public string[] addedAssemblyNames = new []{ZSave.mainAssembly};
+
+        public IEnumerable<Assembly> AddedAssemblies => from assemblyName in addedAssemblyNames
+            select Assembly.Load(assemblyName);
 
         
 

@@ -45,8 +45,12 @@ public class PersistentGameObjectEditor : Editor
             GUILayout.Label("<color=#29cf42>Persistent GameObject</color>", styler.header, GUILayout.MinHeight(32));
             showSettings = GUILayout.Toggle(showSettings, styler.cogWheel, new GUIStyle("button"),
                 GUILayout.MaxHeight(32), GUILayout.MaxWidth(32));
-            
-            if (showSettings && showSettings != toggleSettings) manager.UpdateSerializableComponents();
+
+            if (showSettings && showSettings != toggleSettings)
+            {
+                manager.UpdateSerializableComponents();
+                return;
+            }
             
         }
 

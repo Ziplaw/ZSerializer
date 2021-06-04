@@ -19,14 +19,13 @@ using Debug = UnityEngine.Debug;
             ZSaverStyler styler = new ZSaverStyler();
             if (styler.settings.autoRebuildZSavers)
             {
-                var types = ZSaver.ZSave.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
-                    .GetAssemblies()).ToArray();
+                var types = ZSave.GetTypesWithPersistentAttribute().ToArray();
 
                 Class[] classes = new Class[types.Length];
 
                 for (int i = 0; i < types.Length; i++)
                 {
-                    classes[i] = new Class(types[i], ZSaverEditor.GetClassState(types[i]));
+                    classes[i] = new Class(types[i], GetClassState(types[i]));
                 }
 
                 string path;
@@ -394,7 +393,7 @@ public class " + type.Name + @"Editor : Editor
         {
             string longScript = "";
 
-            Type[] types = ZSave.ComponentSerializableTypes;
+            IEnumerable<Type> types = ZSave.ComponentSerializableTypes;
             foreach (var type in types)
             {
                 string[] blackListForThisComponent = {" "};

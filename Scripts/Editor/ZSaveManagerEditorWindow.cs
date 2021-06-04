@@ -52,8 +52,7 @@ namespace ZSaver.Editor
         {
             styler = new ZSaverStyler();
 
-            var types = ZSave.GetTypesWithPersistentAttribute(AppDomain.CurrentDomain
-                .GetAssemblies()).ToArray();
+            var types = ZSave.GetTypesWithPersistentAttribute().ToArray();
 
             classes = new Class[types.Length];
 
