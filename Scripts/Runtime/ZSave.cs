@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
+
 [assembly: InternalsVisibleTo("com.Ziplaw.ZSaver.Editor")]
 
 namespace ZSaver
@@ -21,7 +22,10 @@ namespace ZSaver
 
         private static MethodInfo castMethod = typeof(Enumerable).GetMethod("Cast");
         private static MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray");
-        private static MethodInfo saveMethod = typeof(ZSave).GetMethod(nameof(Save),BindingFlags.NonPublic | BindingFlags.Static);
+
+        private static MethodInfo saveMethod =
+            typeof(ZSave).GetMethod(nameof(Save), BindingFlags.NonPublic | BindingFlags.Static);
+
         private static MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson));
 
         static string mainAssembly = "Assembly-CSharp";
@@ -97,7 +101,7 @@ namespace ZSaver
                 return true;
             };
         }
-        
+
         internal static void Log(object obj)
         {
             if (ZSaverSettings.Instance.debugMode) Debug.Log(obj);
@@ -112,7 +116,7 @@ namespace ZSaver
         {
             if (ZSaverSettings.Instance.debugMode) Debug.LogError(obj);
         }
-        
+
         static int GetCurrentScene()
         {
             return SceneManager.GetActiveScene().buildIndex;
@@ -267,6 +271,49 @@ namespace ZSaver
             }
         }
 
+        static void UpdateAllInstanceIDs(int prevInstanceID, int newInstanceID,
+            bool isRestoring = false)
+        {
+            // string COMPInstanceIDToReplaceString = $"instanceID\":{prevInstanceID}";
+            // string newCOMPInstanceIDToReplaceString = "instanceID\":" + newInstanceID;
+            //
+            // string COMPFileIDToReplaceString = $"m_FileID\":{prevInstanceID}";
+            // string newCOMPFileIDToReplaceString = "m_FileID\":" + newInstanceID;
+            //
+            // string GOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + prevInstanceID;
+            // string GOInstanceIDToReplace =
+            //     "\"_componentParent\":{\"instanceID\":" + prevInstanceID + "}";
+            // string GOInstanceIDToReplaceParent = "\"parent\":{\"instanceID\":" + prevInstanceID + "}";
+            // string oldParentFileID = "\"parent\":{\"m_FileID\":" + prevInstanceID;
+            // string oldGOFileID = "\"_componentParent\":{\"m_FileID\":" + prevInstanceID;
+            // //"parent":{"instanceID":-15442}
+            //
+            // string newGOInstanceIDToReplaceString = "\"gameObjectInstanceID\":" + newInstanceID;
+            // string newGOInstanceIDToReplace =
+            //     "\"_componentParent\":{\"instanceID\":" + newInstanceID + "}";
+            // string newGOInstanceIDToReplaceParent =
+            //     "\"parent\":{\"instanceID\":" + newInstanceID + "}";
+            // string newGOFileID = "\"_componentParent\":{\"m_FileID\":" + newInstanceID;
+            // string newParentFileID = "\"parent\":{\"m_FileID\":" + prevInstanceID;
+            
+            if (!isRestoring)
+            {
+                RecordTempID(prevInstanceID, newInstanceID);
+            }
+
+            // UpdateAllJSONFiles(
+            //     new[]
+            //     {
+            //         COMPInstanceIDToReplaceString, COMPFileIDToReplaceString, GOInstanceIDToReplaceString,
+            //         GOInstanceIDToReplace, GOInstanceIDToReplaceParent, oldParentFileID, oldGOFileID
+            //     }, new[]
+            //     {
+            //         newCOMPInstanceIDToReplaceString, newCOMPFileIDToReplaceString, newGOInstanceIDToReplaceString,
+            //         newGOInstanceIDToReplace, newGOInstanceIDToReplaceParent, newParentFileID, newGOFileID
+            //     });
+            UpdateAllJSONFiles(new []{prevInstanceID.ToString()}, new[]{newInstanceID.ToString()});
+        }
+
         static void UpdateComponentInstanceIDs(int prevComponentInstanceID, int newComponentInstanceID,
             bool isRestoring = false)
         {
@@ -415,7 +462,8 @@ namespace ZSaver
             gameObject.AddComponent<PersistentGameObject>();
             gameObjectInstanceID = gameObject.GetInstanceID();
 
-            UpdateGameObjectInstanceIDs(prevGOInstanceID, gameObjectInstanceID);
+            // UpdateGameObjectInstanceIDs(prevGOInstanceID, gameObjectInstanceID);
+            UpdateAllInstanceIDs(prevGOInstanceID, gameObjectInstanceID);
         }
 
         static void LoadObjectsDynamically(Type ZSaverType, Type componentType, object FromJSONdObject)
@@ -459,7 +507,8 @@ namespace ZSaver
                 if (componentInGameObject == null) return;
                 componentInstanceID = componentInGameObject.GetInstanceID();
 
-                UpdateComponentInstanceIDs(prevCOMPInstanceID, componentInstanceID);
+                UpdateAllInstanceIDs(prevCOMPInstanceID, componentInstanceID);
+                // UpdateComponentInstanceIDs(prevCOMPInstanceID, componentInstanceID);
             }
 
             if (componentType == typeof(PersistentGameObject))
@@ -616,8 +665,9 @@ namespace ZSaver
         {
             for (var i = 0; i < idStorage.Count; i++)
             {
-                UpdateGameObjectInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i], true);
-                UpdateComponentInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i], true);
+                // UpdateGameObjectInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i], true);
+                // UpdateComponentInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i], true);
+                UpdateAllInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i],true);
             }
         }
 
