@@ -314,7 +314,7 @@ namespace ZSaver
 
         static void UpdateAllJSONFiles(string[] previousFields, string[] newFields, bool isRestoring = false)
         {
-            // if(!isRestoring) Log("-------------------------------------------------------------");
+            // /*if(!isRestoring)*/ Log("-------------------------------------------------------------");
             foreach (var file in Directory.GetFiles(GetFilePath(""), "*.save",
                 SearchOption.AllDirectories))
             {
@@ -329,7 +329,8 @@ namespace ZSaver
 
                 WriteToFile(fileName, newJson);
 
-                // if(!isRestoring) Log(fileName + " " + newJson);
+                // /*if(!isRestoring)*/ Log(previousFields.First() + " " + fileName + "Prev " + json);
+                // /*if(!isRestoring)*/ Log(newFields.First() + " " + fileName + "New " + newJson);
             }
         }
 
@@ -459,7 +460,7 @@ namespace ZSaver
         {
             List<Component> serializedComponentsOfGivenType = new List<Component>();
 
-            var componentsOfGivenType = objects.SelectMany(o => o.GetComponents(componentType)).ToArray();
+            var componentsOfGivenType = objects.SelectMany(o => o.GetComponents(componentType));
 
             foreach (var c in componentsOfGivenType)
             {
@@ -569,6 +570,7 @@ namespace ZSaver
                 if (componentInGameObject == null) return;
                 componentInstanceID = componentInGameObject.GetInstanceID();
 
+                Debug.LogWarning("updating " + componentType);
                 UpdateAllInstanceIDs(prevCOMPInstanceID, componentInstanceID);
                 // UpdateComponentInstanceIDs(prevCOMPInstanceID, componentInstanceID);
             }
@@ -693,33 +695,56 @@ namespace ZSaver
         static void RecordAllPersistentIDs()
         {
             var objs = Object.FindObjectsOfType<PersistentGameObject>();
-            foreach (var persistentGameObject in objs)
-            {
-                int id = persistentGameObject.gameObject.GetInstanceID();
 
-                idStorage.Add(id, id);
-            }
 
-            var componentTypes = GetAllPersistentComponents(objs);
-            foreach (var componentType in componentTypes)
-            {
-                var components = GetSerializedComponentsOfGivenType(objs, componentType);
 
-                int[] ids = components.Select(c => c.GetInstanceID()).ToArray();
-                foreach (var id in ids)
-                {
-                    idStorage.Add(id, id);
-                }
-            }
+            idStorage = objs.SelectMany(o => o.GetComponents(typeof(Component))
+                    .Where(c =>
+                        c.GetType() == typeof(PersistentGameObject) ||
+                        c.GetType().GetCustomAttribute<PersistentAttribute>() != null ||
+                        GetSerializedComponentsOfGivenType(objs, c.GetType()).Contains(c)
+                    ))
+                .ToDictionary(component => component.GetInstanceID(), component => component.GetInstanceID());
+            
+            idStorage.Append(objs.Select(o => o.gameObject).ToDictionary(o => o.GetInstanceID(), o=> o.GetInstanceID()));
+
+
+
+            // foreach (var persistentGameObject in objs)
+            // {
+            //     int id = persistentGameObject.gameObject.GetInstanceID();
+            //
+            //     idStorage.Add(id, id);
+            // }
+
+            // var componentTypes = GetAllPersistentComponents(objs);
+            // foreach (var componentType in componentTypes)
+            // {
+            //     var components = GetSerializedComponentsOfGivenType(objs, componentType);
+            //
+            //     int[] ids = components.Select(c => c.GetInstanceID()).ToArray();
+            //     foreach (var id in ids)
+            //     {
+            //         idStorage.Add(id, id);
+            //     }
+            // }
+
+            // foreach (var keyValuePair in idStorage)
+            // {
+            //     Debug.Log( "id: " + keyValuePair.Key + " " + FindObjectFromInstanceID(keyValuePair.Value).GetType());
+            // }
+
         }
 
         static void RecordTempID(int prevID, int newID)
         {
+            Debug.LogWarning("got called!");
             for (var i = 0; i < idStorage.Count; i++)
             {
                 if (idStorage[idStorage.Keys.ToArray()[i]] == prevID)
                 {
                     idStorage[idStorage.Keys.ToArray()[i]] = newID;
+                    Debug.LogWarning( prevID + " is now " + newID);
                 }
             }
         }
@@ -956,6 +981,15 @@ namespace ZSaver
         private class Wrapper<T>
         {
             public T[] Items;
+        }
+    }
+    
+    public static class LINQExtensions
+    {
+        public static void Append<K, V>(this Dictionary<K, V> first, Dictionary<K, V> second)
+        {
+            List<KeyValuePair<K, V>> pairs = second.ToList();
+            pairs.ForEach(pair => first.Add(pair.Key, pair.Value));
         }
     }
 }
