@@ -161,14 +161,12 @@ using Debug = UnityEngine.Debug;
 
             string editorScript =
                 @"using UnityEditor;
-using ZSaver.Editor;
 using UnityEditor.Callbacks;
 
 [CustomEditor(typeof(" + type.Name + @"))]
 public class " + type.Name + @"Editor : Editor
 {
     private " + type.Name + @" manager;
-    private bool editMode;
     private static ZSaverStyler styler;
 
     private void OnEnable()
@@ -185,7 +183,7 @@ public class " + type.Name + @"Editor : Editor
 
     public override void OnInspectorGUI()
     {
-        ZSaverEditor.BuildPersistentComponentEditor(manager, ref editMode, styler);
+        ZSaverEditor.BuildPersistentComponentEditor(manager, styler);
         base.OnInspectorGUI();
     }
 }";
@@ -316,17 +314,17 @@ public class " + type.Name + @"Editor : Editor
         }
 
 
-        public static void BuildPersistentComponentEditor<T>(T manager, ref bool editMode, ZSaverStyler styler)
+        public static void BuildPersistentComponentEditor<T>(T manager, ZSaverStyler styler)
         {
-            Texture2D cogwheel = Resources.Load<Texture2D>("cog");
+            // Texture2D cogwheel = styler.cogWheel;
 
             using (new GUILayout.HorizontalScope("helpbox"))
             {
-                GUILayout.Label("Persistent " + manager.GetType().GetCustomAttribute<PersistentAttribute>().saveType,
+                GUILayout.Label("Persistent Component",
                     styler.header, GUILayout.Height(28));
-                using (new EditorGUI.DisabledScope(GetClassState(manager.GetType()) != ClassState.Valid))
-                    editMode = GUILayout.Toggle(editMode, cogwheel, new GUIStyle("button"), GUILayout.MaxWidth(28),
-                        GUILayout.Height(28));
+                // using (new EditorGUI.DisabledScope(GetClassState(manager.GetType()) != ClassState.Valid))
+                //     editMode = GUILayout.Toggle(editMode, cogwheel, new GUIStyle("button"), GUILayout.MaxWidth(28),
+                //         GUILayout.Height(28));
 
                 BuildButton(manager.GetType(), 28, styler);
             }
@@ -396,12 +394,6 @@ public class " + type.Name + @"Editor : Editor
             IEnumerable<Type> types = ZSave.ComponentSerializableTypes;
             foreach (var type in types)
             {
-                string[] blackListForThisComponent = {" "};
-
-                if (ZSave.ComponentBlackList.ContainsKey(type))
-                    ZSave.ComponentBlackList.TryGetValue(type, out blackListForThisComponent);
-
-
                 longScript +=
                     "[System.Serializable]\npublic class " + type.Name + "ZSerializer : ZSaver.ZSerializer<" + type.FullName +
                     "> {\n";
@@ -410,8 +402,6 @@ public class " + type.Name + @"Editor : Editor
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(ZSave.FieldIsSuitableForAssignment))
                 {
-                    if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
-
                     longScript +=
                         $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
                         ";\n";
@@ -421,8 +411,6 @@ public class " + type.Name + @"Editor : Editor
                     .GetFields(BindingFlags.Public | BindingFlags.Instance)
                     .Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
                 {
-                    if (blackListForThisComponent.Contains(fieldInfo.Name)) continue;
-
                     var fieldType = fieldInfo.FieldType;
 
                     if (fieldInfo.FieldType.IsArray)
@@ -467,8 +455,6 @@ public class " + type.Name + @"Editor : Editor
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(ZSave.FieldIsSuitableForAssignment))
                 {
-                    if (blackListForThisComponent.Contains(propertyInfo.Name)) continue;
-
                     longScript +=
                         $"        " + propertyInfo.Name + " = " + type.Name + "Instance." + propertyInfo.Name + ";\n";
                 }
@@ -477,8 +463,6 @@ public class " + type.Name + @"Editor : Editor
                     .GetFields(BindingFlags.Public | BindingFlags.Instance)
                     .Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
                 {
-                    if (blackListForThisComponent.Contains(fieldInfo.Name)) continue;
-
                     longScript +=
                         $"        " + fieldInfo.Name + " = " + type.Name + "Instance." + fieldInfo.Name + ";\n";
                 }

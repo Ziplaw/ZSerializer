@@ -49,22 +49,46 @@ Simply add the Persistent GameObject Component to the GameObject you wont to ret
 
 ![no image :(](Scripts/Editor/Resources/README/persistent_go_tut.png)
 
+#### 
+
+##### Additional Settings
+<details><summary>Components to Serialize</summary>
+<p>
+If you want to discard any attached Unity Component while saving and loading, simply toggle or untoggle de checks next to the names of the Components, like this!
+
+![no image :(](Scripts/Editor/Resources/README/components_to_serialize.png)
+</p>
+</details>
+
+
 ### Loading and saving
-Whenever you want to make a save state of your Persistent GameObjects and Components, just call 
+Whenever you want to make a save your Persistent GameObjects and Components from your current **Scene** into your **Selected Save File**, just call 
 ```cs
-ZSave.SaveAllObjectsAndComponents();
+ZSave.SaveAll();
 ```
-To load it, just call 
+To load them, just call 
 ```cs
-ZSave.LoadAllObjectsAndComponents();
+ZSave.LoadAll();
 ```
 That's it :)
 
 ### Settings
 If you open the **Persistent Classes Configurator**, you'll see a button with this icon: ![no image :(](Scripts/Editor/Resources/cog.png)
 If you click it, the settings panel will open up. In here you can change some settings about the tool and how it behaves.
- - Debug Mode
+<details><summary>Debug Mode</summary>
+<p>
  If you turn it on, the Console will dump all the information that gets saved, updated and loaded, so you can look through it in case something unexpected happens.
- - Auto Rebuild Z Savers
+</p>
+</details>
+
+<details><summary>Auto Rebuild ZSavers</summary>
+<p>
  This one is self explanatory, if you check this box, every ZSaver will be updated automatically whenever you make changes to the component it refers to.
- - Selected Save File. This is a setting you can change at runtime to select a Save File by index in case you want to support it inside your game. Every save file is stored in ```Application.persistentDataPath/<SaveFileIndex>/<SceneBuildIndex>/```
+</p></details>
+
+<details><summary>Selected Save File</summary>
+<p>
+This is a setting you can change at runtime to select a Save File by index in case you want to support it inside your game. Every save file is stored in
+Application.persistentDataPath/[SaveFileIndex]/[SceneBuildIndex]/
+</p></details>
+

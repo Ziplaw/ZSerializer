@@ -22,29 +22,27 @@ public class PersistentGameObject : MonoBehaviour
     }
 
     public List<SerializableComponentData> _componentDatas = new List<SerializableComponentData>();
-    public void UpdateSerializableComponents()
+    public void UpdateSerializableComponents(IEnumerable<Type> serializableTypes)
     {
         if (!Application.isPlaying)
         {
-            var componentTypes = GetComponents<Component>().Select(c => c.GetType()).Where(type =>
-                ZSave.ComponentSerializableTypes.Contains(type) &&
-                !type.IsSubclassOf(typeof(MonoBehaviour))).ToArray();
+            var componentTypes = GetComponents<Component>().Where(c => !c.GetType().IsSubclassOf(typeof(MonoBehaviour)) && c.GetType() != typeof(Transform)).Select(c => c.GetType());
 
-            var serializableComponentTypes = _componentDatas.Select(c => Type.GetType(c.typeName)).ToArray();
+            var serializableComponentTypes = _componentDatas.Select(c => Type.GetType(c.typeName));
 
-            for (var i = 0; i < serializableComponentTypes.Length; i++)
+            for (var i = 0; i < serializableComponentTypes.Count(); i++)
             {
-                if (!componentTypes.Contains(serializableComponentTypes[i]) && i < _componentDatas.Count)
+                if (!componentTypes.Contains(serializableComponentTypes.ElementAt(i)) && i < _componentDatas.Count)
                 {
                     _componentDatas.RemoveAt(i);
                 }
             }
 
-            for (var i = 0; i < componentTypes.Length; i++)
+            for (var i = 0; i < componentTypes.Count(); i++)
             {
-                if (!serializableComponentTypes.Contains(componentTypes[i]))
+                if (!serializableComponentTypes.Contains(componentTypes.ElementAt(i)))
                 {
-                    _componentDatas.Add(new SerializableComponentData(componentTypes[i]));
+                    _componentDatas.Add(new SerializableComponentData(componentTypes.ElementAt(i)));
                 }
             }
         }

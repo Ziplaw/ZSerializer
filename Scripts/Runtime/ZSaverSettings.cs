@@ -17,10 +17,10 @@ namespace ZSaver
         public bool autoRebuildZSavers;
         public int selectedSaveFile;
         public bool encryptData;
-        public string[] addedAssemblyNames = new []{ZSave.mainAssembly};
+        public string[] addedAssemblyNames;
 
-        public IEnumerable<Assembly> AddedAssemblies => from assemblyName in addedAssemblyNames
-            select Assembly.Load(assemblyName);
+        public IEnumerable<Assembly> AddedAssemblies =>
+            new string[] {"com.Ziplaw.ZSaver.Runtime", "UnityEngine.CoreModule", "Assembly-CSharp"}.Select(Assembly.Load).Concat(addedAssemblyNames.Select(Assembly.Load)).Distinct();
 
         
 
