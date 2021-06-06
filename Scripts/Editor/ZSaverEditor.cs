@@ -30,7 +30,7 @@ public static class ZSaverEditor
     static void TryRebuildZSavers()
     {
         ZSaverStyler styler = new ZSaverStyler();
-        if (styler.settings.autoRebuildZSavers)
+        if (styler.settings.autoRebuildZSerializers)
         {
             var types = ZSave.GetTypesWithPersistentAttribute().ToArray();
 

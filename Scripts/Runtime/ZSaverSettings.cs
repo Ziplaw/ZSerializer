@@ -13,12 +13,12 @@ namespace ZSaver
 
         public static ZSaverSettings Instance => instance ? instance : Resources.Load<ZSaverSettings>("ZSaverSettings");
 
-        #if ZSAVE_INSTALLED_AS_PACKAGE//
-        [HideInInspector] 
-        #endif
+        
+        //TO/DO: uncomment this before every commit
+        [HideInInspector]
         public bool packageInitialized;
         public bool debugMode;
-        public bool autoRebuildZSavers;
+        public bool autoRebuildZSerializers;
         public int selectedSaveFile;
         public bool encryptData;
         public string[] addedAssemblyNames;
