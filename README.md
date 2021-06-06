@@ -1,7 +1,7 @@
 # ZSaver
 ZSaver is an easy, all-in-one Serialization solution for Unity. It supports serialization for every one of Unity's built in Components, and an easy way of Serializing your own!
 ## Installation
-To get started, simply [right click me and select "Copy this link address"](https://github.com/Ziplaw/ZSave.git), go into the **Package Manager**, click on the **+** icon and select "Add package frpm git URL..."
+To get started, simply [right click me and select "Copy this link address"](https://github.com/Ziplaw/ZSave.git), go into the **Package Manager**, click on the **+** icon and select "Add package from git URL..."
 
  ![no image :(](Scripts/Editor/Resources/README/package_manager_tut.png)
 
@@ -89,6 +89,6 @@ If you click it, the settings panel will open up. In here you can change some se
 <details><summary>Selected Save File</summary>
 <p>
 This is a setting you can change at runtime to select a Save File by index in case you want to support it inside your game. Every save file is stored in
-Application.persistentDataPath/[SaveFileIndex]/[SceneBuildIndex]/
-</p></details>
-
+<tt>Application.persistentDataPath/[SaveFileIndex]/[SceneBuildIndex]/</tt>
+</p>
+ </details>
