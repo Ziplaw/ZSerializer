@@ -9,6 +9,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.Ziplaw.ZSaver.Runtime",
+            "expression": "1.0",
+            "define": "ZSAVE_INSTALLED_AS_PACKAGE"
+        }
+    ],
     "noEngineReferences": false
 }

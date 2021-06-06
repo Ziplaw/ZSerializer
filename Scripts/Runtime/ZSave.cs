@@ -100,7 +100,7 @@ namespace ZSaver
             {typeof(Light), new[] {"shadowRadius", "shadowAngle", "areaSize", "lightmapBakeType"}},
             {typeof(MeshRenderer), new[] {"scaleInLightmap", "receiveGI", "stitchLightmapSeams"}},
             {typeof(Terrain), new[] {"bakeLightProbesForTrees", "deringLightProbesForTrees"}},
-            {typeof(MonoBehaviour), new[] {"runInEditMode","useGUILayout"}},
+            {typeof(MonoBehaviour), new[] {"runInEditMode", "useGUILayout"}},
         };
 
         internal static bool FieldIsSuitableForAssignment(PropertyInfo fieldInfo)
@@ -284,7 +284,7 @@ namespace ZSaver
             {
                 for (var j = 0; j < zSaverFields.Length; j++)
                 {
-                    if (zSaverFields[j].Name == componentFields[i].Name)
+                    if (zSaverFields[j].Name == componentFields[i].Name && _component != null)
                     {
                         componentFields[i].SetValue(_component, zSaverFields[j].GetValue(zSaver));
                     }
@@ -697,7 +697,6 @@ namespace ZSaver
             var objs = Object.FindObjectsOfType<PersistentGameObject>();
 
 
-
             idStorage = objs.SelectMany(o => o.GetComponents(typeof(Component))
                     .Where(c =>
                         c.GetType() == typeof(PersistentGameObject) ||
@@ -705,9 +704,9 @@ namespace ZSaver
                         GetSerializedComponentsOfGivenType(objs, c.GetType()).Contains(c)
                     ))
                 .ToDictionary(component => component.GetInstanceID(), component => component.GetInstanceID());
-            
-            idStorage.Append(objs.Select(o => o.gameObject).ToDictionary(o => o.GetInstanceID(), o=> o.GetInstanceID()));
 
+            idStorage.Append(
+                objs.Select(o => o.gameObject).ToDictionary(o => o.GetInstanceID(), o => o.GetInstanceID()));
 
 
             // foreach (var persistentGameObject in objs)
@@ -733,7 +732,6 @@ namespace ZSaver
             // {
             //     Debug.Log( "id: " + keyValuePair.Key + " " + FindObjectFromInstanceID(keyValuePair.Value).GetType());
             // }
-
         }
 
         static void RecordTempID(int prevID, int newID)
@@ -744,7 +742,7 @@ namespace ZSaver
                 if (idStorage[idStorage.Keys.ToArray()[i]] == prevID)
                 {
                     idStorage[idStorage.Keys.ToArray()[i]] = newID;
-                    Debug.LogWarning( prevID + " is now " + newID);
+                    Debug.LogWarning(prevID + " is now " + newID);
                 }
             }
         }
@@ -983,7 +981,7 @@ namespace ZSaver
             public T[] Items;
         }
     }
-    
+
     public static class LINQExtensions
     {
         public static void Append<K, V>(this Dictionary<K, V> first, Dictionary<K, V> second)

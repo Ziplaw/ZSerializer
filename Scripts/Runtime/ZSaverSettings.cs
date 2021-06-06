@@ -10,9 +10,13 @@ namespace ZSaver
     public class ZSaverSettings : ScriptableObject
     {
         private static ZSaverSettings instance;
-        
+
         public static ZSaverSettings Instance => instance ? instance : Resources.Load<ZSaverSettings>("ZSaverSettings");
 
+        #if ZSAVE_INSTALLED_AS_PACKAGE//
+        [HideInInspector] 
+        #endif
+        public bool packageInitialized;
         public bool debugMode;
         public bool autoRebuildZSavers;
         public int selectedSaveFile;
@@ -20,9 +24,9 @@ namespace ZSaver
         public string[] addedAssemblyNames;
 
         public IEnumerable<Assembly> AddedAssemblies =>
-            new string[] {"com.Ziplaw.ZSaver.Runtime", "UnityEngine.CoreModule", "Assembly-CSharp"}.Select(Assembly.Load).Concat(addedAssemblyNames.Select(Assembly.Load)).Distinct();
+            new string[] {"com.Ziplaw.ZSaver.Runtime", "Assembly-CSharp", "UnityEngine.CoreModule"}
+                .Select(Assembly.Load).Concat(addedAssemblyNames.Select(Assembly.Load)).Distinct();
 
-        
 
         [RuntimeInitializeOnLoadMethod]
         static void Init()
