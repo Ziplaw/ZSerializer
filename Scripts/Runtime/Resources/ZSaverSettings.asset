@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1efd7af9bd4fdc48a69c60405eb42f4, type: 3}
   m_Name: ZSaverSettings
   m_EditorClassIdentifier: 
-  packageInitialized: 0
+  packageInitialized: 1
   debugMode: 1
   autoRebuildZSerializers: 1
   selectedSaveFile: 0
