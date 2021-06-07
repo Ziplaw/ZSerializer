@@ -279,16 +279,11 @@ namespace ZSaver
         {
             FieldInfo[] zSaverFields = zSaverType.GetFields();
             FieldInfo[] componentFields = componentType.GetFields();
-
-            for (var i = 0; i < componentFields.Length; i++)
+            
+            for (var i = 0; i < zSaverFields.Length; i++)
             {
-                for (var j = 0; j < zSaverFields.Length; j++)
-                {
-                    if (zSaverFields[j].Name == componentFields[i].Name && _component != null)
-                    {
-                        componentFields[i].SetValue(_component, zSaverFields[j].GetValue(zSaver));
-                    }
-                }
+                var fieldInfo = componentFields.FirstOrDefault(f => f.Name == zSaverFields[i].Name);
+                fieldInfo?.SetValue(_component, zSaverFields[i].GetValue(zSaver));
             }
         }
 
@@ -301,14 +296,8 @@ namespace ZSaver
 
             for (var i = 0; i < fieldInfos.Length; i++)
             {
-                for (var j = 0; j < propertyInfos.Count(); j++)
-                {
-                    if (propertyInfos.ElementAt(j).Name == fieldInfos[i].Name)
-                    {
-                        if (propertyInfos.ElementAt(j) != null)
-                            propertyInfos.ElementAt(j).SetValue(c, fieldInfos[i].GetValue(FromJSONdObject));
-                    }
-                }
+                var propertyInfo = propertyInfos.FirstOrDefault(p => p.Name == fieldInfos[i].Name);
+                propertyInfo?.SetValue(c, fieldInfos[i].GetValue(FromJSONdObject));
             }
         }
 
@@ -489,7 +478,7 @@ namespace ZSaver
             foreach (var componentType in componentTypes)
             {
                 yield return SerializeComponents(GetSerializedComponentsOfGivenType(objects, componentType),
-                    Type.GetType(componentType.Name + "ZSerializer"),
+                    Assembly.Load(componentType == typeof(PersistentGameObject) ? "com.Ziplaw.ZSaver.Runtime" : mainAssembly).GetType(componentType.Name + "ZSerializer"),
                     componentType.FullName + ".save");
             }
         }
@@ -569,21 +558,19 @@ namespace ZSaver
                 else componentInGameObject = gameObject.AddComponent(componentType);
                 if (componentInGameObject == null) return;
                 componentInstanceID = componentInGameObject.GetInstanceID();
-
-                Debug.LogWarning("updating " + componentType);
                 UpdateAllInstanceIDs(prevCOMPInstanceID, componentInstanceID);
                 // UpdateComponentInstanceIDs(prevCOMPInstanceID, componentInstanceID);
             }
 
-            if (componentType == typeof(PersistentGameObject))
-            {
-                GameObjectData gameObjectData =
-                    (GameObjectData) ZSaverType.GetField("gameObjectData").GetValue(FromJSONdObject);
-
-                gameObject.transform.position = gameObjectData.position;
-                gameObject.transform.rotation = gameObjectData.rotation;
-                gameObject.transform.localScale = gameObjectData.size;
-            }
+            // if (componentType == typeof(PersistentGameObject))
+            // {
+            //     GameObjectData gameObjectData =
+            //         (GameObjectData) ZSaverType.GetField("gameObjectData").GetValue(FromJSONdObject);
+            //
+            //     gameObject.transform.position = gameObjectData.position;
+            //     gameObject.transform.rotation = gameObjectData.rotation;
+            //     gameObject.transform.localScale = gameObjectData.size;
+            // }
         }
 
         static void LoadAllObjects()
@@ -619,7 +606,7 @@ namespace ZSaver
             foreach (var type in types)
             {
                 if (!File.Exists(GetFilePath(type.FullName + ".save"))) continue;
-                var ZSaverType = Type.GetType(type.Name + "ZSerializer");
+                var ZSaverType = Assembly.Load(type == typeof(PersistentGameObject) ? "com.Ziplaw.ZSaver.Runtime" : mainAssembly).GetType(type.Name + "ZSerializer");
                 if (ZSaverType == null) continue;
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
@@ -641,13 +628,14 @@ namespace ZSaver
         static void LoadReferences()
         {
             IEnumerable<Type> types = GetSerializedComponentsInCurrentSaveFile()
-                .OrderByDescending(x => x == typeof(PersistentGameObject))
-                .ToArray();
+                .OrderByDescending(x => x == typeof(PersistentGameObject));
 
             foreach (var type in types)
             {
                 if (!File.Exists(GetFilePath(type.FullName + ".save"))) continue;
-                var ZSaverType = Type.GetType(type.Name + "ZSerializer");
+                var ZSaverType = Assembly
+                    .Load(type == typeof(PersistentGameObject) ? "com.Ziplaw.ZSaver.Runtime" : mainAssembly)
+                    .GetType(type.Name + "ZSerializer");
                 if (ZSaverType == null) continue;
                 var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
 
@@ -707,42 +695,17 @@ namespace ZSaver
 
             idStorage.Append(
                 objs.Select(o => o.gameObject).ToDictionary(o => o.GetInstanceID(), o => o.GetInstanceID()));
-
-
-            // foreach (var persistentGameObject in objs)
-            // {
-            //     int id = persistentGameObject.gameObject.GetInstanceID();
-            //
-            //     idStorage.Add(id, id);
-            // }
-
-            // var componentTypes = GetAllPersistentComponents(objs);
-            // foreach (var componentType in componentTypes)
-            // {
-            //     var components = GetSerializedComponentsOfGivenType(objs, componentType);
-            //
-            //     int[] ids = components.Select(c => c.GetInstanceID()).ToArray();
-            //     foreach (var id in ids)
-            //     {
-            //         idStorage.Add(id, id);
-            //     }
-            // }
-
-            // foreach (var keyValuePair in idStorage)
-            // {
-            //     Debug.Log( "id: " + keyValuePair.Key + " " + FindObjectFromInstanceID(keyValuePair.Value).GetType());
-            // }
         }
 
         static void RecordTempID(int prevID, int newID)
         {
-            Debug.LogWarning("got called!");
+            // Debug.LogWarning("got called!");
             for (var i = 0; i < idStorage.Count; i++)
             {
-                if (idStorage[idStorage.Keys.ToArray()[i]] == prevID)
+                if (idStorage[idStorage.Keys.ElementAt(i)] == prevID)
                 {
-                    idStorage[idStorage.Keys.ToArray()[i]] = newID;
-                    Debug.LogWarning(prevID + " is now " + newID);
+                    idStorage[idStorage.Keys.ElementAt(i)] = newID;
+                    // Debug.LogWarning(prevID + " is now " + newID);
                 }
             }
         }
@@ -753,9 +716,7 @@ namespace ZSaver
 
             for (var i = 0; i < idStorage.Count; i++)
             {
-                // UpdateGameObjectInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i], true);
-                // UpdateComponentInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i], true);
-                UpdateAllInstanceIDs(idStorage[idStorage.Keys.ToArray()[i]], idStorage.Keys.ToArray()[i], true);
+                UpdateAllInstanceIDs(idStorage[idStorage.Keys.ElementAt(i)], idStorage.Keys.ElementAt(i), true);
             }
         }
 

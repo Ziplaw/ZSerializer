@@ -21,7 +21,7 @@ public class PersistentGameObject : MonoBehaviour
         }
     }
 
-    public List<SerializableComponentData> _componentDatas = new List<SerializableComponentData>();
+    [OmitSerializableCheck] public List<SerializableComponentData> _componentDatas = new List<SerializableComponentData>();
     public void UpdateSerializableComponents(IEnumerable<Type> serializableTypes)
     {
         if (!Application.isPlaying)
