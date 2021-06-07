@@ -19,8 +19,10 @@ public static class ZSaverEditor
     [DidReloadScripts]
     static void InitializePackage()
     {
-        if (!ZSaverSettings.Instance.packageInitialized)
+        if (!ZSaverSettings.Instance)
         {
+            ZSaveManagerEditorWindow.ShowWindow();
+            
             ZSaverSettings.Instance.packageInitialized = true;
             GenerateUnityComponentClasses();
         }
@@ -29,34 +31,38 @@ public static class ZSaverEditor
     [DidReloadScripts]
     static void TryRebuildZSavers()
     {
-        ZSaverStyler styler = new ZSaverStyler();
-        if (styler.settings.autoRebuildZSerializers)
+        if (ZSaverSettings.Instance && ZSaverSettings.Instance.packageInitialized)
         {
-            var types = ZSave.GetTypesWithPersistentAttribute().ToArray();
 
-            Class[] classes = new Class[types.Length];
-
-            for (int i = 0; i < types.Length; i++)
+            ZSaverStyler styler = new ZSaverStyler();
+            if (styler.settings.autoRebuildZSerializers)
             {
-                classes[i] = new Class(types[i], GetClassState(types[i]));
-            }
+                var types = ZSave.GetTypesWithPersistentAttribute().ToArray();
 
-            string path;
+                Class[] classes = new Class[types.Length];
 
-            foreach (var c in classes)
-            {
-                ClassState state = c.state;
-
-                if (state == ClassState.NeedsRebuilding)
+                for (int i = 0; i < types.Length; i++)
                 {
-                    path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSerializer.cs",
-                        SearchOption.AllDirectories)[0];
-                    path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
-                           path.Replace('\\', '/');
+                    classes[i] = new Class(types[i], GetClassState(types[i]));
+                }
+
+                string path;
+
+                foreach (var c in classes)
+                {
+                    ClassState state = c.state;
+
+                    if (state == ClassState.NeedsRebuilding)
+                    {
+                        path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSerializer.cs",
+                            SearchOption.AllDirectories)[0];
+                        path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
+                               path.Replace('\\', '/');
 
 
-                    CreateZSaver(c.classType, path);
-                    AssetDatabase.Refresh();
+                        CreateZSaver(c.classType, path);
+                        AssetDatabase.Refresh();
+                    }
                 }
             }
         }
@@ -191,6 +197,7 @@ public class " + type.Name + @"Editor : Editor
     [DidReloadScripts]
     static void OnDatabaseReload()
     {
+        if(ZSaverSettings.Instance && ZSaverSettings.Instance.packageInitialized)
         styler = new ZSaverStyler();
     }
 
