@@ -14,7 +14,7 @@ namespace ZSaver
         public static ZSaverSettings Instance => instance ? instance : Resources.Load<ZSaverSettings>("ZSaverSettings");
 
         
-        //TO/DO: uncomment this before every commit
+        // TODO: uncomment this before every commit
         [HideInInspector]
         public bool packageInitialized;
         public bool debugMode;
@@ -23,10 +23,7 @@ namespace ZSaver
         public bool encryptData;
         public string[] addedAssemblyNames;
 
-        public IEnumerable<Assembly> AddedAssemblies =>
-            new string[] {"com.Ziplaw.ZSaver.Runtime", "Assembly-CSharp", "UnityEngine.CoreModule"}
-                .Select(Assembly.Load).Concat(addedAssemblyNames.Select(Assembly.Load)).Distinct();
-
+        public IEnumerable<Assembly> AddedAssemblies => new []{"Assembly-CSharp", "com.Ziplaw.ZSaver.Runtime"}.Select(Assembly.Load).Concat(addedAssemblyNames.Select(Assembly.Load));
 
         [RuntimeInitializeOnLoadMethod]
         static void Init()

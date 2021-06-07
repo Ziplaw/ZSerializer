@@ -49,6 +49,7 @@ namespace ZSaver
         internal static string mainAssembly = "Assembly-CSharp";
         static Dictionary<int, int> idStorage = new Dictionary<int, int>();
         private static IEnumerable<Type> persistentTypes;
+        private static List<string> unityComponentAssemblies = new List<string>();
 
         private static IEnumerable<Type> serializableComponentTypes;
         // internal static IEnumerable<Type> PersistentTypes
@@ -84,7 +85,9 @@ namespace ZSaver
             foreach (var fileName in Directory.GetFiles(GetFilePath("")))
             {
                 string typeName = fileName.Split('\\').Last().Replace(".save", "");
-                Assembly assembly = ZSaverSettings.Instance.AddedAssemblies.First(a => a.GetType(typeName) != null);
+                
+                Assembly assembly = unityComponentAssemblies.Select(Assembly.Load).FirstOrDefault(a => a.GetType(typeName) != null);
+                if(assembly == null) continue;
                 yield return Type.GetType($"{typeName}, {assembly}");
             }
         }
@@ -474,7 +477,7 @@ namespace ZSaver
         {
             var objects = Object.FindObjectsOfType<PersistentGameObject>();
             var componentTypes = GetAllPersistentComponents(objects);
-
+            
             foreach (var componentType in componentTypes)
             {
                 yield return SerializeComponents(GetSerializedComponentsOfGivenType(objects, componentType),
@@ -493,6 +496,8 @@ namespace ZSaver
             {
                 zSavers = OrderPersistentGameObjectsByLoadingOrder(zSavers);
             }
+            
+            unityComponentAssemblies.Add(components[0].GetType().Assembly.FullName);
 
             yield return ReflectedSave(zSavers, fileName);
         }
@@ -744,6 +749,8 @@ namespace ZSaver
             yield return ZMono.Instance.StartCoroutine(SaveAllObjects());
 
             yield return null;
+            
+            Save(unityComponentAssemblies.Distinct().ToArray(),"assemblies.save");
 
             Log("Serialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                 (Time.frameCount - frameCount) + " frames");
@@ -754,6 +761,8 @@ namespace ZSaver
         {
             float startingTime = Time.realtimeSinceStartup;
             float frameCount = Time.frameCount;
+
+            unityComponentAssemblies = JsonHelper.FromJson<string>(ReadFromFile(GetFilePath("assemblies.save"))).ToList();
 
             LoadAllPersistentGameObjects();
             LoadAllObjects();

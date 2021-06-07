@@ -24,7 +24,7 @@ public class PersistentGameObject : MonoBehaviour
     [OmitSerializableCheck] public List<SerializableComponentData> _componentDatas = new List<SerializableComponentData>();
     public void UpdateSerializableComponents(IEnumerable<Type> serializableTypes)
     {
-        if (!Application.isPlaying)
+        // if (!Application.isPlaying)
         {
             var componentTypes = GetComponents<Component>().Where(c => !c.GetType().IsSubclassOf(typeof(MonoBehaviour)) && c.GetType() != typeof(Transform)).Select(c => c.GetType());
 
