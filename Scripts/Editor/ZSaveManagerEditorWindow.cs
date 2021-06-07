@@ -42,7 +42,7 @@ namespace ZSaver.Editor
         internal static void ShowWindow()
         {
             var window = GetWindow<ZSaveManagerEditorWindow>();
-            window.titleContent = new GUIContent("Persistent Classes");
+            window.titleContent = new GUIContent("ZSaver");
             window.Show();
             Init();
         }
@@ -68,14 +68,26 @@ namespace ZSaver.Editor
             }
         }
 
+        private bool stylerInitialized;
+
         private void OnGUI()
         {
-            if (!ZSaverSettings.Instance.packageInitialized)
+            if (!ZSaverSettings.Instance.packageInitialized)//
             {
-                if (GUILayout.Button("Setup"))
+                ZSaveManagerEditorWindow w;
+                
+                styler = new ZSaverStyler();
+                styler.GetEveryResource();
+
+                w = GetWindow<ZSaveManagerEditorWindow>();
+                w.position = new Rect(w.position){height = 104};
+
+                if (GUILayout.Button("Setup", new GUIStyle("button"){fontSize = 48, font = styler.header.font}, GUILayout.MinHeight(100)))
                 {
                     ZSaverSettings.Instance.packageInitialized = true;
-                    ZSaverEditor.GenerateUnityComponentClasses();
+                    ZSaverEditor.GenerateUnityComponentClasses();//
+                    Init();
+                    w.position = new Rect(w.position){height = 300};
                 }
             }
             else

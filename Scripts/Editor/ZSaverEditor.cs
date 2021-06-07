@@ -19,12 +19,12 @@ public static class ZSaverEditor
     [DidReloadScripts]
     static void InitializePackage()
     {
-        if (!ZSaverSettings.Instance)
+        if (!ZSaverSettings.Instance || ZSaverSettings.Instance && !ZSaverSettings.Instance.packageInitialized)
         {
             ZSaveManagerEditorWindow.ShowWindow();
             
-            ZSaverSettings.Instance.packageInitialized = true;
-            GenerateUnityComponentClasses();
+            // ZSaverSettings.Instance.packageInitialized = true;
+            // GenerateUnityComponentClasses();
         }
     }
 
