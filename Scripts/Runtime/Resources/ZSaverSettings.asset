@@ -16,5 +16,5 @@ MonoBehaviour:
   debugMode: 1
   autoRebuildZSerializers: 1
   selectedSaveFile: 0
-  encryptData: 1
-  addedAssemblyNames: []
+  encryptData: 0
+  componentBlackList: []

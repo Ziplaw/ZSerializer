@@ -181,6 +181,7 @@ public static class ZSaverEditor
         string editorScript =
             @"using UnityEditor;
 using UnityEditor.Callbacks;
+using ZSaver;
 
 [CustomEditor(typeof(" + type.Name + @"))]
 public class " + type.Name + @"Editor : Editor
@@ -221,7 +222,7 @@ public class " + type.Name + @"Editor : Editor
         }
 
 
-        string newNewPath = newPath + "Editor/" + type.Name + "Editor.cs";
+        string newNewPath = newPath + "Editor/Z" + type.Name + "Editor.cs";
         FileStream fileStream = new FileStream(newNewPath, FileMode.Create, FileAccess.Write);
         StreamWriter sw = new StreamWriter(fileStream);
         sw.Write(editorScript);
@@ -234,6 +235,7 @@ public class " + type.Name + @"Editor : Editor
     public static ClassState GetClassState(Type type)
     {
         Type ZSaverType = type.Assembly.GetType(type.Name + "ZSerializer");
+        // Debug.Log(type.Assembly);
         if (ZSaverType == null) return ClassState.NotMade;
 
         var fieldsZSaver = ZSaverType.GetFields()
@@ -260,6 +262,7 @@ public class " + type.Name + @"Editor : Editor
     public static void BuildButton(Type type, int width, ZSaverStyler styler)
     {
         ClassState state = GetClassState(type);
+        // Debug.Log(type + " " + state);
         if (styler.validImage == null) styler.GetEveryResource();
 
         using (new EditorGUI.DisabledGroupScope(state == ClassState.Valid))
@@ -279,16 +282,16 @@ public class " + type.Name + @"Editor : Editor
                 string path;
 
 
-                if (state == ClassState.NotMade)
+                // if (state == ClassState.NotMade)
+                // {
+                //     path = EditorUtility.SaveFilePanel(
+                //         type.Name + "ZSerializer.cs Save Location", "Assets",
+                //         type.Name + "ZSerializer", "cs");
+                // }
+                // else
                 {
-                    path = EditorUtility.SaveFilePanel(
-                        type.Name + "ZSerializer.cs Save Location", "Assets",
-                        type.Name + "ZSerializer", "cs");
-                }
-                else
-                {
-                    path = Directory.GetFiles("Assets", $"{type.Name}ZSerializer.cs",
-                        SearchOption.AllDirectories)[0];
+                    path = Directory.GetFiles("Assets", $"*{type.Name}*.cs",
+                        SearchOption.AllDirectories)[0].Split('.')[0] + "ZSerializer.cs";
                     path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                            path.Replace('\\', '/');
                 }
@@ -310,18 +313,18 @@ public class " + type.Name + @"Editor : Editor
         {
             string path;
 
-            string folderPath = EditorUtility.SaveFolderPanel("ZSerializer.cs Save Locations", "Assets", "");
+            // string folderPath = EditorUtility.SaveFolderPanel("ZSerializer.cs Save Locations", "Assets", "");
 
             foreach (var c in classes)
             {
                 ClassState state = c.state;
 
-                path = folderPath + $"/{c.classType.Name}ZSerializer.cs";
+                // path = folderPath + $"/{c.classType.Name}ZSerializer.cs";
 
-                if (state != ClassState.NotMade)
+                // if (state != ClassState.NotMade)
                 {
-                    path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSerializer.cs",
-                        SearchOption.AllDirectories)[0];
+                    path = Directory.GetFiles("Assets", $"*{c.classType.Name}*.cs",
+                        SearchOption.AllDirectories)[0].Split('.')[0] + "ZSerializer.cs";
                     path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                            path.Replace('\\', '/');
                 }

@@ -7,6 +7,19 @@ using UnityEngine;
 namespace ZSaver
 {
     // [CreateAssetMenu(fileName = "New ZSerializer Settings", menuName = "ZSaverSettings", order = 0)]
+    [Serializable]
+    public class SerializableComponentBlackList
+    {
+        public Type Type => Type.GetType(typeFullName);
+        [SerializeField] private string typeFullName;
+        public List<string> componentNames;
+
+        public SerializableComponentBlackList(Type type, string componentName)
+        {
+            typeFullName = type.AssemblyQualifiedName;
+            componentNames = new List<string>{componentName};
+        }
+    }
     public class ZSaverSettings : ScriptableObject
     {
         private static ZSaverSettings instance;
@@ -21,9 +34,8 @@ namespace ZSaver
         public bool autoRebuildZSerializers;
         public int selectedSaveFile;
         public bool encryptData;
-        public string[] addedAssemblyNames;
-
-        public IEnumerable<Assembly> AddedAssemblies => new []{"Assembly-CSharp", "com.Ziplaw.ZSaver.Runtime"}.Select(Assembly.Load).Concat(addedAssemblyNames.Select(Assembly.Load));
+        [SerializeField][HideInInspector]public List<SerializableComponentBlackList> componentBlackList;
+        
 
         [RuntimeInitializeOnLoadMethod]
         static void Init()
