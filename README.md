@@ -92,3 +92,9 @@ This is a setting you can change at runtime to select a Save File by index in ca
 <tt>Application.persistentDataPath/[SaveFileIndex]/[SceneBuildIndex]/</tt>
 </p>
  </details>
+ 
+ <details><summary>Encrypt Data</summary>
+ <p>
+  If you turn it on, your save files will be encrypted using the [Rijndael Algorithm](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard).
+ </p>
+ </details>
