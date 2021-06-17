@@ -95,6 +95,6 @@ This is a setting you can change at runtime to select a Save File by index in ca
  
  <details><summary>Encrypt Data</summary>
  <p>
-  If you turn it on, your save files will be encrypted using the [Rijndael Algorithm](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard).
+  If you turn it on, your save files will be encrypted using the <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">Rijndael Algorithm</a>
  </p>
  </details>
