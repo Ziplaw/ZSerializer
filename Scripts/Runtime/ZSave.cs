@@ -586,15 +586,15 @@ namespace ZSaver
                 // UpdateComponentInstanceIDs(prevCOMPInstanceID, componentInstanceID);
             }
 
-            // if (componentType == typeof(PersistentGameObject))
-            // {
-            //     GameObjectData gameObjectData =
-            //         (GameObjectData) ZSaverType.GetField("gameObjectData").GetValue(FromJSONdObject);
-            //
-            //     gameObject.transform.position = gameObjectData.position;
-            //     gameObject.transform.rotation = gameObjectData.rotation;
-            //     gameObject.transform.localScale = gameObjectData.size;
-            // }
+             if (componentType == typeof(PersistentGameObject))
+             {
+                 GameObjectData gameObjectData =
+                     (GameObjectData) ZSaverType.GetField("gameObjectData").GetValue(FromJSONdObject);
+            
+                 gameObject.transform.position = gameObjectData.position;
+                 gameObject.transform.rotation = gameObjectData.rotation;
+                 gameObject.transform.localScale = gameObjectData.size;
+             }
         }
 
         static void LoadAllObjects()
