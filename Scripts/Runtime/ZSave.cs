@@ -454,8 +454,6 @@ namespace ZSaver
 
         static IEnumerator SaveAllObjects()
         {
-            Debug.Log(persistentTypes.Count());
-
             var types = persistentTypes.Where(t => Object.FindObjectOfType(t) != null);
 
             foreach (var type in types)
@@ -748,7 +746,7 @@ namespace ZSaver
 
         static void RestoreTempIDs()
         {
-            LogWarning("Restoring Temporary IDs");
+            Log("Restoring Temporary IDs");
 
             for (var i = 0; i < idStorage.Count; i++)
             {
@@ -859,9 +857,9 @@ namespace ZSaver
         internal static string GetFilePath(string fileName)
         {
             int currentScene = GetCurrentScene();
-            if (currentScene == SceneManager.sceneCount)
+            if (currentScene == SceneManager.sceneCountInBuildSettings)
             {
-                Debug.LogWarning(
+                LogWarning(
                     "Be careful! You're trying to save data in an unbuilt Scene, and any data saved in other unbuilt Scenes will overwrite this one, and vice-versa.\n" +
                     "If you want your data to persist properly, add this scene to the list of Scenes In Build in your Build Settings");
             }

@@ -12,21 +12,11 @@ class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithRep
 {
     public int callbackOrder => 0;
     private bool errorCs1061;
-    private BuildPlayerOptions _options;
 
     // CALLED BEFORE THE BUILD
     public void OnPreprocessBuild(BuildReport report)
     {
-        // Start listening for errors when build starts
-        BuildPlayerWindow.RegisterGetBuildPlayerOptionsHandler(GetBuildPlayerOptions);
-
         Application.logMessageReceived += OnBuildError;
-    }
-
-    private BuildPlayerOptions GetBuildPlayerOptions(BuildPlayerOptions arg)
-    {
-        _options = arg;
-        return arg;
     }
 
     // CALLED DURING BUILD TO CHECK FOR ERRORS
@@ -38,9 +28,6 @@ class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithRep
             var split = condition.Split('\'');
             string typeName = split[1];
             string propertyName = split[3];
-
-            // Debug.Log(typeName);
-            // Debug.Log(propertyName);
 
             var componentType =
                 ZSave.FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
@@ -57,15 +44,6 @@ class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithRep
                 ZSaverSettings.Instance.componentBlackList.Add(
                     new SerializableComponentBlackList(componentType, propertyName));
             }
-
-            // if(ZSaverSettings.Instance.componentBlackList.Select(c => c.Type))
-            // ZSaverSettings.Instance.componentBlackList.Add();
-
-
-            // for (var i = 0; i < condition.Split('\'').Length; i++)
-            // {
-            //     Debug.Log(i + " " + condition.Split('\'')[i]);
-            // }
         }
 
         if (condition.Contains("'Failed'") && errorCs1061)
@@ -74,12 +52,6 @@ class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithRep
                 "Some of your build errors had to do with Editor Only Properties being Serialized, rebuilding Unity Component Serializer");
             ZSaverEditor.GenerateUnityComponentClasses();
         }
-
-        // if (type == LogType.Error)
-        // {
-        //     // FAILED TO BUILD, STOP LISTENING FOR ERRORS
-        //     Application.logMessageReceived -= OnBuildError;
-        // }
     }
     
     
