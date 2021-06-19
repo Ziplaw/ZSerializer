@@ -163,7 +163,7 @@ public static class ZSaverEditor
 
     static Type[] typesImplementingCustomEditor = AppDomain.CurrentDomain.GetAssemblies().SelectMany(ass =>
         ass.GetTypes()
-            .Where(t => t.GetCustomAttribute<CustomEditor>() != null && !t.FullName.Contains("UnityEngine.") &&
+            .Where(t => t.GetCustomAttributes(typeof(CustomEditor)).Any() && !t.FullName.Contains("UnityEngine.") &&
                         !t.FullName.Contains("UnityEditor.")).Select(t =>
                 t.GetCustomAttribute<CustomEditor>().GetType()
                     .GetField("m_InspectedType", BindingFlags.NonPublic | BindingFlags.Instance)
