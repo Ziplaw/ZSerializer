@@ -529,5 +529,6 @@ public class " + type.Name + @"Editor : Editor
         sw.Close();
 
         AssetDatabase.Refresh();
+        ZSave.Log("Unity Component ZSerializers built");
     }
 }

@@ -843,6 +843,12 @@ namespace ZSaver
 
         static string ReadFromFile(string fileName)
         {
+            if (!File.Exists(GetFilePath(fileName)))
+            {
+                Debug.LogWarning("You attempted to load a file that didn't exist, this may be caused by trying to load a save file without having it saved first");
+                return null;
+            }
+            
             if (ZSaverSettings.Instance.encryptData)
             {
                 byte[] key =
