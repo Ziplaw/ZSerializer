@@ -739,7 +739,6 @@ namespace ZSaver
                 if (idStorage[idStorage.Keys.ElementAt(i)] == prevID)
                 {
                     idStorage[idStorage.Keys.ElementAt(i)] = newID;
-                    // Debug.LogWarning(prevID + " is now " + newID);
                 }
             }
         }
@@ -800,20 +799,6 @@ namespace ZSaver
 
             Log("Deserialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                 (Time.frameCount - frameCount) + " frames");
-
-
-            // SaveAll(); //Temporary fix for objects duping after loading destroyed GOs
-
-            // string[]
-            //     files = Directory.GetFiles(
-            //         GetFilePath("")); //Temporary fix for objects duping after loading destroyed GOs
-            // foreach (string file in files)
-            // {
-            //     File.Delete(file);
-            // }
-            //
-            // SaveAllPersistentGameObjects();
-            // SaveAllObjects();
         }
 
 
