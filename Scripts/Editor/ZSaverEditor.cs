@@ -22,7 +22,7 @@ public static class ZSaverEditor
         if (!ZSaverSettings.Instance || ZSaverSettings.Instance && !ZSaverSettings.Instance.packageInitialized)
         {
             ZSaveManagerEditorWindow.ShowWindow();
-            
+
             // ZSaverSettings.Instance.packageInitialized = true;
             // GenerateUnityComponentClasses();
         }
@@ -33,7 +33,6 @@ public static class ZSaverEditor
     {
         if (ZSaverSettings.Instance && ZSaverSettings.Instance.packageInitialized)
         {
-
             ZSaverStyler styler = new ZSaverStyler();
             if (styler.settings.autoRebuildZSerializers)
             {
@@ -281,27 +280,41 @@ public class " + type.Name + @"Editor : Editor
             {
                 string path;
 
-
-                // if (state == ClassState.NotMade)
-                // {
-                //     path = EditorUtility.SaveFilePanel(
-                //         type.Name + "ZSerializer.cs Save Location", "Assets",
-                //         type.Name + "ZSerializer", "cs");
-                // }
-                // else
+                if (UnityEngine.Random.Range(0, 100) == 0)
                 {
-                    path = Directory.GetFiles("Assets", $"*{type.Name}*.cs",
-                        SearchOption.AllDirectories)[0].Split('.')[0] + "ZSerializer.cs";
-                    path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
-                           path.Replace('\\', '/');
+                    PlayClip(Resources.Load<AudioClip>("surprise"));
                 }
 
+                path = Directory.GetFiles("Assets", $"*{type.Name}*.cs",
+                    SearchOption.AllDirectories)[0].Split('.')[0] + "ZSerializer.cs";
+                path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
+                       path.Replace('\\', '/');
+                
                 CreateZSaver(type, path);
                 if (state == ClassState.NotMade)
                     CreateEditorScript(type, path);
                 AssetDatabase.Refresh();
             }
         }
+    }
+
+    public static void PlayClip(AudioClip clip, int startSample = 0, bool loop = false)
+    {
+        Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
+
+        Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+        MethodInfo method = audioUtilClass.GetMethod(
+            "PlayPreviewClip",
+            BindingFlags.Static | BindingFlags.Public,
+            null,
+            new Type[] {typeof(AudioClip), typeof(int), typeof(bool)},
+            null
+        );
+
+        method?.Invoke(
+            null,
+            new object[] {clip, startSample, loop}
+        );
     }
 
     public static void BuildButtonAll(Class[] classes, int width, ZSaverStyler styler)
