@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 [assembly: InternalsVisibleTo("com.Ziplaw.ZSaver.Editor")]
-[assembly: InternalsVisibleTo("Assembly-CSharp")]
+// [assembly: InternalsVisibleTo("Assembly-CSharp")]
 
 namespace ZSaver
 {
@@ -663,12 +663,9 @@ namespace ZSaver
             foreach (var type in types)
             {
                 if (!File.Exists(GetFilePath(type.FullName + ".save"))) continue;
-                // var ZSaverType = Assembly
-                //     .Load(type == typeof(PersistentGameObject) ? "com.Ziplaw.ZSaver.Runtime" : mainAssembly)
-                //     .GetType(type.Name + "ZSerializer");
 
-
-                var ZSaverType = type.Assembly.GetType(type.Name + "ZSerializer");
+                var ZSaverType = type.AssemblyQualifiedName.Contains("UnityEngine.") ? Assembly.Load(mainAssembly).GetType(type.Name + "ZSerializer") : type.Assembly.GetType(type.Name + "ZSerializer");
+                
 
                 if (ZSaverType == null) continue;
                 var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
