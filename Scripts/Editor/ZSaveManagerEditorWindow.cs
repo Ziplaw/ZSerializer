@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-namespace ZSaver.Editor
+namespace ZSerializer.Editor
 {
     public enum ClassState
     {
@@ -38,11 +38,11 @@ namespace ZSaver.Editor
 
         private static Class[] classes;
 
-        [MenuItem("Tools/ZSave/ZSaver Menu")]
+        [MenuItem("Tools/ZSave/ZSerializer Menu")]
         internal static void ShowWindow()
         {
             var window = GetWindow<ZSaveManagerEditorWindow>();
-            window.titleContent = new GUIContent("ZSaver");
+            window.titleContent = new GUIContent("ZSerializer");
             window.Show();
             Init();
         }
@@ -74,20 +74,26 @@ namespace ZSaver.Editor
         {
             if (!ZSaverSettings.Instance.packageInitialized)//
             {
-                ZSaveManagerEditorWindow w;
-                
-                styler = new ZSaverStyler();
-                styler.GetEveryResource();
+                if (!stylerInitialized)
+                {
+                    ZSaveManagerEditorWindow w;
 
-                w = GetWindow<ZSaveManagerEditorWindow>();
-                w.position = new Rect(w.position){height = 104};
+                    styler = new ZSaverStyler();
+                    styler.GetEveryResource();
+
+                    w = GetWindow<ZSaveManagerEditorWindow>();
+                    w.position = new Rect(w.position) {height = 104};
+                }
+
+                stylerInitialized = true;
 
                 if (GUILayout.Button("Setup", new GUIStyle("button"){fontSize = 48, font = styler.header.font}, GUILayout.MinHeight(100)))
                 {
                     ZSaverSettings.Instance.packageInitialized = true;
                     ZSaverEditor.GenerateUnityComponentClasses();//
                     Init();
-                    w.position = new Rect(w.position){height = 300};
+                    
+                    // w.position = new Rect(w.position){height = 300};
                 }
             }
             else
@@ -128,7 +134,7 @@ namespace ZSaver.Editor
 
                     using (new EditorGUILayout.HorizontalScope("helpbox"))
                     {
-                        EditorGUILayout.LabelField("Save All",
+                        EditorGUILayout.LabelField("ZSerialize All",
                             new GUIStyle("label") {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
                             GUILayout.Height(classHeight));
 

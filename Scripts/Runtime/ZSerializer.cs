@@ -1,10 +1,10 @@
 using System;
 using System.Reflection;
 using UnityEngine;
-using ZSaver;
+using ZSerializer;
 using Object = UnityEngine.Object;
 
-namespace ZSaver
+namespace ZSerializer
 {
     [Serializable]
     public struct GameObjectData
@@ -44,10 +44,10 @@ namespace ZSaver
     }
     public abstract class ZSerializer<T> where T : Component
     {
-        [OmitSerializableCheck] public int gameObjectInstanceID;
-        [OmitSerializableCheck] public int componentinstanceID;
-        [OmitSerializableCheck] public GameObject _componentParent;
-        [OmitSerializableCheck] public T _component;
+        [NonZSerialized] public int gameObjectInstanceID;
+        [NonZSerialized] public int componentinstanceID;
+        [NonZSerialized] public GameObject _componentParent;
+        [NonZSerialized] public T _component;
 
         public ZSerializer(GameObject componentParent, T component)
         {

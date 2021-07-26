@@ -1,12 +1,12 @@
 [System.Serializable]
-public class PersistentGameObjectZSerializer : ZSaver.ZSerializer<PersistentGameObject> {
+public class PersistentGameObjectZSerializer : ZSerializer.ZSerializer<PersistentGameObject> {
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public ZSaver.GameObjectData gameObjectData;
+    public ZSerializer.GameObjectData gameObjectData;
     public PersistentGameObjectZSerializer (PersistentGameObject PersistentGameObjectInstance) : base(PersistentGameObjectInstance.gameObject, PersistentGameObjectInstance ) {
         enabled = PersistentGameObjectInstance.enabled;
         hideFlags = PersistentGameObjectInstance.hideFlags;
-        gameObjectData =new ZSaver.GameObjectData()
+        gameObjectData =new ZSerializer.GameObjectData()
         {
             loadingOrder = PersistentGameObject.CountParents(PersistentGameObjectInstance.transform),
             active = _componentParent.activeSelf,

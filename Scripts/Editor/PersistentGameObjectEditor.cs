@@ -4,8 +4,8 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
-using ZSaver;
-using ZSaver.Editor;
+using ZSerializer;
+using ZSerializer.Editor;
 
 
 [CustomEditor(typeof(PersistentGameObject))]

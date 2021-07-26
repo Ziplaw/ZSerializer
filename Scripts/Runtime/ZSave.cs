@@ -11,9 +11,8 @@ using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 [assembly: InternalsVisibleTo("com.Ziplaw.ZSaver.Editor")]
-// [assembly: InternalsVisibleTo("Assembly-CSharp")]
 
-namespace ZSaver
+namespace ZSerializer
 {
     public class ZMono : MonoBehaviour
     {
@@ -52,16 +51,6 @@ namespace ZSaver
         private static List<string> unityComponentAssemblies = new List<string>();
 
         private static IEnumerable<Type> serializableComponentTypes;
-        // internal static IEnumerable<Type> PersistentTypes
-        // {
-        //     get
-        //     {
-        //         Debug.Log(persistentTypes != null);
-        //         if (persistentTypes != null) return persistentTypes;
-        //         persistentTypes = GetTypesWithPersistentAttribute();
-        //         return persistentTypes;
-        //     }
-        // }
 
         internal static IEnumerable<Type> ComponentSerializableTypes
         {
@@ -74,8 +63,7 @@ namespace ZSaver
                                             !t.IsSubclassOf(typeof(MonoBehaviour)) &&
                                             t != typeof(Transform) &&
                                             t != typeof(MonoBehaviour) &&
-                                            t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible /*&&
-                                            !ManualComponentBlacklist.Contains(t)*/)
+                                            t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible)
                 );
             }
         }
@@ -92,21 +80,6 @@ namespace ZSaver
                 yield return Type.GetType($"{typeName}, {assembly}");
             }
         }
-
-
-        // static readonly Type[] ManualComponentBlacklist =
-        //         {typeof(MeshRenderer), typeof(SkinnedMeshRenderer), typeof(SpriteRenderer)};
-
-
-        internal static readonly Dictionary<Type, string[]> ComponentBlackList = new Dictionary<Type, string[]>()
-        {
-            // {typeof(LightProbeGroup), new[] {"dering"}},
-            {typeof(Light), new[] {"shadowRadius", "shadowAngle", "areaSize", "lightmapBakeType"}},
-            {typeof(MeshRenderer), new[] {"scaleInLightmap", "receiveGI", "stitchLightmapSeams"}},
-            {typeof(Terrain), new[] {"bakeLightProbesForTrees", "deringLightProbesForTrees"}},
-            {typeof(MonoBehaviour), new[] {"runInEditMode", "useGUILayout"}},
-        };
-
         internal static bool FieldIsSuitableForAssignment(PropertyInfo fieldInfo)
         {
             SerializableComponentBlackList blackList =
@@ -114,7 +87,7 @@ namespace ZSaver
             bool isInBlackList = blackList != null;
 
             return fieldInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&
-                fieldInfo.GetCustomAttribute<OmitSerializableCheck>() == null &&
+                fieldInfo.GetCustomAttribute<NonZSerialized>() == null &&
                 fieldInfo.CanRead &&
                 fieldInfo.CanWrite &&
                 (
@@ -122,11 +95,6 @@ namespace ZSaver
                     isInBlackList && 
                     !blackList.componentNames.Contains(fieldInfo.Name))
                 ) &&
-                // (
-                //     !ComponentBlackList.ContainsKey(fieldInfo.DeclaringType) || (
-                //         ComponentBlackList.ContainsKey(fieldInfo.DeclaringType) &&
-                //         !ComponentBlackList[fieldInfo.DeclaringType].Contains(fieldInfo.Name))
-                // ) &&
                 fieldInfo.Name != "material" &&
                 fieldInfo.Name != "materials" &&
                 fieldInfo.Name != "sharedMaterial" &&
@@ -137,9 +105,8 @@ namespace ZSaver
 
         internal static IEnumerable<Type> GetTypesWithPersistentAttribute()
         {
-            var assemblies = /*ZSaverSettings.Instance.AddedAssemblies;*/ AppDomain.CurrentDomain
+            var assemblies = AppDomain.CurrentDomain
                 .GetAssemblies();
-            // var assemblies = unityComponentAssemblies.Select(Assembly.Load);
 
             foreach (var assembly in assemblies)
             {
@@ -749,7 +716,9 @@ namespace ZSaver
                 UpdateAllInstanceIDs(idStorage[idStorage.Keys.ElementAt(i)], idStorage.Keys.ElementAt(i), true);
             }
         }
-
+        /// <summary>
+        /// Serialize all Persistent components and GameObjects on the current scene to the selected save file
+        /// </summary>
         public static void SaveAll()
         {
             ZMono.Instance.StartCoroutine(SaveAllCoroutine());
@@ -782,6 +751,9 @@ namespace ZSaver
             OnAfterSave?.Invoke();
         }
 
+        /// <summary>
+        /// Load all Persistent components and GameObjects from the current scene that have been previously serialized in the current save file
+        /// </summary>
         public static void LoadAll()
         {
             float startingTime = Time.realtimeSinceStartup;

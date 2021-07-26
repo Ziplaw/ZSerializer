@@ -10,8 +10,8 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.PackageManager;
 using UnityEngine;
-using ZSaver;
-using ZSaver.Editor;
+using ZSerializer;
+using ZSerializer.Editor;
 using Debug = UnityEngine.Debug;
 
 public static class ZSaverEditor
@@ -73,14 +73,12 @@ public static class ZSaverEditor
         StreamWriter sw = new StreamWriter(fileStream);
 
         string script =
-            "using ZSaver;\n" +
-            "\n" +
             "[System.Serializable]\n" +
-            $"public class {type.Name}ZSerializer : ZSerializer<{type.Name}>\n" +
+            $"public class {type.Name}ZSerializer : ZSerializer.ZSerializer<{type.Name}>\n" +
             "{\n";
 
         foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-            .Where(f => f.GetCustomAttribute(typeof(OmitSerializableCheck)) == null))
+            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null))
         {
             var fieldType = fieldInfo.FieldType;
 
@@ -118,7 +116,8 @@ public static class ZSaverEditor
             $"\n    public {type.Name}ZSerializer({type.Name} {className}) : base({className}.gameObject, {className})\n" +
             "    {\n";
 
-        foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
+            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null))  
         {
             var fieldType = fieldInfo.FieldType;
 
@@ -180,7 +179,7 @@ public static class ZSaverEditor
         string editorScript =
             @"using UnityEditor;
 using UnityEditor.Callbacks;
-using ZSaver;
+using ZSerializer;
 
 [CustomEditor(typeof(" + type.Name + @"))]
 public class " + type.Name + @"Editor : Editor
@@ -238,12 +237,12 @@ public class " + type.Name + @"Editor : Editor
         if (ZSaverType == null) return ClassState.NotMade;
 
         var fieldsZSaver = ZSaverType.GetFields()
-            .Where(f => f.GetCustomAttribute(typeof(OmitSerializableCheck)) == null).ToArray();
-        var fieldsType = type.GetFields();
+            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
+        var fieldsType = type.GetFields().Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
 
-        if (fieldsZSaver.Length == fieldsType.Length)
+        if (fieldsZSaver.Count == fieldsType.Count)
         {
-            for (int j = 0; j < fieldsZSaver.Length; j++)
+            for (int j = 0; j < fieldsZSaver.Count; j++)
             {
                 if (fieldsZSaver[j].Name != fieldsType[j].Name ||
                     fieldsZSaver[j].FieldType != fieldsType[j].FieldType)
@@ -261,7 +260,6 @@ public class " + type.Name + @"Editor : Editor
     public static void BuildButton(Type type, int width, ZSaverStyler styler)
     {
         ClassState state = GetClassState(type);
-        // Debug.Log(type + " " + state);
         if (styler.validImage == null) styler.GetEveryResource();
 
         using (new EditorGUI.DisabledGroupScope(state == ClassState.Valid))
@@ -289,7 +287,7 @@ public class " + type.Name + @"Editor : Editor
                     SearchOption.AllDirectories)[0].Split('.')[0] + "ZSerializer.cs";
                 path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                        path.Replace('\\', '/');
-                
+
                 CreateZSaver(type, path);
                 if (state == ClassState.NotMade)
                     CreateEditorScript(type, path);

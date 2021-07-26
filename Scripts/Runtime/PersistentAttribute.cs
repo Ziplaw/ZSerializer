@@ -4,10 +4,10 @@ using System.Linq;
 using System.Reflection;
 using Object = UnityEngine.Object;
 
-namespace ZSaver
+namespace ZSerializer
 {
 
-    public class OmitSerializableCheck : Attribute
+    public class NonZSerialized : Attribute
     {
     }
 

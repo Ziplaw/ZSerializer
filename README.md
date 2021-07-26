@@ -19,7 +19,7 @@ The Persistent Attribute will make any class Serializable and Ready to be saved.
 using ZSaver;
 
 [Persistent]
-public class Testing : MonoBehaviour {
+public class MyComponent : MonoBehaviour {
 ```
 Then go to ```Tools/ZSaver/Persistent Classes Configurator``` in the Unity Toolbar and this window will open up
 

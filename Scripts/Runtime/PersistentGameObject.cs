@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using ZSaver;
+using ZSerializer;
 using Component = UnityEngine.Component;
 
 [AddComponentMenu("ZSaver/Persistent GameObject"), DisallowMultipleComponent]
@@ -21,7 +21,7 @@ public class PersistentGameObject : MonoBehaviour
         }
     }
 
-    [OmitSerializableCheck] public List<SerializableComponentData> _componentDatas = new List<SerializableComponentData>();
+    [NonZSerialized] public List<SerializableComponentData> _componentDatas = new List<SerializableComponentData>();
     public void UpdateSerializableComponents(IEnumerable<Type> serializableTypes)
     {
         // if (!Application.isPlaying)
