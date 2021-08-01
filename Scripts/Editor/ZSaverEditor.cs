@@ -53,10 +53,17 @@ public static class ZSaverEditor
 
                     if (state == ClassState.NeedsRebuilding)
                     {
-                        path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSerializer.cs",
-                            SearchOption.AllDirectories)[0];
+                        var pathList = Directory.GetFiles("Assets", $"*{c.classType.Name}*.cs",
+                            SearchOption.AllDirectories)[0].Split('.').ToList();
+                        pathList.RemoveAt(pathList.Count - 1);
+                        path = String.Join(".",pathList) + "ZSerializer.cs";
+                        // path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSerializer.cs",
+                        //     SearchOption.AllDirectories)[0];
+                        ZSave.Log(path);
                         path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                                path.Replace('\\', '/');
+
+                        ZSave.Log(path);
 
 
                         CreateZSaver(c.classType, path);
@@ -69,6 +76,8 @@ public static class ZSaverEditor
 
     public static void CreateZSaver(Type type, string path)
     {
+        ZSave.Log(path);
+
         FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
         StreamWriter sw = new StreamWriter(fileStream);
 
@@ -283,10 +292,20 @@ public class " + type.Name + @"Editor : Editor
                     PlayClip(Resources.Load<AudioClip>("surprise"));
                 }
 
-                path = Directory.GetFiles("Assets", $"*{type.Name}*.cs",
-                    SearchOption.AllDirectories)[0].Split('.')[0] + "ZSerializer.cs";
+                var pathList = Directory.GetFiles("Assets", $"*{type.Name}*.cs",
+                    SearchOption.AllDirectories)[0].Split('.').ToList();
+                pathList.RemoveAt(pathList.Count - 1);
+                path = String.Join(".",pathList) + "ZSerializer.cs";
+
+                // path = Directory.GetFiles("Assets", $"*{type.Name}*.cs",
+                //     SearchOption.AllDirectories)[0].Split('.')[0] + "ZSerializer.cs";
+                ZSave.Log(path);
+
                 path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                        path.Replace('\\', '/');
+                
+                ZSave.Log(path);
+
 
                 CreateZSaver(type, path);
                 if (state == ClassState.NotMade)
