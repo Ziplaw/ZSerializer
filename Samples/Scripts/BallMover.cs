@@ -43,7 +43,7 @@ public class BallMover : MonoBehaviour
             Handles.color = Color.cyan;
 
             Handles.ArrowHandleCap(0, transform.position,
-                Quaternion.LookRotation(rb.velocity), rb.velocity.sqrMagnitude*.5f, EventType.Repaint);
+                Quaternion.LookRotation(rb.velocity), Mathf.Min(rb.velocity.sqrMagnitude*.5f,3), EventType.Repaint);
         }
     }
 #endif

@@ -57,14 +57,8 @@ public static class ZSaverEditor
                             SearchOption.AllDirectories)[0].Split('.').ToList();
                         pathList.RemoveAt(pathList.Count - 1);
                         path = String.Join(".",pathList) + "ZSerializer.cs";
-                        // path = Directory.GetFiles("Assets", $"{c.classType.Name}ZSerializer.cs",
-                        //     SearchOption.AllDirectories)[0];
-                        ZSave.Log(path);
                         path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                                path.Replace('\\', '/');
-
-                        ZSave.Log(path);
-
 
                         CreateZSaver(c.classType, path);
                         AssetDatabase.Refresh();
@@ -76,7 +70,6 @@ public static class ZSaverEditor
 
     public static void CreateZSaver(Type type, string path)
     {
-        ZSave.Log(path);
 
         FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
         StreamWriter sw = new StreamWriter(fileStream);
@@ -297,14 +290,8 @@ public class " + type.Name + @"Editor : Editor
                 pathList.RemoveAt(pathList.Count - 1);
                 path = String.Join(".",pathList) + "ZSerializer.cs";
 
-                // path = Directory.GetFiles("Assets", $"*{type.Name}*.cs",
-                //     SearchOption.AllDirectories)[0].Split('.')[0] + "ZSerializer.cs";
-                ZSave.Log(path);
-
                 path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                        path.Replace('\\', '/');
-                
-                ZSave.Log(path);
 
 
                 CreateZSaver(type, path);
@@ -458,7 +445,7 @@ public class " + type.Name + @"Editor : Editor
 
                 foreach (var propertyInfo in type
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(ZSave.FieldIsSuitableForAssignment))
+                    .Where(ZSave.PropertyIsSuitableForAssignment))
                 {
                     longScript +=
                         $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
@@ -511,7 +498,7 @@ public class " + type.Name + @"Editor : Editor
 
                 foreach (var propertyInfo in type
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(ZSave.FieldIsSuitableForAssignment))
+                    .Where(ZSave.PropertyIsSuitableForAssignment))
                 {
                     longScript +=
                         $"        " + propertyInfo.Name + " = " + type.Name + "Instance." + propertyInfo.Name + ";\n";

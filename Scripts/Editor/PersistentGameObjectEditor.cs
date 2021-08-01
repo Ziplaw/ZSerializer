@@ -49,37 +49,37 @@ public class PersistentGameObjectEditor : Editor
                 GUILayout.MaxHeight(32), GUILayout.MaxWidth(32));
             
 
-            if (manager.GetComponents<Component>().Count(c => !c.GetType().IsSubclassOf(typeof(MonoBehaviour)) && c.GetType() != typeof(Transform)) !=
-                manager._componentDatas.Count)
-            {
-                manager.UpdateSerializableComponents(serializableTypes);
-                return;
-            }
+            // if (manager.GetComponents<Component>().Count(c => !c.GetType().IsSubclassOf(typeof(MonoBehaviour)) && c.GetType() != typeof(Transform)) !=
+            //     manager._componentDatas.Count)
+            // {
+            //     manager.UpdateSerializableComponents(serializableTypes);
+            //     return;
+            // }
         }
 
         if (showSettings)
         {
-            var managerComponentDatas = manager._componentDatas;
-            using (new GUILayout.VerticalScope("helpbox"))
-            {
-                using (new GUILayout.VerticalScope("box"))
-                {
-                    GUILayout.Label("Components to Serialize",
-                        new GUIStyle("label") {alignment = TextAnchor.MiddleCenter});
-                    // if(GUILayout.Button())
-                }
-
-                for (var i = 0; i < managerComponentDatas.Count; i++)
-                {
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        EditorGUILayout.PropertyField(
-                            serializedObject.FindProperty(nameof(manager._componentDatas)).GetArrayElementAtIndex(i)
-                                .FindPropertyRelative("serialize"), GUIContent.none, GUILayout.MaxWidth(20));
-                        GUILayout.Label(Type.GetType(managerComponentDatas[i].typeName).ToString().Split('.').Last());
-                    }
-                }
-            }
+            // var managerComponentDatas = manager._componentDatas;
+            // using (new GUILayout.VerticalScope("helpbox"))
+            // {
+            //     using (new GUILayout.VerticalScope("box"))
+            //     {
+            //         GUILayout.Label("Components to Serialize",
+            //             new GUIStyle("label") {alignment = TextAnchor.MiddleCenter});
+            //         // if(GUILayout.Button())
+            //     }
+            //
+            //     for (var i = 0; i < managerComponentDatas.Count; i++)
+            //     {
+            //         using (new GUILayout.HorizontalScope())
+            //         {
+            //             EditorGUILayout.PropertyField(
+            //                 serializedObject.FindProperty(nameof(manager._componentDatas)).GetArrayElementAtIndex(i)
+            //                     .FindPropertyRelative("serialize"), GUIContent.none, GUILayout.MaxWidth(20));
+            //             GUILayout.Label(Type.GetType(managerComponentDatas[i].typeName).ToString().Split('.').Last());
+            //         }
+            //     }
+            // }
         }
 
         serializedObject.ApplyModifiedProperties();

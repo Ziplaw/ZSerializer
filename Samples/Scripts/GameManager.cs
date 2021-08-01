@@ -1,12 +1,14 @@
 using System;
 using UnityEngine;
 using ZSerializer;
+
 [Persistent]
 public class GameManager : MonoBehaviour
 {
-    int highScore;
-    int currentScore;
-    string playerName;
+    public int highScore;
+    public int currentScore;
+    public string playerName;
+    public Vector3 position;
 
     public BallMover ballMover;
 
@@ -32,7 +34,7 @@ public class GameManager : MonoBehaviour
             Destroy(ballMover.gameObject);
         }
 
-        if (ballMover)
+        if (ballMover && ballMover.rb)
         {
             GUILayout.Label("Velocity: " + ballMover.rb.velocity);
         }
