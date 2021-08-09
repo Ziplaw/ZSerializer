@@ -439,7 +439,7 @@ public class " + type.Name + @"Editor : Editor
             if (type != typeof(PersistentGameObject))
             {
                 longScript +=
-                    "[System.Serializable]\npublic class " + type.Name + "ZSerializer : ZSaver.ZSerializer<" +
+                    "[System.Serializable]\npublic class " + type.Name + "ZSerializer : ZSerializer.ZSerializer<" +
                     type.FullName +
                     "> {\n";
 
