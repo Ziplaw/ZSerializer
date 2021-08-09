@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using ZSerializer;
 
-[Persistent]
+// [Persistent]
 public class BallMover : MonoBehaviour
 {
     internal Rigidbody rb;

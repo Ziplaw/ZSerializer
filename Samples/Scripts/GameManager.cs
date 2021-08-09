@@ -2,8 +2,7 @@ using System;
 using UnityEngine;
 using ZSerializer;
 
-[Persistent]
-public class GameManager : MonoBehaviour
+public class GameManager : PersistentMonoBehaviour
 {
     public int highScore;
     public int currentScore;

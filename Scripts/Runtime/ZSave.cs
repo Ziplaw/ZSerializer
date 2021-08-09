@@ -47,7 +47,7 @@ namespace ZSerializer
         static Dictionary<int, int> idStorage = new Dictionary<int, int>();
         //Every type marked with [Persistent]
         private static Type[] persistentTypes;
-        internal static IEnumerable<Type> GetTypesWithPersistentAttribute()
+        internal static IEnumerable<Type> GetPersistentTypes()
         {
             var assemblies = AppDomain.CurrentDomain
                 .GetAssemblies();
@@ -56,7 +56,7 @@ namespace ZSerializer
             {
                 foreach (Type type in assembly.GetTypes())
                 {
-                    if (type.GetCustomAttributes(typeof(PersistentAttribute), true).Length > 0)
+                    if (type.IsSubclassOf(typeof(PersistentMonoBehaviour)))
                     {
                         yield return type;
                     }
@@ -140,7 +140,7 @@ namespace ZSerializer
                 return true;
             };
 
-            persistentTypes = GetTypesWithPersistentAttribute().ToArray();
+            persistentTypes = GetPersistentTypes().ToArray();
             serializableComponentTypes = ComponentSerializableTypes;
         }
 
@@ -566,7 +566,7 @@ namespace ZSerializer
             idStorage = objs.SelectMany(o => o.GetComponents(typeof(Component))
                     .Where(c =>
                         c.GetType() == typeof(PersistentGameObject) ||
-                        c.GetType().GetCustomAttribute<PersistentAttribute>() != null ||
+                        c.GetType() is PersistentMonoBehaviour ||
                         GetComponentsOfGivenType(objs, c.GetType()).Contains(c)
                     ))
                 .ToDictionary(component => component.GetInstanceID(), component => component.GetInstanceID());

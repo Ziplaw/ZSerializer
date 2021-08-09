@@ -4,11 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 using UnityEditor;
 using UnityEditor.Callbacks;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using ZSerializer;
 using ZSerializer.Editor;
@@ -36,7 +33,7 @@ public static class ZSaverEditor
             ZSaverStyler styler = new ZSaverStyler();
             if (styler.settings.autoRebuildZSerializers)
             {
-                var types = ZSave.GetTypesWithPersistentAttribute().ToArray();
+                var types = ZSave.GetPersistentTypes().ToArray();
 
                 Class[] classes = new Class[types.Length];
 
@@ -204,7 +201,8 @@ public class " + type.Name + @"Editor : Editor
 
     public override void OnInspectorGUI()
     {
-        ZSaverEditor.BuildPersistentComponentEditor(manager, styler);
+        if(manager is PersistentMonoBehaviour)
+            ZSaverEditor.BuildPersistentComponentEditor(manager, styler);
         base.OnInspectorGUI();
     }
 }";

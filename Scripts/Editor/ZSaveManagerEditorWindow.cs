@@ -55,7 +55,7 @@ namespace ZSerializer.Editor
 
                 styler = new ZSaverStyler();
 
-                var types = ZSave.GetTypesWithPersistentAttribute().ToArray();
+                var types = ZSave.GetPersistentTypes().ToArray();
 
                 classes = new Class[types.Length];
 
@@ -92,8 +92,6 @@ namespace ZSerializer.Editor
                     ZSaverSettings.Instance.packageInitialized = true;
                     ZSaverEditor.GenerateUnityComponentClasses();//
                     Init();
-                    
-                    // w.position = new Rect(w.position){height = 300};
                 }
             }
             else

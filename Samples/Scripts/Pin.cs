@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using ZSerializer;
 
-[Persistent]
+// [Persistent]
 public class Pin : MonoBehaviour
 {
     private Renderer _renderer;
