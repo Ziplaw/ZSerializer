@@ -185,7 +185,6 @@ using ZSerializer;
 public class " + type.Name + @"Editor : Editor
 {
     private " + type.Name + @" manager;
-    private bool showSettings;
     private static ZSaverStyler styler;
 
     private void OnEnable()
@@ -204,7 +203,7 @@ public class " + type.Name + @"Editor : Editor
     public override void OnInspectorGUI()
     {
         if(manager is PersistentMonoBehaviour)
-            ZSaverEditor.BuildPersistentComponentEditor(manager, styler, showSettings, ZSaverEditor.ShowGroupIDSettings);
+            ZSaverEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings, ZSaverEditor.ShowGroupIDSettings);
         base.OnInspectorGUI();
     }
 }";
@@ -355,7 +354,7 @@ public class " + type.Name + @"Editor : Editor
     }
 
 
-    public static void BuildPersistentComponentEditor<T>(T manager, ZSaverStyler styler, bool showSettings,
+    public static void BuildPersistentComponentEditor<T>(T manager, ZSaverStyler styler, ref bool showSettings,
         Action<Type, ISaveGroupID, bool> toggleOn) where T : ISaveGroupID
     {
         // Texture2D cogwheel = styler.cogWheel;
@@ -369,10 +368,12 @@ public class " + type.Name + @"Editor : Editor
             //         GUILayout.Height(28));
 
             BuildButton(manager.GetType(), 28, styler);
-            SettingsButton(showSettings, styler, 28);
+            showSettings = SettingsButton(showSettings, styler, 28);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(manager as MonoBehaviour);
+
         }
 
-        if (showSettings || ZSaverSettings.Instance.debugMode)
+        if (showSettings)
             toggleOn?.Invoke(typeof(PersistentMonoBehaviour), manager, true);
     }
 
@@ -383,7 +384,7 @@ public class " + type.Name + @"Editor : Editor
             GUILayout.Label("GroupID: " + data.GroupID);
             if (GUILayout.Button("-", GUILayout.Width(20)))
             {
-                if (data.GroupID > -1)
+                if (data.GroupID > 0)
                 {
                     if (data.AutoSync)
                     {
@@ -490,6 +491,15 @@ public class " + type.Name + @"Editor : Editor
             startInfo.Arguments = $"/C start {_path}";
             process.StartInfo = startInfo;
             process.Start();
+        }
+
+        if (GUILayout.Button("Reset all Group IDs from Scene"))
+        {
+            foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>().Where(o => o is ISaveGroupID))
+            {
+                Debug.Log(monoBehaviour);
+                monoBehaviour.GetType().GetField("groupID", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(monoBehaviour,0);
+            }
         }
 
         using (new GUILayout.VerticalScope("helpbox"))

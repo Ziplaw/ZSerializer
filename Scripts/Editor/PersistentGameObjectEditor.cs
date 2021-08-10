@@ -14,7 +14,6 @@ public class PersistentGameObjectEditor : Editor
 {
     private PersistentGameObject manager;
     private static ZSaverStyler styler;
-    private bool showSettings;
 
     private void OnEnable()
     {
@@ -35,10 +34,11 @@ public class PersistentGameObjectEditor : Editor
         using (new EditorGUILayout.HorizontalScope("helpbox"))
         {
             GUILayout.Label("<color=#29cf42>Persistent GameObject</color>", styler.header, GUILayout.MinHeight(32));
-            showSettings = ZSaverEditor.SettingsButton(showSettings, styler, 32);
+            manager.showSettings = ZSaverEditor.SettingsButton(manager.showSettings, styler, 32);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
         }
 
-        if (showSettings || ZSaverSettings.Instance.debugMode)
+        if (manager.showSettings)
         {
             ZSaverEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager,false);
         }

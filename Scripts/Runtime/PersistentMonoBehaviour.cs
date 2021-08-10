@@ -21,11 +21,6 @@ namespace ZSerializer
     
     public class PersistentMonoBehaviour : MonoBehaviour, ISaveGroupID
     {
-        private void Start()
-        {
-            Debug.Log(name + " " + groupID + " " + autoSync);
-        }
-
         /// <summary>
         /// OnPreSave is called right before any Save occurs
         /// </summary>
@@ -43,6 +38,7 @@ namespace ZSerializer
         /// </summary>
         public virtual void OnPostLoad(){}
 
+        [NonZSerialized][HideInInspector]public bool showSettings;
         [HideInInspector]public int groupID;
         [HideInInspector]public bool autoSync = true;
         public int GroupID => groupID;

@@ -17,7 +17,8 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
         return totalParents;
     }
 
-    [SerializeField][HideInInspector]private int groupID = -1;
+    [NonZSerialized]public bool showSettings;
+    [SerializeField][HideInInspector]private int groupID;
     public int GroupID => groupID;
     public bool AutoSync => false;
 }
