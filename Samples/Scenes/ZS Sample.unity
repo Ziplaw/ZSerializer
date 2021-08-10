@@ -464,7 +464,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 276530668}
   m_LocalRotation: {x: 0.23911765, y: 0.3696438, z: -0.09904577, w: 0.89239913}
-  m_LocalPosition: {x: -5.19, y: 4.28, z: -5.43}
+  m_LocalPosition: {x: -5.2, y: 4.4, z: -5.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1367208270}
@@ -655,6 +655,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0944a1262defa34bbcd43a62b4738ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  groupID: 7
+  autoSync: 1
 --- !u!54 &469202270
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -683,6 +685,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  groupID: 7
 --- !u!1 &608016568
 GameObject:
   m_ObjectHideFlags: 0
@@ -907,6 +910,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pin (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
+      propertyPath: groupID
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
+      propertyPath: autoSync
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
 --- !u!4 &822103307 stripped
@@ -1012,6 +1023,10 @@ PrefabInstance:
     - target: {fileID: 5453140791990679695, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: m_Name
       value: Pin (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
+      propertyPath: groupID
+      value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
@@ -1356,6 +1371,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aaadf9c1d8d11ac49bd3ee67d13d6eeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  groupID: 0
+  autoSync: 0
   highScore: 0
   currentScore: 0
   playerName: 
@@ -1610,6 +1627,14 @@ PrefabInstance:
     - target: {fileID: 5453140791990679695, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: m_Name
       value: Pin
+      objectReference: {fileID: 0}
+    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
+      propertyPath: groupID
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
+      propertyPath: autoSync
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}

@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using ZSerializer;
-using Component = UnityEngine.Component;
 
 [AddComponentMenu("ZSaver/Persistent GameObject"), DisallowMultipleComponent]
-public class PersistentGameObject : MonoBehaviour
+public class PersistentGameObject : MonoBehaviour, ISaveGroupID
 {
     public static int CountParents(Transform transform)
     {
@@ -18,6 +16,10 @@ public class PersistentGameObject : MonoBehaviour
 
         return totalParents;
     }
+
+    [SerializeField][HideInInspector]private int groupID = -1;
+    public int GroupID => groupID;
+    public bool AutoSync => false;
 }
 
 namespace ZSerializer

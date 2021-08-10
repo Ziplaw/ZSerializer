@@ -253,7 +253,7 @@ namespace ZSerializer
         static void CopyFieldsToFields(Type zSaverType, Type componentType, Component _component, object zSaver)
         {
             FieldInfo[] zSaverFields = zSaverType.GetFields();
-            FieldInfo[] componentFields = componentType.GetFields();
+            FieldInfo[] componentFields = componentType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 
             for (var i = 0; i < zSaverFields.Length; i++)
             {
@@ -601,6 +601,13 @@ namespace ZSerializer
         /// </summary>
         public static void SaveAll()
         {
+            var persistentMonoBehavioursInScene = Object.FindObjectsOfType<PersistentMonoBehaviour>();
+            
+            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+            {
+                persistentMonoBehaviour.OnPreSave();
+            }
+
             if (ZSaverSettings.Instance.stableSave)
             {
                 var e = SaveAllCoroutine();
@@ -609,6 +616,11 @@ namespace ZSerializer
             else
             {
                 ZMono.Instance.StartCoroutine(SaveAllCoroutine());
+            }
+            
+            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+            {
+                persistentMonoBehaviour.OnPostSave();
             }
         }
 
@@ -643,6 +655,13 @@ namespace ZSerializer
         /// </summary>
         public static void LoadAll()
         {
+            var persistentMonoBehavioursInScene = Object.FindObjectsOfType<PersistentMonoBehaviour>();
+            
+            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+            {
+                persistentMonoBehaviour.OnPreLoad();
+            }
+            
             float startingTime = Time.realtimeSinceStartup;
             float frameCount = Time.frameCount;
 
@@ -655,6 +674,11 @@ namespace ZSerializer
 
             Log("Deserialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                 (Time.frameCount - frameCount) + " frames");
+            
+            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+            {
+                persistentMonoBehaviour.OnPostLoad();
+            }
         }
 
 

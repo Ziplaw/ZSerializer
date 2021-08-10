@@ -8,7 +8,7 @@ using UnityEngine;
 using ZSerializer;
 
 // [Persistent]
-public class BallMover : MonoBehaviour
+public class BallMover : PersistentMonoBehaviour
 {
     internal Rigidbody rb;
     private Vector3 movement;

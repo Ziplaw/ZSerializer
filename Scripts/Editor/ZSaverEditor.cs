@@ -10,6 +10,7 @@ using UnityEngine;
 using ZSerializer;
 using ZSerializer.Editor;
 using Debug = UnityEngine.Debug;
+using Object = System.Object;
 
 public static class ZSaverEditor
 {
@@ -53,7 +54,8 @@ public static class ZSaverEditor
                         var pathList = Directory.GetFiles("Assets", $"*{c.classType.Name}*.cs",
                             SearchOption.AllDirectories)[0].Split('.').ToList();
                         pathList.RemoveAt(pathList.Count - 1);
-                        path = String.Join(".",pathList) + "ZSerializer.cs";
+                        path = String.Join(".", pathList) + "ZSerializer.cs";
+
                         path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                                path.Replace('\\', '/');
 
@@ -67,7 +69,6 @@ public static class ZSaverEditor
 
     public static void CreateZSaver(Type type, string path)
     {
-
         FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
         StreamWriter sw = new StreamWriter(fileStream);
 
@@ -116,7 +117,7 @@ public static class ZSaverEditor
             "    {\n";
 
         foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null))  
+            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null))
         {
             var fieldType = fieldInfo.FieldType;
 
@@ -184,6 +185,7 @@ using ZSerializer;
 public class " + type.Name + @"Editor : Editor
 {
     private " + type.Name + @" manager;
+    private bool showSettings;
     private static ZSaverStyler styler;
 
     private void OnEnable()
@@ -202,7 +204,7 @@ public class " + type.Name + @"Editor : Editor
     public override void OnInspectorGUI()
     {
         if(manager is PersistentMonoBehaviour)
-            ZSaverEditor.BuildPersistentComponentEditor(manager, styler);
+            ZSaverEditor.BuildPersistentComponentEditor(manager, styler, showSettings, ZSaverEditor.ShowGroupIDSettings);
         base.OnInspectorGUI();
     }
 }";
@@ -257,6 +259,12 @@ public class " + type.Name + @"Editor : Editor
         return ClassState.NeedsRebuilding;
     }
 
+    public static bool SettingsButton(bool showSettings, ZSaverStyler styler, int width)
+    {
+        return GUILayout.Toggle(showSettings, styler.cogWheel, new GUIStyle("button"),
+            GUILayout.MaxHeight(width), GUILayout.MaxWidth(width));
+    }
+
     public static void BuildButton(Type type, int width, ZSaverStyler styler)
     {
         ClassState state = GetClassState(type);
@@ -286,7 +294,7 @@ public class " + type.Name + @"Editor : Editor
                 var pathList = Directory.GetFiles("Assets", $"*{type.Name}*.cs",
                     SearchOption.AllDirectories)[0].Split('.').ToList();
                 pathList.RemoveAt(pathList.Count - 1);
-                path = String.Join(".",pathList) + "ZSerializer.cs";
+                path = String.Join(".", pathList) + "ZSerializer.cs";
 
                 path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                        path.Replace('\\', '/');
@@ -332,17 +340,12 @@ public class " + type.Name + @"Editor : Editor
 
             foreach (var c in classes)
             {
-                ClassState state = c.state;
-
-                // path = folderPath + $"/{c.classType.Name}ZSerializer.cs";
-
-                // if (state != ClassState.NotMade)
-                {
-                    path = Directory.GetFiles("Assets", $"*{c.classType.Name}*.cs",
-                        SearchOption.AllDirectories)[0].Split('.')[0] + "ZSerializer.cs";
-                    path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
-                           path.Replace('\\', '/');
-                }
+                var pathList = Directory.GetFiles("Assets", $"*{c.classType.Name}*.cs",
+                    SearchOption.AllDirectories)[0].Split('.').ToList();
+                pathList.RemoveAt(pathList.Count - 1);
+                path = String.Join(".", pathList) + "ZSerializer.cs";
+                path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
+                       path.Replace('\\', '/');
 
                 CreateZSaver(c.classType, path);
                 CreateEditorScript(c.classType, path);
@@ -352,7 +355,8 @@ public class " + type.Name + @"Editor : Editor
     }
 
 
-    public static void BuildPersistentComponentEditor<T>(T manager, ZSaverStyler styler)
+    public static void BuildPersistentComponentEditor<T>(T manager, ZSaverStyler styler, bool showSettings,
+        Action<Type, ISaveGroupID, bool> toggleOn) where T : ISaveGroupID
     {
         // Texture2D cogwheel = styler.cogWheel;
 
@@ -365,6 +369,79 @@ public class " + type.Name + @"Editor : Editor
             //         GUILayout.Height(28));
 
             BuildButton(manager.GetType(), 28, styler);
+            SettingsButton(showSettings, styler, 28);
+        }
+
+        if (showSettings || ZSaverSettings.Instance.debugMode)
+            toggleOn?.Invoke(typeof(PersistentMonoBehaviour), manager, true);
+    }
+
+    public static void ShowGroupIDSettings(Type type, ISaveGroupID data, bool canAutoSync)
+    {
+        using (new EditorGUILayout.HorizontalScope("helpbox"))
+        {
+            GUILayout.Label("GroupID: " + data.GroupID);
+            if (GUILayout.Button("-", GUILayout.Width(20)))
+            {
+                if (data.GroupID > -1)
+                {
+                    if (data.AutoSync)
+                    {
+                        int newVal = data.GroupID - 1;
+
+                        foreach (var o in GameObject.FindObjectsOfType(data.GetType())
+                            .Where(t => ((ISaveGroupID) t).AutoSync))
+                        {
+                            o.GetType().GetField("groupID",
+                                    BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                                ?.SetValue(o, newVal);
+                            PrefabUtility.RecordPrefabInstancePropertyModifications(o as MonoBehaviour);
+                        }
+                    }
+                    else
+                    {
+                        type.GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                            ?.SetValue(data, data.GroupID - 1);
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(data as MonoBehaviour);
+                    }
+                }
+            }
+
+            if (GUILayout.Button("+", GUILayout.Width(20)))
+            {
+                if (data.AutoSync)
+                {
+                    int newVal = data.GroupID + 1;
+
+                    foreach (var o in GameObject.FindObjectsOfType(data.GetType())
+                        .Where(t => ((ISaveGroupID) t).AutoSync))
+                    {
+                        o.GetType().GetField("groupID",
+                                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                            ?.SetValue(o, newVal);
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(o as MonoBehaviour);
+                    }
+                }
+                else
+                {
+                    type.GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                        ?.SetValue(data, data.GroupID + 1);
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(data as MonoBehaviour);
+                }
+            }
+
+            if (canAutoSync)
+            {
+                SerializedObject o = new SerializedObject(data as PersistentMonoBehaviour);
+
+                o.Update();
+
+                EditorGUILayout.PropertyField(
+                    o.FindProperty("autoSync"), GUIContent.none, GUILayout.Width(12));
+                GUILayout.Label("Sync", GUILayout.Width(35));
+
+                o.ApplyModifiedProperties();
+            }
         }
     }
 

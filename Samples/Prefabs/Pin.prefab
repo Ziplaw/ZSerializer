@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7628023991474892115}
   - component: {fileID: 5376406752090024678}
   - component: {fileID: 3060704869041869045}
-  - component: {fileID: 2956009367653141464}
+  - component: {fileID: 9127893661354651109}
   m_Layer: 0
   m_Name: Pin
   m_TagString: Untagged
@@ -96,7 +96,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2956009367653141464
+--- !u!114 &9127893661354651109
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -108,3 +108,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aa257885727c124e9953aa5bb4c7f36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  groupID: 7
+  autoSync: 1
+  hits: 0

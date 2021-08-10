@@ -5,8 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using ZSerializer;
 
-// [Persistent]
-public class Pin : MonoBehaviour
+public class Pin : PersistentMonoBehaviour
 {
     private Renderer _renderer;
     private MaterialPropertyBlock _propBlock;

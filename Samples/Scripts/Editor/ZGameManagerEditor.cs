@@ -6,6 +6,7 @@ using ZSerializer;
 public class GameManagerEditor : Editor
 {
     private GameManager manager;
+    private bool showSettings;
     private static ZSaverStyler styler;
 
     private void OnEnable()
@@ -23,7 +24,8 @@ public class GameManagerEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        ZSaverEditor.BuildPersistentComponentEditor(manager, styler);
+        if(manager is PersistentMonoBehaviour)
+            ZSaverEditor.BuildPersistentComponentEditor(manager, styler, showSettings, ZSaverEditor.ShowGroupIDSettings);
         base.OnInspectorGUI();
     }
 }
