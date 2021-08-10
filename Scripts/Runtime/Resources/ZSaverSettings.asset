@@ -16,6 +16,6 @@ MonoBehaviour:
   debugMode: 1
   autoRebuildZSerializers: 0
   selectedSaveFile: 0
-  encryptData: 1
+  encryptData: 0
   stableSave: 0
   componentBlackList: []

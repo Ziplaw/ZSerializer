@@ -294,19 +294,26 @@ namespace ZSerializer
         //Updates json files changing a specific string for another
         static void UpdateAllJSONFiles(string[] previousFields, string[] newFields, bool isRestoring = false)
         {
-            foreach (var file in Directory.GetFiles(GetFilePath(""), "*.zsave",
-                SearchOption.AllDirectories))
-            {
-                string fileName = file.Split('\\').Last();
+            var col = Directory.GetFiles(GetFilePath("", true), "*.zsave",
+                SearchOption.AllDirectories);
 
-                string json = ReadFromFile(fileName);
+            foreach (var file in col)
+            {
+                var split = file.Replace('\\', '/').Split('/');
+
+                string fileName = split.Last();
+                int id = Int32.Parse(split[split.Length - 2]);
+
+                currentGroupID = id;
+
+                string json = ReadFromFile(fileName, split.Length == 10);
                 string newJson = json;
                 for (int i = 0; i < previousFields.Length; i++)
                 {
                     newJson = newJson.Replace(previousFields[i], newFields[i]);
                 }
 
-                WriteToFile(fileName, newJson);
+                WriteToFile(fileName, newJson, split.Length == 10);
             }
         }
 
@@ -558,8 +565,17 @@ namespace ZSerializer
                     Component componentInGameObject =
                         (Component) ZSaverType.GetField("_component").GetValue(FromJSONdObjects[i]);
 
-                    CopyFieldsToProperties(type, componentInGameObject, FromJSONdObjects[i]);
-                    CopyFieldsToFields(ZSaverType, type, componentInGameObject, FromJSONdObjects[i]);
+                    if (
+                        (componentInGameObject is ISaveGroupID
+                         &&
+                         ((ISaveGroupID) componentInGameObject).GroupID == currentGroupID)
+                        ||
+                        (!(componentInGameObject is ISaveGroupID) &&
+                         componentInGameObject.GetComponent<PersistentGameObject>().GroupID == currentGroupID))
+                    {
+                        CopyFieldsToProperties(type, componentInGameObject, FromJSONdObjects[i]);
+                        CopyFieldsToFields(ZSaverType, type, componentInGameObject, FromJSONdObjects[i]);
+                    }
                 }
             }
 
@@ -581,8 +597,17 @@ namespace ZSerializer
                     Component componentInGameObject =
                         (Component) ZSaverType.GetField("_component").GetValue(FromJSONdObjects[i]);
 
-                    CopyFieldsToProperties(type, componentInGameObject, FromJSONdObjects[i]);
-                    CopyFieldsToFields(ZSaverType, type, componentInGameObject, FromJSONdObjects[i]);
+                    if (
+                        (componentInGameObject is ISaveGroupID
+                         &&
+                         ((ISaveGroupID) componentInGameObject).GroupID == currentGroupID)
+                        ||
+                        (!(componentInGameObject is ISaveGroupID) &&
+                         componentInGameObject.GetComponent<PersistentGameObject>().GroupID == currentGroupID))
+                    {
+                        CopyFieldsToProperties(type, componentInGameObject, FromJSONdObjects[i]);
+                        CopyFieldsToFields(ZSaverType, type, componentInGameObject, FromJSONdObjects[i]);
+                    }
                 }
             }
         }
@@ -649,6 +674,21 @@ namespace ZSerializer
             currentGroupID = groupID;
             Log(groupID == -1 ? "Saving All Data" : "Saving Group " + currentGroupID);
 
+            if (groupID == -1)
+            {
+                string[] files = Directory.GetFiles(GetFilePath("", true),"*",SearchOption.AllDirectories);
+                foreach (string directory in files)
+                {
+                    File.Delete(directory);
+                }
+                
+                string[] directories = Directory.GetDirectories(GetFilePath("", true));
+                foreach (string directory in directories)
+                {
+                    Directory.Delete(directory);
+                }
+            }
+
             var persistentMonoBehavioursInScene = Object.FindObjectsOfType<PersistentMonoBehaviour>();
 
             foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
@@ -687,8 +727,6 @@ namespace ZSerializer
 
             if (isSavingAll) Save(idList.ToArray(), "lastSaveIDs.zsave", true);
 
-            Debug.Log(JsonHelper.ToJson(idList.ToArray()));
-
             for (int i = 0; i < idList.Count; i++)
             {
                 currentGroupID = idList[i];
@@ -699,13 +737,10 @@ namespace ZSerializer
 
                 yield return null;
 
-                if (!isSavingAll)
+                string[] files = Directory.GetFiles(GetFilePath(""));
+                foreach (string file in files)
                 {
-                    string[] files = Directory.GetFiles(GetFilePath(""));
-                    foreach (string file in files)
-                    {
-                        File.Delete(file);
-                    }
+                    File.Delete(file);
                 }
 
                 yield return ZMono.Instance.StartCoroutine(SaveAllPersistentGameObjects());
@@ -734,13 +769,19 @@ namespace ZSerializer
             bool isLoadingAll = currentGroupID == -1;
             Log(isLoadingAll ? "Loading All Data" : "Loading Group " + currentGroupID);
 
+            int[] idList;
+            if (isLoadingAll)
+            {
+                idList = JsonHelper.FromJson<int>(ReadFromFile(GetFilePath("lastSaveIDs.zsave", true), true));
+            }
+            else
+            {
+                idList= new [] {currentGroupID};
+            }
 
-            List<int> idList;
-            idList = isLoadingAll
-                ? JsonHelper.FromJson<int>(ReadFromFile(GetFilePath("lastSaveIDs.zsave", true))).ToList()
-                : new List<int>() {currentGroupID};
+            Log("Loading Groups in disk: " + ReadFromFile(GetFilePath("lastSaveIDs.zsave", true),true));
 
-            for (int i = 0; i < idList.Count; i++)
+            for (int i = 0; i < idList.Length; i++)
             {
                 currentGroupID = idList[i];
 
@@ -803,12 +844,12 @@ namespace ZSerializer
         }
 
         //Reads json from file
-        static string ReadFromFile(string fileName)
+        static string ReadFromFile(string fileName, bool useGlobalID = false)
         {
-            if (!File.Exists(GetFilePath(fileName)))
+            if (!File.Exists(GetFilePath(fileName, useGlobalID)))
             {
                 Debug.LogWarning(
-                    $"You attempted to load a file that didn't exist ({GetFilePath(fileName)}), this may be caused by trying to load a save file without having it saved first");
+                    $"You attempted to load a file that didn't exist ({GetFilePath(fileName, useGlobalID)}), this may be caused by trying to load a save file without having it saved first");
 
                 return null;
             }
@@ -818,14 +859,14 @@ namespace ZSerializer
                 byte[] key =
                     {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
-                return DecryptStringFromBytes(File.ReadAllBytes(GetFilePath(fileName)), key, key);
+                return DecryptStringFromBytes(File.ReadAllBytes(GetFilePath(fileName, useGlobalID)), key, key);
             }
 
-            return File.ReadAllText(GetFilePath(fileName));
+            return File.ReadAllText(GetFilePath(fileName, useGlobalID));
         }
 
         //Gets complete filepath for a specific filename
-        internal static string GetFilePath(string fileName, bool useGlobalID = false)
+        static string GetFilePath(string fileName, bool useGlobalID = false)
         {
             int currentScene = GetCurrentScene();
             if (currentScene == SceneManager.sceneCountInBuildSettings)
@@ -845,9 +886,10 @@ namespace ZSerializer
                     ZSaverSettings.Instance.selectedSaveFile.ToString(),
                     currentScene.ToString(),
                     currentGroupID.ToString());
+            Debug.LogWarning(useGlobalID + " " + path + " "+Path.Combine(path, fileName));
+
 
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-
             return Path.Combine(path, fileName);
         }
 
