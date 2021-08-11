@@ -6,7 +6,7 @@ public class BallMoverZSerializer : ZSerializer.ZSerializer<BallMover>
 
     public BallMoverZSerializer(BallMover BallMoverInstance) : base(BallMoverInstance.gameObject, BallMoverInstance)
     {
-         groupID = (System.Int32)typeof(BallMover).GetField("groupID").GetValue(BallMoverInstance);
-         autoSync = (System.Boolean)typeof(BallMover).GetField("autoSync").GetValue(BallMoverInstance);
+         groupID = BallMoverInstance.GroupID;
+         autoSync = BallMoverInstance.AutoSync;
     }
 }

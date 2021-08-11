@@ -34,6 +34,7 @@ namespace ZSerializer.Editor
         private const int classHeight = 32;
         private bool editMode;
         private bool initiated;
+        private bool showLayerTab;
         private static ZSaverStyler styler;
 
         private static Class[] classes;
@@ -110,7 +111,7 @@ namespace ZSerializer.Editor
 
                 if (editMode)
                 {
-                    ZSaverEditor.BuildSettingsEditor(styler);
+                    ZSaverEditor.BuildSettingsEditor(styler, ref showLayerTab);
                 }
 
 

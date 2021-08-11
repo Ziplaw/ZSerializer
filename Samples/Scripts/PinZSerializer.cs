@@ -8,7 +8,7 @@ public class PinZSerializer : ZSerializer.ZSerializer<Pin>
     public PinZSerializer(Pin PinInstance) : base(PinInstance.gameObject, PinInstance)
     {
          hits = (System.Int32)typeof(Pin).GetField("hits").GetValue(PinInstance);
-         groupID = (System.Int32)typeof(Pin).GetField("groupID").GetValue(PinInstance);
-         autoSync = (System.Boolean)typeof(Pin).GetField("autoSync").GetValue(PinInstance);
+         groupID = PinInstance.GroupID;
+         autoSync = PinInstance.AutoSync;
     }
 }

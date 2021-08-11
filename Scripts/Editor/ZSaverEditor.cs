@@ -77,8 +77,13 @@ public static class ZSaverEditor
             $"public class {type.Name}ZSerializer : ZSerializer.ZSerializer<{type.Name}>\n" +
             "{\n";
 
-        foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null))
+        var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Instance)
+            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
+
+        fieldInfos.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList());
+
+        foreach (var fieldInfo in fieldInfos)
         {
             var fieldType = fieldInfo.FieldType;
 
@@ -117,7 +122,7 @@ public static class ZSaverEditor
             "    {\n";
 
         foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null))
+            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList())
         {
             var fieldType = fieldInfo.FieldType;
 
@@ -149,10 +154,11 @@ public static class ZSaverEditor
                 script = script.Replace(oldString, newString);
             }
         }
+        script += $"         groupID = {className}.GroupID;\n" +
+                  $"         autoSync = {className}.AutoSync;\n" +
+                  "    }\n}";
 
         ZSave.Log("ZSerializer script being created at " + path);
-
-        script += "    }\n}";
 
         sw.Write(script);
 
@@ -239,9 +245,12 @@ public class " + type.Name + @"Editor : Editor
 
         var fieldsZSaver = ZSaverType.GetFields()
             .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
-        var fieldsType = type.GetFields().Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
-
-        if (fieldsZSaver.Count == fieldsType.Count)
+        var fieldsType = type.GetFields().Where(f =>
+                f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null)
+            .ToList();
+        fieldsType.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(f => f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null ));
+        
+        if (fieldsZSaver.Count == fieldsType.Count - 0)
         {
             for (int j = 0; j < fieldsZSaver.Count; j++)
             {
@@ -381,53 +390,23 @@ public class " + type.Name + @"Editor : Editor
     {
         using (new EditorGUILayout.HorizontalScope("helpbox"))
         {
-            GUILayout.Label("GroupID: " + data.GroupID);
-            if (GUILayout.Button("-", GUILayout.Width(20)))
+            GUILayout.Label("Save Group", GUILayout.MaxWidth(80));
+            int newValue = EditorGUILayout.Popup(data.GroupID, ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s)).ToArray());
+            if (newValue != data.GroupID)
             {
-                if (data.GroupID > 0)
+                if (!data.AutoSync)
                 {
-                    if (data.AutoSync)
-                    {
-                        int newVal = data.GroupID - 1;
-
-                        foreach (var o in GameObject.FindObjectsOfType(data.GetType())
-                            .Where(t => ((ISaveGroupID) t).AutoSync))
-                        {
-                            o.GetType().GetField("groupID",
-                                    BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
-                                ?.SetValue(o, newVal);
-                            PrefabUtility.RecordPrefabInstancePropertyModifications(o as MonoBehaviour);
-                        }
-                    }
-                    else
-                    {
-                        type.GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
-                            ?.SetValue(data, data.GroupID - 1);
-                        PrefabUtility.RecordPrefabInstancePropertyModifications(data as MonoBehaviour);
-                    }
-                }
-            }
-
-            if (GUILayout.Button("+", GUILayout.Width(20)))
-            {
-                if (data.AutoSync)
-                {
-                    int newVal = data.GroupID + 1;
-
-                    foreach (var o in GameObject.FindObjectsOfType(data.GetType())
-                        .Where(t => ((ISaveGroupID) t).AutoSync))
-                    {
-                        o.GetType().GetField("groupID",
-                                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
-                            ?.SetValue(o, newVal);
-                        PrefabUtility.RecordPrefabInstancePropertyModifications(o as MonoBehaviour);
-                    }
+                    type.GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                        .SetValue(data, newValue);
                 }
                 else
                 {
-                    type.GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
-                        ?.SetValue(data, data.GroupID + 1);
-                    PrefabUtility.RecordPrefabInstancePropertyModifications(data as MonoBehaviour);
+                    foreach (var o in GameObject.FindObjectsOfType(data.GetType())
+                        .Where(t => ((ISaveGroupID) t).AutoSync))
+                    {
+                        o.GetType().BaseType.GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance)
+                            .SetValue(o, newValue);
+                    }
                 }
             }
 
@@ -475,7 +454,7 @@ public class " + type.Name + @"Editor : Editor
         }
     }
 
-    public static void BuildSettingsEditor(ZSaverStyler styler)
+    public static void BuildSettingsEditor(ZSaverStyler styler, ref bool showLayersTab)
     {
         IEnumerable<FieldInfo> fieldInfos = typeof(ZSaverSettings)
             .GetFields(BindingFlags.Instance | BindingFlags.Public)
@@ -502,13 +481,37 @@ public class " + type.Name + @"Editor : Editor
             }
         }
 
-        using (new GUILayout.VerticalScope("helpbox"))
+        showLayersTab = GUILayout.Toggle(showLayersTab, "Saving Groups", new GUIStyle("button"));
+        
+        if (showLayersTab)
         {
-            foreach (var fieldInfo in fieldInfos)
+            using (new GUILayout.VerticalScope("helpbox"))
             {
                 serializedObject.Update();
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
+                for (int i = 0; i < 16; i++)
+                {
+                    using (new EditorGUI.DisabledScope(i < 2))
+                    {
+                        var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
+                        prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
+                            new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
+                    }
+                }
+
                 serializedObject.ApplyModifiedProperties();
+
+            }
+        }
+        else
+        {
+            using (new GUILayout.VerticalScope("helpbox"))
+            {
+                foreach (var fieldInfo in fieldInfos)
+                {
+                    serializedObject.Update();
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
+                    serializedObject.ApplyModifiedProperties();
+                }
             }
         }
     }

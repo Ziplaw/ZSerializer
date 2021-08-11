@@ -22,8 +22,20 @@ namespace ZSerializer
     }
     public class ZSaverSettings : ScriptableObject
     {
-        private static ZSaverSettings instance;
+        [Serializable]
+        public struct SaveGroup
+        {
+            public int index;
+            public string name;
 
+            public SaveGroup(int index, string name)
+            {
+                this.index = index;
+                this.name = name;
+            }
+        }
+        
+        private static ZSaverSettings instance;
         public static ZSaverSettings Instance => instance ? instance : Resources.Load<ZSaverSettings>("ZSaverSettings");
 
         
@@ -36,6 +48,28 @@ namespace ZSerializer
         public bool encryptData;
         public bool stableSave;
         [SerializeField][HideInInspector]public List<SerializableComponentBlackList> componentBlackList;
+        [HideInInspector]public List<string> saveGroups = new List<string>()
+        {
+            "Main",
+            "Settings",
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty
+        };
+
         
 
         [RuntimeInitializeOnLoadMethod]

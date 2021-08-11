@@ -266,8 +266,11 @@ namespace ZSerializer
         static void CopyFieldsToFields(Type zSaverType, Type componentType, Component _component, object zSaver)
         {
             FieldInfo[] zSaverFields = zSaverType.GetFields();
-            FieldInfo[] componentFields = componentType.GetFields(BindingFlags.Public | BindingFlags.NonPublic |
-                                                                  BindingFlags.Instance | BindingFlags.Static);
+            var componentFields = componentType.GetFields(BindingFlags.Public | BindingFlags.NonPublic |
+                                                                  BindingFlags.Instance | BindingFlags.Static).ToList();
+            
+            componentFields.AddRange(componentType.BaseType.GetFields(BindingFlags.NonPublic |
+                                                                      BindingFlags.Instance));
 
             for (var i = 0; i < zSaverFields.Length; i++)
             {
@@ -284,6 +287,8 @@ namespace ZSerializer
 
             FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields();
 
+            
+            
             for (var i = 0; i < fieldInfos.Length; i++)
             {
                 var propertyInfo = propertyInfos.FirstOrDefault(p => p.Name == fieldInfos[i].Name);
@@ -623,7 +628,7 @@ namespace ZSerializer
             idStorage = objs.SelectMany(o => o.GetComponents(typeof(Component))
                     .Where(c =>
                         c.GetType() == typeof(PersistentGameObject) ||
-                        c.GetType() is PersistentMonoBehaviour ||
+                        c is PersistentMonoBehaviour ||
                         GetComponentsOfGivenType(objs, c.GetType()).Contains(c)
                     ))
                 .ToDictionary(component => component.GetInstanceID(), component => component.GetInstanceID());
@@ -672,7 +677,6 @@ namespace ZSerializer
 
             isSaving = true;
             currentGroupID = groupID;
-            Log(groupID == -1 ? "Saving All Data" : "Saving Group " + currentGroupID);
 
             if (groupID == -1)
             {
@@ -886,7 +890,6 @@ namespace ZSerializer
                     ZSaverSettings.Instance.selectedSaveFile.ToString(),
                     currentScene.ToString(),
                     currentGroupID.ToString());
-            Debug.LogWarning(useGlobalID + " " + path + " "+Path.Combine(path, fileName));
 
 
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);

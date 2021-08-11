@@ -16,7 +16,7 @@ public class GameManagerZSerializer : ZSerializer.ZSerializer<GameManager>
          playerName = (System.String)typeof(GameManager).GetField("playerName").GetValue(GameManagerInstance);
          position = (UnityEngine.Vector3)typeof(GameManager).GetField("position").GetValue(GameManagerInstance);
          ballMover = (BallMover)typeof(GameManager).GetField("ballMover").GetValue(GameManagerInstance);
-         groupID = (System.Int32)typeof(GameManager).GetField("groupID").GetValue(GameManagerInstance);
-         autoSync = (System.Boolean)typeof(GameManager).GetField("autoSync").GetValue(GameManagerInstance);
+         groupID = GameManagerInstance.GroupID;
+         autoSync = GameManagerInstance.AutoSync;
     }
 }
