@@ -911,7 +911,7 @@ namespace ZSerializer
                 LoadAllObjects();
                 LoadReferences();
 
-                Log("Deserialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
+                Log($"Deserialization of group \"{ZSaverSettings.Instance.saveGroups[currentGroupID]}\" ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                     (Time.frameCount - frameCount) + " frames");
 
                 foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)

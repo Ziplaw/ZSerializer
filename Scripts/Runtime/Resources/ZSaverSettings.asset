@@ -17,7 +17,7 @@ MonoBehaviour:
   autoRebuildZSerializers: 0
   selectedSaveFile: 0
   encryptData: 0
-  stableSave: 1
+  stableSave: 0
   componentBlackList: []
   saveGroups:
   - Main

@@ -474,10 +474,12 @@ public class " + type.Name + @"Editor : Editor
 
         if (GUILayout.Button("Reset all Group IDs from Scene"))
         {
+            ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
+            
             foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>().Where(o => o is ISaveGroupID))
             {
-                Debug.Log(monoBehaviour);
-                monoBehaviour.GetType().GetField("groupID", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(monoBehaviour,0);
+                monoBehaviour.GetType().GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(monoBehaviour,0);
+                monoBehaviour.GetType().BaseType?.GetField("groupID", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(monoBehaviour,0);
             }
         }
 
