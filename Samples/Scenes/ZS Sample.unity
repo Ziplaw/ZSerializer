@@ -655,7 +655,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0944a1262defa34bbcd43a62b4738ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showSettings: 0
+  showSettings: 1
   groupID: 0
   autoSync: 1
 --- !u!54 &469202270
@@ -686,7 +686,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showSettings: 1
+  showSettings: 0
   groupID: 0
 --- !u!1 &608016568
 GameObject:

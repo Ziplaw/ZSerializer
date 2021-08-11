@@ -285,7 +285,16 @@ namespace ZSerializer
             var propertyInfos = componentType.GetProperties()
                 .Where(PropertyIsSuitableForAssignment);
 
+            Debug.Log(componentType + " " + propertyInfos.Any(o => o.Name == "sharedMaterials"));
+
             FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields();
+
+            // int j = 0;
+            // foreach (var propertyInfo in propertyInfos)
+            // {
+            //     Debug.Log("<color=cyan>" + propertyInfo.Name + " " + fieldInfos[j].Name + "</color>");
+            //     j++;
+            // }
 
             // Debug.LogWarning("Type: "+componentType);
             // Debug.LogWarning("Property Infos: "+ propertyInfos.Count + " FieldInfos: " + fieldInfos.Length);
@@ -310,15 +319,22 @@ namespace ZSerializer
                 {
                     if (i + indexDisplace == fieldInfos.Length - 1)
                     {
-                        foundMatch = false;
-                        break;
+                        indexDisplace = -i-1;
                     }
 
                     indexDisplace++;
+
+                    if (indexDisplace == 0)
+                    {
+                        foundMatch = false;
+                        break;
+                    }
                 }
 
                 if (foundMatch)
                 {
+                    if (componentType == typeof(MeshRenderer))
+                        Debug.Log(fieldInfos[i + indexDisplace].Name + " " + propertyInfo.Name);
                     propertyInfo.SetValue(c, fieldInfos[i + indexDisplace].GetValue(FromJSONdObject));
 
                     // var propertyInfo = propertyInfos.FirstOrDefault(p => p.Name == fieldInfos[i].Name);
@@ -366,8 +382,8 @@ namespace ZSerializer
         {
             var files = Directory.GetFiles(GetFilePath("", true), "*.zsave",
                 SearchOption.AllDirectories).ToList();
-            
-            
+
+
             for (var i = 0; i < files.Count; i++)
             {
                 if (files[i].Contains("lastSaveIDs.zsave") || files[i].Contains("assemblies.zsave"))
@@ -452,7 +468,8 @@ namespace ZSerializer
 
             foreach (var componentType in componentTypes)
             {
-                yield return ZMono.Instance.StartCoroutine(SerializeComponents(GetComponentsOfGivenType(objects, componentType),
+                yield return ZMono.Instance.StartCoroutine(SerializeComponents(
+                    GetComponentsOfGivenType(objects, componentType),
                     Assembly.Load(componentType == typeof(PersistentGameObject)
                         ? "com.Ziplaw.ZSaver.Runtime"
                         : mainAssembly).GetType(componentType.Name + "ZSerializer"),
@@ -493,7 +510,8 @@ namespace ZSerializer
         }
 
         //Loads a component no matter the type
-        static void LoadObjectsDynamically(Type ZSaverType, Type componentType, object FromJSONdObject, ref Dictionary<string,string> temporaryInstanceIDs)
+        static void LoadObjectsDynamically(Type ZSaverType, Type componentType, object FromJSONdObject,
+            ref Dictionary<string, string> temporaryInstanceIDs)
         {
             GameObject gameObject =
                 (GameObject) ZSaverType.GetField("_componentParent").GetValue(FromJSONdObject);
@@ -512,14 +530,13 @@ namespace ZSerializer
                 (int) ZSaverType.GetField("componentinstanceID").GetValue(FromJSONdObject);
             int gameObjectInstanceID =
                 (int) ZSaverType.GetField("gameObjectInstanceID").GetValue(FromJSONdObject);
-            
-            
+
 
             if (componentType != typeof(PersistentGameObject) && gameObject == null)
             {
                 gameObject = (GameObject) FindObjectFromInstanceID(gameObjectInstanceID);
             }
-            
+
             if (componentInGameObject == null)
             {
                 int prevCOMPInstanceID = componentInstanceID;
@@ -534,8 +551,8 @@ namespace ZSerializer
                     }
 
                     LoadDestroyedGameObject(gameObjectInstanceID, out gameObject, ZSaverType, FromJSONdObject);
-                    UpdateAllInstanceIDs(new []{gameObjectInstanceID.ToString()},new [] {gameObject.GetInstanceID().ToString()});
-
+                    UpdateAllInstanceIDs(new[] {gameObjectInstanceID.ToString()},
+                        new[] {gameObject.GetInstanceID().ToString()});
                 }
 
                 if (componentType == typeof(PersistentGameObject))
@@ -544,8 +561,7 @@ namespace ZSerializer
                 if (componentInGameObject == null) Debug.LogError("wtf");
                 componentInstanceID = componentInGameObject.GetInstanceID();
                 // temporaryInstanceIDs.Add(prevCOMPInstanceID.ToString(), componentInstanceID.ToString());
-                UpdateAllInstanceIDs(new []{prevCOMPInstanceID.ToString()},new [] {componentInstanceID.ToString()});
-
+                UpdateAllInstanceIDs(new[] {prevCOMPInstanceID.ToString()}, new[] {componentInstanceID.ToString()});
             }
 
             if (componentType == typeof(PersistentGameObject))
@@ -579,7 +595,7 @@ namespace ZSerializer
 
                 object[] FromJSONdObjects = (object[]) fromJson.Invoke(null,
                     new object[] {ReadFromFile(type.FullName + ".zsave")});
-                
+
                 Dictionary<string, string> temporaryInstanceIDs = new Dictionary<string, string>();
 
                 for (var i = 0; i < FromJSONdObjects.Length; i++)
@@ -588,6 +604,7 @@ namespace ZSerializer
                         new object[] {ReadFromFile(type.FullName + ".zsave")}))[i];
                     LoadObjectsDynamically(ZSaverType, type, FromJSONdObjects[i], ref temporaryInstanceIDs);
                 }
+
                 // UpdateAllInstanceIDs(temporaryInstanceIDs.Select(i => i.Value.ToString()).ToArray(),temporaryInstanceIDs.Select(i => i.Key.ToString()).ToArray());
             }
         }
@@ -612,8 +629,8 @@ namespace ZSerializer
                 object[] FromJSONdObjects = (object[]) fromJson.Invoke(null,
                     new object[]
                         {ReadFromFile(type.FullName + ".zsave")});
-                
-                Dictionary<string,string> temporaryInstanceIDs = new Dictionary<string, string>();
+
+                Dictionary<string, string> temporaryInstanceIDs = new Dictionary<string, string>();
 
                 for (var i = 0; i < FromJSONdObjects.Length; i++)
                 {
@@ -621,6 +638,7 @@ namespace ZSerializer
                         new object[] {ReadFromFile(type.FullName + ".zsave")}))[i];
                     LoadObjectsDynamically(ZSaverType, type, FromJSONdObjects[i], ref temporaryInstanceIDs);
                 }
+
                 // UpdateAllInstanceIDs(temporaryInstanceIDs.Select(i => i.Value.ToString()).ToArray(),temporaryInstanceIDs.Select(i => i.Key.ToString()).ToArray());
             }
         }
@@ -739,9 +757,9 @@ namespace ZSerializer
 
             var originalIDs = idStorage.Select(i => i.Key.ToString()).ToArray();
             var temporaryIDs = idStorage.Select(i => i.Value.ToString()).ToArray();
-            
-            UpdateAllJSONFiles(temporaryIDs,originalIDs);
-            
+
+            UpdateAllJSONFiles(temporaryIDs, originalIDs);
+
             // for (var i = 0; i < idStorage.Count; i++)
             // {
             //     UpdateAllInstanceIDs(idStorage[idStorage.Keys.ElementAt(i)], idStorage.Keys.ElementAt(i), true);
@@ -818,7 +836,7 @@ namespace ZSerializer
             else idList = new List<int>() {currentGroupID};
 
             if (isSavingAll) Save(idList.ToArray(), "lastSaveIDs.zsave", true);
-            
+
             float startingTime = Time.realtimeSinceStartup;
             float frameCount = Time.frameCount;
 
@@ -827,7 +845,6 @@ namespace ZSerializer
                 currentGroupID = idList[i];
                 LogWarning("Saving data on Group " + currentGroupID);
 
-                
 
                 string[] files = Directory.GetFiles(GetFilePath(""));
                 foreach (string file in files)
@@ -848,8 +865,6 @@ namespace ZSerializer
                     while (e.MoveNext())
                     {
                     }
-
-                    
                 }
                 else
                 {
@@ -859,8 +874,6 @@ namespace ZSerializer
                 }
 
                 Save(unityComponentAssemblies.Distinct().ToArray(), "assemblies.zsave");
-
-                
             }
 
             Log("Serialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
@@ -911,7 +924,8 @@ namespace ZSerializer
                 LoadAllObjects();
                 LoadReferences();
 
-                Log($"Deserialization of group \"{ZSaverSettings.Instance.saveGroups[currentGroupID]}\" ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
+                Log($"Deserialization of group \"{ZSaverSettings.Instance.saveGroups[currentGroupID]}\" ended in: " +
+                    (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                     (Time.frameCount - frameCount) + " frames");
 
                 foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
@@ -970,7 +984,7 @@ namespace ZSerializer
 
                 return DecryptStringFromBytes(File.ReadAllBytes(GetFilePath(fileName, useGlobalID)), key, key);
             }
-            
+
             return File.ReadAllText(GetFilePath(fileName, useGlobalID));
         }
 
