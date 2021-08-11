@@ -39,9 +39,11 @@ public class Pin : PersistentMonoBehaviour
         }
     }
 
+    #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         Handles.color = Color.cyan;
         Handles.Label(transform.position + Vector3.up*2.5f + Quaternion.Euler(0,45,0)*Vector3.left*.125f, hits.ToString());
     }
+    #endif
 }
