@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -17,6 +19,13 @@ public class BallMover : PersistentMonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        // foreach (var type in AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes().Where(c => typeof(Component).IsAssignableFrom(c)).SelectMany(t => t.GetProperties() )))
+        // {
+        //     Debug.Log(type.DeclaringType + " " + type);
+        // }
+
+        Debug.Log(typeof(TrailRenderer).GetProperty("rayTracingMode").ReflectedType + " " + ZSaverSettings.Instance.componentBlackList.IsInBlackList(typeof(TrailRenderer), "rayTracingMode"));
     }
 
     // Update is called once per frame

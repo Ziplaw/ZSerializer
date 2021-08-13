@@ -7,6 +7,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using ZSerializer;
 using ZSerializer.Editor;
 using Debug = UnityEngine.Debug;
@@ -460,30 +461,7 @@ public class " + type.Name + @"Editor : Editor
             .GetFields(BindingFlags.Instance | BindingFlags.Public)
             .Where(f => f.GetCustomAttribute<HideInInspector>() == null);
         SerializedObject serializedObject = new SerializedObject(styler.settings);
-        if (GUILayout.Button("Open Save file Directory"))
-        {
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.WindowStyle = ProcessWindowStyle.Normal;
-            startInfo.FileName = "cmd.exe";
-            string _path = Application.persistentDataPath;
-            startInfo.Arguments = $"/C start {_path}";
-            process.StartInfo = startInfo;
-            process.Start();
-        }
-
-        if (GUILayout.Button("Reset all Group IDs from Scene"))
-        {
-            ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
-            
-            foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>().Where(o => o is ISaveGroupID))
-            {
-                monoBehaviour.GetType().GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(monoBehaviour,0);
-                monoBehaviour.GetType().BaseType?.GetField("groupID", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(monoBehaviour,0);
-            }
-        }
-
-        showLayersTab = GUILayout.Toggle(showLayersTab, "Saving Groups", new GUIStyle("button"));
+        
         
         if (showLayersTab)
         {
@@ -516,6 +494,31 @@ public class " + type.Name + @"Editor : Editor
                 }
             }
         }
+        
+        if (GUILayout.Button("Open Save file Directory"))
+        {
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.WindowStyle = ProcessWindowStyle.Normal;
+            startInfo.FileName = "cmd.exe";
+            string _path = Application.persistentDataPath;
+            startInfo.Arguments = $"/C start {_path}";
+            process.StartInfo = startInfo;
+            process.Start();
+        }
+
+        if (GUILayout.Button("Reset all Group IDs from Scene"))
+        {
+            ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
+            
+            foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>().Where(o => o is ISaveGroupID))
+            {
+                monoBehaviour.GetType().GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(monoBehaviour,0);
+                monoBehaviour.GetType().BaseType?.GetField("groupID", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(monoBehaviour,0);
+            }
+        }
+
+        showLayersTab = GUILayout.Toggle(showLayersTab, "Saving Groups", new GUIStyle("button"));
     }
 
     [MenuItem("Tools/ZSave/Generate Unity Component ZSerializers")]
@@ -537,6 +540,11 @@ public class " + type.Name + @"Editor : Editor
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(ZSave.PropertyIsSuitableForAssignment))
                 {
+                    // if (propertyInfo.PropertyType == typeof(RayTracingMode))
+                    // {
+                    //     Debug.Log(propertyInfo.Name + " " + type + " " +  ZSave.PropertyIsSuitableForAssignment(propertyInfo) + " " + ZSaverSettings.Instance.componentBlackList.IsInBlackList(type, propertyInfo.Name));
+                    // }
+                    
                     longScript +=
                         $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
                         ";\n";

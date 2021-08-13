@@ -26,24 +26,14 @@ class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithRep
         {
             errorCs1061 = true;
             var split = condition.Split('\'');
-            string typeName = split[1];
-            string propertyName = split[3];
+            string typeName = split[1]; //EW
+            string propertyName = split[3]; //EWWWWW
 
             var componentType =
                 ZSave.FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
                     "UnityEngine." + typeName); //THIS MIGHT BREAK IN FUTURE VERSIONS
-
-            var s = ZSaverSettings.Instance.componentBlackList.FirstOrDefault(c => c.Type == componentType);
-
-            if (s != null)
-            {
-                s.componentNames.Add(propertyName);
-            }
-            else
-            {
-                ZSaverSettings.Instance.componentBlackList.Add(
-                    new SerializableComponentBlackList(componentType, propertyName));
-            }
+            
+            ZSaverSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
         }
 
         if (condition.Contains("'Failed'") && errorCs1061)

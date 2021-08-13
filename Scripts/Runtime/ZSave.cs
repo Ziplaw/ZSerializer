@@ -109,19 +109,21 @@ namespace ZSerializer
         //returns if the current property is to be assigned when loading
         internal static bool PropertyIsSuitableForAssignment(PropertyInfo fieldInfo)
         {
-            SerializableComponentBlackList blackList =
-                ZSaverSettings.Instance.componentBlackList.FirstOrDefault(c => c.Type == fieldInfo.DeclaringType);
-            bool isInBlackList = blackList != null;
+            // SerializableComponentBlackList blackList =
+            //     ZSaverSettings.Instance.componentBlackList.FirstOrDefault(c => c.Type == fieldInfo.DeclaringType);
+            // bool isInBlackList = blackList != null;
+            // Debug.Log(fieldInfo.Name + " " + fieldInfo.DeclaringType);
 
             return fieldInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&
                    fieldInfo.GetCustomAttribute<NonZSerialized>() == null &&
                    fieldInfo.CanRead &&
                    fieldInfo.CanWrite &&
-                   (
-                       (!isInBlackList) || (
-                           isInBlackList &&
-                           !blackList.componentNames.Contains(fieldInfo.Name))
-                   ) &&
+                   !ZSaverSettings.Instance.componentBlackList.IsInBlackList(fieldInfo.ReflectedType, fieldInfo.Name) &&
+                   // (
+                   //     (!isInBlackList) || (
+                   //         isInBlackList &&
+                   //         !blackList.componentNames.Contains(fieldInfo.Name))
+                   // ) &&
                    fieldInfo.Name != "material" &&
                    fieldInfo.Name != "materials" &&
                    fieldInfo.Name != "sharedMaterial" &&

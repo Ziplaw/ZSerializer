@@ -47,7 +47,8 @@ namespace ZSerializer
         public int selectedSaveFile;
         public bool encryptData;
         public bool stableSave;
-        [SerializeField][HideInInspector]public List<SerializableComponentBlackList> componentBlackList;
+        // [HideInInspector]
+        public List<SerializableComponentBlackList> componentBlackList;
         [HideInInspector]public List<string> saveGroups = new List<string>()
         {
             "Main",
@@ -76,6 +77,48 @@ namespace ZSerializer
         static void Init()
         {
             instance = Resources.Load<ZSaverSettings>("ZSaverSettings");
+        }
+    }
+
+    public static class Extensions
+    {
+        public static void SafeAdd(this List<SerializableComponentBlackList> list, Type componentType, string propertyName)
+        {
+            var s = list.FirstOrDefault(c => c.Type == componentType);
+
+            if (s != null)
+            {
+                if (!s.componentNames.Contains(propertyName))
+                {
+                    s.componentNames.Add(propertyName);
+                }
+            }
+            else
+            {
+                list.Add(
+                    new SerializableComponentBlackList(componentType, propertyName));
+            }
+        }
+        
+        public static void SafeRemove(this List<SerializableComponentBlackList> list, Type componentType, string propertyName)
+        {
+            var s = list.FirstOrDefault(c => c.Type == componentType);
+
+            if (s != null && s.componentNames.Contains(propertyName))
+            {
+                s.componentNames.Remove(propertyName);
+
+                if (s.componentNames.Count == 0)
+                {
+                    list.Remove(s);
+                }
+            }
+        }
+
+        public static bool IsInBlackList(this List<SerializableComponentBlackList> list, Type componentType,
+            string propertyName)
+        {
+            return list.Any(a => a.Type == componentType && a.componentNames.Contains(propertyName));
         }
     }
 }
