@@ -555,11 +555,11 @@ GameObject:
   m_Component:
   - component: {fileID: 469202268}
   - component: {fileID: 469202271}
+  - component: {fileID: 469202269}
   - component: {fileID: 469202267}
   - component: {fileID: 469202266}
   - component: {fileID: 469202265}
   - component: {fileID: 469202270}
-  - component: {fileID: 469202269}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged

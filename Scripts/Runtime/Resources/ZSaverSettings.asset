@@ -18,7 +18,92 @@ MonoBehaviour:
   selectedSaveFile: 0
   encryptData: 0
   stableSave: 1
-  componentBlackList: []
+  componentBlackList:
+  - typeFullName: UnityEngine.LightProbeGroup, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - dering
+  - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    componentNames:
+    - shadowRadius
+    - shadowAngle
+    - areaSize
+    - lightmapBakeType
+  - typeFullName: UnityEngine.Terrain, UnityEngine.TerrainModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - bakeLightProbesForTrees
+    - deringLightProbesForTrees
+  - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - additionalVertexStreams
+    - enlightenVertexStream
+    - scaleInLightmap
+    - receiveGI
+    - stitchLightmapSeams
+    - enabled
+    - shadowCastingMode
+    - receiveShadows
+    - forceRenderingOff
+    - motionVectorGenerationMode
+    - lightProbeUsage
+    - reflectionProbeUsage
+    - renderingLayerMask
+    - rendererPriority
+    - rayTracingMode
+    - sortingLayerName
+    - sortingLayerID
+    - sortingOrder
+    - allowOcclusionWhenDynamic
+    - lightProbeProxyVolumeOverride
+    - probeAnchor
+    - lightmapIndex
+    - realtimeLightmapIndex
+    - lightmapScaleOffset
+    - realtimeLightmapScaleOffset
+    - hideFlags
+  - typeFullName: UnityEngine.TrailRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - time
+    - startWidth
+    - endWidth
+    - widthMultiplier
+    - autodestruct
+    - emitting
+    - numCornerVertices
+    - numCapVertices
+    - minVertexDistance
+    - startColor
+    - endColor
+    - shadowBias
+    - generateLightingData
+    - textureMode
+    - alignment
+    - colorGradient
+    - enabled
+    - shadowCastingMode
+    - receiveShadows
+    - forceRenderingOff
+    - motionVectorGenerationMode
+    - lightProbeUsage
+    - reflectionProbeUsage
+    - renderingLayerMask
+    - rendererPriority
+    - rayTracingMode
+    - sortingLayerName
+    - sortingLayerID
+    - sortingOrder
+    - allowOcclusionWhenDynamic
+    - lightProbeProxyVolumeOverride
+    - probeAnchor
+    - lightmapIndex
+    - realtimeLightmapIndex
+    - lightmapScaleOffset
+    - realtimeLightmapScaleOffset
+    - hideFlags
   saveGroups:
   - Main
   - Settings

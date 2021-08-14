@@ -155,6 +155,7 @@ public static class ZSaverEditor
                 script = script.Replace(oldString, newString);
             }
         }
+
         script += $"         groupID = {className}.GroupID;\n" +
                   $"         autoSync = {className}.AutoSync;\n" +
                   "    }\n}";
@@ -249,8 +250,9 @@ public class " + type.Name + @"Editor : Editor
         var fieldsType = type.GetFields().Where(f =>
                 f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null)
             .ToList();
-        fieldsType.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(f => f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null ));
-        
+        fieldsType.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(f =>
+            f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null));
+
         if (fieldsZSaver.Count == fieldsType.Count - 0)
         {
             for (int j = 0; j < fieldsZSaver.Count; j++)
@@ -380,7 +382,6 @@ public class " + type.Name + @"Editor : Editor
             BuildButton(manager.GetType(), 28, styler);
             showSettings = SettingsButton(showSettings, styler, 28);
             PrefabUtility.RecordPrefabInstancePropertyModifications(manager as MonoBehaviour);
-
         }
 
         if (showSettings)
@@ -392,7 +393,8 @@ public class " + type.Name + @"Editor : Editor
         using (new EditorGUILayout.HorizontalScope("helpbox"))
         {
             GUILayout.Label("Save Group", GUILayout.MaxWidth(80));
-            int newValue = EditorGUILayout.Popup(data.GroupID, ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s)).ToArray());
+            int newValue = EditorGUILayout.Popup(data.GroupID,
+                ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s)).ToArray());
             if (newValue != data.GroupID)
             {
                 if (!data.AutoSync)
@@ -455,46 +457,107 @@ public class " + type.Name + @"Editor : Editor
         }
     }
 
-    public static void BuildSettingsEditor(ZSaverStyler styler, ref bool showLayersTab)
+    private static Vector2 scrollPos;
+
+    public static void BuildSettingsEditor(ZSaverStyler styler, ref int selectedMenu, ref int selectedType, float width)
     {
         IEnumerable<FieldInfo> fieldInfos = typeof(ZSaverSettings)
             .GetFields(BindingFlags.Instance | BindingFlags.Public)
             .Where(f => f.GetCustomAttribute<HideInInspector>() == null);
         SerializedObject serializedObject = new SerializedObject(styler.settings);
-        
-        
-        if (showLayersTab)
+
+        string[] toolbarNames;
+
+        if (ZSaverSettings.Instance.debugMode)
         {
-            using (new GUILayout.VerticalScope("helpbox"))
-            {
-                serializedObject.Update();
-                for (int i = 0; i < 16; i++)
-                {
-                    using (new EditorGUI.DisabledScope(i < 2))
-                    {
-                        var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
-                        prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
-                            new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
-                    }
-                }
-
-                serializedObject.ApplyModifiedProperties();
-
-            }
+            toolbarNames = new[] {"Settings", "Saving Groups", "Component Blacklist"};
         }
         else
         {
-            using (new GUILayout.VerticalScope("helpbox"))
-            {
-                foreach (var fieldInfo in fieldInfos)
+            toolbarNames = new[] {"Settings", "Saving Groups"};
+        }
+
+        selectedMenu = GUILayout.Toolbar(selectedMenu, toolbarNames);
+
+        switch (selectedMenu)
+        {
+            case 0:
+                using (new GUILayout.VerticalScope("helpbox"))
+                {
+                    foreach (var fieldInfo in fieldInfos)
+                    {
+                        serializedObject.Update();
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
+                        serializedObject.ApplyModifiedProperties();
+                    }
+                }
+
+                break;
+            case 1:
+                using (new GUILayout.VerticalScope("helpbox"))
                 {
                     serializedObject.Update();
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
+
+                    if (GUILayout.Button("Reset all Group IDs from Scene"))
+                    {
+                        ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
+
+                        foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>()
+                            .Where(o => o is ISaveGroupID))
+                        {
+                            monoBehaviour.GetType().GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance)
+                                ?.SetValue(monoBehaviour, 0);
+                            monoBehaviour.GetType().BaseType
+                                ?.GetField("groupID", BindingFlags.Instance | BindingFlags.NonPublic)
+                                ?.SetValue(monoBehaviour, 0);
+                        }
+                    }
+
+                    for (int i = 0; i < 16; i++)
+                    {
+                        using (new EditorGUI.DisabledScope(i < 2))
+                        {
+                            var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
+                            prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
+                                new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
+                        }
+                    }
+
                     serializedObject.ApplyModifiedProperties();
                 }
-            }
+
+                break;
+            case 2:
+
+                using (new GUILayout.HorizontalScope(GUILayout.Width(20)))
+                {
+                    using (new EditorGUILayout.VerticalScope("helpbox"))
+                    {
+                        foreach (var serializableComponentBlackList in ZSaverSettings.Instance.componentBlackList)
+                        {
+                            if (GUILayout.Button(serializableComponentBlackList.Type.Name))
+                            {
+                                selectedType =
+                                    ZSaverSettings.Instance.componentBlackList.IndexOf(serializableComponentBlackList);
+                            }
+                        }
+                    }
+
+                    using (var scrollView =
+                        new GUILayout.ScrollViewScope(scrollPos,new GUIStyle("helpbox"),GUILayout.Width(width-124), GUILayout.Height(21.8f * ZSaverSettings.Instance.componentBlackList.Count)))
+                    {
+                        scrollPos = scrollView.scrollPosition;
+                        foreach (var componentName in ZSaverSettings.Instance.componentBlackList[selectedType]
+                            .componentNames)
+                        {
+                            GUILayout.Label(componentName);
+                        }
+                    }
+                }
+
+                break;
         }
-        
+
         if (GUILayout.Button("Open Save file Directory"))
         {
             Process process = new Process();
@@ -506,19 +569,6 @@ public class " + type.Name + @"Editor : Editor
             process.StartInfo = startInfo;
             process.Start();
         }
-
-        if (GUILayout.Button("Reset all Group IDs from Scene"))
-        {
-            ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
-            
-            foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>().Where(o => o is ISaveGroupID))
-            {
-                monoBehaviour.GetType().GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(monoBehaviour,0);
-                monoBehaviour.GetType().BaseType?.GetField("groupID", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(monoBehaviour,0);
-            }
-        }
-
-        showLayersTab = GUILayout.Toggle(showLayersTab, "Saving Groups", new GUIStyle("button"));
     }
 
     [MenuItem("Tools/ZSave/Generate Unity Component ZSerializers")]
@@ -544,7 +594,7 @@ public class " + type.Name + @"Editor : Editor
                     // {
                     //     Debug.Log(propertyInfo.Name + " " + type + " " +  ZSave.PropertyIsSuitableForAssignment(propertyInfo) + " " + ZSaverSettings.Instance.componentBlackList.IsInBlackList(type, propertyInfo.Name));
                     // }
-                    
+
                     longScript +=
                         $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
                         ";\n";

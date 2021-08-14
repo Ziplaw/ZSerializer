@@ -34,7 +34,8 @@ namespace ZSerializer.Editor
         private const int classHeight = 32;
         private bool editMode;
         private bool initiated;
-        private bool showLayerTab;
+        private int selectedMenu;
+        private int selectedType;
         private static ZSaverStyler styler;
 
         private static Class[] classes;
@@ -44,6 +45,7 @@ namespace ZSerializer.Editor
         {
             var window = GetWindow<ZSaveManagerEditorWindow>();
             window.titleContent = new GUIContent("ZSerializer");
+            window.minSize = new Vector2(420,0);
             window.Show();
             Init();
         }
@@ -70,6 +72,7 @@ namespace ZSerializer.Editor
         }
 
         private bool stylerInitialized;
+        private Vector2 scrollPos;
 
         private void OnGUI()
         {
@@ -100,45 +103,49 @@ namespace ZSerializer.Editor
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("Refresh", GUILayout.MaxHeight(28)))
+                    if (GUILayout.Button("Refresh", GUILayout.Height(28)))
                     {
                         Init();
                     }
 
                     editMode = GUILayout.Toggle(editMode, styler.cogWheel, new GUIStyle("button"),
-                        GUILayout.MaxHeight(28), GUILayout.MaxWidth(28));
+                        GUILayout.Height(28), GUILayout.Width(28));
                 }
-
-                if (editMode)
+                
+                using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
                 {
-                    ZSaverEditor.BuildSettingsEditor(styler, ref showLayerTab);
-                }
+                    scrollPos = scrollView.scrollPosition;
 
-
-                if (classes != null && !editMode)
-                {
-                    foreach (var classInstance in classes)
+                    if (editMode)
                     {
+                        ZSaverEditor.BuildSettingsEditor(styler, ref selectedMenu, ref selectedType, position.width);
+                    }
+                    else if (classes != null)
+                    {
+                        foreach (var classInstance in classes)
+                        {
+                            using (new EditorGUILayout.HorizontalScope("helpbox"))
+                            {
+                                EditorGUILayout.LabelField(classInstance.classType.Name,
+                                    new GUIStyle("label") {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
+                                    GUILayout.Height(classHeight));
+
+                                ZSaverEditor.BuildButton(classInstance.classType, classHeight, styler);
+                            }
+                        }
+
+                        GUILayout.Space(5);
+
                         using (new EditorGUILayout.HorizontalScope("helpbox"))
                         {
-                            EditorGUILayout.LabelField(classInstance.classType.Name,
+                            EditorGUILayout.LabelField("ZSerialize All",
                                 new GUIStyle("label") {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
                                 GUILayout.Height(classHeight));
 
-                            ZSaverEditor.BuildButton(classInstance.classType, classHeight, styler);
+                            ZSaverEditor.BuildButtonAll(classes, classHeight, styler);
                         }
                     }
 
-                    GUILayout.Space(5);
-
-                    using (new EditorGUILayout.HorizontalScope("helpbox"))
-                    {
-                        EditorGUILayout.LabelField("ZSerialize All",
-                            new GUIStyle("label") {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
-                            GUILayout.Height(classHeight));
-
-                        ZSaverEditor.BuildButtonAll(classes, classHeight, styler);
-                    }
                 }
             }
         }
