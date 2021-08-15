@@ -30,7 +30,7 @@ public class PersistentGameObjectEditor : Editor
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
-        
+
         using (new EditorGUILayout.HorizontalScope("helpbox"))
         {
             GUILayout.Label("<color=#29cf42>Persistent GameObject</color>", styler.header, GUILayout.MinHeight(32));
@@ -40,7 +40,58 @@ public class PersistentGameObjectEditor : Editor
 
         if (manager.showSettings)
         {
-            ZSaverEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager,false);
+            ZSaverEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager, false);
+            if (ZSaverSettings.Instance.advancedSerialization)
+            {
+                using (new GUILayout.VerticalScope("helpbox"))
+                {
+                    GUILayout.Label("Serialized Components:");
+                    if (manager.serializedComponents.Count == 0) GUILayout.Label("None");
+                    for (var i = 0; i < manager.serializedComponents.Count; i++)
+                    {
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            serializedObject.Update();
+
+                            var component = manager.serializedComponents[i];
+                            Color fontColor = Color.cyan;
+                            switch (component.persistenceType)
+                            {
+                                case PersistentType.Everything:
+                                    fontColor = new Color(41 / 255f, 207 / 255f, 66 / 255f);
+                                    break;
+                                case PersistentType.Component:
+                                    fontColor = new Color(1f, 0.79f, 0.47f);
+                                    break;
+                                case PersistentType.None:
+                                    fontColor = new Color(1f, 0.56f, 0.54f);
+                                    break;
+                            }
+
+                            GUILayout.Label(
+                                component.Type.Name +
+                                (ZSaverSettings.Instance.debugMode ? $"({component.instanceID})" : ""),
+                                new GUIStyle("helpbox")
+                                {
+                                    font = styler.header.font, normal = new GUIStyleState() {textColor = fontColor},
+                                    alignment = TextAnchor.MiddleCenter
+                                }, GUILayout.MaxWidth(ZSaverSettings.Instance.debugMode ? 150 : 100));
+
+                            EditorGUILayout.PropertyField(serializedObject
+                                .FindProperty(nameof(manager.serializedComponents)).GetArrayElementAtIndex(i)
+                                .FindPropertyRelative("persistenceType"), GUIContent.none);
+
+                            serializedObject.ApplyModifiedProperties();
+                        }
+                    }
+
+                    if (GUILayout.Button("Reset"))
+                    {
+                        manager.serializedComponents.Clear();
+                        manager.Reset();
+                    }
+                }
+            }
         }
 
         serializedObject.ApplyModifiedProperties();

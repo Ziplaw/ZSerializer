@@ -47,6 +47,7 @@ namespace ZSerializer
         public int selectedSaveFile;
         public bool encryptData;
         public bool stableSave;
+        public bool advancedSerialization;
         [HideInInspector]
         public List<SerializableComponentBlackList> componentBlackList;
         [HideInInspector]public List<string> saveGroups = new List<string>()

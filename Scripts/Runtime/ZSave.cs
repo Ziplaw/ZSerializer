@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 [assembly: InternalsVisibleTo("com.Ziplaw.ZSaver.Editor")]
-[assembly: InternalsVisibleTo("Assembly-CSharp")]
+// [assembly: InternalsVisibleTo("Assembly-CSharp")]
 
 namespace ZSerializer
 {
@@ -87,7 +87,8 @@ namespace ZSerializer
                                             !t.IsSubclassOf(typeof(MonoBehaviour)) &&
                                             t != typeof(Transform) &&
                                             t != typeof(MonoBehaviour) &&
-                                            t.GetCustomAttribute<ObsoleteAttribute>() == null && t.IsVisible)
+                                            t.GetCustomAttribute<ObsoleteAttribute>() == null &&
+                                            t.IsVisible)
                 );
             }
         }
@@ -196,24 +197,37 @@ namespace ZSerializer
         static List<Type> GetAllPersistentComponents(IEnumerable<PersistentGameObject> objects)
         {
             var componentTypes = new List<Type>();
+            componentTypes.Add(typeof(PersistentGameObject));
 
             foreach (var persistentGameObject in objects)
             {
-                foreach (var component in persistentGameObject.GetComponents<Component>()
-                    .Where(c =>
-                        c.GetType() == typeof(PersistentGameObject) ||
-                        !c.GetType().IsSubclassOf(typeof(MonoBehaviour)) &&
-                        c.GetType() != typeof(Transform)
-                    ))
+                if (ZSaverSettings.Instance.advancedSerialization)
                 {
-                    if (!componentTypes.Contains(component.GetType()))
+                    foreach (var serializedComponent in persistentGameObject.serializedComponents)
                     {
-                        componentTypes.Add(component.GetType());
+                        if (serializedComponent.persistenceType == PersistentType.Everything)
+                        {
+                            componentTypes.Add(serializedComponent.Type);
+                        }
+                    }
+                }
+                else{
+                    foreach (var component in persistentGameObject.GetComponents<Component>()
+                        .Where(c =>
+                            c is PersistentGameObject ||
+                            !c.GetType().IsSubclassOf(typeof(MonoBehaviour)) &&
+                            c.GetType() != typeof(Transform)
+                        ))
+                    {
+                        if (!componentTypes.Contains(component.GetType()))
+                        {
+                            componentTypes.Add(component.GetType());
+                        }
                     }
                 }
             }
 
-            return componentTypes;
+            return componentTypes.Distinct().ToList();
         }
 
         //Dynamically create array of zsavers based on component
@@ -287,8 +301,6 @@ namespace ZSerializer
             var propertyInfos = componentType.GetProperties()
                 .Where(PropertyIsSuitableForAssignment);
 
-            Debug.Log(componentType + " " + propertyInfos.Any(o => o.Name == "sharedMaterials"));
-
             FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields();
 
             // int j = 0;
@@ -321,7 +333,7 @@ namespace ZSerializer
                 {
                     if (i + indexDisplace == fieldInfos.Length - 1)
                     {
-                        indexDisplace = -i-1;
+                        indexDisplace = -i - 1;
                     }
 
                     indexDisplace++;
@@ -456,7 +468,14 @@ namespace ZSerializer
         static IEnumerable<Component> GetComponentsOfGivenType(IEnumerable<PersistentGameObject> objects,
             Type componentType)
         {
-            return objects.SelectMany(o => o.GetComponents(componentType));
+            return objects.SelectMany(o => o.GetComponents(componentType)
+                .Where(c =>
+                {
+                    var selection = o.serializedComponents.FirstOrDefault(sc => sc.instanceID == c.GetInstanceID());
+
+                    return !ZSaverSettings.Instance.advancedSerialization || !selection.Equals(default(SerializedComponent)) && selection.persistenceType ==
+                        PersistentType.Everything || c is PersistentGameObject;
+                }));
         }
 
         //Saves all persistent GameObjects and all of its attached unity components
@@ -558,9 +577,30 @@ namespace ZSerializer
                 }
 
                 if (componentType == typeof(PersistentGameObject))
+                {
                     componentInGameObject = gameObject.GetComponent<PersistentGameObject>();
-                else componentInGameObject = gameObject.AddComponent(componentType);
-                if (componentInGameObject == null) Debug.LogError("wtf");
+                    var pc = (PersistentGameObject) componentInGameObject;
+
+                    CopyFieldsToFields(typeof(PersistentGameObjectZSerializer), typeof(PersistentGameObject), pc,
+                        FromJSONdObject);
+
+                    if (ZSaverSettings.Instance.advancedSerialization)
+                    {
+                        var scList = new List<SerializedComponent>(pc.serializedComponents);
+                        pc.serializedComponents.Clear();
+
+                        foreach (var serializedComponent in scList)
+                        {
+                            if (serializedComponent.persistenceType == PersistentType.Component)
+                            {
+                                pc.AddComponent(serializedComponent.Type, PersistentType.Component);
+                            }
+                        }
+                    }
+                }
+                else componentInGameObject = gameObject.GetComponent<PersistentGameObject>().AddComponent(componentType, PersistentType.Everything);
+
+                if (componentInGameObject == null) Debug.LogError("Achievement Unlocked: No idea how you caused this error");
                 componentInstanceID = componentInGameObject.GetInstanceID();
                 // temporaryInstanceIDs.Add(prevCOMPInstanceID.ToString(), componentInstanceID.ToString());
                 UpdateAllInstanceIDs(new[] {prevCOMPInstanceID.ToString()}, new[] {componentInstanceID.ToString()});
@@ -653,6 +693,7 @@ namespace ZSerializer
 
             foreach (var type in types)
             {
+                // Debug.Log(type + "first load references");
                 if (!File.Exists(GetFilePath(type.FullName + ".zsave"))) continue;
 
                 var ZSaverType = type.AssemblyQualifiedName.Contains("UnityEngine.")
@@ -676,14 +717,17 @@ namespace ZSerializer
                     // Debug.Log(componentInGameObject.GetType() + " " +
                     //           typeof(ISaveGroupID).IsAssignableFrom(componentInGameObject.GetType()));
                     // return;
-
-                    if (!typeof(ISaveGroupID).IsAssignableFrom(componentInGameObject.GetType()) &&
-                        componentInGameObject.GetComponent<PersistentGameObject>().GroupID == currentGroupID)
+                    if (!(componentInGameObject is PersistentGameObject))
                     {
-                        CopyFieldsToProperties(type, componentInGameObject, FromJSONdObjects[i]);
-                    }
 
-                    CopyFieldsToFields(ZSaverType, type, componentInGameObject, FromJSONdObjects[i]);
+                        if (!typeof(ISaveGroupID).IsAssignableFrom(componentInGameObject.GetType()) &&
+                            componentInGameObject.GetComponent<PersistentGameObject>().GroupID == currentGroupID)
+                        {
+                            CopyFieldsToProperties(type, componentInGameObject, FromJSONdObjects[i]);
+                        }
+
+                        CopyFieldsToFields(ZSaverType, type, componentInGameObject, FromJSONdObjects[i]);
+                    }
                 }
             }
 
@@ -691,9 +735,10 @@ namespace ZSerializer
 
             foreach (var type in types)
             {
-                var ZSaverType = Type.GetType(type.Name + "ZSerializer, " + mainAssembly);
-                if (ZSaverType == null) continue;
-                var fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
+                // Debug.Log(type + "second load references");
+
+                var ZSaverType = type.Assembly.GetType(type.Name + "ZSerializer");
+                MethodInfo fromJson = fromJsonMethod.MakeGenericMethod(ZSaverType);
 
                 if (!File.Exists(GetFilePath(type.FullName + ".zsave"))) continue;
 
