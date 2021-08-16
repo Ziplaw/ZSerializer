@@ -18,7 +18,7 @@ MonoBehaviour:
   selectedSaveFile: 0
   encryptData: 0
   stableSave: 1
-  advancedSerialization: 1
+  advancedSerialization: 0
   componentBlackList:
   - typeFullName: UnityEngine.LightProbeGroup, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null

@@ -11,7 +11,7 @@ using UnityEngine.Experimental.Rendering;
 using ZSerializer;
 using ZSerializer.Editor;
 using Debug = UnityEngine.Debug;
-using Object = System.Object;
+using Object = UnityEngine.Object;
 
 public static class ZSaverEditor
 {
@@ -484,12 +484,30 @@ public class " + type.Name + @"Editor : Editor
             case 0:
                 using (new GUILayout.VerticalScope("helpbox"))
                 {
+                    serializedObject.Update();
+                    
                     foreach (var fieldInfo in fieldInfos)
                     {
-                        serializedObject.Update();
+                        EditorGUI.BeginChangeCheck();
+
                         EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
-                        serializedObject.ApplyModifiedProperties();
+                        
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            if (fieldInfo.Name == "advancedSerialization")
+                            {
+                                if (!ZSaverSettings.Instance.advancedSerialization)
+                                {
+                                    foreach (var persistentGameObject in Object.FindObjectsOfType<PersistentGameObject>())
+                                    {
+                                        persistentGameObject.serializedComponents.Clear();
+                                    }
+                                }
+                            }
+                        }
                     }
+
+                    serializedObject.ApplyModifiedProperties();
                 }
 
                 break;
@@ -544,7 +562,8 @@ public class " + type.Name + @"Editor : Editor
                     }
 
                     using (var scrollView =
-                        new GUILayout.ScrollViewScope(scrollPos,new GUIStyle("helpbox"),GUILayout.Width(width-124), GUILayout.Height(21.8f * ZSaverSettings.Instance.componentBlackList.Count)))
+                        new GUILayout.ScrollViewScope(scrollPos, new GUIStyle("helpbox"), GUILayout.Width(width - 124),
+                            GUILayout.Height(21.8f * ZSaverSettings.Instance.componentBlackList.Count)))
                     {
                         scrollPos = scrollView.scrollPosition;
                         foreach (var componentName in ZSaverSettings.Instance.componentBlackList[selectedType]

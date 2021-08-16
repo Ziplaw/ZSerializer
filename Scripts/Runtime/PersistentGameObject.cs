@@ -50,7 +50,7 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
 
     private static void ComponentListChanged()
     {
-        if (Selection.activeGameObject && !Application.isPlaying)
+        if (ZSaverSettings.Instance.advancedSerialization && Selection.activeGameObject && !Application.isPlaying)
         {
             PersistentGameObject persistentGameObject = Selection.activeGameObject.GetComponent<PersistentGameObject>();
             if (persistentGameObject)
@@ -83,10 +83,13 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
 
     public void Reset()
     {
-        foreach (var component in GetComponents<Component>().Where(c =>
-            !(c is PersistentGameObject) && ZSave.ComponentSerializableTypes.Contains(c.GetType())))
+        if (ZSaverSettings.Instance.advancedSerialization)
         {
-            serializedComponents.Add(new SerializedComponent(component, PersistentType.Everything));
+            foreach (var component in GetComponents<Component>().Where(c =>
+                !(c is PersistentGameObject) && ZSave.ComponentSerializableTypes.Contains(c.GetType())))
+            {
+                serializedComponents.Add(new SerializedComponent(component, PersistentType.Everything));
+            }
         }
     }
 

@@ -197,7 +197,9 @@ namespace ZSerializer
         static List<Type> GetAllPersistentComponents(IEnumerable<PersistentGameObject> objects)
         {
             var componentTypes = new List<Type>();
-            componentTypes.Add(typeof(PersistentGameObject));
+            
+            if(Object.FindObjectOfType<PersistentGameObject>())
+                componentTypes.Add(typeof(PersistentGameObject));
 
             foreach (var persistentGameObject in objects)
             {
