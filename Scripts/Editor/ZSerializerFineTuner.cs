@@ -34,6 +34,25 @@ namespace ZSerializer.Editor
             searchTypes = "";
             searchComponents = "";
         }
+        
+        Dictionary<string,string> aliases = new Dictionary<string, string>()
+        {
+            {"Object", "object"},  
+            {"String", "string"},  
+            {"Boolean", "bool"},    
+            {"Byte", "byte"},    
+            {"SByte", "sbyte"},   
+            {"Int16", "short"},   
+            {"UInt16", "ushort"},  
+            {"Int32", "int"},     
+            {"UInt32", "uint"},    
+            {"Int64", "long"},    
+            {"UInt64", "ulong"},   
+            {"Single", "float"},   
+            {"Double", "double"},  
+            {"Decimal", "decimal"}, 
+            {"Char", "char"} 
+        };
 
         private void OnGUI()
         {
@@ -83,7 +102,14 @@ namespace ZSerializer.Editor
 
                                         var prev = isWhiteListed;
 
-                                        isWhiteListed = GUILayout.Toggle(isWhiteListed, propertyInfo.Name);
+                                        Color classOrStruct = new Color(0f, 0.79f, 0.69f);
+                                        Color nativeTypes = new Color(0f, 0.55f, 0.85f);
+                                        
+                                        string propertyName = aliases.ContainsKey(propertyInfo.PropertyType.Name) ? aliases[propertyInfo.PropertyType.Name]:propertyInfo.PropertyType.Name;
+                                        
+                                        isWhiteListed = GUILayout.Toggle(isWhiteListed,GUIContent.none, GUILayout.Width(15));
+                                        GUILayout.Label(propertyName,new GUIStyle("label"){normal = new GUIStyleState(){textColor = aliases.ContainsKey(propertyInfo.PropertyType.Name) ? nativeTypes : classOrStruct}}, GUILayout.Width(propertyName.Length*10));
+                                        GUILayout.Label(propertyInfo.Name);
 
                                         if (isWhiteListed != prev)
                                         {
