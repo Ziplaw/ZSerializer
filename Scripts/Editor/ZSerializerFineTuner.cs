@@ -78,7 +78,7 @@ namespace ZSerializer.Editor
                 }
 
 
-                using (var scope = new EditorGUILayout.VerticalScope(GUILayout.Height(position.height - 5)))
+                using (new EditorGUILayout.VerticalScope(GUILayout.Height(position.height - 5)))
                 {
                     using (new EditorGUILayout.VerticalScope("helpbox", GUILayout.Height(position.height - 5)))
                     {
@@ -88,6 +88,9 @@ namespace ZSerializer.Editor
                             using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPosComponentProps))
                             {
                                 scrollPosComponentProps = scrollView.scrollPosition;
+                                
+                                int longestPropertyName = selectedType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                    .Where(PropertyIsSuitableForAssignmentNoBlackList).Max(p => p.PropertyType.Name.Length);
 
 
 
@@ -108,7 +111,7 @@ namespace ZSerializer.Editor
                                         string propertyName = aliases.ContainsKey(propertyInfo.PropertyType.Name) ? aliases[propertyInfo.PropertyType.Name]:propertyInfo.PropertyType.Name;
                                         
                                         isWhiteListed = GUILayout.Toggle(isWhiteListed,GUIContent.none, GUILayout.Width(15));
-                                        GUILayout.Label(propertyName,new GUIStyle("label"){normal = new GUIStyleState(){textColor = aliases.ContainsKey(propertyInfo.PropertyType.Name) ? nativeTypes : classOrStruct}}, GUILayout.Width(propertyName.Length*10));
+                                        GUILayout.Label(propertyName,new GUIStyle("label"){normal = new GUIStyleState(){textColor = aliases.ContainsKey(propertyInfo.PropertyType.Name) ? nativeTypes : classOrStruct}}, GUILayout.Width(longestPropertyName * 7));
                                         GUILayout.Label(propertyInfo.Name);
 
                                         if (isWhiteListed != prev)
