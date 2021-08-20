@@ -371,9 +371,13 @@ public class " + type.Name + @"Editor : Editor
     {
         // Texture2D cogwheel = styler.cogWheel;
 
-        using (new GUILayout.HorizontalScope("helpbox"))
+        GUILayout.Space(-15);
+        using (new GUILayout.HorizontalScope(styler.window))
         {
-            GUILayout.Label("Persistent Component",
+            var state = GetClassState(manager.GetType());
+            string color = state == ClassState.Valid ? "29cf42" : state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
+            
+            GUILayout.Label($"<color=#{color}>  Persistent Component</color>",
                 styler.header, GUILayout.Height(28));
             // using (new EditorGUI.DisabledScope(GetClassState(manager.GetType()) != ClassState.Valid))
             //     editMode = GUILayout.Toggle(editMode, cogwheel, new GUIStyle("button"), GUILayout.MaxWidth(28),

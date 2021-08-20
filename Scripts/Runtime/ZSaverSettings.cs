@@ -40,7 +40,7 @@ namespace ZSerializer
 
         
         // TODO: uncomment this before every commit
-        [HideInInspector]
+        // [HideInInspector]
         public bool packageInitialized;
         public bool debugMode;
         public bool autoRebuildZSerializers;

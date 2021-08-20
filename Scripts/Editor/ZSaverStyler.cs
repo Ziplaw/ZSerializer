@@ -18,6 +18,17 @@ public class ZSaverStyler
 
     public GUIStyle header;
 
+    public GUIStyle window
+    {
+        get
+        {
+            var style = new GUIStyle("window");
+            style.overflow = new RectOffset(style.overflow.left, style.overflow.right, style.overflow.top - 19,
+                style.overflow.bottom);
+            return style;
+        }
+    }
+
     public void GetEveryResource()
     {
         notMadeImage = Resources.Load<Texture2D>("not_made");
@@ -26,13 +37,13 @@ public class ZSaverStyler
         cogWheel = Resources.Load<Texture2D>("cog");
         refreshImage = Resources.Load<Texture2D>("Refresh");
 
-        mainFont = Resources.Load<Font>("Comfortaa");
+        mainFont = Resources.Load<Font>("FugazOne");
         settings = Resources.Load<ZSaverSettings>("ZSaverSettings");
 
         header = new GUIStyle()
         {
-            alignment = TextAnchor.MiddleCenter,
-            fontSize = 15,
+            // alignment = TextAnchor.MiddleCenter,
+            fontSize = 20, // 15 for comfortaa
             richText = true,
             font = mainFont
         };

@@ -45,7 +45,6 @@ namespace ZSerializer.Editor
         {
             var window = GetWindow<ZSaveManagerEditorWindow>();
             window.titleContent = new GUIContent("ZSerializer");
-            window.minSize = new Vector2(420,0);
             window.Show();
             Init();
         }
@@ -55,6 +54,7 @@ namespace ZSerializer.Editor
         {
             if (ZSaverSettings.Instance && ZSaverSettings.Instance.packageInitialized)
             {
+                GetWindow<ZSaveManagerEditorWindow>().minSize = new Vector2(420,400);
 
                 styler = new ZSaverStyler();
 
@@ -124,10 +124,13 @@ namespace ZSerializer.Editor
                     {
                         foreach (var classInstance in classes)
                         {
-                            using (new EditorGUILayout.HorizontalScope("helpbox"))
+                            GUILayout.Space(-15);
+                            using (new EditorGUILayout.HorizontalScope(styler.window, GUILayout.Height(32)))
                             {
-                                EditorGUILayout.LabelField(classInstance.classType.Name,
-                                    new GUIStyle("label") {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
+                                new Color(0.16f, 0.81f, 0.26f, 0.5f);
+                                string color = classInstance.state == ClassState.Valid ? "29CF42" : classInstance.state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
+                                EditorGUILayout.LabelField($"<color=#{color}>{classInstance.classType.Name}</color>",
+                                    new GUIStyle(styler.header) {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
                                     GUILayout.Height(classHeight));
 
                                 ZSaverEditor.BuildButton(classInstance.classType, classHeight, styler);
@@ -136,14 +139,18 @@ namespace ZSerializer.Editor
 
                         GUILayout.Space(5);
 
-                        using (new EditorGUILayout.HorizontalScope("helpbox"))
+                        GUILayout.Space(-15);
+                        using (new EditorGUILayout.HorizontalScope(styler.window, GUILayout.Height(32)))
                         {
                             EditorGUILayout.LabelField("ZSerialize All",
-                                new GUIStyle("label") {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
+                                new GUIStyle(styler.header) {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
                                 GUILayout.Height(classHeight));
 
                             ZSaverEditor.BuildButtonAll(classes, classHeight, styler);
                         }
+                        
+                        GUILayout.Space(15);
+
                     }
 
                 }

@@ -31,9 +31,10 @@ public class PersistentGameObjectEditor : Editor
     {
         serializedObject.Update();
 
-        using (new EditorGUILayout.HorizontalScope("helpbox"))
+        GUILayout.Space(-15);
+        using (new EditorGUILayout.HorizontalScope(styler.window))
         {
-            GUILayout.Label("<color=#29cf42>Persistent GameObject</color>", styler.header, GUILayout.MinHeight(32));
+            GUILayout.Label("<color=#29cf42>  Persistent GameObject</color>", styler.header, GUILayout.MinHeight(32));
             manager.showSettings = ZSaverEditor.SettingsButton(manager.showSettings, styler, 32);
             PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
         }
