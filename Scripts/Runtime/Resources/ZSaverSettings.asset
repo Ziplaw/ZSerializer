@@ -12,99 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1efd7af9bd4fdc48a69c60405eb42f4, type: 3}
   m_Name: ZSaverSettings
   m_EditorClassIdentifier: 
-  packageInitialized: 1
+  packageInitialized: 0
   debugMode: 1
   autoRebuildZSerializers: 0
   selectedSaveFile: 0
   encryptData: 0
   stableSave: 1
   advancedSerialization: 1
-  componentBlackList:
-  - typeFullName: UnityEngine.LightProbeGroup, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - dering
-  - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-    componentNames:
-    - shadowRadius
-    - shadowAngle
-    - areaSize
-    - lightmapBakeType
-  - typeFullName: UnityEngine.Terrain, UnityEngine.TerrainModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - bakeLightProbesForTrees
-    - deringLightProbesForTrees
-  - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - additionalVertexStreams
-    - enlightenVertexStream
-    - scaleInLightmap
-    - receiveGI
-    - stitchLightmapSeams
-    - enabled
-    - shadowCastingMode
-    - receiveShadows
-    - forceRenderingOff
-    - motionVectorGenerationMode
-    - lightProbeUsage
-    - reflectionProbeUsage
-    - renderingLayerMask
-    - rendererPriority
-    - rayTracingMode
-    - sortingLayerName
-    - sortingLayerID
-    - sortingOrder
-    - allowOcclusionWhenDynamic
-    - lightProbeProxyVolumeOverride
-    - probeAnchor
-    - lightmapIndex
-    - realtimeLightmapIndex
-    - lightmapScaleOffset
-    - realtimeLightmapScaleOffset
-    - hideFlags
-  - typeFullName: UnityEngine.TrailRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - time
-    - startWidth
-    - endWidth
-    - widthMultiplier
-    - autodestruct
-    - emitting
-    - numCornerVertices
-    - numCapVertices
-    - minVertexDistance
-    - startColor
-    - endColor
-    - shadowBias
-    - generateLightingData
-    - textureMode
-    - alignment
-    - colorGradient
-    - enabled
-    - shadowCastingMode
-    - receiveShadows
-    - forceRenderingOff
-    - motionVectorGenerationMode
-    - lightProbeUsage
-    - reflectionProbeUsage
-    - renderingLayerMask
-    - rendererPriority
-    - rayTracingMode
-    - sortingLayerName
-    - sortingLayerID
-    - sortingOrder
-    - allowOcclusionWhenDynamic
-    - lightProbeProxyVolumeOverride
-    - probeAnchor
-    - lightmapIndex
-    - realtimeLightmapIndex
-    - lightmapScaleOffset
-    - realtimeLightmapScaleOffset
-    - hideFlags
+  componentBlackList: []
   saveGroups:
   - Main
   - Settings

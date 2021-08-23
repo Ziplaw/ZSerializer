@@ -519,15 +519,40 @@ public class " + type.Name + @"Editor : Editor
                         }
 
                         serializedObject.ApplyModifiedProperties();
+                        
+                        if (GUILayout.Button("Open Save file Directory"))
+                        {
+                            Process process = new Process();
+                            ProcessStartInfo startInfo = new ProcessStartInfo();
+                            startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                            startInfo.FileName = "cmd.exe";
+                            string _path = Application.persistentDataPath;
+                            startInfo.Arguments = $"/C start {_path}";
+                            process.StartInfo = startInfo;
+                            process.Start();
+                        }
                     }
+                    
+                    
+                    
 
                     break;
                 case 1:
                     GUILayout.Space(-15);
-                    using (new GUILayout.VerticalScope(ZSaverStyler.window))
+                    using (new GUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
                     {
                         serializedObject.Update();
 
+                        for (int i = 0; i < 16; i++)
+                        {
+                            using (new EditorGUI.DisabledScope(i < 2))
+                            {
+                                var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
+                                prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
+                                    new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
+                            }
+                        }
+                        
                         if (GUILayout.Button("Reset all Group IDs from Scene"))
                         {
                             ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
@@ -544,78 +569,79 @@ public class " + type.Name + @"Editor : Editor
                             }
                         }
 
-                        for (int i = 0; i < 16; i++)
-                        {
-                            using (new EditorGUI.DisabledScope(i < 2))
-                            {
-                                var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
-                                prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
-                                    new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
-                            }
-                        }
-
                         serializedObject.ApplyModifiedProperties();
                     }
 
                     break;
                 case 2:
-
-                    using (new GUILayout.HorizontalScope(GUILayout.Width(20)))
+                    if (ZSaverSettings.Instance
+                        .componentBlackList.Count > 0)
                     {
-                        using (new EditorGUILayout.VerticalScope())
+
+                        using (new GUILayout.HorizontalScope(GUILayout.Width(1)))
                         {
-                            GUILayout.Space(-15);
-                            using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
+                            using (new EditorGUILayout.VerticalScope())
                             {
-                                foreach (var serializableComponentBlackList in ZSaverSettings.Instance
-                                    .componentBlackList)
+                                GUILayout.Space(-15);
+                                using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1), GUILayout.Height(Mathf.Max(88, 20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
                                 {
-                                    if (GUILayout.Button(serializableComponentBlackList.Type.Name))
+                                    foreach (var serializableComponentBlackList in ZSaverSettings.Instance
+                                        .componentBlackList)
                                     {
-                                        selectedType =
-                                            ZSaverSettings.Instance.componentBlackList.IndexOf(
-                                                serializableComponentBlackList);
+                                        if (GUILayout.Button(serializableComponentBlackList.Type.Name,GUILayout.Width(150)))
+                                        {
+                                            selectedType =
+                                                ZSaverSettings.Instance.componentBlackList.IndexOf(
+                                                    serializableComponentBlackList);
+                                        }
                                     }
                                 }
                             }
+
+
+                            using (new EditorGUILayout.VerticalScope())
+                            {
+                                GUILayout.Space(-15);
+                                using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
+                                {
+                                    using (var scrollView =
+                                        new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
+                                            GUILayout.Width(width - 196),
+                                            GUILayout.Height(Mathf.Max(61.8f, 20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
+                                    {
+                                        scrollPos = scrollView.scrollPosition;
+                                        Debug.Log(selectedType);
+                                        foreach (var componentName in ZSaverSettings.Instance
+                                            .componentBlackList[selectedType]
+                                            .componentNames)
+                                        {
+                                            GUILayout.Label(componentName);
+                                        }
+
+                                    }
+                                }
+                            }
+
+
                         }
 
-
-                        using (new EditorGUILayout.VerticalScope())
+                        if (GUILayout.Button("Delete Blacklist"))
                         {
-                            GUILayout.Space(-15);
-                            using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
-                            {
-                                using (var scrollView =
-                                    new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
-                                        GUILayout.Width(width - 151),
-                                        GUILayout.Height(20.6f * ZSaverSettings.Instance.componentBlackList.Count)))
-                                {
-                                    scrollPos = scrollView.scrollPosition;
-                                    foreach (var componentName in ZSaverSettings.Instance
-                                        .componentBlackList[selectedType]
-                                        .componentNames)
-                                    {
-                                        GUILayout.Label(componentName);
-                                    }
-                                }
-                            }
+                            ZSaverSettings.Instance.componentBlackList = new List<SerializableComponentBlackList>();
+                            selectedType = 0;
+                        }
+                    }
+                    else
+                    {
+                        GUILayout.Label("The Component Blacklist is Empty.", new GUIStyle("label"){alignment = TextAnchor.MiddleCenter});
+                        if (GUILayout.Button("Open Fine Tuner"))
+                        {
+                            ZSerializerFineTuner.ShowWindow();
                         }
                     }
 
                     break;
                 
-            }
-            if (GUILayout.Button("Open Save file Directory"))
-            {
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                startInfo.FileName = "cmd.exe";
-                string _path = Application.persistentDataPath;
-                startInfo.Arguments = $"/C start {_path}";
-                process.StartInfo = startInfo;
-                process.Start();
             }
         }
 
