@@ -18,7 +18,7 @@ public class ZSaverStyler
 
     public GUIStyle header;
 
-    public GUIStyle window
+    public static GUIStyle window
     {
         get
         {

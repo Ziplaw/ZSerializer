@@ -372,11 +372,12 @@ public class " + type.Name + @"Editor : Editor
         // Texture2D cogwheel = styler.cogWheel;
 
         GUILayout.Space(-15);
-        using (new GUILayout.HorizontalScope(styler.window))
+        using (new GUILayout.HorizontalScope(ZSaverStyler.window))
         {
             var state = GetClassState(manager.GetType());
-            string color = state == ClassState.Valid ? "29cf42" : state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
-            
+            string color = state == ClassState.Valid ? "29cf42" :
+                state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
+
             GUILayout.Label($"<color=#{color}>  Persistent Component</color>",
                 styler.header, GUILayout.Height(28));
             // using (new EditorGUI.DisabledScope(GetClassState(manager.GetType()) != ClassState.Valid))
@@ -394,7 +395,8 @@ public class " + type.Name + @"Editor : Editor
 
     public static void ShowGroupIDSettings(Type type, ISaveGroupID data, bool canAutoSync)
     {
-        using (new EditorGUILayout.HorizontalScope("helpbox"))
+        GUILayout.Space(-15);
+        using (new EditorGUILayout.HorizontalScope(ZSaverStyler.window))
         {
             GUILayout.Label("Save Group", GUILayout.MaxWidth(80));
             int newValue = EditorGUILayout.Popup(data.GroupID,
@@ -481,117 +483,143 @@ public class " + type.Name + @"Editor : Editor
             toolbarNames = new[] {"Settings", "Saving Groups"};
         }
 
-        selectedMenu = GUILayout.Toolbar(selectedMenu, toolbarNames);
-
-        switch (selectedMenu)
+        using (new GUILayout.VerticalScope("box"))
         {
-            case 0:
-                using (new GUILayout.VerticalScope("helpbox"))
-                {
-                    serializedObject.Update();
-                    
-                    foreach (var fieldInfo in fieldInfos)
-                    {
-                        EditorGUI.BeginChangeCheck();
+            selectedMenu = GUILayout.Toolbar(selectedMenu, toolbarNames);
 
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
-                        
-                        if (EditorGUI.EndChangeCheck())
+            switch (selectedMenu)
+            {
+                case 0:
+
+                    GUILayout.Space(-15);
+                    using (new GUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
+                    {
+                        serializedObject.Update();
+
+                        foreach (var fieldInfo in fieldInfos)
                         {
-                            if (fieldInfo.Name == "advancedSerialization")
+                            EditorGUI.BeginChangeCheck();
+
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
+
+                            if (EditorGUI.EndChangeCheck())
                             {
-                                if (!ZSaverSettings.Instance.advancedSerialization)
+                                if (fieldInfo.Name == "advancedSerialization")
                                 {
-                                    foreach (var persistentGameObject in Object.FindObjectsOfType<PersistentGameObject>())
+                                    if (!ZSaverSettings.Instance.advancedSerialization)
                                     {
-                                        persistentGameObject.serializedComponents.Clear();
+                                        foreach (var persistentGameObject in Object
+                                            .FindObjectsOfType<PersistentGameObject>())
+                                        {
+                                            persistentGameObject.serializedComponents.Clear();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        serializedObject.ApplyModifiedProperties();
+                    }
+
+                    break;
+                case 1:
+                    GUILayout.Space(-15);
+                    using (new GUILayout.VerticalScope(ZSaverStyler.window))
+                    {
+                        serializedObject.Update();
+
+                        if (GUILayout.Button("Reset all Group IDs from Scene"))
+                        {
+                            ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
+
+                            foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>()
+                                .Where(o => o is ISaveGroupID))
+                            {
+                                monoBehaviour.GetType().GetField("groupID",
+                                        BindingFlags.NonPublic | BindingFlags.Instance)
+                                    ?.SetValue(monoBehaviour, 0);
+                                monoBehaviour.GetType().BaseType
+                                    ?.GetField("groupID", BindingFlags.Instance | BindingFlags.NonPublic)
+                                    ?.SetValue(monoBehaviour, 0);
+                            }
+                        }
+
+                        for (int i = 0; i < 16; i++)
+                        {
+                            using (new EditorGUI.DisabledScope(i < 2))
+                            {
+                                var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
+                                prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
+                                    new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
+                            }
+                        }
+
+                        serializedObject.ApplyModifiedProperties();
+                    }
+
+                    break;
+                case 2:
+
+                    using (new GUILayout.HorizontalScope(GUILayout.Width(20)))
+                    {
+                        using (new EditorGUILayout.VerticalScope())
+                        {
+                            GUILayout.Space(-15);
+                            using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
+                            {
+                                foreach (var serializableComponentBlackList in ZSaverSettings.Instance
+                                    .componentBlackList)
+                                {
+                                    if (GUILayout.Button(serializableComponentBlackList.Type.Name))
+                                    {
+                                        selectedType =
+                                            ZSaverSettings.Instance.componentBlackList.IndexOf(
+                                                serializableComponentBlackList);
+                                    }
+                                }
+                            }
+                        }
+
+
+                        using (new EditorGUILayout.VerticalScope())
+                        {
+                            GUILayout.Space(-15);
+                            using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
+                            {
+                                using (var scrollView =
+                                    new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
+                                        GUILayout.Width(width - 151),
+                                        GUILayout.Height(20.6f * ZSaverSettings.Instance.componentBlackList.Count)))
+                                {
+                                    scrollPos = scrollView.scrollPosition;
+                                    foreach (var componentName in ZSaverSettings.Instance
+                                        .componentBlackList[selectedType]
+                                        .componentNames)
+                                    {
+                                        GUILayout.Label(componentName);
                                     }
                                 }
                             }
                         }
                     }
 
-                    serializedObject.ApplyModifiedProperties();
-                }
-
-                break;
-            case 1:
-                using (new GUILayout.VerticalScope("helpbox"))
-                {
-                    serializedObject.Update();
-
-                    if (GUILayout.Button("Reset all Group IDs from Scene"))
-                    {
-                        ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
-
-                        foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>()
-                            .Where(o => o is ISaveGroupID))
-                        {
-                            monoBehaviour.GetType().GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance)
-                                ?.SetValue(monoBehaviour, 0);
-                            monoBehaviour.GetType().BaseType
-                                ?.GetField("groupID", BindingFlags.Instance | BindingFlags.NonPublic)
-                                ?.SetValue(monoBehaviour, 0);
-                        }
-                    }
-
-                    for (int i = 0; i < 16; i++)
-                    {
-                        using (new EditorGUI.DisabledScope(i < 2))
-                        {
-                            var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
-                            prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
-                                new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
-                        }
-                    }
-
-                    serializedObject.ApplyModifiedProperties();
-                }
-
-                break;
-            case 2:
-
-                using (new GUILayout.HorizontalScope(GUILayout.Width(20)))
-                {
-                    using (new EditorGUILayout.VerticalScope("helpbox"))
-                    {
-                        foreach (var serializableComponentBlackList in ZSaverSettings.Instance.componentBlackList)
-                        {
-                            if (GUILayout.Button(serializableComponentBlackList.Type.Name))
-                            {
-                                selectedType =
-                                    ZSaverSettings.Instance.componentBlackList.IndexOf(serializableComponentBlackList);
-                            }
-                        }
-                    }
-
-                    using (var scrollView =
-                        new GUILayout.ScrollViewScope(scrollPos, new GUIStyle("helpbox"), GUILayout.Width(width - 124),
-                            GUILayout.Height(21.8f * ZSaverSettings.Instance.componentBlackList.Count)))
-                    {
-                        scrollPos = scrollView.scrollPosition;
-                        foreach (var componentName in ZSaverSettings.Instance.componentBlackList[selectedType]
-                            .componentNames)
-                        {
-                            GUILayout.Label(componentName);
-                        }
-                    }
-                }
-
-                break;
+                    break;
+                
+            }
+            if (GUILayout.Button("Open Save file Directory"))
+            {
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                startInfo.FileName = "cmd.exe";
+                string _path = Application.persistentDataPath;
+                startInfo.Arguments = $"/C start {_path}";
+                process.StartInfo = startInfo;
+                process.Start();
+            }
         }
 
-        if (GUILayout.Button("Open Save file Directory"))
-        {
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.WindowStyle = ProcessWindowStyle.Normal;
-            startInfo.FileName = "cmd.exe";
-            string _path = Application.persistentDataPath;
-            startInfo.Arguments = $"/C start {_path}";
-            process.StartInfo = startInfo;
-            process.Start();
-        }
+        
     }
 
     [MenuItem("Tools/ZSave/Generate Unity Component ZSerializers")]

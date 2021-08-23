@@ -54,7 +54,7 @@ namespace ZSerializer.Editor
         {
             if (ZSaverSettings.Instance && ZSaverSettings.Instance.packageInitialized)
             {
-                GetWindow<ZSaveManagerEditorWindow>().minSize = new Vector2(420,400);
+                GetWindow<ZSaveManagerEditorWindow>().minSize = new Vector2(480,400);
 
                 styler = new ZSaverStyler();
 
@@ -101,58 +101,65 @@ namespace ZSerializer.Editor
             else
             {
 
-                using (new EditorGUILayout.HorizontalScope())
+                using (new GUILayout.VerticalScope("box"))
                 {
-                    if (GUILayout.Button("Refresh", GUILayout.Height(28)))
+                    using (new EditorGUILayout.HorizontalScope())
                     {
-                        Init();
-                    }
-
-                    editMode = GUILayout.Toggle(editMode, styler.cogWheel, new GUIStyle("button"),
-                        GUILayout.Height(28), GUILayout.Width(28));
-                }
-                
-                using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
-                {
-                    scrollPos = scrollView.scrollPosition;
-
-                    if (editMode)
-                    {
-                        ZSaverEditor.BuildSettingsEditor(styler, ref selectedMenu, ref selectedType, position.width);
-                    }
-                    else if (classes != null)
-                    {
-                        foreach (var classInstance in classes)
+                        if (GUILayout.Button("Refresh", GUILayout.Height(28)))
                         {
-                            GUILayout.Space(-15);
-                            using (new EditorGUILayout.HorizontalScope(styler.window, GUILayout.Height(32)))
+                            Init();
+                        }
+
+                        editMode = GUILayout.Toggle(editMode, styler.cogWheel, new GUIStyle("button"),
+                            GUILayout.Height(28), GUILayout.Width(28));
+                    }
+
+                    using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
+                    {
+                        scrollPos = scrollView.scrollPosition;
+
+                        if (editMode)
+                        {
+                            ZSaverEditor.BuildSettingsEditor(styler, ref selectedMenu, ref selectedType,
+                                position.width);
+                        }
+                        else if (classes != null)
+                        {
+                            foreach (var classInstance in classes)
                             {
-                                new Color(0.16f, 0.81f, 0.26f, 0.5f);
-                                string color = classInstance.state == ClassState.Valid ? "29CF42" : classInstance.state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
-                                EditorGUILayout.LabelField($"<color=#{color}>{classInstance.classType.Name}</color>",
-                                    new GUIStyle(styler.header) {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
+                                GUILayout.Space(-15);
+                                using (new EditorGUILayout.HorizontalScope(ZSaverStyler.window, GUILayout.Height(32)))
+                                {
+                                    string color = classInstance.state == ClassState.Valid ? "29CF42" :
+                                        classInstance.state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
+                                    EditorGUILayout.LabelField(
+                                        $"<color=#{color}>{classInstance.classType.Name}</color>",
+                                        new GUIStyle(styler.header)
+                                            {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
+                                        GUILayout.Height(classHeight));
+
+                                    ZSaverEditor.BuildButton(classInstance.classType, classHeight, styler);
+                                }
+                            }
+
+                            GUILayout.Space(5);
+
+                            GUILayout.Space(-15);
+                            using (new EditorGUILayout.HorizontalScope(ZSaverStyler.window, GUILayout.Height(32)))
+                            {
+                                EditorGUILayout.LabelField("ZSerialize All",
+                                    new GUIStyle(styler.header)
+                                        {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
                                     GUILayout.Height(classHeight));
 
-                                ZSaverEditor.BuildButton(classInstance.classType, classHeight, styler);
+                                ZSaverEditor.BuildButtonAll(classes, classHeight, styler);
                             }
+
+                            GUILayout.Space(15);
+
                         }
-
-                        GUILayout.Space(5);
-
-                        GUILayout.Space(-15);
-                        using (new EditorGUILayout.HorizontalScope(styler.window, GUILayout.Height(32)))
-                        {
-                            EditorGUILayout.LabelField("ZSerialize All",
-                                new GUIStyle(styler.header) {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
-                                GUILayout.Height(classHeight));
-
-                            ZSaverEditor.BuildButtonAll(classes, classHeight, styler);
-                        }
-                        
-                        GUILayout.Space(15);
 
                     }
-
                 }
             }
         }

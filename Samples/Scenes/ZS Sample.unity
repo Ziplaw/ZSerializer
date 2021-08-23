@@ -692,19 +692,19 @@ MonoBehaviour:
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
-    instanceID: 16886
+    instanceID: 16938
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
-    instanceID: 16884
+    instanceID: 16936
   - typeFullName: UnityEngine.SphereCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
-    instanceID: 16882
+    instanceID: 16934
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
-    instanceID: 16892
+    instanceID: 16944
 --- !u!1 &608016568
 GameObject:
   m_ObjectHideFlags: 0

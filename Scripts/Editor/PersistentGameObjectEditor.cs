@@ -32,10 +32,10 @@ public class PersistentGameObjectEditor : Editor
         serializedObject.Update();
 
         GUILayout.Space(-15);
-        using (new EditorGUILayout.HorizontalScope(styler.window))
+        using (new EditorGUILayout.HorizontalScope(ZSaverStyler.window))
         {
-            GUILayout.Label("<color=#29cf42>  Persistent GameObject</color>", styler.header, GUILayout.MinHeight(32));
-            manager.showSettings = ZSaverEditor.SettingsButton(manager.showSettings, styler, 32);
+            GUILayout.Label("<color=#29cf42>  Persistent GameObject</color>", styler.header, GUILayout.MinHeight(28));
+            manager.showSettings = ZSaverEditor.SettingsButton(manager.showSettings, styler, 28);
             PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
         }
 
@@ -44,7 +44,8 @@ public class PersistentGameObjectEditor : Editor
             ZSaverEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager, false);
             if (ZSaverSettings.Instance.advancedSerialization)
             {
-                using (new GUILayout.VerticalScope("helpbox"))
+                GUILayout.Space(-15);
+                using (new GUILayout.VerticalScope(ZSaverStyler.window))
                 {
                     GUILayout.Label("Serialized Components:");
                     if (manager.serializedComponents.Count == 0) GUILayout.Label("None");
