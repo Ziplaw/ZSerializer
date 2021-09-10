@@ -1,4 +1,4 @@
-# ZSaver
+# ZSerializer
 ZSaver is an easy, all-in-one Serialization solution for Unity. It supports serialization for every one of Unity's built in Components, and an easy way of Serializing your own!
 ## Installation
 To get started, simply [right click me and select "Copy this link address"](https://github.com/Ziplaw/ZSave.git), go into the **Package Manager**, click on the **+** icon and select "Add package from git URL..."
