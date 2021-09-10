@@ -25,6 +25,6 @@ public class PinEditor : Editor
     {
         if(manager is PersistentMonoBehaviour)
             ZSaverEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings, ZSaverEditor.ShowGroupIDSettings);
-        base.OnInspectorGUI();
+        if(!manager.showSettings) base.OnInspectorGUI();
     }
 }

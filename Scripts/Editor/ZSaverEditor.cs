@@ -180,7 +180,7 @@ public static class ZSaverEditor
     {
         if (typesImplementingCustomEditor.Contains(type))
         {
-            Debug.Log($"{type} already implements a Custom Editor, and another one won´t be created");
+            Debug.Log($"{type} already implements a Custom Editor, and another one won't be created");
             return;
         }
 
@@ -212,7 +212,7 @@ public class " + type.Name + @"Editor : Editor
     {
         if(manager is PersistentMonoBehaviour)
             ZSaverEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings, ZSaverEditor.ShowGroupIDSettings);
-        base.OnInspectorGUI();
+        if(!manager.showSettings) base.OnInspectorGUI();
     }
 }";
 
@@ -390,7 +390,53 @@ public class " + type.Name + @"Editor : Editor
         }
 
         if (showSettings)
+        {
             toggleOn?.Invoke(typeof(PersistentMonoBehaviour), manager, true);
+
+            SerializedObject serializedObject = new SerializedObject(manager as MonoBehaviour);
+            serializedObject.Update();
+
+            foreach (var field in typeof(T).GetFields().Where(f => f.DeclaringType != typeof(PersistentMonoBehaviour)))
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    string color = field.GetCustomAttribute<NonZSerialized>() == null ? "29cf42" : "FFFFFF";
+                    GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
+                        new GUIStyle("label") {richText = true}, GUILayout.Width(EditorGUIUtility.currentViewWidth/3f));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty(field.Name), GUIContent.none);
+                }
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
+    }
+
+    public static string FieldNameToInspectorName(this string value)
+    {
+        var charArray = value.ToCharArray();
+
+        List<char> chars = new List<char>();
+
+        for (int i = 0; i < charArray.Length; i++)
+        {
+            if (i == 0)
+            {
+                chars.Add(Char.ToUpper(charArray[i]));
+                continue;
+            }
+
+            if (Char.IsUpper(charArray[i]))
+            {
+                chars.Add(' ');
+                chars.Add(Char.ToUpper(charArray[i]));
+            }
+            else
+            {
+                chars.Add(charArray[i]);
+            }
+        }
+
+        return new string(chars.ToArray());
     }
 
     public static void ShowGroupIDSettings(Type type, ISaveGroupID data, bool canAutoSync)
@@ -519,7 +565,7 @@ public class " + type.Name + @"Editor : Editor
                         }
 
                         serializedObject.ApplyModifiedProperties();
-                        
+
                         if (GUILayout.Button("Open Save file Directory"))
                         {
                             Process process = new Process();
@@ -532,9 +578,7 @@ public class " + type.Name + @"Editor : Editor
                             process.Start();
                         }
                     }
-                    
-                    
-                    
+
 
                     break;
                 case 1:
@@ -552,7 +596,7 @@ public class " + type.Name + @"Editor : Editor
                                     new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
                             }
                         }
-                        
+
                         if (GUILayout.Button("Reset all Group IDs from Scene"))
                         {
                             ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
@@ -577,18 +621,20 @@ public class " + type.Name + @"Editor : Editor
                     if (ZSaverSettings.Instance
                         .componentBlackList.Count > 0)
                     {
-
                         using (new GUILayout.HorizontalScope(GUILayout.Width(1)))
                         {
                             using (new EditorGUILayout.VerticalScope())
                             {
                                 GUILayout.Space(-15);
-                                using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1), GUILayout.Height(Mathf.Max(88, 20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
+                                using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1),
+                                    GUILayout.Height(Mathf.Max(88,
+                                        20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
                                 {
                                     foreach (var serializableComponentBlackList in ZSaverSettings.Instance
                                         .componentBlackList)
                                     {
-                                        if (GUILayout.Button(serializableComponentBlackList.Type.Name,GUILayout.Width(150)))
+                                        if (GUILayout.Button(serializableComponentBlackList.Type.Name,
+                                            GUILayout.Width(150)))
                                         {
                                             selectedType =
                                                 ZSaverSettings.Instance.componentBlackList.IndexOf(
@@ -607,7 +653,8 @@ public class " + type.Name + @"Editor : Editor
                                     using (var scrollView =
                                         new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
                                             GUILayout.Width(width - 196),
-                                            GUILayout.Height(Mathf.Max(61.8f, 20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
+                                            GUILayout.Height(Mathf.Max(61.8f,
+                                                20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
                                     {
                                         scrollPos = scrollView.scrollPosition;
                                         Debug.Log(selectedType);
@@ -617,12 +664,9 @@ public class " + type.Name + @"Editor : Editor
                                         {
                                             GUILayout.Label(componentName);
                                         }
-
                                     }
                                 }
                             }
-
-
                         }
 
                         if (GUILayout.Button("Delete Blacklist"))
@@ -633,7 +677,8 @@ public class " + type.Name + @"Editor : Editor
                     }
                     else
                     {
-                        GUILayout.Label("The Component Blacklist is Empty.", new GUIStyle("label"){alignment = TextAnchor.MiddleCenter});
+                        GUILayout.Label("The Component Blacklist is Empty.",
+                            new GUIStyle("label") {alignment = TextAnchor.MiddleCenter});
                         if (GUILayout.Button("Open Fine Tuner"))
                         {
                             ZSerializerFineTuner.ShowWindow();
@@ -641,11 +686,8 @@ public class " + type.Name + @"Editor : Editor
                     }
 
                     break;
-                
             }
         }
-
-        
     }
 
     [MenuItem("Tools/ZSave/Generate Unity Component ZSerializers")]
