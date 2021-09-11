@@ -72,7 +72,7 @@ namespace ZSerializer
             string.Empty
         };
 
-        [HideInInspector] public SerializableDictionary defaultOnDictionary = new SerializableDictionary();
+        [HideInInspector]public SerializableDictionary defaultOnDictionary = new SerializableDictionary();
 
         public bool GetDefaultOnValue<T>() where T : PersistentMonoBehaviour
         {

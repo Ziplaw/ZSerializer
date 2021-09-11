@@ -309,7 +309,6 @@ public class " + type.Name + @"Editor : Editor
             textureToUse = defaultOnValue ? textureToUse : styler.offImage;
         }
 
-
         if (!Application.isPlaying)
         {
             if (GUILayout.Button(textureToUse,
@@ -317,13 +316,17 @@ public class " + type.Name + @"Editor : Editor
             {
                 if (state == ClassState.Valid)
                 {
+                    
                     bool newOnValue = !ZSaverSettings.Instance.GetDefaultOnValue(componentType);
                     ZSaverSettings.Instance.SetDefaultOnValue(componentType, newOnValue);
                     foreach (var component in Object.FindObjectsOfType(componentType).Where(c =>
                         c.GetType() == componentType && ((PersistentMonoBehaviour)c).AutoSync))
                     {
                         ((PersistentMonoBehaviour)component).isOn = newOnValue;
+                        EditorUtility.SetDirty(component);
                     }
+
+                    EditorUtility.SetDirty(ZSaverSettings.Instance);
                 }
                 else
                 {
@@ -365,12 +368,15 @@ public class " + type.Name + @"Editor : Editor
                             persistentMonoBehaviour.isOn = !componentIsOn;
                             ZSaverSettings.Instance.defaultOnDictionary.SetElementAt(persistentMonoBehaviour.GetType(),
                                 persistentMonoBehaviour.isOn);
+                            
                         }
                     }
                     else
                     {
                         component.isOn = !componentIsOn;
                     }
+                    EditorUtility.SetDirty(component);
+                    EditorUtility.SetDirty(ZSaverSettings.Instance);
                 }
             }
         }
