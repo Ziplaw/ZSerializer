@@ -42,10 +42,16 @@ namespace ZSerializer
         /// </summary>
         public virtual void OnPostLoad(){}
 
-        [NonZSerialized][HideInInspector]public bool showSettings;
-        [ForceZSerialized][HideInInspector][SerializeField]private int groupID;
-        [ForceZSerialized][HideInInspector][SerializeField]private bool autoSync = true;
+        [NonZSerialized, HideInInspector]public bool showSettings;
+        [NonZSerialized, HideInInspector, SerializeField] internal bool isOn;
+        [ForceZSerialized, HideInInspector, SerializeField]private int groupID;
+        [ForceZSerialized, HideInInspector, SerializeField]private bool autoSync = true;
         public int GroupID => groupID;
         public bool AutoSync => autoSync;
+
+        public virtual void Reset()
+        {
+            isOn = ZSaverSettings.Instance.GetDefaultOnValue(GetType());
+        }
     }
 }

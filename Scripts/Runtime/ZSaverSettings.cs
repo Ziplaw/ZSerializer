@@ -17,9 +17,10 @@ namespace ZSerializer
         public SerializableComponentBlackList(Type type, string componentName)
         {
             typeFullName = type.AssemblyQualifiedName;
-            componentNames = new List<string>{componentName};
+            componentNames = new List<string> { componentName };
         }
     }
+
     public class ZSaverSettings : ScriptableObject
     {
         [Serializable]
@@ -34,23 +35,22 @@ namespace ZSerializer
                 this.name = name;
             }
         }
-        
+
         private static ZSaverSettings instance;
         public static ZSaverSettings Instance => instance ? instance : Resources.Load<ZSaverSettings>("ZSaverSettings");
 
-        
+
         // TODO: uncomment this before every commit
-        [HideInInspector]
-        public bool packageInitialized;
+        [HideInInspector] public bool packageInitialized;
         public bool debugMode;
         public bool autoRebuildZSerializers;
         public int selectedSaveFile;
         public bool encryptData;
         public bool stableSave;
         public bool advancedSerialization;
-        [HideInInspector]
-        public List<SerializableComponentBlackList> componentBlackList;
-        [HideInInspector]public List<string> saveGroups = new List<string>()
+        [HideInInspector] public List<SerializableComponentBlackList> componentBlackList;
+
+        [HideInInspector] public List<string> saveGroups = new List<string>()
         {
             "Main",
             "Settings",
@@ -72,18 +72,74 @@ namespace ZSerializer
             string.Empty
         };
 
+        [HideInInspector] public SerializableDictionary defaultOnDictionary = new SerializableDictionary();
+
+        public bool GetDefaultOnValue<T>() where T : PersistentMonoBehaviour
+        {
+            if(!defaultOnDictionary.ContainsKey(typeof(T))) defaultOnDictionary.Add(typeof(T),true);
+            return defaultOnDictionary.GetElementAt(typeof(T));
+        }
         
+        public bool GetDefaultOnValue(Type type)
+        {
+            if(!defaultOnDictionary.ContainsKey(type)) defaultOnDictionary.Add(type,true);
+            return defaultOnDictionary.GetElementAt(type);
+        }
+        
+        public void SetDefaultOnValue<T>(bool value) where T : PersistentMonoBehaviour
+        {
+            if (!defaultOnDictionary.ContainsKey(typeof(T))) defaultOnDictionary.Add(typeof(T), value);
+            else defaultOnDictionary.SetElementAt(typeof(T), value);
+        }
+        
+        public void SetDefaultOnValue(Type type, bool value)
+        {
+            if(!defaultOnDictionary.ContainsKey(type)) defaultOnDictionary.Add(type,value);
+            else defaultOnDictionary.SetElementAt(type, value);
+        }
+
+        [Serializable]
+        public class SerializableDictionary
+        {
+            public List<string> keyList = new List<string>();
+            public List<bool> valueList = new List<bool>();
+
+            public bool ContainsKey(Type type)
+            {
+                return keyList.Contains(type.AssemblyQualifiedName);
+            }
+
+            public void Add(Type key, bool value)
+            {
+                keyList.Add(key.AssemblyQualifiedName);
+                valueList.Add(value);
+            }
+
+            public bool GetElementAt(Type key)
+            {
+                return valueList[keyList.IndexOf(key.AssemblyQualifiedName)];
+            }
+            
+            public bool SetElementAt(Type key, bool value)
+            {
+                return valueList[keyList.IndexOf(key.AssemblyQualifiedName)] = value;
+            }
+        }
+
 
         [RuntimeInitializeOnLoadMethod]
         static void Init()
         {
             instance = Resources.Load<ZSaverSettings>("ZSaverSettings");
         }
+
+        
     }
 
     public static class Extensions
     {
-        public static void SafeAdd(this List<SerializableComponentBlackList> list, Type componentType, string propertyName)
+        public static void SafeAdd(this List<SerializableComponentBlackList> list, Type componentType,
+            string propertyName)
         {
             var s = list.FirstOrDefault(c => c.Type == componentType);
 
@@ -100,8 +156,9 @@ namespace ZSerializer
                     new SerializableComponentBlackList(componentType, propertyName));
             }
         }
-        
-        public static void SafeRemove(this List<SerializableComponentBlackList> list, Type componentType, string propertyName)
+
+        public static void SafeRemove(this List<SerializableComponentBlackList> list, Type componentType,
+            string propertyName)
         {
             var s = list.FirstOrDefault(c => c.Type == componentType);
 

@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1efd7af9bd4fdc48a69c60405eb42f4, type: 3}
   m_Name: ZSaverSettings
   m_EditorClassIdentifier: 
-  packageInitialized: 0
+  packageInitialized: 1
   debugMode: 1
   autoRebuildZSerializers: 0
   selectedSaveFile: 0
   encryptData: 0
   stableSave: 1
-  advancedSerialization: 1
+  advancedSerialization: 0
   componentBlackList: []
   saveGroups:
   - Main
@@ -37,3 +37,16 @@ MonoBehaviour:
   - 
   - 
   - 
+  defaultOnDictionary:
+    keyList:
+    - A, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - B, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - C, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - FrameTester, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - SerializationTest, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - BallMover, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - GameManager, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - Pin, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - DifferentAssemblyMono, DifferentAssembly, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    valueList: 000000010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
@@ -81,8 +82,16 @@ public static class ZSaverEditor
         var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Instance)
             .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
 
-        fieldInfos.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList());
+        var currentType = type;
+
+        while (type.BaseType != typeof(MonoBehaviour))
+        {
+            fieldInfos.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList());
+            type = type.BaseType;
+        }
+
+        type = currentType;
 
         foreach (var fieldInfo in fieldInfos)
         {
@@ -242,7 +251,6 @@ public class " + type.Name + @"Editor : Editor
     public static ClassState GetClassState(Type type)
     {
         Type ZSaverType = type.Assembly.GetType(type.Name + "ZSerializer");
-        // Debug.Log(type.Assembly);
         if (ZSaverType == null) return ClassState.NotMade;
 
         var fieldsZSaver = ZSaverType.GetFields()
@@ -250,8 +258,19 @@ public class " + type.Name + @"Editor : Editor
         var fieldsType = type.GetFields().Where(f =>
                 f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null)
             .ToList();
-        fieldsType.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(f =>
-            f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null));
+
+        new Color(0, 0, 0, 1);
+
+        var currentType = type;
+
+        while (type.BaseType != typeof(MonoBehaviour))
+        {
+            fieldsType.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(f =>
+                f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null));
+            type = type.BaseType;
+        }
+
+        type = currentType;
 
         if (fieldsZSaver.Count == fieldsType.Count - 0)
         {
@@ -276,47 +295,123 @@ public class " + type.Name + @"Editor : Editor
             GUILayout.MaxHeight(width), GUILayout.MaxWidth(width));
     }
 
-    public static void BuildButton(Type type, int width, ZSaverStyler styler)
+    public static void BuildWindowValidityButton(Type componentType, ZSaverStyler styler)
     {
-        ClassState state = GetClassState(type);
-        if (styler.validImage == null) styler.GetEveryResource();
+        int width = 32;
 
-        using (new EditorGUI.DisabledGroupScope(state == ClassState.Valid))
+        ClassState state = GetClassState(componentType);
+
+        var textureToUse = GetTextureToUse(state, styler);
+
+        if (state == ClassState.Valid)
         {
-            Texture2D textureToUse = styler.validImage;
+            bool defaultOnValue = ZSaverSettings.Instance.GetDefaultOnValue(componentType);
+            textureToUse = defaultOnValue ? textureToUse : styler.offImage;
+        }
 
-            if (state != ClassState.Valid)
-            {
-                textureToUse = state == ClassState.NeedsRebuilding
-                    ? styler.needsRebuildingImage
-                    : styler.notMadeImage;
-            }
 
+        if (!Application.isPlaying)
+        {
             if (GUILayout.Button(textureToUse,
                 GUILayout.MaxWidth(width), GUILayout.Height(width)))
             {
-                string path;
-
-                if (UnityEngine.Random.Range(0, 100) == 0)
+                if (state == ClassState.Valid)
                 {
-                    PlayClip(Resources.Load<AudioClip>("surprise"));
+                    bool newOnValue = !ZSaverSettings.Instance.GetDefaultOnValue(componentType);
+                    ZSaverSettings.Instance.SetDefaultOnValue(componentType, newOnValue);
+                    foreach (var component in Object.FindObjectsOfType(componentType).Where(c =>
+                        c.GetType() == componentType && ((PersistentMonoBehaviour)c).AutoSync))
+                    {
+                        ((PersistentMonoBehaviour)component).isOn = newOnValue;
+                    }
                 }
-
-                var pathList = Directory.GetFiles("Assets", $"*{type.Name}*.cs",
-                    SearchOption.AllDirectories)[0].Split('.').ToList();
-                pathList.RemoveAt(pathList.Count - 1);
-                path = String.Join(".", pathList) + "ZSerializer.cs";
-
-                path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
-                       path.Replace('\\', '/');
-
-
-                CreateZSaver(type, path);
-                if (state == ClassState.NotMade)
-                    CreateEditorScript(type, path);
-                AssetDatabase.Refresh();
+                else
+                {
+                    GenerateZSerializer(componentType, state);
+                }
             }
         }
+    }
+
+    private static void BuildInspectorValidityButton<T>(T component, ZSaverStyler styler)
+        where T : PersistentMonoBehaviour
+    {
+        int width = 28;
+        ClassState state = GetClassState(typeof(T));
+
+        var textureToUse = GetTextureToUse(state, styler);
+
+        if (state == ClassState.Valid && component)
+        {
+            textureToUse = component.isOn ? styler.validImage : styler.offImage;
+        }
+
+        if (!Application.isPlaying)
+        {
+            if (GUILayout.Button(textureToUse,
+                GUILayout.MaxWidth(width), GUILayout.Height(width)))
+            {
+                if (state != ClassState.Valid)
+                    GenerateZSerializer(typeof(T), state);
+                else
+                {
+                    bool componentIsOn = component.isOn;
+
+                    if (component.AutoSync)
+                    {
+                        foreach (var persistentMonoBehaviour in Object.FindObjectsOfType<T>()
+                            .Where(t => t.GetType() == component.GetType() && t.AutoSync))
+                        {
+                            persistentMonoBehaviour.isOn = !componentIsOn;
+                            ZSaverSettings.Instance.defaultOnDictionary.SetElementAt(persistentMonoBehaviour.GetType(),
+                                persistentMonoBehaviour.isOn);
+                        }
+                    }
+                    else
+                    {
+                        component.isOn = !componentIsOn;
+                    }
+                }
+            }
+        }
+    }
+
+    static Texture2D GetTextureToUse(ClassState state, ZSaverStyler styler)
+    {
+        if (styler.validImage == null) styler.GetEveryResource();
+
+        Texture2D textureToUse = styler.validImage;
+
+        if (state != ClassState.Valid)
+        {
+            textureToUse = state == ClassState.NeedsRebuilding
+                ? styler.needsRebuildingImage
+                : styler.notMadeImage;
+        }
+
+        return textureToUse;
+    }
+
+    static void GenerateZSerializer(Type componentType, ClassState state)
+    {
+        if (UnityEngine.Random.Range(0, 100) == 0)
+        {
+            PlayClip(Resources.Load<AudioClip>("surprise"));
+        }
+
+        var pathList = Directory.GetFiles("Assets", $"*{componentType.Name}*.cs",
+            SearchOption.AllDirectories)[0].Split('.').ToList();
+        pathList.RemoveAt(pathList.Count - 1);
+        var path = String.Join(".", pathList) + "ZSerializer.cs";
+
+        path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
+               path.Replace('\\', '/');
+
+
+        CreateZSaver(componentType, path);
+        if (state == ClassState.NotMade)
+            CreateEditorScript(componentType, path);
+        AssetDatabase.Refresh();
     }
 
     public static void PlayClip(AudioClip clip, int startSample = 0, bool loop = false)
@@ -328,13 +423,13 @@ public class " + type.Name + @"Editor : Editor
             "PlayPreviewClip",
             BindingFlags.Static | BindingFlags.Public,
             null,
-            new Type[] {typeof(AudioClip), typeof(int), typeof(bool)},
+            new Type[] { typeof(AudioClip), typeof(int), typeof(bool) },
             null
         );
 
         method?.Invoke(
             null,
-            new object[] {clip, startSample, loop}
+            new object[] { clip, startSample, loop }
         );
     }
 
@@ -367,7 +462,7 @@ public class " + type.Name + @"Editor : Editor
 
 
     public static void BuildPersistentComponentEditor<T>(T manager, ZSaverStyler styler, ref bool showSettings,
-        Action<Type, ISaveGroupID, bool> toggleOn) where T : ISaveGroupID
+        Action<Type, ISaveGroupID, bool> toggleOn) where T : PersistentMonoBehaviour
     {
         // Texture2D cogwheel = styler.cogWheel;
 
@@ -375,7 +470,7 @@ public class " + type.Name + @"Editor : Editor
         using (new GUILayout.HorizontalScope(ZSaverStyler.window))
         {
             var state = GetClassState(manager.GetType());
-            string color = state == ClassState.Valid ? "29cf42" :
+            string color = state == ClassState.Valid ? manager.isOn ? "29cf42" : "999999" :
                 state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
 
             GUILayout.Label($"<color=#{color}>  Persistent Component</color>",
@@ -384,25 +479,28 @@ public class " + type.Name + @"Editor : Editor
             //     editMode = GUILayout.Toggle(editMode, cogwheel, new GUIStyle("button"), GUILayout.MaxWidth(28),
             //         GUILayout.Height(28));
 
-            BuildButton(manager.GetType(), 28, styler);
+            BuildInspectorValidityButton(manager, styler);
             showSettings = SettingsButton(showSettings, styler, 28);
-            PrefabUtility.RecordPrefabInstancePropertyModifications(manager as MonoBehaviour);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
         }
 
         if (showSettings)
         {
             toggleOn?.Invoke(typeof(PersistentMonoBehaviour), manager, true);
 
-            SerializedObject serializedObject = new SerializedObject(manager as MonoBehaviour);
+            SerializedObject serializedObject = new SerializedObject(manager);
             serializedObject.Update();
 
             foreach (var field in typeof(T).GetFields().Where(f => f.DeclaringType != typeof(PersistentMonoBehaviour)))
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    string color = field.GetCustomAttribute<NonZSerialized>() == null ? "29cf42" : "FFFFFF";
+                    string color = field.GetCustomAttribute<NonZSerialized>() == null && manager.isOn
+                        ? "29cf42"
+                        : "999999";
                     GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
-                        new GUIStyle("label") {richText = true}, GUILayout.Width(EditorGUIUtility.currentViewWidth/3f));
+                        new GUIStyle("label") { richText = true },
+                        GUILayout.Width(EditorGUIUtility.currentViewWidth / 3f));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty(field.Name), GUIContent.none);
                 }
             }
@@ -457,7 +555,7 @@ public class " + type.Name + @"Editor : Editor
                 else
                 {
                     foreach (var o in GameObject.FindObjectsOfType(data.GetType())
-                        .Where(t => ((ISaveGroupID) t).AutoSync))
+                        .Where(t => ((ISaveGroupID)t).AutoSync))
                     {
                         o.GetType().BaseType.GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance)
                             .SetValue(o, newValue);
@@ -486,7 +584,7 @@ public class " + type.Name + @"Editor : Editor
         if (editMode)
         {
             GUILayout.Label("Select fields to serialize",
-                new GUIStyle("helpbox") {alignment = TextAnchor.MiddleCenter}, GUILayout.Height(18));
+                new GUIStyle("helpbox") { alignment = TextAnchor.MiddleCenter }, GUILayout.Height(18));
             var fields = manager.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
             for (var i = 0; i < fields.Length; i++)
@@ -522,11 +620,11 @@ public class " + type.Name + @"Editor : Editor
 
         if (ZSaverSettings.Instance.debugMode)
         {
-            toolbarNames = new[] {"Settings", "Saving Groups", "Component Blacklist"};
+            toolbarNames = new[] { "Settings", "Saving Groups", "Component Blacklist" /*, "Default On Setting"*/ };
         }
         else
         {
-            toolbarNames = new[] {"Settings", "Saving Groups"};
+            toolbarNames = new[] { "Settings", "Saving Groups" };
         }
 
         using (new GUILayout.VerticalScope("box"))
@@ -593,7 +691,7 @@ public class " + type.Name + @"Editor : Editor
                             {
                                 var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
                                 prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
-                                    new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
+                                    new GUIStyle("textField") { alignment = TextAnchor.MiddleCenter });
                             }
                         }
 
@@ -678,7 +776,7 @@ public class " + type.Name + @"Editor : Editor
                     else
                     {
                         GUILayout.Label("The Component Blacklist is Empty.",
-                            new GUIStyle("label") {alignment = TextAnchor.MiddleCenter});
+                            new GUIStyle("label") { alignment = TextAnchor.MiddleCenter });
                         if (GUILayout.Button("Open Fine Tuner"))
                         {
                             ZSerializerFineTuner.ShowWindow();
@@ -686,6 +784,16 @@ public class " + type.Name + @"Editor : Editor
                     }
 
                     break;
+                // case 3:
+                //     for (var i = 0; i < ZSaverSettings.Instance.defaultOnDictionary.keyList.Count; i++)
+                //     {
+                //         using (new GUILayout.HorizontalScope())
+                //         {
+                //             GUILayout.Label(ZSaverSettings.Instance.defaultOnDictionary.keyList[i], GUILayout.Width(200));//
+                //             GUILayout.Label(ZSaverSettings.Instance.defaultOnDictionary.valueList[i].ToString());
+                //         }    
+                //     }
+                //     break;
             }
         }
     }

@@ -130,7 +130,7 @@ namespace ZSerializer.Editor
                                 GUILayout.Space(-15);
                                 using (new EditorGUILayout.HorizontalScope(ZSaverStyler.window, GUILayout.Height(32)))
                                 {
-                                    string color = classInstance.state == ClassState.Valid ? "29CF42" :
+                                    string color = classInstance.state == ClassState.Valid ? ZSaverSettings.Instance.GetDefaultOnValue(classInstance.classType) ? "29CF42" : "999999" :
                                         classInstance.state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
                                     EditorGUILayout.LabelField(
                                         $"<color=#{color}>{classInstance.classType.Name}</color>",
@@ -138,7 +138,7 @@ namespace ZSerializer.Editor
                                             {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
                                         GUILayout.Height(classHeight));
 
-                                    ZSaverEditor.BuildButton(classInstance.classType, classHeight, styler);
+                                    ZSaverEditor.BuildWindowValidityButton(classInstance.classType, styler);
                                 }
                             }
 
