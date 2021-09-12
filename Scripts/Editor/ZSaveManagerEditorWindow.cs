@@ -132,11 +132,29 @@ namespace ZSerializer.Editor
                                 {
                                     string color = classInstance.state == ClassState.Valid ? ZSaverSettings.Instance.GetDefaultOnValue(classInstance.classType) ? "29CF42" : "999999" :
                                         classInstance.state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
-                                    EditorGUILayout.LabelField(
+
+
+
+                                    if (GUILayout.Button(
                                         $"<color=#{color}>{classInstance.classType.Name}</color>",
                                         new GUIStyle(styler.header)
-                                            {alignment = TextAnchor.MiddleCenter, fontSize = fontSize},
-                                        GUILayout.Height(classHeight));
+                                            { alignment = TextAnchor.MiddleCenter, fontSize = fontSize },
+                                        GUILayout.Height(classHeight)))
+                                    {
+                                        var pathList = Directory.GetFiles("Assets", $"*{classInstance.classType.Name}*.cs",
+                                            SearchOption.AllDirectories)[0];
+
+                                        var path = pathList.Replace('\\', '/');
+                                        
+                                        
+                                        EditorUtility.FocusProjectWindow();
+                                        
+                                        UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
+                                        
+                                        Selection.activeObject = obj;
+                                        
+                                        EditorGUIUtility.PingObject(obj);
+                                    }
 
                                     ZSaverEditor.BuildWindowValidityButton(classInstance.classType, styler);
                                 }

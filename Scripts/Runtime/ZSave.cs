@@ -457,49 +457,23 @@ namespace ZSerializer
         //Saves all Persistent Components
         static IEnumerator SaveAllObjects()
         {
-            var componentsMap = persistentTypes
-                .Where(t =>
-                    Object.FindObjectsOfType(t).Any(obj =>
-                        ((PersistentMonoBehaviour)obj).GroupID == currentGroupID &&
-                        ((PersistentMonoBehaviour)obj).isOn &&
-                        obj.GetType() == t))
-                .ToDictionary(t => t,
-                    t => Object.FindObjectsOfType(t).Where(ShouldBeSerialized).Select(o => (Component)o).ToList())
-                .SequenceValueDistinct();
+            Dictionary<Type, List<Component>> componentMap = new Dictionary<Type, List<Component>>();
 
-            // var _objects = persistentTypes.SelectMany(Object.FindObjectsOfType).Distinct().Where(ShouldBeSerialized);
-            // var _types = _objects.Select(o => o.GetType()).Distinct();
-            //
-            //
-            var types = persistentTypes.Where(t =>
-                Object.FindObjectsOfType(t).Any(obj =>
-                    ((PersistentMonoBehaviour)obj).GroupID == currentGroupID && ((PersistentMonoBehaviour)obj).isOn));
-
-            // List<Component> inspectedMonoBehaviours = new List<Component>();
-
-            foreach (var pair in componentsMap)
+            foreach (var persistentMonoBehaviour in Object.FindObjectsOfType<PersistentMonoBehaviour>()
+                .Where(ShouldBeSerialized))
             {
-                yield return ZMono.Instance.StartCoroutine(SerializeComponents(componentsMap[pair.Key],
+                var type = persistentMonoBehaviour.GetType();
+                if (!componentMap.ContainsKey(type))
+                    componentMap.Add(type, new List<Component>() { persistentMonoBehaviour });
+                else componentMap[type].Add(persistentMonoBehaviour);
+            }
+
+            foreach (var pair in componentMap)
+            {
+                yield return ZMono.Instance.StartCoroutine(SerializeComponents(componentMap[pair.Key],
                     pair.Key.Assembly.GetType(pair.Key.Name + "ZSerializer"),
                     pair.Key.FullName + ".zsave"));
             }
-
-            // foreach (var type in _types)
-            // {
-            //     // inspectedMonoBehaviours.AddRange(Object.FindObjectsOfType(type)
-            //     //     .Where(i => ShouldBeSerialized(i) && !inspectedMonoBehaviours.Contains(i))
-            //     //     .Select(t => (Component)t));
-            //
-            //
-            //     // var objects = inspectedMonoBehaviours.Where(o => o.GetType() == type);
-            //
-            //     // if (!objects.Any())
-            //     {
-            //         yield return ZMono.Instance.StartCoroutine(SerializeComponents(_objects.Where(o => o.GetType() == type).Select(t => (Component)t),
-            //             type.Assembly.GetType(type.Name + "ZSerializer"),
-            //             type.FullName + ".zsave"));
-            //     }
-            // }
         }
 
         //Gets all the components of a given type from an array of persistent gameobjects
@@ -1226,30 +1200,6 @@ namespace ZSerializer
         {
             List<KeyValuePair<T1, T2>> pairs = second.ToList();
             pairs.ForEach(pair => first.Add(pair.Key, pair.Value));
-        }
-
-        public static Dictionary<Type, List<T2>> SequenceValueDistinct<T2>(this Dictionary<Type, List<T2>> dictionary)
-        {
-            List<T2> inspectedElements = new List<T2>();
-
-            foreach (var pair in dictionary)
-            {
-                for (var i = 0; i < pair.Value.Count; i++)
-                {
-                    var element = pair.Value[i];
-                    if (!inspectedElements.Contains(element) && pair.Value[i].GetType() == pair.Key)
-                    {
-                        inspectedElements.Add(element);
-                    }
-                    else
-                    {
-                        pair.Value.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
-
-            return dictionary;
         }
     }
 }

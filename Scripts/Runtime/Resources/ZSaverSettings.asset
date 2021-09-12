@@ -49,4 +49,4 @@ MonoBehaviour:
     - Pin, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     - DifferentAssemblyMono, DifferentAssembly, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
-    valueList: 000001010101010101
+    valueList: 010001010101010101

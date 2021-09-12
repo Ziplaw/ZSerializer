@@ -121,19 +121,6 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
         Destroy(component);
     }
 
-    private void OnGUI()
-    {
-        if (GUILayout.Button("Add CapsuleCollider"))
-        {
-            AddComponent<CapsuleCollider>(PersistentType.Component);
-        }
-
-        if (GUILayout.Button("Remove Last Component"))
-        {
-            RemoveComponent(GetComponent<CapsuleCollider>());
-        }
-    }
-
     public static int CountParents(Transform transform)
     {
         int totalParents = 1;

@@ -761,7 +761,6 @@ public class " + type.Name + @"Editor : Editor
                                                 20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
                                     {
                                         scrollPos = scrollView.scrollPosition;
-                                        Debug.Log(selectedType);
                                         foreach (var componentName in ZSaverSettings.Instance
                                             .componentBlackList[selectedType]
                                             .componentNames)
