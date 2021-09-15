@@ -177,12 +177,6 @@ namespace ZSerializer
                 ?.Invoke(null, new object[] { instanceID });
         }
 
-        internal static Type FindTypeInsideAssemblies(Assembly[] assemblies, string typeName)
-        {
-            var assembly = assemblies.First(a => a.GetType(typeName) != null);
-            return assembly.GetType(typeName);
-        }
-
         //Gets all the types from a persistentGameObject that are not monobehaviours
         static List<Type> GetAllPersistentComponents(IEnumerable<PersistentGameObject> objects)
         {

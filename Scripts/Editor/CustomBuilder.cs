@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -30,7 +31,7 @@ class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithRep
             string propertyName = split[3]; //EWWWWW
 
             var componentType =
-                ZSave.FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
+                FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
                     "UnityEngine." + typeName); //THIS MIGHT BREAK IN FUTURE VERSIONS
             
             ZSaverSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
@@ -43,6 +44,12 @@ class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithRep
             ZSaverEditor.GenerateUnityComponentClasses();
             
         }
+    }
+    
+    internal static Type FindTypeInsideAssemblies(Assembly[] assemblies, string typeName)
+    {
+        var assembly = assemblies.First(a => a.GetType(typeName) != null);
+        return assembly.GetType(typeName);
     }
     
     
