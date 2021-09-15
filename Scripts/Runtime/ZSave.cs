@@ -45,7 +45,7 @@ namespace ZSerializer
 
         private static MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson));
 
-        internal const string mainAssembly = "Assembly-CSharp";
+        private const string mainAssembly = "Assembly-CSharp";
 
         //IDs to be stored for InstanceID manipulation when loading destroyed GameObjects
         static Dictionary<int, int> idStorage = new Dictionary<int, int>();
@@ -110,21 +110,11 @@ namespace ZSerializer
         //returns if the current property is to be assigned when loading
         internal static bool PropertyIsSuitableForAssignment(PropertyInfo fieldInfo)
         {
-            // SerializableComponentBlackList blackList =
-            //     ZSaverSettings.Instance.componentBlackList.FirstOrDefault(c => c.Type == fieldInfo.DeclaringType);
-            // bool isInBlackList = blackList != null;
-            // Debug.Log(fieldInfo.Name + " " + fieldInfo.DeclaringType);
-
             return fieldInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&
                    fieldInfo.GetCustomAttribute<NonZSerialized>() == null &&
                    fieldInfo.CanRead &&
                    fieldInfo.CanWrite &&
                    !ZSaverSettings.Instance.componentBlackList.IsInBlackList(fieldInfo.ReflectedType, fieldInfo.Name) &&
-                   // (
-                   //     (!isInBlackList) || (
-                   //         isInBlackList &&
-                   //         !blackList.componentNames.Contains(fieldInfo.Name))
-                   // ) &&
                    fieldInfo.Name != "material" &&
                    fieldInfo.Name != "materials" &&
                    fieldInfo.Name != "sharedMaterial" &&
@@ -305,26 +295,6 @@ namespace ZSerializer
                 .Where(PropertyIsSuitableForAssignment);
 
             FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields();
-
-            // int j = 0;
-            // foreach (var propertyInfo in propertyInfos)
-            // {
-            //     Debug.Log("<color=cyan>" + propertyInfo.Name + " " + fieldInfos[j].Name + "</color>");
-            //     j++;
-            // }
-
-            // Debug.LogWarning("Type: "+componentType);
-            // Debug.LogWarning("Property Infos: "+ propertyInfos.Count + " FieldInfos: " + fieldInfos.Length);
-            // Debug.LogWarning("Field Infos: ");
-            // foreach (var f in fieldInfos)
-            // {
-            //     Debug.Log(f.Name);
-            // }
-            // Debug.LogWarning("Property Infos: ");
-            // foreach (var p in propertyInfos)
-            // {
-            //     Debug.Log(p.Name);
-            // }
             int indexDisplace = 0;
             int i = 0;
 
@@ -353,9 +323,6 @@ namespace ZSerializer
                     if (componentType == typeof(MeshRenderer))
                         Debug.Log(fieldInfos[i + indexDisplace].Name + " " + propertyInfo.Name);
                     propertyInfo.SetValue(c, fieldInfos[i + indexDisplace].GetValue(FromJSONdObject));
-
-                    // var propertyInfo = propertyInfos.FirstOrDefault(p => p.Name == fieldInfos[i].Name);
-                    // propertyInfo?.SetValue(c, fieldInfos[i].GetValue(FromJSONdObject));
                 }
                 else
                 {
@@ -364,34 +331,6 @@ namespace ZSerializer
 
                 i++;
             }
-
-            // for (var i = 0; i < propertyInfos.Count; i++)
-            // {
-            //     bool foundMatch = true;
-            //
-            //     while (fieldInfos[i + indexDisplace].Name != propertyInfos[i].Name)
-            //     {
-            //         if (i + indexDisplace == fieldInfos.Length - 1)
-            //         {
-            //             foundMatch = false;
-            //             break;
-            //         }
-            //
-            //         indexDisplace++;
-            //     }
-            //
-            //     if (foundMatch)
-            //     {
-            //         propertyInfos[i].SetValue(c, fieldInfos[i + indexDisplace].GetValue(FromJSONdObject));
-            //
-            //         // var propertyInfo = propertyInfos.FirstOrDefault(p => p.Name == fieldInfos[i].Name);
-            //         // propertyInfo?.SetValue(c, fieldInfos[i].GetValue(FromJSONdObject));
-            //     }
-            //     else
-            //     {
-            //         indexDisplace = 0;
-            //     }
-            // }
         }
 
         //Updates json files changing a specific string for another
@@ -448,7 +387,7 @@ namespace ZSerializer
 
         #region Save
 
-        static bool ShouldBeSerialized(Object persistentMonoBehaviour)
+        static bool PersistentMonoBehaviourShouldBeSerialized(Object persistentMonoBehaviour)
         {
             PersistentMonoBehaviour m = (PersistentMonoBehaviour)persistentMonoBehaviour;
             return (m.GroupID == currentGroupID || currentGroupID == -1) && m.isOn;
@@ -460,7 +399,7 @@ namespace ZSerializer
             Dictionary<Type, List<Component>> componentMap = new Dictionary<Type, List<Component>>();
 
             foreach (var persistentMonoBehaviour in Object.FindObjectsOfType<PersistentMonoBehaviour>()
-                .Where(ShouldBeSerialized))
+                .Where(PersistentMonoBehaviourShouldBeSerialized))
             {
                 var type = persistentMonoBehaviour.GetType();
                 if (!componentMap.ContainsKey(type))
@@ -476,7 +415,7 @@ namespace ZSerializer
             }
         }
 
-        //Gets all the components of a given type from an array of persistent gameobjects
+        //Gets all the components of a given type from an array of persistent gameObjects
         static IEnumerable<Component> GetComponentsOfGivenType(IEnumerable<PersistentGameObject> objects,
             Type componentType)
         {
@@ -497,9 +436,9 @@ namespace ZSerializer
             IEnumerable<PersistentGameObject> objects = currentGroupID == -1
                 ? Object.FindObjectsOfType<PersistentGameObject>()
                 : Object.FindObjectsOfType<PersistentGameObject>().Where(t => t.GroupID == currentGroupID);
-
+            
             var componentTypes = GetAllPersistentComponents(objects);
-
+            
             foreach (var componentType in componentTypes)
             {
                 yield return ZMono.Instance.StartCoroutine(SerializeComponents(
