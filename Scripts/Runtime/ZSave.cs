@@ -335,13 +335,11 @@ namespace ZSerializer
             {
                 var split = file.Replace('\\', '/').Split('/');
 
-                string fileName = split.Last();
                 int id = ZSaverSettings.Instance.saveGroups.IndexOf(split[split.Length - 2]);
 
                 currentGroupID = id;
-
-                string json = String.Join("",
-                    tempTuples[currentGroupID].Select(t => "{" + t.Item1.AssemblyQualifiedName + "}" + t.Item2 + "\n"));
+                
+                string json = GetStringFromTypesAndJson(tempTuples[currentGroupID]);
                     // ReadFromFile(fileName).Select(t => "{"+t.Item1.AssemblyQualifiedName+"}" + t.Item2+"\n"));
                 string newJson = json;
                 for (int i = 0; i < previousFields.Length; i++)
@@ -368,7 +366,6 @@ namespace ZSerializer
                     RecordTempID(Int32.Parse(prevInstanceIDs[i]), Int32.Parse(newInstanceIDs[i]));
                 }
             }
-
             UpdateAllJSONFiles(prevInstanceIDs, newInstanceIDs);
         }
 
@@ -448,8 +445,6 @@ namespace ZSerializer
             {
                 zSavers = OrderPersistentGameObjectsByLoadingOrder(zSavers);
             }
-
-            Debug.Log(components.Any() + " " + components.ElementAt(0).GetType());
             
             if (components.Any()) unityComponentAssemblies.Add(components.ElementAt(0).GetType().Assembly.FullName);
 
@@ -665,6 +660,15 @@ namespace ZSerializer
             var temporaryIDs = idStorage.Select(i => i.Value.ToString()).ToArray();
 
             UpdateAllJSONFiles(temporaryIDs, originalIDs);
+            
+            foreach (var file in Directory.GetFiles(GetFilePath("", true), "components.zsave",
+                SearchOption.AllDirectories))
+            {
+                var split = file.Replace('\\', '/').Split('/');
+
+                int id = ZSaverSettings.Instance.saveGroups.IndexOf(split[split.Length - 2]);
+                WriteToFile("components.zsave", GetStringFromTypesAndJson(tempTuples[id]));
+            }
 
             // for (var i = 0; i < idStorage.Count; i++)
             // {
@@ -674,7 +678,7 @@ namespace ZSerializer
 
         private static int currentGroupID = -1;
         public static bool isSaving;
-        private static List<(Type,string)[]> tempTuples;
+        static List<(Type,string)[]> tempTuples;
 
         /// <summary>
         /// Serialize all Persistent components and GameObjects on the current scene to the selected save file
@@ -724,6 +728,8 @@ namespace ZSerializer
             {
                 ZMono.Instance.StartCoroutine(SaveAllCoroutine(false));
             }
+
+            FillTemporaryJsonTuples();
 
             foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
             {
@@ -792,15 +798,8 @@ namespace ZSerializer
             isSaving = false;
         }
 
-        /// <summary>
-        /// Load all Persistent components and GameObjects from the current scene that have been previously serialized in the current save file
-        /// </summary>
-        public static void LoadAll(int groupID = -1)
+        static void FillTemporaryJsonTuples()
         {
-            currentGroupID = groupID;
-            bool isLoadingAll = currentGroupID == -1;
-            Log(isLoadingAll ? "Loading All Data" : "Loading Group " + currentGroupID);
-
             tempTuples = new List<(Type, string)[]>();
 
             foreach (var file in Directory.GetFiles(GetFilePath("",true),"components.zsave",SearchOption.AllDirectories))
@@ -814,6 +813,18 @@ namespace ZSerializer
                 currentGroupID = id;
                 tempTuples.Add(ReadFromFile(fileName));
             }
+        }
+
+        /// <summary>
+        /// Load all Persistent components and GameObjects from the current scene that have been previously serialized in the current save file
+        /// </summary>
+        public static void LoadAll(int groupID = -1)
+        {
+            currentGroupID = groupID;
+            bool isLoadingAll = currentGroupID == -1;
+            Log(isLoadingAll ? "Loading All Data" : "Loading Group " + currentGroupID);
+
+            FillTemporaryJsonTuples();
 
             currentGroupID = groupID;
 
