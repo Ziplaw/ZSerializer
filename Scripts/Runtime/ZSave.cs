@@ -106,7 +106,7 @@ namespace ZSerializer
                 yield return Type.GetType($"{typeName}, {assembly}");
             }
         }
-        
+
         internal static bool PropertyIsSuitableForZSerializer(PropertyInfo fieldInfo)
         {
             return fieldInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&
@@ -284,15 +284,18 @@ namespace ZSerializer
         //Copies the fields of a ZSerializer to the properties of a component
         static void CopyFieldsToProperties(Type componentType, Component c, object FromJSONdObject)
         {
-            FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields(BindingFlags.DeclaredOnly | 
-                                                                         BindingFlags.Public | 
+            FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields(BindingFlags.DeclaredOnly |
+                                                                         BindingFlags.Public |
                                                                          BindingFlags.Instance);
             var propertyInfos = componentType.GetProperties()
                 .Where(p => fieldInfos.Any(p2 => p2.Name == p.Name)).ToList();
 
             for (int j = 0; j < fieldInfos.Length; j++)
             {
-                propertyInfos[j].SetValue(c,fieldInfos[j].GetValue(FromJSONdObject));
+                if (fieldInfos[j].Name == propertyInfos[j].Name)
+                    propertyInfos[j].SetValue(c, fieldInfos[j].GetValue(FromJSONdObject));
+                else
+                    LogError($"Tried to assign {fieldInfos[j]} to {propertyInfos[j]}");
             }
         }
 
@@ -733,6 +736,8 @@ namespace ZSerializer
             float startingTime = Time.realtimeSinceStartup;
             float frameCount = Time.frameCount;
 
+            string fileSize = "";
+            
             for (int i = 0; i < idList.Count; i++)
             {
                 currentGroupID = idList[i];
@@ -767,10 +772,13 @@ namespace ZSerializer
                 SaveJsonData("components.zsave");
                 CompileJson(unityComponentAssemblies.Distinct().ToArray());
                 SaveJsonData("assemblies.zsave");
+                
+                fileSize += $"{ZSaverSettings.Instance.saveGroups[currentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length*.001f} KB";
+                if (idList.Count > 1 && i != idList.Count-1) fileSize += ", ";
             }
 
             Log("Serialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
-                (Time.frameCount - frameCount) + " frames");
+                (Time.frameCount - frameCount) + " frames. ("+ fileSize +")");
             currentGroupID = -1;
             isSaving = false;
         }
