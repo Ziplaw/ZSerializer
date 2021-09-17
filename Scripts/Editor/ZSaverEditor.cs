@@ -820,7 +820,7 @@ public class " + type.Name + @"Editor : Editor
 
                 foreach (var propertyInfo in type
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(ZSave.PropertyIsSuitableForAssignment))
+                    .Where(ZSave.PropertyIsSuitableForZSerializer))
                 {
                     // if (propertyInfo.PropertyType == typeof(RayTracingMode))
                     // {
@@ -878,7 +878,7 @@ public class " + type.Name + @"Editor : Editor
 
                 foreach (var propertyInfo in type
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(ZSave.PropertyIsSuitableForAssignment))
+                    .Where(ZSave.PropertyIsSuitableForZSerializer))
                 {
                     longScript +=
                         $"        " + propertyInfo.Name + " = " + type.Name + "Instance." + propertyInfo.Name + ";\n";

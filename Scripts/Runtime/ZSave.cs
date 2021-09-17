@@ -106,9 +106,8 @@ namespace ZSerializer
                 yield return Type.GetType($"{typeName}, {assembly}");
             }
         }
-
-        //returns if the current property is to be assigned when loading
-        internal static bool PropertyIsSuitableForAssignment(PropertyInfo fieldInfo)
+        
+        internal static bool PropertyIsSuitableForZSerializer(PropertyInfo fieldInfo)
         {
             return fieldInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&
                    fieldInfo.GetCustomAttribute<NonZSerialized>() == null &&
@@ -285,43 +284,15 @@ namespace ZSerializer
         //Copies the fields of a ZSerializer to the properties of a component
         static void CopyFieldsToProperties(Type componentType, Component c, object FromJSONdObject)
         {
+            FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields(BindingFlags.DeclaredOnly | 
+                                                                         BindingFlags.Public | 
+                                                                         BindingFlags.Instance);
             var propertyInfos = componentType.GetProperties()
-                .Where(PropertyIsSuitableForAssignment);
+                .Where(p => fieldInfos.Any(p2 => p2.Name == p.Name)).ToList();
 
-            FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields();
-            int indexDisplace = 0;
-            int i = 0;
-
-            foreach (var propertyInfo in propertyInfos)
+            for (int j = 0; j < fieldInfos.Length; j++)
             {
-                bool foundMatch = true;
-
-                while (fieldInfos[i + indexDisplace].Name != propertyInfo.Name)
-                {
-                    if (i + indexDisplace == fieldInfos.Length - 1)
-                    {
-                        indexDisplace = -i - 1;
-                    }
-
-                    indexDisplace++;
-
-                    if (indexDisplace == 0)
-                    {
-                        foundMatch = false;
-                        break;
-                    }
-                }
-
-                if (foundMatch)
-                {
-                    propertyInfo.SetValue(c, fieldInfos[i + indexDisplace].GetValue(FromJSONdObject));
-                }
-                else
-                {
-                    indexDisplace = 0;
-                }
-
-                i++;
+                propertyInfos[j].SetValue(c,fieldInfos[j].GetValue(FromJSONdObject));
             }
         }
 
@@ -330,7 +301,7 @@ namespace ZSerializer
         {
             var files = Directory.GetFiles(GetFilePath("", true), "components.zsave",
                 SearchOption.AllDirectories).ToList();
-            
+
             foreach (var file in files)
             {
                 var split = file.Replace('\\', '/').Split('/');
@@ -338,9 +309,9 @@ namespace ZSerializer
                 int id = ZSaverSettings.Instance.saveGroups.IndexOf(split[split.Length - 2]);
 
                 currentGroupID = id;
-                
+
                 string json = GetStringFromTypesAndJson(tempTuples[currentGroupID]);
-                    // ReadFromFile(fileName).Select(t => "{"+t.Item1.AssemblyQualifiedName+"}" + t.Item2+"\n"));
+                // ReadFromFile(fileName).Select(t => "{"+t.Item1.AssemblyQualifiedName+"}" + t.Item2+"\n"));
                 string newJson = json;
                 for (int i = 0; i < previousFields.Length; i++)
                 {
@@ -366,6 +337,7 @@ namespace ZSerializer
                     RecordTempID(Int32.Parse(prevInstanceIDs[i]), Int32.Parse(newInstanceIDs[i]));
                 }
             }
+
             UpdateAllJSONFiles(prevInstanceIDs, newInstanceIDs);
         }
 
@@ -445,7 +417,7 @@ namespace ZSerializer
             {
                 zSavers = OrderPersistentGameObjectsByLoadingOrder(zSavers);
             }
-            
+
             if (components.Any()) unityComponentAssemblies.Add(components.ElementAt(0).GetType().Assembly.FullName);
 
             yield return ZMono.Instance.StartCoroutine(ReflectedSave(zSavers));
@@ -560,12 +532,14 @@ namespace ZSerializer
         static Type GetTypeFromZSerializerType(Type ZSerializerType)
         {
             return ZSerializerType.Assembly.GetType(ZSerializerType.Name.Replace("ZSerializer", "")) ??
-                   unityComponentAssemblies.Select(s => Assembly.Load(s).GetType("UnityEngine."+ZSerializerType.Name.Replace("ZSerializer", ""))).First(t => t!=null ) ;
+                   unityComponentAssemblies
+                       .Select(s =>
+                           Assembly.Load(s).GetType("UnityEngine." + ZSerializerType.Name.Replace("ZSerializer", "")))
+                       .First(t => t != null);
         }
 
         static void LoadComponents()
         {
-
             for (var j = 0; j < tempTuples[currentGroupID].Length; j++)
             {
                 var tuple = tempTuples[currentGroupID][j];
@@ -586,7 +560,7 @@ namespace ZSerializer
                             { tempTuples[currentGroupID][j].Item2 }))[i];
                     LoadObjectsDynamically(tuple.Item1, realType, FromJSONdObjects[i]);
                 }
-                
+
                 WriteToFile("components.zsave", GetStringFromTypesAndJson(tempTuples[currentGroupID]));
             }
         }
@@ -613,8 +587,11 @@ namespace ZSerializer
                     Component componentInGameObject =
                         (Component)zSerializerType.GetField("_component").GetValue(jsonObjects[i]);
 
-                    CopyFieldsToProperties(realType, componentInGameObject, jsonObjects[i]);
-                    CopyFieldsToFields(zSerializerType, realType, componentInGameObject, jsonObjects[i]);
+                    if (componentInGameObject is PersistentMonoBehaviour ||
+                        componentInGameObject is PersistentGameObject)
+                        CopyFieldsToFields(zSerializerType, realType, componentInGameObject, jsonObjects[i]);
+                    else
+                        CopyFieldsToProperties(realType, componentInGameObject, jsonObjects[i]);
                 }
             }
         }
@@ -660,7 +637,7 @@ namespace ZSerializer
             var temporaryIDs = idStorage.Select(i => i.Value.ToString()).ToArray();
 
             UpdateAllJSONFiles(temporaryIDs, originalIDs);
-            
+
             foreach (var file in Directory.GetFiles(GetFilePath("", true), "components.zsave",
                 SearchOption.AllDirectories))
             {
@@ -678,7 +655,7 @@ namespace ZSerializer
 
         private static int currentGroupID = -1;
         public static bool isSaving;
-        static List<(Type,string)[]> tempTuples;
+        static List<(Type, string)[]> tempTuples;
 
         /// <summary>
         /// Serialize all Persistent components and GameObjects on the current scene to the selected save file
@@ -802,7 +779,8 @@ namespace ZSerializer
         {
             tempTuples = new List<(Type, string)[]>();
 
-            foreach (var file in Directory.GetFiles(GetFilePath("",true),"components.zsave",SearchOption.AllDirectories))
+            foreach (var file in Directory.GetFiles(GetFilePath("", true), "components.zsave",
+                SearchOption.AllDirectories))
             {
                 var split = file.Replace('\\', '/').Split('/');
 
@@ -973,11 +951,11 @@ namespace ZSerializer
             string path = useGlobalID
                 ? Path.Combine(
                     Application.persistentDataPath,
-                    "SaveFile-"+ZSaverSettings.Instance.selectedSaveFile,
+                    "SaveFile-" + ZSaverSettings.Instance.selectedSaveFile,
                     currentScene)
                 : Path.Combine(
                     Application.persistentDataPath,
-                    "SaveFile-"+ZSaverSettings.Instance.selectedSaveFile,
+                    "SaveFile-" + ZSaverSettings.Instance.selectedSaveFile,
                     currentScene,
                     ZSaverSettings.Instance.saveGroups[currentGroupID]);
 
