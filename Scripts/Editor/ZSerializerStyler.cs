@@ -1,19 +1,18 @@
 using UnityEngine;
 using ZSerializer;
 
-public class ZSaverStyler
+public class ZSerializerStyler
 {
     public Texture2D notMadeImage;
     public Texture2D needsRebuildingImage;
     public Texture2D validImage;
     public Texture2D offImage;
-    public Texture2D mixedImage;
     internal Texture2D cogWheel;
     internal Texture2D refreshImage;
     private Font mainFont;
     internal ZSaverSettings settings;
 
-    public ZSaverStyler()
+    public ZSerializerStyler()
     {
         GetEveryResource();
     }
@@ -37,7 +36,6 @@ public class ZSaverStyler
         validImage = Resources.Load<Texture2D>("valid");
         needsRebuildingImage = Resources.Load<Texture2D>("needs_rebuilding");
         offImage = Resources.Load<Texture2D>("off");
-        mixedImage = Resources.Load<Texture2D>("mixed");
         cogWheel = Resources.Load<Texture2D>("cog");
         refreshImage = Resources.Load<Texture2D>("Refresh");
 

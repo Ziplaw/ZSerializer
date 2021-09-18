@@ -33,7 +33,7 @@ public static class ZSaverEditor
     {
         if (ZSaverSettings.Instance && ZSaverSettings.Instance.packageInitialized)
         {
-            ZSaverStyler styler = new ZSaverStyler();
+            ZSerializerStyler styler = new ZSerializerStyler();
             if (styler.settings.autoRebuildZSerializers)
             {
                 var types = ZSave.GetPersistentTypes().ToArray();
@@ -202,19 +202,19 @@ using ZSerializer;
 public class " + type.Name + @"Editor : Editor
 {
     private " + type.Name + @" manager;
-    private static ZSaverStyler styler;
+    private static ZSerializerStyler styler;
 
     private void OnEnable()
     {
         manager = target as " + type.Name + @";
-        styler = new ZSaverStyler();
+        styler = new ZSerializerStyler();
     }
 
     [DidReloadScripts]
     static void OnDatabaseReload()
     {
         if(ZSaverSettings.Instance && ZSaverSettings.Instance.packageInitialized)
-        styler = new ZSaverStyler();
+        styler = new ZSerializerStyler();
     }
 
     public override void OnInspectorGUI()
@@ -289,13 +289,13 @@ public class " + type.Name + @"Editor : Editor
         return ClassState.NeedsRebuilding;
     }
 
-    public static bool SettingsButton(bool showSettings, ZSaverStyler styler, int width)
+    public static bool SettingsButton(bool showSettings, ZSerializerStyler styler, int width)
     {
         return GUILayout.Toggle(showSettings, styler.cogWheel, new GUIStyle("button"),
             GUILayout.MaxHeight(width), GUILayout.MaxWidth(width));
     }
 
-    public static void BuildWindowValidityButton(Type componentType, ZSaverStyler styler)
+    public static void BuildWindowValidityButton(Type componentType, ZSerializerStyler styler)
     {
         int width = 32;
 
@@ -336,7 +336,7 @@ public class " + type.Name + @"Editor : Editor
         }
     }
 
-    private static void BuildInspectorValidityButton<T>(T component, ZSaverStyler styler)
+    private static void BuildInspectorValidityButton<T>(T component, ZSerializerStyler styler)
         where T : PersistentMonoBehaviour
     {
         int width = 28;
@@ -382,7 +382,7 @@ public class " + type.Name + @"Editor : Editor
         }
     }
 
-    static Texture2D GetTextureToUse(ClassState state, ZSaverStyler styler)
+    static Texture2D GetTextureToUse(ClassState state, ZSerializerStyler styler)
     {
         if (styler.validImage == null) styler.GetEveryResource();
 
@@ -439,7 +439,7 @@ public class " + type.Name + @"Editor : Editor
         );
     }
 
-    public static void BuildButtonAll(Class[] classes, int width, ZSaverStyler styler)
+    public static void BuildButtonAll(Class[] classes, int width, ZSerializerStyler styler)
     {
         Texture2D textureToUse = styler.refreshImage;
 
@@ -467,13 +467,13 @@ public class " + type.Name + @"Editor : Editor
     }
 
 
-    public static void BuildPersistentComponentEditor<T>(T manager, ZSaverStyler styler, ref bool showSettings,
+    public static void BuildPersistentComponentEditor<T>(T manager, ZSerializerStyler styler, ref bool showSettings,
         Action<Type, ISaveGroupID, bool> toggleOn) where T : PersistentMonoBehaviour
     {
         // Texture2D cogwheel = styler.cogWheel;
 
         GUILayout.Space(-15);
-        using (new GUILayout.HorizontalScope(ZSaverStyler.window))
+        using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
         {
             var state = GetClassState(manager.GetType());
             string color = state == ClassState.Valid ? manager.isOn ? "29cf42" : "999999" :
@@ -546,7 +546,7 @@ public class " + type.Name + @"Editor : Editor
     public static void ShowGroupIDSettings(Type type, ISaveGroupID data, bool canAutoSync)
     {
         GUILayout.Space(-15);
-        using (new EditorGUILayout.HorizontalScope(ZSaverStyler.window))
+        using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
         {
             GUILayout.Label("Save Group", GUILayout.MaxWidth(80));
             int newValue = EditorGUILayout.Popup(data.GroupID,
@@ -615,7 +615,7 @@ public class " + type.Name + @"Editor : Editor
 
     private static Vector2 scrollPos;
 
-    public static void BuildSettingsEditor(ZSaverStyler styler, ref int selectedMenu, ref int selectedType, float width)
+    public static void BuildSettingsEditor(ZSerializerStyler styler, ref int selectedMenu, ref int selectedType, float width)
     {
         IEnumerable<FieldInfo> fieldInfos = typeof(ZSaverSettings)
             .GetFields(BindingFlags.Instance | BindingFlags.Public)
@@ -642,7 +642,7 @@ public class " + type.Name + @"Editor : Editor
                 case 0:
 
                     GUILayout.Space(-15);
-                    using (new GUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
+                    using (new GUILayout.VerticalScope(ZSerializerStyler.window, GUILayout.Height(1)))
                     {
                         serializedObject.Update();
 
@@ -687,7 +687,7 @@ public class " + type.Name + @"Editor : Editor
                     break;
                 case 1:
                     GUILayout.Space(-15);
-                    using (new GUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
+                    using (new GUILayout.VerticalScope(ZSerializerStyler.window, GUILayout.Height(1)))
                     {
                         serializedObject.Update();
 
@@ -730,7 +730,7 @@ public class " + type.Name + @"Editor : Editor
                             using (new EditorGUILayout.VerticalScope())
                             {
                                 GUILayout.Space(-15);
-                                using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1),
+                                using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window, GUILayout.Height(1),
                                     GUILayout.Height(Mathf.Max(88,
                                         20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
                                 {
@@ -752,7 +752,7 @@ public class " + type.Name + @"Editor : Editor
                             using (new EditorGUILayout.VerticalScope())
                             {
                                 GUILayout.Space(-15);
-                                using (new EditorGUILayout.VerticalScope(ZSaverStyler.window, GUILayout.Height(1)))
+                                using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window, GUILayout.Height(1)))
                                 {
                                     using (var scrollView =
                                         new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),

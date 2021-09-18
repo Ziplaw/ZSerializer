@@ -5,10 +5,9 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using ZSerializer;
 
-namespace ZSerializer.Editor
-{
-    public class ZSerializerFineTuner : EditorWindow
+public class ZSerializerFineTuner : EditorWindow
     {
         [MenuItem("Tools/ZSave/ZSerializer Fine Tuner")]
         internal static void ShowWindow()
@@ -116,6 +115,7 @@ namespace ZSerializer.Editor
 
                                         if (isWhiteListed != prev)
                                         {
+                                            Undo.RecordObject(ZSaverSettings.Instance,"Change Component Blacklist");
                                             if (isWhiteListed)
                                             {
                                                 ZSaverSettings.Instance.componentBlackList.SafeRemove(selectedType, propertyInfo.Name);
@@ -188,4 +188,3 @@ namespace ZSerializer.Editor
                    fieldInfo.Name != "name";
         }
     }
-}

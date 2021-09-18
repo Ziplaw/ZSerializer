@@ -13,7 +13,7 @@ using ZSerializer.Editor;
 public class PersistentGameObjectEditor : Editor
 {
     private PersistentGameObject manager;
-    private static ZSaverStyler styler;
+    private static ZSerializerStyler styler;
 
     private void OnEnable()
     {
@@ -23,7 +23,7 @@ public class PersistentGameObjectEditor : Editor
     [DidReloadScripts]
     static void OnDatabaseReload()
     {
-        styler = new ZSaverStyler();
+        styler = new ZSerializerStyler();
     }
 
 
@@ -32,7 +32,7 @@ public class PersistentGameObjectEditor : Editor
         serializedObject.Update();
 
         GUILayout.Space(-15);
-        using (new EditorGUILayout.HorizontalScope(ZSaverStyler.window))
+        using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
         {
             GUILayout.Label("<color=#29cf42>  Persistent GameObject</color>", styler.header, GUILayout.MinHeight(28));
             manager.showSettings = ZSaverEditor.SettingsButton(manager.showSettings, styler, 28);
@@ -45,7 +45,7 @@ public class PersistentGameObjectEditor : Editor
             if (ZSaverSettings.Instance.advancedSerialization)
             {
                 GUILayout.Space(-15);
-                using (new GUILayout.VerticalScope(ZSaverStyler.window))
+                using (new GUILayout.VerticalScope(ZSerializerStyler.window))
                 {
                     GUILayout.Label("Serialized Components:");
                     if (manager.serializedComponents.Count == 0) GUILayout.Label("None");

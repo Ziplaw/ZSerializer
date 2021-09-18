@@ -36,7 +36,7 @@ namespace ZSerializer.Editor
         private bool initiated;
         private int selectedMenu;
         private int selectedType;
-        private static ZSaverStyler styler;
+        private static ZSerializerStyler styler;
 
         private static Class[] classes;
 
@@ -56,7 +56,7 @@ namespace ZSerializer.Editor
             {
                 GetWindow<ZSaveManagerEditorWindow>().minSize = new Vector2(480,400);
 
-                styler = new ZSaverStyler();
+                styler = new ZSerializerStyler();
 
                 var types = ZSave.GetPersistentTypes().ToArray();
 
@@ -82,7 +82,7 @@ namespace ZSerializer.Editor
                 {
                     ZSaveManagerEditorWindow w;
 
-                    styler = new ZSaverStyler();
+                    styler = new ZSerializerStyler();
                     styler.GetEveryResource();
 
                     w = GetWindow<ZSaveManagerEditorWindow>();
@@ -128,7 +128,7 @@ namespace ZSerializer.Editor
                             foreach (var classInstance in classes)
                             {
                                 GUILayout.Space(-15);
-                                using (new EditorGUILayout.HorizontalScope(ZSaverStyler.window, GUILayout.Height(32)))
+                                using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window, GUILayout.Height(32)))
                                 {
                                     string color = classInstance.state == ClassState.Valid ? ZSaverSettings.Instance.GetDefaultOnValue(classInstance.classType) ? "29CF42" : "999999" :
                                         classInstance.state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
@@ -163,7 +163,7 @@ namespace ZSerializer.Editor
                             GUILayout.Space(5);
 
                             GUILayout.Space(-15);
-                            using (new EditorGUILayout.HorizontalScope(ZSaverStyler.window, GUILayout.Height(32)))
+                            using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window, GUILayout.Height(32)))
                             {
                                 EditorGUILayout.LabelField("ZSerialize All",
                                     new GUIStyle(styler.header)

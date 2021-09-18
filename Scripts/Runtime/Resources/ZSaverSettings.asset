@@ -19,11 +19,15 @@ MonoBehaviour:
   encryptData: 0
   stableSave: 1
   advancedSerialization: 0
-  componentBlackList: []
+  componentBlackList:
+  - typeFullName: UnityEngine.Animations.AimConstraint, UnityEngine.AnimationModule,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - upVector
   saveGroups:
   - Main
   - Settings
-  - 
+  - Parents
   - 
   - 
   - 

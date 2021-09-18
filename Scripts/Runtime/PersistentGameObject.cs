@@ -59,7 +59,8 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
                 var list = new List<SerializedComponent>();
                 foreach (var serializedComponent in persistentGameObject.serializedComponents)
                 {
-                    if (persistentGameObject.GetComponents(serializedComponent.Type).Any(c => c.GetInstanceID() == serializedComponent.instanceID))
+                    if (persistentGameObject.GetComponents(serializedComponent.Type)
+                        .Any(c => c.GetInstanceID() == serializedComponent.instanceID))
                     {
                         list.Add(serializedComponent);
                     }
@@ -138,7 +139,7 @@ namespace ZSerializer
     [Serializable]
     public struct GameObjectData
     {
-        public int loadingOrder;
+        public Vector2Int loadingOrder;
         public HideFlags hideFlags;
         public string name;
         public bool active;
@@ -167,6 +168,7 @@ namespace ZSerializer
             o.transform.localScale = size;
 
             o.transform.SetParent(parent != null ? parent.transform : null);
+            o.transform.SetSiblingIndex(loadingOrder.y);
 
             return o;
         }
