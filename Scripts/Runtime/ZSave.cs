@@ -319,7 +319,7 @@ namespace ZSerializer
         }
 
         //Updates json files for ID manipulation
-        static void UpdateAllInstanceIDs(string[] prevInstanceIDs, string[] newInstanceIDs, int[] idList, bool isRestoring = false)
+        static void UpdateAllInstanceIDs(string[] prevInstanceIDs, string[] newInstanceIDs, bool isRestoring = false)
         {
             if (!isRestoring)
             {
@@ -430,7 +430,7 @@ namespace ZSerializer
         }
 
         //Loads a component no matter the type
-        static void LoadObjectsDynamically(Type ZSaverType, Type componentType, object zSerializerObject, int[] idList)
+        static void LoadObjectsDynamically(Type ZSaverType, Type componentType, object zSerializerObject)
         {
             GameObject gameObject =
                 (GameObject)ZSaverType.GetField("_componentParent").GetValue(zSerializerObject);
@@ -471,7 +471,7 @@ namespace ZSerializer
 
                     LoadDestroyedGameObject(out gameObject, ZSaverType, zSerializerObject);
                     UpdateAllInstanceIDs(new[] { gameObjectInstanceID.ToString() },
-                        new[] { gameObject.GetInstanceID().ToString() }, idList);
+                        new[] { gameObject.GetInstanceID().ToString() });
                 }
 
                 if (componentType == typeof(PersistentGameObject))
@@ -506,7 +506,7 @@ namespace ZSerializer
                 if (componentInGameObject == null)
                     Debug.LogError("Achievement Unlocked: No idea how you caused this error");
                 componentInstanceID = componentInGameObject.GetInstanceID();
-                UpdateAllInstanceIDs(new[] { prevCOMPInstanceID.ToString() }, new[] { componentInstanceID.ToString() }, idList);
+                UpdateAllInstanceIDs(new[] { prevCOMPInstanceID.ToString() }, new[] { componentInstanceID.ToString() });
             }
 
             if (componentType == typeof(PersistentGameObject))
@@ -529,7 +529,7 @@ namespace ZSerializer
                        .First(t => t != null);
         }
 
-        static void LoadComponents(int tupleID, int[] idList)
+        static void LoadComponents(int tupleID)
         {
             for (var j = 0; j < tempTuples[tupleID].Length; j++)
             {
@@ -549,7 +549,7 @@ namespace ZSerializer
                     zSerializerObjects[i] = ((object[])fromJson.Invoke(null,
                         new object[]
                             { tempTuples[tupleID][j].Item2 }))[i];
-                    LoadObjectsDynamically(tuple.Item1, realType, zSerializerObjects[i], idList);
+                    LoadObjectsDynamically(tuple.Item1, realType, zSerializerObjects[i]);
                 }
 
                 WriteToFile("components.zsave", GetStringFromTypesAndJson(tempTuples[tupleID]));
@@ -786,7 +786,7 @@ namespace ZSerializer
 
         static void FillTemporaryJsonTuples(int[] idList)
         {
-            tempTuples ??= new (Type, string)[ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s)).Max(sg => ZSaverSettings.Instance.saveGroups.IndexOf(sg))+1][];
+            if(tempTuples == null || tempTuples.Length == 0) tempTuples = new (Type, string)[ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s)).Max(sg => ZSaverSettings.Instance.saveGroups.IndexOf(sg))+1][];
             
             foreach (var i in idList)
             {
@@ -826,8 +826,6 @@ namespace ZSerializer
 
             currentGroupID = groupID;
 
-            int tupleID = 0;
-
             for (int i = 0; i < idList.Length; i++)
             {
                 currentGroupID = idList[i];
@@ -848,10 +846,10 @@ namespace ZSerializer
                     JsonHelper.FromJson<string>(ReadFromFile("assemblies.zsave")[0].Item2).ToList();
 
 
-                LoadComponents(tupleID, idList);
+                LoadComponents(currentGroupID);
                 // LoadAllPersistentGameObjects();
                 // LoadAllObjects();
-                LoadReferences(tupleID);
+                LoadReferences(currentGroupID);
 
                 Log($"Deserialization of group \"{ZSaverSettings.Instance.saveGroups[currentGroupID]}\" ended in: " +
                     (Time.realtimeSinceStartup - startingTime) + " seconds or " +
@@ -861,8 +859,6 @@ namespace ZSerializer
                 {
                     persistentMonoBehaviour.OnPostLoad();
                 }
-
-                tupleID++;
             }
 
 

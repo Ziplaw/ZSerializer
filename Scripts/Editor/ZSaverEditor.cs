@@ -195,35 +195,10 @@ public static class ZSaverEditor
 
         string editorScript =
             @"using UnityEditor;
-using UnityEditor.Callbacks;
-using ZSerializer;
+using ZSerializer.Editor;
 
 [CustomEditor(typeof(" + type.Name + @"))]
-public class " + type.Name + @"Editor : Editor
-{
-    private " + type.Name + @" manager;
-    private static ZSerializerStyler styler;
-
-    private void OnEnable()
-    {
-        manager = target as " + type.Name + @";
-        styler = new ZSerializerStyler();
-    }
-
-    [DidReloadScripts]
-    static void OnDatabaseReload()
-    {
-        if(ZSaverSettings.Instance && ZSaverSettings.Instance.packageInitialized)
-        styler = new ZSerializerStyler();
-    }
-
-    public override void OnInspectorGUI()
-    {
-        if(manager is PersistentMonoBehaviour)
-            ZSaverEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings, ZSaverEditor.ShowGroupIDSettings);
-        if(!manager.showSettings) base.OnInspectorGUI();
-    }
-}";
+public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.Name + @"> { }";
 
 
         string newPath = new string((new string(path.Reverse().ToArray())).Substring(path.Split('/').Last().Length)
