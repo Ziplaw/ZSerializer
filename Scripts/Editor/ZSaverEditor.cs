@@ -751,6 +751,11 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                         {
                             ZSaverSettings.Instance.componentBlackList = new List<SerializableComponentBlackList>();
                             selectedType = 0;
+                            GenerateUnityComponentClasses();
+                        }
+                        if (GUILayout.Button("Open Fine Tuner"))
+                        {
+                            ZSerializerFineTuner.ShowWindow();
                         }
                     }
                     else

@@ -514,9 +514,7 @@ namespace ZSerializer
                 GameObjectData gameObjectData =
                     (GameObjectData)ZSaverType.GetField("gameObjectData").GetValue(zSerializerObject);
 
-                gameObject.transform.position = gameObjectData.position;
-                gameObject.transform.rotation = gameObjectData.rotation;
-                gameObject.transform.localScale = gameObjectData.size;
+                gameObject.ApplyValues(gameObjectData);
             }
         }
 
@@ -544,12 +542,15 @@ namespace ZSerializer
                 object[] zSerializerObjects = new object[((object[])fromJson.Invoke(null,
                     new object[]
                         { tuple.Item2 })).Length];
+
+                // Debug.LogWarning(tuple.Item1);
+
                 for (var i = 0; i < zSerializerObjects.Length; i++)
                 {
                     zSerializerObjects[i] = ((object[])fromJson.Invoke(null,
                         new object[]
                             { tempTuples[tupleID][j].Item2 }))[i];
-                    LoadObjectsDynamically(tuple.Item1, realType, zSerializerObjects[i]);
+                    LoadObjectsDynamically(tempTuples[tupleID][j].Item1, realType, zSerializerObjects[i]);
                 }
 
                 WriteToFile("components.zsave", GetStringFromTypesAndJson(tempTuples[tupleID]));
@@ -618,7 +619,7 @@ namespace ZSerializer
         static void RecordTempID(int prevID, int newID)
         {
             int key = 0;
-            
+
             foreach (var pair in idStorage)
             {
                 if (pair.Value == prevID)
@@ -627,6 +628,8 @@ namespace ZSerializer
                     break;
                 }
             }
+
+            if (key == 0) return;
 
             idStorage[key] = newID;
         }
@@ -707,6 +710,7 @@ namespace ZSerializer
             {
                 ZMono.Instance.StartCoroutine(SaveAllCoroutine(false));
             }
+
             foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
             {
                 persistentMonoBehaviour.OnPostSave();
@@ -714,7 +718,7 @@ namespace ZSerializer
         }
 
         internal static List<int> restorationIDList = new List<int>();
-        
+
         //SaveAll() but its actually a coroutine so the game doesn't lag
         static IEnumerator SaveAllCoroutine(bool stableSave)
         {
@@ -724,7 +728,7 @@ namespace ZSerializer
             if (isSavingAll)
                 idList = Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is ISaveGroupID)
                     .Select(o => ((ISaveGroupID)o).GroupID).Distinct().ToArray();
-            else idList = new [] { currentGroupID };
+            else idList = new[] { currentGroupID };
 
             // if (isSavingAll) CompileJson(idList.ToArray());
             // SaveJsonData("lastSaveIDs.zsave", true);
@@ -780,14 +784,16 @@ namespace ZSerializer
                 (Time.frameCount - frameCount) + " frames. (" + fileSize + ")");
             currentGroupID = -1;
             isSaving = false;
-            
+
             FillTemporaryJsonTuples(idList);
         }
 
         static void FillTemporaryJsonTuples(int[] idList)
         {
-            if(tempTuples == null || tempTuples.Length == 0) tempTuples = new (Type, string)[ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s)).Max(sg => ZSaverSettings.Instance.saveGroups.IndexOf(sg))+1][];
-            
+            if (tempTuples == null || tempTuples.Length == 0)
+                tempTuples = new (Type, string)[ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s))
+                    .Max(sg => ZSaverSettings.Instance.saveGroups.IndexOf(sg)) + 1][];
+
             foreach (var i in idList)
             {
                 currentGroupID = i;
@@ -802,12 +808,11 @@ namespace ZSerializer
         {
             saveFiles ??= Directory.GetFiles(GetFilePath("", true), "components.zsave",
                 SearchOption.AllDirectories).ToList();
-            
+
             currentGroupID = groupID;
             bool isLoadingAll = currentGroupID == -1;
             Log(isLoadingAll ? "Loading All Data" : "Loading Group " + currentGroupID);
 
-            
 
             int[] idList;
             if (isLoadingAll)
@@ -819,7 +824,7 @@ namespace ZSerializer
             {
                 idList = new[] { currentGroupID };
             }
-            
+
             restorationIDList.AddRange(idList);
             restorationIDList = restorationIDList.Distinct().ToList();
             FillTemporaryJsonTuples(idList);
@@ -874,7 +879,7 @@ namespace ZSerializer
         static void CompileJson<T>(T[] objectsToPersist)
         {
             string json = "{" + typeof(T).AssemblyQualifiedName + "}" + JsonHelper.ToJson(objectsToPersist, false);
-            Log(typeof(T) + " " + json);
+            Log("Serializing: " + typeof(T) + " " + json);
             jsonToSave += json + "\n";
             // WriteToFile(fileName, json, useGlobalID);
         }

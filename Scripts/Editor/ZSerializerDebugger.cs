@@ -38,10 +38,10 @@ public class ZSerializerDebugger : EditorWindow
                 {
                     idStorageScrollPos = scrollView.scrollPosition;
                     GUILayout.Toolbar(-1, new[] { "Original ID", "Temporary ID" });
+                    
                     foreach (var keyValuePair in ZSave.idStorage)
                     {
-                        GUILayout.Space(-15);
-                        using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
+                        using (new GUILayout.HorizontalScope("helpbox"))
                         {
                             GUILayout.Label(keyValuePair.Key.ToString(),
                                 new GUIStyle("label") { alignment = TextAnchor.MiddleCenter });
@@ -82,7 +82,6 @@ public class ZSerializerDebugger : EditorWindow
                                             selectedTypeIndex = i;
                                         }
                                     }
-                                    // GUILayout.Label(tuple.Item2.Replace("gameObjectInstanceID",));
                                 }
 
                                 GUILayout.Label(ZSave.tempTuples[selectedGroupID][selectedTypeIndex].Item2.Replace("{\"gameObjectInstanceID","{\n\"gameObjectInstanceID"));

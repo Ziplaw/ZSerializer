@@ -155,20 +155,27 @@ namespace ZSerializer
 
         public GameObject MakePerfectlyValidGameObject()
         {
-            GameObject o = new GameObject();
-            o.hideFlags = hideFlags;
-            o.name = name;
-            o.SetActive(active);
-            o.isStatic = isStatic;
-            o.layer = layer;
-            o.tag = tag;
+            return new GameObject().ApplyValues(this);
+        }
+    }
 
-            o.transform.position = position;
-            o.transform.rotation = rotation;
-            o.transform.localScale = size;
+    public static class GameObjectExtensions
+    {
+        public static GameObject ApplyValues(this GameObject o, GameObjectData data)
+        {
+            o.hideFlags = data.hideFlags;
+            o.name = data.name;
+            o.SetActive(data.active);
+            o.isStatic = data.isStatic;
+            o.layer = data.layer;
+            o.tag = data.tag;
 
-            o.transform.SetParent(parent != null ? parent.transform : null);
-            o.transform.SetSiblingIndex(loadingOrder.y);
+            o.transform.position = data.position;
+            o.transform.rotation = data.rotation;
+            o.transform.localScale = data.size;
+
+            o.transform.SetParent(data.parent != null ? data.parent.transform : null);
+            o.transform.SetSiblingIndex(data.loadingOrder.y);
 
             return o;
         }
