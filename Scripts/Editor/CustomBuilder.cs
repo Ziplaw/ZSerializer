@@ -41,6 +41,8 @@ class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithRep
         {
             Debug.LogWarning(
                 "Some of your build errors had to do with Editor Only Properties being Serialized, rebuilding Unity Component Serializer");
+            EditorUtility.SetDirty(ZSaverSettings.Instance);
+            AssetDatabase.SaveAssets();
             ZSaverEditor.GenerateUnityComponentClasses();
             
         }

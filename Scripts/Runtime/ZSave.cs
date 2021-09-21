@@ -26,6 +26,7 @@ namespace ZSerializer
             {
                 if (_instance) return _instance;
                 _instance = new GameObject("ZMono").AddComponent<ZMono>();
+                _instance.gameObject.hideFlags = HideFlags.HideAndDontSave;
                 DontDestroyOnLoad(_instance.gameObject);
                 return _instance;
             }
@@ -291,6 +292,11 @@ namespace ZSerializer
             var propertyInfos = componentType.GetProperties()
                 .Where(p => fieldInfos.Any(p2 => p2.Name == p.Name)).ToList();
 
+            if (componentType == typeof(PersistentMonoBehaviour))
+            {
+                Debug.Log("bruh");
+            }
+
             for (int j = 0; j < fieldInfos.Length; j++)
             {
                 if (fieldInfos[j].Name == propertyInfos[j].Name)
@@ -312,7 +318,8 @@ namespace ZSerializer
                     for (var k = 0; k < tempTuples[i].Length; k++)
                     {
                         tempTuples[i][k].Item2 = tempTuples[i][k].Item2
-                            .Replace(previousFields[j], newFields[j]);
+                            .Replace(":" + previousFields[j] + ",", ":" + newFields[j] + ",")
+                            .Replace(":" + previousFields[j] + "}", ":" + newFields[j] + "}");
                     }
                 }
             }
@@ -743,7 +750,7 @@ namespace ZSerializer
             for (int i = 0; i < idList.Length; i++)
             {
                 currentGroupID = idList[i];
-                LogWarning("Saving data on Group " + currentGroupID);
+                LogWarning("Saving data on Group: " + ZSaverSettings.Instance.saveGroups[currentGroupID]);
 
 
                 string[] files = Directory.GetFiles(GetFilePath(""));
@@ -834,7 +841,7 @@ namespace ZSerializer
             for (int i = 0; i < idList.Length; i++)
             {
                 currentGroupID = idList[i];
-                Log("Loading Group in disk: " + currentGroupID);
+                LogWarning("Loading Group in disk: " + ZSaverSettings.Instance.saveGroups[currentGroupID]);
 
                 var persistentMonoBehavioursInScene = Object.FindObjectsOfType<PersistentMonoBehaviour>();
 

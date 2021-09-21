@@ -749,7 +749,9 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
                         if (GUILayout.Button("Delete Blacklist"))
                         {
-                            ZSaverSettings.Instance.componentBlackList = new List<SerializableComponentBlackList>();
+                            ZSaverSettings.Instance.componentBlackList.Clear();
+                            EditorUtility.SetDirty(ZSaverSettings.Instance);
+                            AssetDatabase.SaveAssets();
                             selectedType = 0;
                             GenerateUnityComponentClasses();
                         }

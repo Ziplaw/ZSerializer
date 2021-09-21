@@ -151,6 +151,8 @@ public class ZSerializerFineTuner : EditorWindow
                             if (GUILayout.Button("Save & Apply"))
                             {
                                 ZSaverEditor.GenerateUnityComponentClasses();
+                                EditorUtility.SetDirty(ZSaverSettings.Instance);
+                                AssetDatabase.SaveAssets();
                             }
 
                         }

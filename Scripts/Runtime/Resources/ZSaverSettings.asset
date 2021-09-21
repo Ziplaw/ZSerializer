@@ -20,10 +20,79 @@ MonoBehaviour:
   stableSave: 1
   advancedSerialization: 0
   componentBlackList:
-  - typeFullName: UnityEngine.Animations.AimConstraint, UnityEngine.AnimationModule,
-      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
     componentNames:
-    - upVector
+    - additionalVertexStreams
+    - enlightenVertexStream
+    - scaleInLightmap
+    - receiveGI
+    - stitchLightmapSeams
+    - enabled
+    - shadowCastingMode
+    - receiveShadows
+    - forceRenderingOff
+    - motionVectorGenerationMode
+    - lightProbeUsage
+    - reflectionProbeUsage
+    - renderingLayerMask
+    - rendererPriority
+    - rayTracingMode
+    - sortingLayerName
+    - sortingLayerID
+    - sortingOrder
+    - allowOcclusionWhenDynamic
+    - lightProbeProxyVolumeOverride
+    - probeAnchor
+    - lightmapIndex
+    - realtimeLightmapIndex
+    - lightmapScaleOffset
+    - realtimeLightmapScaleOffset
+    - hideFlags
+  - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - hideFlags
+  - typeFullName: UnityEngine.TrailRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - time
+    - startWidth
+    - endWidth
+    - widthMultiplier
+    - autodestruct
+    - emitting
+    - numCornerVertices
+    - numCapVertices
+    - minVertexDistance
+    - startColor
+    - endColor
+    - shadowBias
+    - generateLightingData
+    - textureMode
+    - alignment
+    - colorGradient
+    - enabled
+    - shadowCastingMode
+    - receiveShadows
+    - forceRenderingOff
+    - motionVectorGenerationMode
+    - lightProbeUsage
+    - reflectionProbeUsage
+    - renderingLayerMask
+    - rendererPriority
+    - rayTracingMode
+    - sortingLayerName
+    - sortingLayerID
+    - sortingOrder
+    - allowOcclusionWhenDynamic
+    - lightProbeProxyVolumeOverride
+    - probeAnchor
+    - lightmapIndex
+    - realtimeLightmapIndex
+    - lightmapScaleOffset
+    - realtimeLightmapScaleOffset
+    - hideFlags
   saveGroups:
   - Main
   - Settings
@@ -53,4 +122,6 @@ MonoBehaviour:
     - Pin, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     - DifferentAssemblyMono, DifferentAssembly, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
-    valueList: 010001010101010101
+    - ChildTest, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - ParentTest, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    valueList: 0100010101010101010101
