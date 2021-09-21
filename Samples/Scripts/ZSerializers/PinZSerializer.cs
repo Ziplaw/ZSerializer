@@ -11,4 +11,11 @@ public class PinZSerializer : ZSerializer.ZSerializer<Pin>
          groupID = PinInstance.GroupID;
          autoSync = PinInstance.AutoSync;
     }
+
+    public override void RestoreValues(Pin component)
+  {
+      component.hits = hits;
+      component.GroupID = groupID;
+      component.AutoSync = autoSync;
+    }
 }

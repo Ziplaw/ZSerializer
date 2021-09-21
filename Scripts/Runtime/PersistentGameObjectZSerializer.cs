@@ -31,4 +31,12 @@ public class PersistentGameObjectZSerializer : ZSerializer.ZSerializer<Persisten
             parent = PersistentGameObjectInstance.transform.parent ? PersistentGameObjectInstance.transform.parent.gameObject : null
         };
     }
+
+    public override void RestoreValues(PersistentGameObject component)
+    {
+        component.GroupID = groupID;
+        component.enabled = enabled;
+        component.hideFlags = hideFlags;
+        component.serializedComponents = serializedComponents;
+    }
 }

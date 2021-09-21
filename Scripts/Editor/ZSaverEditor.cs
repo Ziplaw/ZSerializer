@@ -61,7 +61,7 @@ public static class ZSaverEditor
                         path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                                path.Replace('\\', '/');
 
-                        CreateZSaver(c.classType, path);
+                        CreateZSerializer(c.classType, path);
                         AssetDatabase.Refresh();
                     }
                 }
@@ -69,9 +69,23 @@ public static class ZSaverEditor
         }
     }
 
-    public static void CreateZSaver(Type type, string path)
+    public static void CreateZSerializer(Type type, string path)
     {
-        FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
+        string newPath = new string((new string(path.Reverse().ToArray())).Substring(path.Split('/').Last().Length)
+            .Reverse().ToArray());
+        Debug.Log("Editor script being created at " + newPath + "ZSerializers");
+        string relativePath = "Assets" + newPath.Substring(Application.dataPath.Length);
+
+
+        if (!AssetDatabase.IsValidFolder(relativePath + "ZSerializers"))
+        {
+            Directory.CreateDirectory(newPath + "ZSerializers");
+        }
+
+
+        string newNewPath = newPath + "ZSerializers/" + type.Name + "ZSerializer.cs";
+        
+        FileStream fileStream = new FileStream(newNewPath, FileMode.Create, FileAccess.Write);
         StreamWriter sw = new StreamWriter(fileStream);
 
         string script =
@@ -165,11 +179,26 @@ public static class ZSaverEditor
             }
         }
 
+
         script += $"         groupID = {className}.GroupID;\n" +
                   $"         autoSync = {className}.AutoSync;\n" +
-                  "    }\n}";
+                  "    }";
 
-        ZSave.Log("ZSerializer script being created at " + path);
+        script += "\n\n    public override void RestoreValues(" + type.FullName + " component)\n  {\n";
+        
+        foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
+            .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList())
+        {
+            script +="      component." + fieldInfo.Name + " = " + fieldInfo.Name + ";\n";
+        }
+
+        script += $"      component.GroupID = groupID;\n" +
+                  $"      component.AutoSync = autoSync;\n"+
+                  "    }";
+        
+        script += "\n}";
+
+        ZSave.Log("ZSerializer script being created at " + newNewPath);
 
         sw.Write(script);
 
@@ -389,7 +418,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                path.Replace('\\', '/');
 
 
-        CreateZSaver(componentType, path);
+        CreateZSerializer(componentType, path);
         if (state == ClassState.NotMade)
             CreateEditorScript(componentType, path);
         AssetDatabase.Refresh();
@@ -434,7 +463,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                 path = Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
                        path.Replace('\\', '/');
 
-                CreateZSaver(c.classType, path);
+                CreateZSerializer(c.classType, path);
                 CreateEditorScript(c.classType, path);
                 AssetDatabase.Refresh();
             }
@@ -804,10 +833,6 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(ZSave.PropertyIsSuitableForZSerializer))
                 {
-                    // if (propertyInfo.PropertyType == typeof(RayTracingMode))
-                    // {
-                    //     Debug.Log(propertyInfo.Name + " " + type + " " +  ZSave.PropertyIsSuitableForAssignment(propertyInfo) + " " + ZSaverSettings.Instance.componentBlackList.IsInBlackList(type, propertyInfo.Name));
-                    // }
 
                     longScript +=
                         $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " + propertyInfo.Name +
@@ -873,25 +898,22 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                     longScript +=
                         $"        " + fieldInfo.Name + " = " + type.Name + "Instance." + fieldInfo.Name + ";\n";
                 }
+                longScript += "    }\n";
 
-                if (type == typeof(PersistentGameObject))
+
+                longScript +=
+@"    public override void RestoreValues(" + type.FullName + @" component)
+    {
+";                
+                foreach (var propertyInfo in type
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(ZSave.PropertyIsSuitableForZSerializer))
+                {
                     longScript +=
-                        @"        gameObjectData =new ZSaver.GameObjectData()
-        {
-            loadingOrder = PersistentGameObject.CountParents(PersistentGameObjectInstance.transform),
-            active = _componentParent.activeSelf,
-            hideFlags = _componentParent.hideFlags,
-            isStatic = _componentParent.isStatic,
-            layer = PersistentGameObjectInstance.gameObject.layer,
-            name = _componentParent.name,
-            position = _componentParent.transform.position,
-            rotation = _componentParent.transform.rotation,
-            size = _componentParent.transform.localScale,
-            tag = PersistentGameObjectInstance.gameObject.tag,
-            parent = PersistentGameObjectInstance.transform.parent ? PersistentGameObjectInstance.transform.parent.gameObject : null
-        };";
+                        $"        component." + propertyInfo.Name + " = " + propertyInfo.Name + ";\n";
+                }
 
-                longScript += "\n    }\n";
+                longScript += "    }\n";
                 longScript += "}\n";
             }
         }

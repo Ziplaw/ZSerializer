@@ -46,8 +46,17 @@ namespace ZSerializer
         [NonZSerialized, HideInInspector, SerializeField] internal bool isOn;
         [ForceZSerialized, HideInInspector, SerializeField]private int groupID;
         [ForceZSerialized, HideInInspector, SerializeField]private bool autoSync = true;
-        public int GroupID => groupID;
-        public bool AutoSync => autoSync;
+        public int GroupID
+        {
+            get => groupID;
+            set => groupID = value;
+        }
+
+        public bool AutoSync
+        {
+            get => autoSync;
+            set => autoSync = value;
+        }
 
         public virtual void Reset()
         {

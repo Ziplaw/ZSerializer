@@ -19,4 +19,15 @@ public class GameManagerZSerializer : ZSerializer.ZSerializer<GameManager>
          groupID = GameManagerInstance.GroupID;
          autoSync = GameManagerInstance.AutoSync;
     }
+
+    public override void RestoreValues(GameManager component)
+  {
+      component.highScore = highScore;
+      component.currentScore = currentScore;
+      component.playerName = playerName;
+      component.position = position;
+      component.ballMover = ballMover;
+      component.GroupID = groupID;
+      component.AutoSync = autoSync;
+    }
 }

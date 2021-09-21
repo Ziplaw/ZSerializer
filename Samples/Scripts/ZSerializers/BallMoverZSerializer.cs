@@ -9,4 +9,10 @@ public class BallMoverZSerializer : ZSerializer.ZSerializer<BallMover>
          groupID = BallMoverInstance.GroupID;
          autoSync = BallMoverInstance.AutoSync;
     }
+
+    public override void RestoreValues(BallMover component)
+  {
+      component.GroupID = groupID;
+      component.AutoSync = autoSync;
+    }
 }

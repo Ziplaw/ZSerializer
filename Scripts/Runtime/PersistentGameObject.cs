@@ -37,7 +37,12 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
     [NonZSerialized] public bool showSettings;
     [SerializeField] [HideInInspector] private int groupID;
     public List<SerializedComponent> serializedComponents = new List<SerializedComponent>();
-    public int GroupID => groupID;
+    public int GroupID
+    {
+        get => groupID;
+        set => groupID = value;
+    }
+
     public bool AutoSync => false;
 
 #if UNITY_EDITOR

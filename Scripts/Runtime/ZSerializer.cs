@@ -20,5 +20,7 @@ namespace ZSerializer
             gameObjectInstanceID = componentParent.GetInstanceID();
             componentinstanceID = component.GetInstanceID();
         }
+
+        public abstract void RestoreValues(T component);
     }
 }

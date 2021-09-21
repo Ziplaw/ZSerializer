@@ -266,6 +266,11 @@ namespace ZSerializer
             yield return null;
         }
 
+        private static void RestoreValues(Component _component, object ZSerializer)
+        {
+            ZSerializer.GetType().GetMethod("RestoreValues").Invoke(ZSerializer, new object[] { _component });
+        }
+
         //Copies the fields of a ZSerializer to the fields of a component
         static void CopyFieldsToFields(Type zSaverType, Type componentType, Component _component, object zSaver)
         {
@@ -284,23 +289,24 @@ namespace ZSerializer
         }
 
         //Copies the fields of a ZSerializer to the properties of a component
-        static void CopyFieldsToProperties(Type componentType, Component c, object FromJSONdObject)
+        static void CopyFieldsToProperties(Type componentType, Component c, object jsonObject)
         {
-            FieldInfo[] fieldInfos = FromJSONdObject.GetType().GetFields(BindingFlags.DeclaredOnly |
-                                                                         BindingFlags.Public |
-                                                                         BindingFlags.Instance);
-            var propertyInfos = componentType.GetProperties()
-                .Where(p => fieldInfos.Any(p2 => p2.Name == p.Name)).ToList();
+            FieldInfo[] fieldInfos = jsonObject.GetType().GetFields(BindingFlags.DeclaredOnly |
+                                                                    BindingFlags.Public |
+                                                                    BindingFlags.Instance);
 
-            if (componentType == typeof(PersistentMonoBehaviour))
+
+            var propertyInfos = componentType.GetProperties()
+                .Where(p => fieldInfos.Any(f => f.Name == p.Name)).ToList();
+
+            foreach (var p in propertyInfos)
             {
-                Debug.Log("bruh");
             }
 
             for (int j = 0; j < fieldInfos.Length; j++)
             {
                 if (fieldInfos[j].Name == propertyInfos[j].Name)
-                    propertyInfos[j].SetValue(c, fieldInfos[j].GetValue(FromJSONdObject));
+                    propertyInfos[j].SetValue(c, fieldInfos[j].GetValue(jsonObject));
                 else
                     LogError($"Tried to assign {fieldInfos[j]} to {propertyInfos[j]}");
             }
@@ -350,7 +356,7 @@ namespace ZSerializer
         }
 
         //Saves all Persistent Components
-        static IEnumerator SaveAllObjects()
+        static IEnumerator SaveAllPersistentMonoBehaviours()
         {
             Dictionary<Type, List<Component>> componentMap = new Dictionary<Type, List<Component>>();
 
@@ -486,8 +492,9 @@ namespace ZSerializer
                     componentInGameObject = gameObject.GetComponent<PersistentGameObject>();
                     var pc = (PersistentGameObject)componentInGameObject;
 
-                    CopyFieldsToFields(typeof(PersistentGameObjectZSerializer), typeof(PersistentGameObject), pc,
-                        zSerializerObject);
+                    // CopyFieldsToFields(typeof(PersistentGameObjectZSerializer), typeof(PersistentGameObject), pc,
+                    //     zSerializerObject);
+                    RestoreValues(componentInGameObject, zSerializerObject);
 
                     if (ZSaverSettings.Instance.advancedSerialization)
                     {
@@ -570,7 +577,7 @@ namespace ZSerializer
             foreach (var tuple in tempTuples[tupleID])
             {
                 Type zSerializerType = tuple.Item1;
-                Type realType = GetTypeFromZSerializerType(zSerializerType);
+                // Type realType = GetTypeFromZSerializerType(zSerializerType);
                 string json = tuple.Item2;
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(zSerializerType);
@@ -583,12 +590,14 @@ namespace ZSerializer
                 {
                     Component componentInGameObject =
                         (Component)zSerializerType.GetField("_component").GetValue(jsonObjects[i]);
+                    
+                    RestoreValues(componentInGameObject, jsonObjects[i]);
 
-                    if (componentInGameObject is PersistentMonoBehaviour ||
-                        componentInGameObject is PersistentGameObject)
-                        CopyFieldsToFields(zSerializerType, realType, componentInGameObject, jsonObjects[i]);
-                    else
-                        CopyFieldsToProperties(realType, componentInGameObject, jsonObjects[i]);
+                    // if (componentInGameObject is PersistentMonoBehaviour ||
+                    //     componentInGameObject is PersistentGameObject)
+                    //     CopyFieldsToFields(zSerializerType, realType, componentInGameObject, jsonObjects[i]);
+                    // else
+                    //     CopyFieldsToProperties(realType, componentInGameObject, jsonObjects[i]);
                 }
             }
         }
@@ -766,7 +775,7 @@ namespace ZSerializer
                     {
                     }
 
-                    e = SaveAllObjects();
+                    e = SaveAllPersistentMonoBehaviours();
                     while (e.MoveNext())
                     {
                     }
@@ -775,7 +784,7 @@ namespace ZSerializer
                 {
                     yield return ZMono.Instance.StartCoroutine(SaveAllPersistentGameObjects());
 
-                    yield return ZMono.Instance.StartCoroutine(SaveAllObjects());
+                    yield return ZMono.Instance.StartCoroutine(SaveAllPersistentMonoBehaviours());
                 }
 
                 SaveJsonData("components.zsave");
