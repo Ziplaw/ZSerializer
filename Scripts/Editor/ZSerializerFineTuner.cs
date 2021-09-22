@@ -9,11 +9,11 @@ using ZSerializer;
 
 public class ZSerializerFineTuner : EditorWindow
     {
-        [MenuItem("Tools/ZSave/ZSerializer Fine Tuner")]
+        [MenuItem("Tools/ZSerializer/ZSerializer Configurator")]
         internal static void ShowWindow()
         {
             var window = GetWindow<ZSerializerFineTuner>();
-            window.titleContent = new GUIContent("ZSerializer Fine Tuner");
+            window.titleContent = new GUIContent("ZSerializer Configurator");
             window.Show();
         }
 
@@ -28,7 +28,7 @@ public class ZSerializerFineTuner : EditorWindow
 
         private void OnEnable()
         {
-            componentTypes = ZSave.ComponentSerializableTypes.OrderBy(a => a.Name).ToList();
+            componentTypes = ZSerialize.ComponentSerializableTypes.OrderBy(a => a.Name).ToList();
             componentTypes.Remove(typeof(PersistentGameObject));
             searchTypes = "";
             searchComponents = "";
@@ -99,7 +99,7 @@ public class ZSerializerFineTuner : EditorWindow
                                     using (new EditorGUILayout.HorizontalScope())
                                     {
                                         bool isWhiteListed =
-                                            !ZSaverSettings.Instance.componentBlackList.IsInBlackList(selectedType,
+                                            !ZSerializerSettings.Instance.componentBlackList.IsInBlackList(selectedType,
                                                 propertyInfo.Name);
 
                                         var prev = isWhiteListed;
@@ -115,14 +115,14 @@ public class ZSerializerFineTuner : EditorWindow
 
                                         if (isWhiteListed != prev)
                                         {
-                                            Undo.RecordObject(ZSaverSettings.Instance,"Change Component Blacklist");
+                                            Undo.RecordObject(ZSerializerSettings.Instance,"Change Component Blacklist");
                                             if (isWhiteListed)
                                             {
-                                                ZSaverSettings.Instance.componentBlackList.SafeRemove(selectedType, propertyInfo.Name);
+                                                ZSerializerSettings.Instance.componentBlackList.SafeRemove(selectedType, propertyInfo.Name);
                                             }
                                             else
                                             {
-                                                ZSaverSettings.Instance.componentBlackList.SafeAdd(selectedType, propertyInfo.Name);
+                                                ZSerializerSettings.Instance.componentBlackList.SafeAdd(selectedType, propertyInfo.Name);
                                             }
                                         }
                                     }
@@ -134,7 +134,7 @@ public class ZSerializerFineTuner : EditorWindow
                                 foreach (var propertyInfo in propertyInfoList.Where(c =>
                                     c.Name.ToLower().Contains(searchComponents.ToLower())))
                                 {
-                                    ZSaverSettings.Instance.componentBlackList.SafeAdd(selectedType, propertyInfo.Name);
+                                    ZSerializerSettings.Instance.componentBlackList.SafeAdd(selectedType, propertyInfo.Name);
                                 }
                             }
                         
@@ -143,15 +143,15 @@ public class ZSerializerFineTuner : EditorWindow
                                 foreach (var propertyInfo in propertyInfoList.Where(c =>
                                     c.Name.ToLower().Contains(searchComponents.ToLower())))
                                 {
-                                    ZSaverSettings.Instance.componentBlackList.SafeRemove(selectedType, propertyInfo.Name);
+                                    ZSerializerSettings.Instance.componentBlackList.SafeRemove(selectedType, propertyInfo.Name);
                                 }
 
                             }
                         
                             if (GUILayout.Button("Save & Apply"))
                             {
-                                ZSaverEditor.GenerateUnityComponentClasses();
-                                EditorUtility.SetDirty(ZSaverSettings.Instance);
+                                ZSerializerEditor.GenerateUnityComponentClasses();
+                                EditorUtility.SetDirty(ZSerializerSettings.Instance);
                                 AssetDatabase.SaveAssets();
                             }
 
@@ -170,7 +170,7 @@ public class ZSerializerFineTuner : EditorWindow
         internal static bool PropertyIsSuitableForAssignmentNoBlackList(PropertyInfo fieldInfo)
         {
             // SerializableComponentBlackList blackList =
-            //     ZSaverSettings.Instance.componentBlackList.FirstOrDefault(c => c.Type == fieldInfo.DeclaringType);
+            //     ZSerializerSettings.Instance.componentBlackList.FirstOrDefault(c => c.Type == fieldInfo.DeclaringType);
             // bool isInBlackList = blackList != null;
 
             return fieldInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&

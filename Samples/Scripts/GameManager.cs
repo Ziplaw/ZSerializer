@@ -20,12 +20,12 @@ public class GameManager : PersistentMonoBehaviour
     {
         if (GUILayout.Button("Save"))
         {
-            ZSave.SaveAll();
+            ZSerialize.SaveAll();
         }
 
         if (GUILayout.Button("Load"))
         {
-            ZSave.LoadAll();
+            ZSerialize.LoadAll();
         }
 
         if (GUILayout.Button("Destroy Player"))

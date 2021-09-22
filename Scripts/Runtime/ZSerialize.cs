@@ -33,7 +33,7 @@ namespace ZSerializer
         }
     }
 
-    public class ZSave
+    public class ZSerialize
     {
         #region Big boys
 
@@ -42,7 +42,7 @@ namespace ZSerializer
         private static MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray");
 
         private static MethodInfo saveMethod =
-            typeof(ZSave).GetMethod(nameof(CompileJson), BindingFlags.NonPublic | BindingFlags.Static);
+            typeof(ZSerialize).GetMethod(nameof(CompileJson), BindingFlags.NonPublic | BindingFlags.Static);
 
         private static MethodInfo fromJsonMethod = typeof(JsonHelper).GetMethod(nameof(JsonHelper.FromJson));
 
@@ -114,7 +114,7 @@ namespace ZSerializer
                    fieldInfo.GetCustomAttribute<NonZSerialized>() == null &&
                    fieldInfo.CanRead &&
                    fieldInfo.CanWrite &&
-                   !ZSaverSettings.Instance.componentBlackList.IsInBlackList(fieldInfo.ReflectedType, fieldInfo.Name) &&
+                   !ZSerializerSettings.Instance.componentBlackList.IsInBlackList(fieldInfo.ReflectedType, fieldInfo.Name) &&
                    fieldInfo.Name != "material" &&
                    fieldInfo.Name != "materials" &&
                    fieldInfo.Name != "sharedMaterial" &&
@@ -151,17 +151,17 @@ namespace ZSerializer
         //internal functions to Log stuff for Debug Mode
         internal static void Log(object obj)
         {
-            if (ZSaverSettings.Instance.debugMode) Debug.Log(obj);
+            if (ZSerializerSettings.Instance.debugMode) Debug.Log(obj);
         }
 
         internal static void LogWarning(object obj)
         {
-            if (ZSaverSettings.Instance.debugMode) Debug.LogWarning(obj);
+            if (ZSerializerSettings.Instance.debugMode) Debug.LogWarning(obj);
         }
 
         internal static void LogError(object obj)
         {
-            if (ZSaverSettings.Instance.debugMode) Debug.LogError(obj);
+            if (ZSerializerSettings.Instance.debugMode) Debug.LogError(obj);
         }
 
         static string GetCurrentScene()
@@ -187,7 +187,7 @@ namespace ZSerializer
 
             foreach (var persistentGameObject in objects)
             {
-                if (ZSaverSettings.Instance.advancedSerialization)
+                if (ZSerializerSettings.Instance.advancedSerialization)
                 {
                     foreach (var serializedComponent in persistentGameObject.serializedComponents)
                     {
@@ -385,7 +385,7 @@ namespace ZSerializer
                 {
                     var selection = o.serializedComponents.FirstOrDefault(sc => sc.instanceID == c.GetInstanceID());
 
-                    return !ZSaverSettings.Instance.advancedSerialization ||
+                    return !ZSerializerSettings.Instance.advancedSerialization ||
                            !selection.Equals(default(SerializedComponent)) && selection.persistenceType ==
                            PersistentType.Everything || c is PersistentGameObject;
                 }));
@@ -496,7 +496,7 @@ namespace ZSerializer
                     //     zSerializerObject);
                     RestoreValues(componentInGameObject, zSerializerObject);
 
-                    if (ZSaverSettings.Instance.advancedSerialization)
+                    if (ZSerializerSettings.Instance.advancedSerialization)
                     {
                         var scList = new List<SerializedComponent>(pc.serializedComponents);
                         pc.serializedComponents.Clear();
@@ -609,7 +609,7 @@ namespace ZSerializer
             return saveFiles.Select(f =>
             {
                 var split = f.Replace('\\', '/').Split('/');
-                return ZSaverSettings.Instance.saveGroups.IndexOf(split[split.Length - 2]);
+                return ZSerializerSettings.Instance.saveGroups.IndexOf(split[split.Length - 2]);
             }).ToArray();
         }
 
@@ -715,7 +715,7 @@ namespace ZSerializer
                 persistentMonoBehaviour.OnPreSave();
             }
 
-            if (ZSaverSettings.Instance.stableSave)
+            if (ZSerializerSettings.Instance.stableSave)
             {
                 var e = SaveAllCoroutine(true);
                 while (e.MoveNext())
@@ -759,7 +759,7 @@ namespace ZSerializer
             for (int i = 0; i < idList.Length; i++)
             {
                 currentGroupID = idList[i];
-                LogWarning("Saving data on Group: " + ZSaverSettings.Instance.saveGroups[currentGroupID]);
+                LogWarning("Saving data on Group: " + ZSerializerSettings.Instance.saveGroups[currentGroupID]);
 
 
                 string[] files = Directory.GetFiles(GetFilePath(""));
@@ -792,7 +792,7 @@ namespace ZSerializer
                 SaveJsonData("assemblies.zsave");
 
                 fileSize +=
-                    $"{ZSaverSettings.Instance.saveGroups[currentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length * .001f} KB";
+                    $"{ZSerializerSettings.Instance.saveGroups[currentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length * .001f} KB";
                 if (idList.Length > 1 && i != idList.Length - 1) fileSize += ", ";
             }
 
@@ -807,8 +807,8 @@ namespace ZSerializer
         static void FillTemporaryJsonTuples(int[] idList)
         {
             if (tempTuples == null || tempTuples.Length == 0)
-                tempTuples = new (Type, string)[ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s))
-                    .Max(sg => ZSaverSettings.Instance.saveGroups.IndexOf(sg)) + 1][];
+                tempTuples = new (Type, string)[ZSerializerSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s))
+                    .Max(sg => ZSerializerSettings.Instance.saveGroups.IndexOf(sg)) + 1][];
 
             foreach (var i in idList)
             {
@@ -850,7 +850,7 @@ namespace ZSerializer
             for (int i = 0; i < idList.Length; i++)
             {
                 currentGroupID = idList[i];
-                LogWarning("Loading Group in disk: " + ZSaverSettings.Instance.saveGroups[currentGroupID]);
+                LogWarning("Loading Group in disk: " + ZSerializerSettings.Instance.saveGroups[currentGroupID]);
 
                 var persistentMonoBehavioursInScene = Object.FindObjectsOfType<PersistentMonoBehaviour>();
 
@@ -872,7 +872,7 @@ namespace ZSerializer
                 // LoadAllObjects();
                 LoadReferences(currentGroupID);
 
-                Log($"Deserialization of group \"{ZSaverSettings.Instance.saveGroups[currentGroupID]}\" ended in: " +
+                Log($"Deserialization of group \"{ZSerializerSettings.Instance.saveGroups[currentGroupID]}\" ended in: " +
                     (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                     (Time.frameCount - frameCount) + " frames");
 
@@ -909,7 +909,7 @@ namespace ZSerializer
         //Writes json into file
         static void WriteToFile(string fileName, string json, bool useGlobalID = false)
         {
-            if (ZSaverSettings.Instance.encryptData)
+            if (ZSerializerSettings.Instance.encryptData)
             {
                 byte[] key =
                     { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
@@ -934,7 +934,7 @@ namespace ZSerializer
                 return null;
             }
 
-            if (ZSaverSettings.Instance.encryptData)
+            if (ZSerializerSettings.Instance.encryptData)
             {
                 byte[] key =
                     { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
@@ -982,13 +982,13 @@ namespace ZSerializer
             string path = useGlobalID
                 ? Path.Combine(
                     Application.persistentDataPath,
-                    "SaveFile-" + ZSaverSettings.Instance.selectedSaveFile,
+                    "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile,
                     currentScene)
                 : Path.Combine(
                     Application.persistentDataPath,
-                    "SaveFile-" + ZSaverSettings.Instance.selectedSaveFile,
+                    "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile,
                     currentScene,
-                    ZSaverSettings.Instance.saveGroups[currentGroupID]);
+                    ZSerializerSettings.Instance.saveGroups[currentGroupID]);
 
 
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);

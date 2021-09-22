@@ -34,16 +34,16 @@ class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithRep
                 FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
                     "UnityEngine." + typeName); //THIS MIGHT BREAK IN FUTURE VERSIONS
             
-            ZSaverSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
+            ZSerializerSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
         }
 
         if (condition.Contains("'Failed'") && errorCs1061)
         {
             Debug.LogWarning(
                 "Some of your build errors had to do with Editor Only Properties being Serialized, rebuilding Unity Component Serializer");
-            EditorUtility.SetDirty(ZSaverSettings.Instance);
+            EditorUtility.SetDirty(ZSerializerSettings.Instance);
             AssetDatabase.SaveAssets();
-            ZSaverEditor.GenerateUnityComponentClasses();
+            ZSerializerEditor.GenerateUnityComponentClasses();
             
         }
     }

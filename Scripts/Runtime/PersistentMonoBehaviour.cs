@@ -60,7 +60,7 @@ namespace ZSerializer
 
         public virtual void Reset()
         {
-            isOn = ZSaverSettings.Instance.GetDefaultOnValue(GetType());
+            isOn = ZSerializerSettings.Instance.GetDefaultOnValue(GetType());
         }
     }
 }

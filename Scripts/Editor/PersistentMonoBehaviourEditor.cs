@@ -18,8 +18,8 @@ namespace ZSerializer.Editor
         {
             styler ??= new ZSerializerStyler();
             if (manager is PersistentMonoBehaviour)
-                ZSaverEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings,
-                    ZSaverEditor.ShowGroupIDSettings);
+                ZSerializerEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings,
+                    ZSerializerEditor.ShowGroupIDSettings);
             if (!manager.showSettings) base.OnInspectorGUI();
         }
     }

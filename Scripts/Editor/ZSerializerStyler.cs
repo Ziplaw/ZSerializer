@@ -10,7 +10,7 @@ public class ZSerializerStyler
     internal Texture2D cogWheel;
     internal Texture2D refreshImage;
     private Font mainFont;
-    internal ZSaverSettings settings;
+    internal ZSerializerSettings settings;
 
     public ZSerializerStyler()
     {
@@ -40,7 +40,7 @@ public class ZSerializerStyler
         refreshImage = Resources.Load<Texture2D>("Refresh");
 
         mainFont = Resources.Load<Font>("FugazOne");
-        settings = Resources.Load<ZSaverSettings>("ZSaverSettings");
+        settings = Resources.Load<ZSerializerSettings>("ZSerializerSettings");
 
         header = new GUIStyle()
         {

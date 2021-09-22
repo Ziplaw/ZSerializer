@@ -35,14 +35,14 @@ public class PersistentGameObjectEditor : Editor
         using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
         {
             GUILayout.Label("<color=#29cf42>  Persistent GameObject</color>", styler.header, GUILayout.MinHeight(28));
-            manager.showSettings = ZSaverEditor.SettingsButton(manager.showSettings, styler, 28);
+            manager.showSettings = ZSerializerEditor.SettingsButton(manager.showSettings, styler, 28);
             PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
         }
 
         if (manager.showSettings)
         {
-            ZSaverEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager, false);
-            if (ZSaverSettings.Instance.advancedSerialization)
+            ZSerializerEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager, false);
+            if (ZSerializerSettings.Instance.advancedSerialization)
             {
                 GUILayout.Space(-15);
                 using (new GUILayout.VerticalScope(ZSerializerStyler.window))
@@ -72,12 +72,12 @@ public class PersistentGameObjectEditor : Editor
 
                             GUILayout.Label(
                                 component.Type.Name +
-                                (ZSaverSettings.Instance.debugMode ? $"({component.instanceID})" : ""),
+                                (ZSerializerSettings.Instance.debugMode ? $"({component.instanceID})" : ""),
                                 new GUIStyle("helpbox")
                                 {
                                     font = styler.header.font, normal = new GUIStyleState() {textColor = fontColor},
                                     alignment = TextAnchor.MiddleCenter
-                                }, GUILayout.MaxWidth(ZSaverSettings.Instance.debugMode ? 150 : 100));
+                                }, GUILayout.MaxWidth(ZSerializerSettings.Instance.debugMode ? 150 : 100));
 
                             EditorGUILayout.PropertyField(serializedObject
                                 .FindProperty(nameof(manager.serializedComponents)).GetArrayElementAtIndex(i)

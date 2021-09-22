@@ -10,7 +10,7 @@ using ZSerializer.Editor;
 
 public class ZSerializerDebugger : EditorWindow
 {
-    [MenuItem("Tools/ZSave/ZSerializer Debugger")]
+    [MenuItem("Tools/ZSerializer/Serialization Debugger")]
     internal static void ShowWindow()
     {
         var window = GetWindow<ZSerializerDebugger>();
@@ -39,7 +39,7 @@ public class ZSerializerDebugger : EditorWindow
                     idStorageScrollPos = scrollView.scrollPosition;
                     GUILayout.Toolbar(-1, new[] { "Original ID", "Temporary ID" });
                     
-                    foreach (var keyValuePair in ZSave.idStorage)
+                    foreach (var keyValuePair in ZSerialize.idStorage)
                     {
                         using (new GUILayout.HorizontalScope("helpbox"))
                         {
@@ -55,9 +55,9 @@ public class ZSerializerDebugger : EditorWindow
 
                 break;
             case 1:
-                if (ZSave.tempTuples != null)
+                if (ZSerialize.tempTuples != null)
                 {
-                    string[] groupIDs = ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s))
+                    string[] groupIDs = ZSerializerSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s))
                         .ToArray();
 
                     selectedGroupID = GUILayout.Toolbar(selectedGroupID, groupIDs,
@@ -67,16 +67,16 @@ public class ZSerializerDebugger : EditorWindow
                     {
                         jsonScrollPos = scrollView.scrollPosition;
 
-                        if (ZSave.tempTuples[selectedGroupID] != null)
+                        if (ZSerialize.tempTuples[selectedGroupID] != null)
                         {
                             using (new GUILayout.HorizontalScope())
                             {
                                 using (new GUILayout.VerticalScope())
                                 {
-                                    for (var i = 0; i < ZSave.tempTuples[selectedGroupID].Length; i++)
+                                    for (var i = 0; i < ZSerialize.tempTuples[selectedGroupID].Length; i++)
                                     {
                                         if (GUILayout.Button(
-                                            ZSave.tempTuples[selectedGroupID][i].Item1.Name.Replace("ZSerializer", ""),
+                                            ZSerialize.tempTuples[selectedGroupID][i].Item1.Name.Replace("ZSerializer", ""),
                                             GUILayout.MaxWidth(150)))
                                         {
                                             selectedTypeIndex = i;
@@ -84,7 +84,7 @@ public class ZSerializerDebugger : EditorWindow
                                     }
                                 }
 
-                                GUILayout.Label(ZSave.tempTuples[selectedGroupID][selectedTypeIndex].Item2.Replace("{\"gameObjectInstanceID","{\n\"gameObjectInstanceID"));
+                                GUILayout.Label(ZSerialize.tempTuples[selectedGroupID][selectedTypeIndex].Item2.Replace("{\"gameObjectInstanceID","{\n\"gameObjectInstanceID"));
                             }
                         }
                     }
@@ -93,7 +93,7 @@ public class ZSerializerDebugger : EditorWindow
                 break;
             case 2:
                 GUILayout.Label("Active Groups for ID Restoration:");
-                ZSave.restorationIDList.ForEach(x => GUILayout.Label(ZSaverSettings.Instance.saveGroups[x]));
+                ZSerialize.restorationIDList.ForEach(x => GUILayout.Label(ZSerializerSettings.Instance.saveGroups[x]));
                 
                 break;
         }

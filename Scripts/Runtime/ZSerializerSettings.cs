@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ZSerializer
 {
-    // [CreateAssetMenu(fileName = "New ZSerializer Settings", menuName = "ZSaverSettings", order = 0)]
+    // [CreateAssetMenu(fileName = "New ZSerializer Settings", menuName = "ZSerializerSettings", order = 0)]
     [Serializable]
     public class SerializableComponentBlackList
     {
@@ -21,26 +21,12 @@ namespace ZSerializer
         }
     }
 
-    public class ZSaverSettings : ScriptableObject
+    public class ZSerializerSettings : ScriptableObject
     {
-        [Serializable]
-        public struct SaveGroup
-        {
-            public int index;
-            public string name;
-
-            public SaveGroup(int index, string name)
-            {
-                this.index = index;
-                this.name = name;
-            }
-        }
-
-        private static ZSaverSettings instance;
-        public static ZSaverSettings Instance => instance ? instance : Resources.Load<ZSaverSettings>("ZSaverSettings");
+        private static ZSerializerSettings instance;
+        public static ZSerializerSettings Instance => instance ? instance : Resources.Load<ZSerializerSettings>("ZSerializerSettings");
 
 
-        // TODO: uncomment this before every commit
         [HideInInspector] public bool packageInitialized;
         public bool debugMode;
         public bool autoRebuildZSerializers;
@@ -130,7 +116,7 @@ namespace ZSerializer
         [RuntimeInitializeOnLoadMethod]
         static void Init()
         {
-            instance = Resources.Load<ZSaverSettings>("ZSaverSettings");
+            instance = Resources.Load<ZSerializerSettings>("ZSerializerSettings");
         }
 
         

@@ -14,29 +14,29 @@ using ZSerializer.Editor;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
-public static class ZSaverEditor
+public static class ZSerializerEditor
 {
     [DidReloadScripts]
     static void InitializePackage()
     {
-        if (!ZSaverSettings.Instance || ZSaverSettings.Instance && !ZSaverSettings.Instance.packageInitialized)
+        if (!ZSerializerSettings.Instance || ZSerializerSettings.Instance && !ZSerializerSettings.Instance.packageInitialized)
         {
-            ZSaveManagerEditorWindow.ShowWindow();
+            ZSerializerEditorWindow.ShowWindow();
 
-            // ZSaverSettings.Instance.packageInitialized = true;
+            // ZSerializerSettings.Instance.packageInitialized = true;
             // GenerateUnityComponentClasses();
         }
     }
 
     [DidReloadScripts]
-    static void TryRebuildZSavers()
+    static void TryRebuildZSerializers()
     {
-        if (ZSaverSettings.Instance && ZSaverSettings.Instance.packageInitialized)
+        if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized)
         {
             ZSerializerStyler styler = new ZSerializerStyler();
             if (styler.settings.autoRebuildZSerializers)
             {
-                var types = ZSave.GetPersistentTypes().ToArray();
+                var types = ZSerialize.GetPersistentTypes().ToArray();
 
                 Class[] classes = new Class[types.Length];
 
@@ -198,7 +198,7 @@ public static class ZSaverEditor
         
         script += "\n}";
 
-        ZSave.Log("ZSerializer script being created at " + newNewPath);
+        ZSerialize.Log("ZSerializer script being created at " + newNewPath);
 
         sw.Write(script);
 
@@ -254,10 +254,10 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
     public static ClassState GetClassState(Type type)
     {
-        Type ZSaverType = type.Assembly.GetType(type.Name + "ZSerializer");
-        if (ZSaverType == null) return ClassState.NotMade;
+        Type ZSerializerType = type.Assembly.GetType(type.Name + "ZSerializer");
+        if (ZSerializerType == null) return ClassState.NotMade;
 
-        var fieldsZSaver = ZSaverType.GetFields()
+        var fieldsZSerializer = ZSerializerType.GetFields()
             .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
         var fieldsType = type.GetFields().Where(f =>
                 f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null)
@@ -276,12 +276,12 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
         type = currentType;
 
-        if (fieldsZSaver.Count == fieldsType.Count - 0)
+        if (fieldsZSerializer.Count == fieldsType.Count - 0)
         {
-            for (int j = 0; j < fieldsZSaver.Count; j++)
+            for (int j = 0; j < fieldsZSerializer.Count; j++)
             {
-                if (fieldsZSaver[j].Name != fieldsType[j].Name ||
-                    fieldsZSaver[j].FieldType != fieldsType[j].FieldType)
+                if (fieldsZSerializer[j].Name != fieldsType[j].Name ||
+                    fieldsZSerializer[j].FieldType != fieldsType[j].FieldType)
                 {
                     return ClassState.NeedsRebuilding;
                 }
@@ -309,7 +309,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
         if (state == ClassState.Valid)
         {
-            bool defaultOnValue = ZSaverSettings.Instance.GetDefaultOnValue(componentType);
+            bool defaultOnValue = ZSerializerSettings.Instance.GetDefaultOnValue(componentType);
             textureToUse = defaultOnValue ? textureToUse : styler.offImage;
         }
 
@@ -321,8 +321,8 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                 if (state == ClassState.Valid)
                 {
                     
-                    bool newOnValue = !ZSaverSettings.Instance.GetDefaultOnValue(componentType);
-                    ZSaverSettings.Instance.SetDefaultOnValue(componentType, newOnValue);
+                    bool newOnValue = !ZSerializerSettings.Instance.GetDefaultOnValue(componentType);
+                    ZSerializerSettings.Instance.SetDefaultOnValue(componentType, newOnValue);
                     foreach (var component in Object.FindObjectsOfType(componentType).Where(c =>
                         c.GetType() == componentType && ((PersistentMonoBehaviour)c).AutoSync))
                     {
@@ -330,7 +330,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                         EditorUtility.SetDirty(component);
                     }
 
-                    EditorUtility.SetDirty(ZSaverSettings.Instance);
+                    EditorUtility.SetDirty(ZSerializerSettings.Instance);
                 }
                 else
                 {
@@ -370,7 +370,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                             .Where(t => t.GetType() == component.GetType() && t.AutoSync))
                         {
                             persistentMonoBehaviour.isOn = !componentIsOn;
-                            ZSaverSettings.Instance.defaultOnDictionary.SetElementAt(persistentMonoBehaviour.GetType(),
+                            ZSerializerSettings.Instance.defaultOnDictionary.SetElementAt(persistentMonoBehaviour.GetType(),
                                 persistentMonoBehaviour.isOn);
                             
                         }
@@ -380,7 +380,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                         component.isOn = !componentIsOn;
                     }
                     EditorUtility.SetDirty(component);
-                    EditorUtility.SetDirty(ZSaverSettings.Instance);
+                    EditorUtility.SetDirty(ZSerializerSettings.Instance);
                 }
             }
         }
@@ -554,7 +554,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
         {
             GUILayout.Label("Save Group", GUILayout.MaxWidth(80));
             int newValue = EditorGUILayout.Popup(data.GroupID,
-                ZSaverSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s)).ToArray());
+                ZSerializerSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s)).ToArray());
             if (newValue != data.GroupID)
             {
                 if (!data.AutoSync)
@@ -621,14 +621,14 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
     public static void BuildSettingsEditor(ZSerializerStyler styler, ref int selectedMenu, ref int selectedType, float width)
     {
-        IEnumerable<FieldInfo> fieldInfos = typeof(ZSaverSettings)
+        IEnumerable<FieldInfo> fieldInfos = typeof(ZSerializerSettings)
             .GetFields(BindingFlags.Instance | BindingFlags.Public)
             .Where(f => f.GetCustomAttribute<HideInInspector>() == null);
         SerializedObject serializedObject = new SerializedObject(styler.settings);
 
         string[] toolbarNames;
 
-        if (ZSaverSettings.Instance.debugMode)
+        if (ZSerializerSettings.Instance.debugMode)
         {
             toolbarNames = new[] { "Settings", "Saving Groups", "Component Blacklist" /*, "Default On Setting"*/ };
         }
@@ -660,7 +660,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                             {
                                 if (fieldInfo.Name == "advancedSerialization")
                                 {
-                                    if (!ZSaverSettings.Instance.advancedSerialization)
+                                    if (!ZSerializerSettings.Instance.advancedSerialization)
                                     {
                                         foreach (var persistentGameObject in Object
                                             .FindObjectsOfType<PersistentGameObject>())
@@ -707,7 +707,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
                         if (GUILayout.Button("Reset all Group IDs from Scene"))
                         {
-                            ZSave.Log("<color=cyan>Resetting All Group IDs</color>");
+                            ZSerialize.Log("<color=cyan>Resetting All Group IDs</color>");
 
                             foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>()
                                 .Where(o => o is ISaveGroupID))
@@ -726,7 +726,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
                     break;
                 case 2:
-                    if (ZSaverSettings.Instance
+                    if (ZSerializerSettings.Instance
                         .componentBlackList.Count > 0)
                     {
                         using (new GUILayout.HorizontalScope(GUILayout.Width(1)))
@@ -736,16 +736,16 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                                 GUILayout.Space(-15);
                                 using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window, GUILayout.Height(1),
                                     GUILayout.Height(Mathf.Max(88,
-                                        20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
+                                        20.6f * ZSerializerSettings.Instance.componentBlackList.Count))))
                                 {
-                                    foreach (var serializableComponentBlackList in ZSaverSettings.Instance
+                                    foreach (var serializableComponentBlackList in ZSerializerSettings.Instance
                                         .componentBlackList)
                                     {
                                         if (GUILayout.Button(serializableComponentBlackList.Type.Name,
                                             GUILayout.Width(150)))
                                         {
                                             selectedType =
-                                                ZSaverSettings.Instance.componentBlackList.IndexOf(
+                                                ZSerializerSettings.Instance.componentBlackList.IndexOf(
                                                     serializableComponentBlackList);
                                         }
                                     }
@@ -762,10 +762,10 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                                         new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
                                             GUILayout.Width(width - 196),
                                             GUILayout.Height(Mathf.Max(61.8f,
-                                                20.6f * ZSaverSettings.Instance.componentBlackList.Count))))
+                                                20.6f * ZSerializerSettings.Instance.componentBlackList.Count))))
                                     {
                                         scrollPos = scrollView.scrollPosition;
-                                        foreach (var componentName in ZSaverSettings.Instance
+                                        foreach (var componentName in ZSerializerSettings.Instance
                                             .componentBlackList[selectedType]
                                             .componentNames)
                                         {
@@ -778,13 +778,13 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
                         if (GUILayout.Button("Delete Blacklist"))
                         {
-                            ZSaverSettings.Instance.componentBlackList.Clear();
-                            EditorUtility.SetDirty(ZSaverSettings.Instance);
+                            ZSerializerSettings.Instance.componentBlackList.Clear();
+                            EditorUtility.SetDirty(ZSerializerSettings.Instance);
                             AssetDatabase.SaveAssets();
                             selectedType = 0;
                             GenerateUnityComponentClasses();
                         }
-                        if (GUILayout.Button("Open Fine Tuner"))
+                        if (GUILayout.Button("Open ZSerializer Configurator"))
                         {
                             ZSerializerFineTuner.ShowWindow();
                         }
@@ -801,12 +801,12 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
                     break;
                 // case 3:
-                //     for (var i = 0; i < ZSaverSettings.Instance.defaultOnDictionary.keyList.Count; i++)
+                //     for (var i = 0; i < ZSerializerSettings.Instance.defaultOnDictionary.keyList.Count; i++)
                 //     {
                 //         using (new GUILayout.HorizontalScope())
                 //         {
-                //             GUILayout.Label(ZSaverSettings.Instance.defaultOnDictionary.keyList[i], GUILayout.Width(200));//
-                //             GUILayout.Label(ZSaverSettings.Instance.defaultOnDictionary.valueList[i].ToString());
+                //             GUILayout.Label(ZSerializerSettings.Instance.defaultOnDictionary.keyList[i], GUILayout.Width(200));//
+                //             GUILayout.Label(ZSerializerSettings.Instance.defaultOnDictionary.valueList[i].ToString());
                 //         }    
                 //     }
                 //     break;
@@ -814,12 +814,12 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
         }
     }
 
-    [MenuItem("Tools/ZSave/Generate Unity Component ZSerializers")]
+    [MenuItem("Tools/ZSerializer/Generate Unity Component ZSerializers")]
     public static void GenerateUnityComponentClasses()
     {
         string longScript = "";
 
-        IEnumerable<Type> types = ZSave.ComponentSerializableTypes;
+        IEnumerable<Type> types = ZSerialize.ComponentSerializableTypes;
         foreach (var type in types)
         {
             if (type != typeof(PersistentGameObject))
@@ -831,7 +831,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
                 foreach (var propertyInfo in type
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(ZSave.PropertyIsSuitableForZSerializer))
+                    .Where(ZSerialize.PropertyIsSuitableForZSerializer))
                 {
 
                     longScript +=
@@ -875,17 +875,13 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
                     }
                 }
 
-                if (type == typeof(PersistentGameObject))
-                    longScript +=
-                        $"    public ZSaver.GameObjectData gameObjectData;\n";
-
                 longScript += "    public " + type.Name + "ZSerializer (" + type.FullName + " " + type.Name +
                               "Instance) : base(" +
                               type.Name + "Instance.gameObject, " + type.Name + "Instance ) {\n";
 
                 foreach (var propertyInfo in type
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(ZSave.PropertyIsSuitableForZSerializer))
+                    .Where(ZSerialize.PropertyIsSuitableForZSerializer))
                 {
                     longScript +=
                         $"        " + propertyInfo.Name + " = " + type.Name + "Instance." + propertyInfo.Name + ";\n";
@@ -907,7 +903,7 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 ";                
                 foreach (var propertyInfo in type
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(ZSave.PropertyIsSuitableForZSerializer))
+                    .Where(ZSerialize.PropertyIsSuitableForZSerializer))
                 {
                     longScript +=
                         $"        component." + propertyInfo.Name + " = " + propertyInfo.Name + ";\n";
@@ -930,6 +926,6 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
         sw.Close();
 
         AssetDatabase.Refresh();
-        ZSave.Log("Unity Component ZSerializers built");
+        ZSerialize.Log("Unity Component ZSerializers built");
     }
 }

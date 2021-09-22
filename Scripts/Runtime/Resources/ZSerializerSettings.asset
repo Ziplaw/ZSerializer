@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1efd7af9bd4fdc48a69c60405eb42f4, type: 3}
-  m_Name: ZSaverSettings
+  m_Name: ZSerializerSettings
   m_EditorClassIdentifier: 
   packageInitialized: 1
   debugMode: 1

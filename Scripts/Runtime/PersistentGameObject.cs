@@ -55,7 +55,7 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
 
     private static void ComponentListChanged()
     {
-        if (ZSaverSettings.Instance.advancedSerialization && Selection.activeGameObject && !Application.isPlaying)
+        if (ZSerializerSettings.Instance.advancedSerialization && Selection.activeGameObject && !Application.isPlaying)
         {
             PersistentGameObject persistentGameObject = Selection.activeGameObject.GetComponent<PersistentGameObject>();
             if (persistentGameObject)
@@ -72,7 +72,7 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
                 }
 
                 foreach (var component in persistentGameObject.GetComponents<Component>().Where(c =>
-                    !(c is PersistentGameObject) && ZSave.ComponentSerializableTypes.Contains(c.GetType())))
+                    !(c is PersistentGameObject) && ZSerialize.ComponentSerializableTypes.Contains(c.GetType())))
                 {
                     if (persistentGameObject.serializedComponents.All(sc => sc.instanceID != component.GetInstanceID()))
                     {
@@ -89,10 +89,10 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
 
     public void Reset()
     {
-        if (ZSaverSettings.Instance.advancedSerialization)
+        if (ZSerializerSettings.Instance.advancedSerialization)
         {
             foreach (var component in GetComponents<Component>().Where(c =>
-                !(c is PersistentGameObject) && ZSave.ComponentSerializableTypes.Contains(c.GetType())))
+                !(c is PersistentGameObject) && ZSerialize.ComponentSerializableTypes.Contains(c.GetType())))
             {
                 serializedComponents.Add(new SerializedComponent(component, PersistentType.Everything));
             }
