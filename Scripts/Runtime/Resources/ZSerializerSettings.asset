@@ -18,7 +18,7 @@ MonoBehaviour:
   selectedSaveFile: 0
   encryptData: 0
   stableSave: 1
-  advancedSerialization: 0
+  advancedSerialization: 1
   componentBlackList:
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
@@ -126,18 +126,31 @@ MonoBehaviour:
   - 
   - 
   - 
-  defaultOnDictionary:
-    keyList:
-    - A, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    - B, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    - C, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    - FrameTester, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    - SerializationTest, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    - BallMover, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    - GameManager, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    - Pin, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    - DifferentAssemblyMono, DifferentAssembly, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-    - ChildTest, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    - ParentTest, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    valueList: 0100010101010101010101
+  componentDataDictionary:
+    typeDatas:
+      keys:
+      - A, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - ChildTest, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - ParentTest, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - C, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - B, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - BallMover, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - GameManager, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - Pin, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      values:
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 2
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0

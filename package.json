@@ -1,7 +1,7 @@
 {
-  "name": "com.ziplaw.zsaver",
-  "displayName": "ZSaver",
-  "version": "2.1.0",
+  "name": "com.ziplaw.zserializer",
+  "displayName": "ZSerializer",
+  "version": "2.2.0",
   "unity": "2020.3",
   "description": "A fast and easy way to serialize anything in Unity",
   "author": {

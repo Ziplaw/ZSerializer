@@ -1,8 +1,8 @@
 [System.Serializable]
 public class BallMoverZSerializer : ZSerializer.ZSerializer<BallMover>
 {
-    public System.Int32 groupID;
-    public System.Boolean autoSync;
+    int groupID;
+    bool autoSync;
 
     public BallMoverZSerializer(BallMover BallMoverInstance) : base(BallMoverInstance.gameObject, BallMoverInstance)
     {
@@ -11,8 +11,8 @@ public class BallMoverZSerializer : ZSerializer.ZSerializer<BallMover>
     }
 
     public override void RestoreValues(BallMover component)
-  {
-      component.GroupID = groupID;
-      component.AutoSync = autoSync;
+    {
+         component.GroupID = groupID;
+         component.AutoSync = autoSync;
     }
 }

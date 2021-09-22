@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ZSerializer
 {
@@ -58,61 +59,49 @@ namespace ZSerializer
             string.Empty
         };
 
-        [HideInInspector]public SerializableDictionary defaultOnDictionary = new SerializableDictionary();
+        internal ComponentDataDictionary componentDataDictionary = new ComponentDataDictionary();
 
-        public bool GetDefaultOnValue<T>() where T : PersistentMonoBehaviour
-        {
-            if(!defaultOnDictionary.ContainsKey(typeof(T))) defaultOnDictionary.Add(typeof(T),true);
-            return defaultOnDictionary.GetElementAt(typeof(T));
-        }
         
-        public bool GetDefaultOnValue(Type type)
+        [Serializable]
+        public class ComponentDataDictionary
         {
-            if(!defaultOnDictionary.ContainsKey(type)) defaultOnDictionary.Add(type,true);
-            return defaultOnDictionary.GetElementAt(type);
-        }
-        
-        public void SetDefaultOnValue<T>(bool value) where T : PersistentMonoBehaviour
-        {
-            if (!defaultOnDictionary.ContainsKey(typeof(T))) defaultOnDictionary.Add(typeof(T), value);
-            else defaultOnDictionary.SetElementAt(typeof(T), value);
-        }
-        
-        public void SetDefaultOnValue(Type type, bool value)
-        {
-            if(!defaultOnDictionary.ContainsKey(type)) defaultOnDictionary.Add(type,value);
-            else defaultOnDictionary.SetElementAt(type, value);
+            public PersistentComponentTypeDataDictionary typeDatas = new PersistentComponentTypeDataDictionary();
+            
+            public PersistentComponentTypeData this[Type t] => typeDatas[t];
         }
 
         [Serializable]
-        public class SerializableDictionary
+        public class PersistentComponentTypeDataDictionary
         {
-            public List<string> keyList = new List<string>();
-            public List<bool> valueList = new List<bool>();
+            public List<string> keys = new List<string>();
+            public List<PersistentComponentTypeData> values = new List<PersistentComponentTypeData>();
 
-            public bool ContainsKey(Type type)
+            public PersistentComponentTypeData this[Type t]
             {
-                return keyList.Contains(type.AssemblyQualifiedName);
-            }
-
-            public void Add(Type key, bool value)
-            {
-                keyList.Add(key.AssemblyQualifiedName);
-                valueList.Add(value);
-            }
-
-            public bool GetElementAt(Type key)
-            {
-                return valueList[keyList.IndexOf(key.AssemblyQualifiedName)];
-            }
-            
-            public bool SetElementAt(Type key, bool value)
-            {
-                return valueList[keyList.IndexOf(key.AssemblyQualifiedName)] = value;
+                get
+                {
+                    if (keys.Contains(t.AssemblyQualifiedName)) return values[keys.IndexOf(t.AssemblyQualifiedName)];
+                    keys.Add(t.AssemblyQualifiedName);
+                    values.Add(new PersistentComponentTypeData());
+                    return values[keys.IndexOf(t.AssemblyQualifiedName)];
+                }
             }
         }
 
-
+        [Serializable]
+        public class PersistentComponentTypeData
+        {
+            public bool isOn;
+            public int groupID;
+            
+            public PersistentComponentTypeData()
+            {
+                isOn = true;
+                groupID = 0;
+            }
+        } 
+        
+        
         [RuntimeInitializeOnLoadMethod]
         static void Init()
         {
