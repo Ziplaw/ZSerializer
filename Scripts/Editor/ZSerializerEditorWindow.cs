@@ -39,6 +39,7 @@ namespace ZSerializer.Editor
         private int selectedMenu;
         private int selectedType;
         private static ZSerializerStyler styler;
+        private int selectedTypeToShowSettings = -1;
 
         private static Class[] classes;
 
@@ -132,27 +133,28 @@ namespace ZSerializer.Editor
                         {
                             if (classes.Length == 0)
                             {
-                                GUILayout.Label("You have no persistent components\nMake one of your components inherit from PersistentMonoBehaviour for it to become persistent!",new GUIStyle("label")
-                                {
-                                    alignment = TextAnchor.MiddleCenter,
-                                    wordWrap = true
-                                });
+                                GUILayout.Label(
+                                    "You have no present persistent components in the current Scene\nMake one of your components inherit from PersistentMonoBehaviour for it to become persistent!",
+                                    new GUIStyle("label")
+                                    {
+                                        alignment = TextAnchor.MiddleCenter,
+                                        wordWrap = true
+                                    });
                             }
                             else
-                                foreach (var classInstance in classes)
+                                for (var i = 0; i < classes.Length; i++)
                                 {
+                                    var classInstance = classes[i];
                                     GUILayout.Space(-15);
                                     using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
                                         GUILayout.Height(32)))
                                     {
                                         string color = classInstance.state == ClassState.Valid
-                                            ?
-                                            ZSerializerSettings.Instance.GetDefaultOnValue(classInstance.classType)
-                                                ?
-                                                "29CF42"
+                                            ? ZSerializerSettings.Instance
+                                                .componentDataDictionary[classInstance.classType].isOn
+                                                ? "29CF42"
                                                 : "999999"
-                                            :
-                                            classInstance.state == ClassState.NeedsRebuilding
+                                            : classInstance.state == ClassState.NeedsRebuilding
                                                 ? "FFC107"
                                                 : "FF625A";
 
@@ -181,6 +183,41 @@ namespace ZSerializer.Editor
                                         }
 
                                         ZSerializerEditor.BuildWindowValidityButton(classInstance.classType, styler);
+
+                                        if (GUILayout.Button(styler.cogWheel,
+                                            GUILayout.MaxHeight(32), GUILayout.MaxWidth(32)))
+                                        {
+                                            selectedTypeToShowSettings = selectedTypeToShowSettings == i ? -1 : i;
+                                        }
+                                    }
+
+                                    using (new GUILayout.HorizontalScope())
+                                    {
+                                        if (selectedTypeToShowSettings == i)
+                                        {
+                                            GUILayout.Label("Save Group", GUILayout.MaxWidth(80));
+                                            int newValue = EditorGUILayout.Popup(
+                                                ZSerializerSettings.Instance
+                                                    .componentDataDictionary[classInstance.classType].groupID,
+                                                ZSerializerSettings.Instance.saveGroups
+                                                    .Where(s => !string.IsNullOrEmpty(s)).ToArray());
+                                            if (newValue != ZSerializerSettings.Instance
+                                                .componentDataDictionary[classInstance.classType].groupID)
+                                            {
+                                                ZSerializerSettings.Instance
+                                                        .componentDataDictionary[classInstance.classType].groupID =
+                                                    newValue;
+                                                foreach (var obj in FindObjectsOfType(classInstance.classType))
+                                                {
+                                                    var o = (PersistentMonoBehaviour)obj;
+                                                    if (o.autoSync)
+                                                    {
+                                                        o.groupID = newValue;
+                                                        EditorUtility.SetDirty(o);
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
 

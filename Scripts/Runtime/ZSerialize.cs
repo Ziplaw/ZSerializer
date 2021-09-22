@@ -114,7 +114,8 @@ namespace ZSerializer
                    fieldInfo.GetCustomAttribute<NonZSerialized>() == null &&
                    fieldInfo.CanRead &&
                    fieldInfo.CanWrite &&
-                   !ZSerializerSettings.Instance.componentBlackList.IsInBlackList(fieldInfo.ReflectedType, fieldInfo.Name) &&
+                   !ZSerializerSettings.Instance.componentBlackList.IsInBlackList(fieldInfo.ReflectedType,
+                       fieldInfo.Name) &&
                    fieldInfo.Name != "material" &&
                    fieldInfo.Name != "materials" &&
                    fieldInfo.Name != "sharedMaterial" &&
@@ -130,7 +131,6 @@ namespace ZSerializer
         [RuntimeInitializeOnLoadMethod]
         internal static void
             Init() //This runs when the game starts, it sets up Instance ID restoration for scene loading
-
         {
             RecordAllPersistentIDs();
 
@@ -146,6 +146,25 @@ namespace ZSerializer
 
             persistentTypes = GetPersistentTypes().ToArray();
             serializableComponentTypes = ComponentSerializableTypes;
+        }
+        /// <summary>
+        /// Get a Save Group's ID from its name
+        /// </summary>
+        /// <param name="name">The name of the SaveGroup</param>
+        /// <returns>Save Group's ID</returns>
+        public static int NameToSaveGroupID(string name)
+        {
+            return ZSerializerSettings.Instance.saveGroups.IndexOf(name);
+        }
+        
+        /// <summary>
+        /// Get a SaveGroup's name from its ID
+        /// </summary>
+        /// <param name="id">The ID of the Save Group</param>
+        /// <returns>Save Group's Name</returns>
+        public static string SaveGroupIDToName(int id)
+        {
+            return ZSerializerSettings.Instance.saveGroups[id];
         }
 
         //internal functions to Log stuff for Debug Mode
@@ -590,7 +609,7 @@ namespace ZSerializer
                 {
                     Component componentInGameObject =
                         (Component)zSerializerType.GetField("_component").GetValue(jsonObjects[i]);
-                    
+
                     RestoreValues(componentInGameObject, jsonObjects[i]);
 
                     // if (componentInGameObject is PersistentMonoBehaviour ||
@@ -807,7 +826,8 @@ namespace ZSerializer
         static void FillTemporaryJsonTuples(int[] idList)
         {
             if (tempTuples == null || tempTuples.Length == 0)
-                tempTuples = new (Type, string)[ZSerializerSettings.Instance.saveGroups.Where(s => !string.IsNullOrEmpty(s))
+                tempTuples = new (Type, string)[ZSerializerSettings.Instance.saveGroups
+                    .Where(s => !string.IsNullOrEmpty(s))
                     .Max(sg => ZSerializerSettings.Instance.saveGroups.IndexOf(sg)) + 1][];
 
             foreach (var i in idList)
@@ -872,7 +892,8 @@ namespace ZSerializer
                 // LoadAllObjects();
                 LoadReferences(currentGroupID);
 
-                Log($"Deserialization of group \"{ZSerializerSettings.Instance.saveGroups[currentGroupID]}\" ended in: " +
+                Log(
+                    $"Deserialization of group \"{ZSerializerSettings.Instance.saveGroups[currentGroupID]}\" ended in: " +
                     (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                     (Time.frameCount - frameCount) + " frames");
 

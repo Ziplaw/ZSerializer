@@ -37,6 +37,7 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
     [NonZSerialized] public bool showSettings;
     [SerializeField] [HideInInspector] private int groupID;
     public List<SerializedComponent> serializedComponents = new List<SerializedComponent>();
+
     public int GroupID
     {
         get => groupID;
@@ -101,15 +102,14 @@ public class PersistentGameObject : MonoBehaviour, ISaveGroupID
 
     public T AddComponent<T>(PersistentType persistentType) where T : Component
     {
-        var c = gameObject.AddComponent<T>();
-        serializedComponents.Add(new SerializedComponent(c, persistentType));
-        return c;
+        return (T)AddComponent(typeof(T), persistentType);
     }
 
     public Component AddComponent(Type type, PersistentType persistentType)
     {
         var c = gameObject.AddComponent(type);
-        serializedComponents.Add(new SerializedComponent(c, persistentType));
+        if (typeof(MonoBehaviour).IsAssignableFrom(type))
+            serializedComponents.Add(new SerializedComponent(c, persistentType));
         return c;
     }
 

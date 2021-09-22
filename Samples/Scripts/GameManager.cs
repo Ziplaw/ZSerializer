@@ -11,9 +11,28 @@ public class GameManager : PersistentMonoBehaviour
 
     public BallMover ballMover;
 
+    public void MySaveFunction()
+    {
+        
+        ZSerialize.SaveAll();
+        ZSerialize.LoadAll();
+        
+    }
+    
+    public void MyLoadFunction()
+    {
+        ZSerialize.LoadAll(ZSerialize.NameToSaveGroupID("Settings"));
+    }
+    
+    public void MyAddComponentFunction()
+    {
+        GetComponent<PersistentGameObject>().AddComponent<BoxCollider>(PersistentType.Component);
+    }
+
     private void Start()
     {
         ballMover = FindObjectOfType<BallMover>();
+        // MySaveFunction();
     }
 
     private void OnGUI()
