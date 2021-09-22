@@ -290,47 +290,6 @@ namespace ZSerializer
             ZSerializer.GetType().GetMethod("RestoreValues").Invoke(ZSerializer, new object[] { _component });
         }
 
-        //Copies the fields of a ZSerializer to the fields of a component
-        static void CopyFieldsToFields(Type zSaverType, Type componentType, Component _component, object zSaver)
-        {
-            FieldInfo[] zSaverFields = zSaverType.GetFields();
-            var componentFields = componentType.GetFields(BindingFlags.Public | BindingFlags.NonPublic |
-                                                          BindingFlags.Instance | BindingFlags.Static).ToList();
-
-            componentFields.AddRange(componentType.BaseType.GetFields(BindingFlags.NonPublic |
-                                                                      BindingFlags.Instance));
-
-            for (var i = 0; i < zSaverFields.Length; i++)
-            {
-                var fieldInfo = componentFields.FirstOrDefault(f => f.Name == zSaverFields[i].Name);
-                fieldInfo?.SetValue(_component, zSaverFields[i].GetValue(zSaver));
-            }
-        }
-
-        //Copies the fields of a ZSerializer to the properties of a component
-        static void CopyFieldsToProperties(Type componentType, Component c, object jsonObject)
-        {
-            FieldInfo[] fieldInfos = jsonObject.GetType().GetFields(BindingFlags.DeclaredOnly |
-                                                                    BindingFlags.Public |
-                                                                    BindingFlags.Instance);
-
-
-            var propertyInfos = componentType.GetProperties()
-                .Where(p => fieldInfos.Any(f => f.Name == p.Name)).ToList();
-
-            foreach (var p in propertyInfos)
-            {
-            }
-
-            for (int j = 0; j < fieldInfos.Length; j++)
-            {
-                if (fieldInfos[j].Name == propertyInfos[j].Name)
-                    propertyInfos[j].SetValue(c, fieldInfos[j].GetValue(jsonObject));
-                else
-                    LogError($"Tried to assign {fieldInfos[j]} to {propertyInfos[j]}");
-            }
-        }
-
         private static List<string> saveFiles;
 
         //Updates json files changing a specific string for another
