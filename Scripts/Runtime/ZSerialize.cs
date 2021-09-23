@@ -40,14 +40,16 @@ namespace ZSerializer
         internal static int currentGroupID = -1;
         public static bool isSaving;
         internal static (Type, string)[][] tempTuples;
-        
+
         private static List<string> saveFiles;
+
         //Assemblies in which Unity Components are located
         private static List<string> unityComponentAssemblies = new List<string>();
+
         //All fields allowed to be added to the Serializable Unity Components list
         private static IEnumerable<Type> serializableComponentTypes;
 
-        
+
         //Cached methods to be invoked dynamically during serialization
         private static MethodInfo castMethod = typeof(Enumerable).GetMethod("Cast");
         private static MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray");
@@ -79,7 +81,7 @@ namespace ZSerializer
                 }
             }
         }
-        
+
         internal static IEnumerable<Type> ComponentSerializableTypes
         {
             get
@@ -118,7 +120,8 @@ namespace ZSerializer
         #region HelperFunctions
 
         [RuntimeInitializeOnLoadMethod]
-        internal static void Init() //This runs when the game starts, it sets up Instance ID restoration for scene loading
+        internal static void
+            Init() //This runs when the game starts, it sets up Instance ID restoration for scene loading
         {
             RecordAllPersistentIDs();
 
@@ -134,7 +137,7 @@ namespace ZSerializer
 
             serializableComponentTypes = ComponentSerializableTypes;
         }
-        
+
         /// <summary>
         /// Get a Save Group's ID from its name
         /// </summary>
@@ -144,7 +147,7 @@ namespace ZSerializer
         {
             return ZSerializerSettings.Instance.saveGroups.IndexOf(name);
         }
-        
+
         /// <summary>
         /// Get a SaveGroup's name from its ID
         /// </summary>
@@ -189,7 +192,7 @@ namespace ZSerializer
         {
             var componentTypes = new List<Type>();
 
-            if (Object.FindObjectOfType<PersistentGameObject>())
+            if (Object.FindObjectsOfType<PersistentGameObject>().Where(c => c.GroupID == currentGroupID).Any())
                 componentTypes.Add(typeof(PersistentGameObject));
 
             foreach (var persistentGameObject in objects)
@@ -359,9 +362,9 @@ namespace ZSerializer
         //Saves all persistent GameObjects and all of its attached unity components
         static IEnumerator SaveAllPersistentGameObjects()
         {
-            IEnumerable<PersistentGameObject> objects = currentGroupID == -1
-                ? Object.FindObjectsOfType<PersistentGameObject>()
-                : Object.FindObjectsOfType<PersistentGameObject>().Where(t => t.GroupID == currentGroupID);
+            IEnumerable<PersistentGameObject> objects = 
+                Object.FindObjectsOfType<PersistentGameObject>()
+                .Where(t => t.GroupID == currentGroupID);
 
             var componentTypes = GetAllPersistentComponents(objects);
 
@@ -503,7 +506,9 @@ namespace ZSerializer
                    unityComponentAssemblies
                        .Select(s =>
                            Assembly.Load(s).GetType("UnityEngine." + ZSerializerType.Name.Replace("ZSerializer", "")))
-                       .First(t => t != null);
+                       .FirstOrDefault(t => t != null) /*??
+                   Type.GetType("PersistentGameObjectZSerializer, com.Ziplaw.ZSaver.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null")*/
+                ;
         }
 
         static void LoadComponents(int tupleID)
@@ -514,7 +519,7 @@ namespace ZSerializer
                 Type realType = GetTypeFromZSerializerType(tuple.Item1);
                 Log("Deserializing " + realType + "s");
                 if (realType == null)
-                    Debug.LogWarning(
+                    Debug.LogError(
                         "ZSerializer type not found, probably because you added ZSerializer somewhere in the name of the class");
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(tuple.Item1);
@@ -634,7 +639,6 @@ namespace ZSerializer
             }
         }
 
-        
 
         /// <summary>
         /// Serialize all Persistent components and GameObjects on the current scene to the selected save file
@@ -715,7 +719,7 @@ namespace ZSerializer
             {
                 currentGroupID = idList[i];
                 LogWarning("Saving data on Group: " + ZSerializerSettings.Instance.saveGroups[currentGroupID]);
-
+                unityComponentAssemblies.Clear();
 
                 string[] files = Directory.GetFiles(GetFilePath(""));
                 foreach (string file in files)

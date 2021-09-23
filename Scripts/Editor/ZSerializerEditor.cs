@@ -139,8 +139,8 @@ public static class ZSerializerEditor
             }
         }
 
-        script += @"    int groupID;
-    bool autoSync;
+        script += @"    public int groupID;
+    public bool autoSync;
 ";
 
         string className = type.Name + "Instance";
@@ -231,7 +231,13 @@ public static class ZSerializerEditor
 using ZSerializer.Editor;
 
 [CustomEditor(typeof(" + type.Name + @"))]
-public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.Name + @"> { }";
+public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.Name + @"> 
+{
+    public override void OnInspectorGUI()
+    {
+        DrawPersistentMonoBehaviourInspector();
+    }
+}";
 
 
         string newPath = new string((new string(path.Reverse().ToArray())).Substring(path.Split('/').Last().Length)
@@ -269,18 +275,14 @@ public class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.N
 
         new Color(0, 0, 0, 1);
 
-        var currentType = type;
+        while (type.BaseType != typeof(MonoBehaviour))
+        {
+            fieldsType.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(f =>
+                f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null));
+            type = type.BaseType;
+        }
 
-        // while (type.BaseType != typeof(MonoBehaviour))
-        // {
-        //     fieldsType.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(f =>
-        //         f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null));
-        //     type = type.BaseType;
-        // }
-        //
-        // type = currentType;
-
-        if (fieldsZSerializer.Count == fieldsType.Count - 0)
+        if (fieldsZSerializer.Count == fieldsType.Count)
         {
             for (int j = 0; j < fieldsZSerializer.Count; j++)
             {

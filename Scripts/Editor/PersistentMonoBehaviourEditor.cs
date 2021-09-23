@@ -14,13 +14,20 @@ namespace ZSerializer.Editor
             styler = new ZSerializerStyler();
         }
 
-        public override void OnInspectorGUI()
+        public void DrawPersistentMonoBehaviourInspector()
         {
-            styler ??= new ZSerializerStyler();
-            if (manager is PersistentMonoBehaviour)
-                ZSerializerEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings,
-                    ZSerializerEditor.ShowGroupIDSettings);
-            if (!manager.showSettings) base.OnInspectorGUI();
+            if (manager.isOn || ZSerializerSettings.Instance.componentDataDictionary[typeof(T)].isOn)
+            {
+                styler ??= new ZSerializerStyler();
+                if (manager is PersistentMonoBehaviour)
+                    ZSerializerEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings,
+                        ZSerializerEditor.ShowGroupIDSettings);
+                if (!manager.showSettings) base.OnInspectorGUI();
+            }
+            else
+            {
+                base.OnInspectorGUI();
+            }
         }
     }
 }

@@ -6,8 +6,8 @@ public class GameManagerZSerializer : ZSerializer.ZSerializer<GameManager>
     public System.String playerName;
     public UnityEngine.Vector3 position;
     public BallMover ballMover;
-    int groupID;
-    bool autoSync;
+    public int groupID;
+    public bool autoSync;
 
     public GameManagerZSerializer(GameManager GameManagerInstance) : base(GameManagerInstance.gameObject, GameManagerInstance)
     {

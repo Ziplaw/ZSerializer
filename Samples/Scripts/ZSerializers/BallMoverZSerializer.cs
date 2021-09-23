@@ -1,8 +1,8 @@
 [System.Serializable]
 public class BallMoverZSerializer : ZSerializer.ZSerializer<BallMover>
 {
-    int groupID;
-    bool autoSync;
+    public int groupID;
+    public bool autoSync;
 
     public BallMoverZSerializer(BallMover BallMoverInstance) : base(BallMoverInstance.gameObject, BallMoverInstance)
     {

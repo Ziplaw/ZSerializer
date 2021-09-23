@@ -2,8 +2,8 @@
 public class PinZSerializer : ZSerializer.ZSerializer<Pin>
 {
     public System.Int32 hits;
-    int groupID;
-    bool autoSync;
+    public int groupID;
+    public bool autoSync;
 
     public PinZSerializer(Pin PinInstance) : base(PinInstance.gameObject, PinInstance)
     {
