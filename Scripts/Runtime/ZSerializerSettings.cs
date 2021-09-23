@@ -31,7 +31,7 @@ namespace ZSerializer
         public bool autoRebuildZSerializers;
         public int selectedSaveFile;
         public bool encryptData;
-        public bool stableSave;
+        public bool stableSave = true;
         public bool advancedSerialization;
         [HideInInspector] public List<SerializableComponentBlackList> componentBlackList;
 

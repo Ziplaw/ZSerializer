@@ -657,8 +657,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 1
   isOn: 1
-  groupID: 2
-  autoSync: 0
+  groupID: 0
+  autoSync: 1
 --- !u!54 &469202270
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -693,19 +693,19 @@ MonoBehaviour:
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
-    instanceID: 26804
+    instanceID: 28832
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
-    instanceID: 26802
+    instanceID: 28830
   - typeFullName: UnityEngine.SphereCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
-    instanceID: 26800
+    instanceID: 28828
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
-    instanceID: 26810
+    instanceID: 28838
 --- !u!1 &608016568
 GameObject:
   m_ObjectHideFlags: 0
