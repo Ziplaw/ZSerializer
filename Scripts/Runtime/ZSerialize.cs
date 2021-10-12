@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using ZSerializer.Internal;
 using Object = UnityEngine.Object;
 
 [assembly: InternalsVisibleTo("com.Ziplaw.ZSaver.Editor")]
@@ -374,14 +375,18 @@ namespace ZSerializer
                     GetComponentsOfGivenType(objects, componentType),
                     Assembly.Load(componentType == typeof(PersistentGameObject)
                         ? "com.Ziplaw.ZSaver.Runtime"
-                        : mainAssembly).GetType(componentType.Name + "ZSerializer")));
+                        : mainAssembly).GetType("ZSerializer." + componentType.Name + "ZSerializer")));
             }
         }
 
         //Dynamically serialize a given list of components 
         static IEnumerator SerializeComponents(IEnumerable<Component> components, Type zSaverType)
         {
-            if (zSaverType == null) yield return new WaitForEndOfFrame();
+            if (zSaverType == null)
+            {
+                LogError("No ZSerializer found for this type");
+                yield return new WaitForEndOfFrame();
+            }
 
             object[] zSavers = CreateArrayOfZSerializers(components, zSaverType);
 
@@ -502,13 +507,12 @@ namespace ZSerializer
 
         static Type GetTypeFromZSerializerType(Type ZSerializerType)
         {
+            if (ZSerializerType == typeof(PersistentGameObjectZSerializer)) return typeof(PersistentGameObject);
             return ZSerializerType.Assembly.GetType(ZSerializerType.Name.Replace("ZSerializer", "")) ??
                    unityComponentAssemblies
                        .Select(s =>
                            Assembly.Load(s).GetType("UnityEngine." + ZSerializerType.Name.Replace("ZSerializer", "")))
-                       .FirstOrDefault(t => t != null) /*??
-                   Type.GetType("PersistentGameObjectZSerializer, com.Ziplaw.ZSaver.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null")*/
-                ;
+                       .FirstOrDefault(t => t != null);
         }
 
         static void LoadComponents(int tupleID)

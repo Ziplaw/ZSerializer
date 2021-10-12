@@ -811,7 +811,9 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         [MenuItem("Tools/ZSerializer/Generate Unity Component ZSerializers")]
         public static void GenerateUnityComponentClasses()
         {
-            string longScript = "";
+            string longScript = @"namespace ZSerializer {
+
+";
 
             IEnumerable<Type> types = ZSerialize.ComponentSerializableTypes;
             foreach (var type in types)
@@ -911,11 +913,13 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 }
             }
 
-            if (!Directory.Exists(Application.dataPath + "/ZResources"))
-                Directory.CreateDirectory(Application.dataPath + "/ZResources");
+            longScript += "}";
+
+            if (!Directory.Exists(Application.dataPath + "/ZResources/ZSerializer"))
+                Directory.CreateDirectory(Application.dataPath + "/ZResources/ZSerializer");
 
             FileStream fs = new FileStream(
-                Application.dataPath + "/ZResources/UnityComponentZSerializers.cs",
+                Application.dataPath + "/ZResources/ZSerializer/UnityComponentZSerializers.cs",
                 FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
 
