@@ -13,13 +13,53 @@ MonoBehaviour:
   m_Name: ZSerializerSettings
   m_EditorClassIdentifier: 
   packageInitialized: 1
-  debugMode: 0
+  debugMode: 1
   autoRebuildZSerializers: 0
   selectedSaveFile: 0
   encryptData: 0
   stableSave: 1
-  advancedSerialization: 1
-  componentBlackList: []
+  advancedSerialization: 0
+  componentBlackList:
+  - typeFullName: UnityEngine.TrailRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - time
+    - startWidth
+    - endWidth
+    - widthMultiplier
+    - autodestruct
+    - emitting
+    - numCornerVertices
+    - numCapVertices
+    - minVertexDistance
+    - startColor
+    - endColor
+    - shadowBias
+    - generateLightingData
+    - textureMode
+    - alignment
+    - colorGradient
+    - enabled
+    - shadowCastingMode
+    - receiveShadows
+    - forceRenderingOff
+    - motionVectorGenerationMode
+    - lightProbeUsage
+    - reflectionProbeUsage
+    - renderingLayerMask
+    - rendererPriority
+    - rayTracingMode
+    - sortingLayerName
+    - sortingLayerID
+    - sortingOrder
+    - allowOcclusionWhenDynamic
+    - lightProbeProxyVolumeOverride
+    - probeAnchor
+    - lightmapIndex
+    - realtimeLightmapIndex
+    - lightmapScaleOffset
+    - realtimeLightmapScaleOffset
+    - hideFlags
   saveGroups:
   - Main
   - Settings

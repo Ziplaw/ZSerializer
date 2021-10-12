@@ -33,7 +33,7 @@ namespace ZSerializer
         }
     }
 
-    public class ZSerialize
+    public sealed class ZSerialize
     {
         #region Big boys
 
@@ -576,6 +576,7 @@ namespace ZSerializer
 
         static int[] GetIDList()
         {
+            Debug.Log(saveFiles);
             return saveFiles.Select(f =>
             {
                 var split = f.Replace('\\', '/').Split('/');
@@ -782,7 +783,7 @@ namespace ZSerializer
         /// </summary>
         public static void LoadAll(int groupID = -1)
         {
-            saveFiles ??= Directory.GetFiles(GetFilePath("", true), "components.zsave",
+            if(saveFiles == null || saveFiles.Count == 0) saveFiles = Directory.GetFiles(GetFilePath("", true), "components.zsave",
                 SearchOption.AllDirectories).ToList();
 
             currentGroupID = groupID;

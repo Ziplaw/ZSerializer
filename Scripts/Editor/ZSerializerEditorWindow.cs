@@ -58,7 +58,7 @@ namespace ZSerializer.Editor
         [DidReloadScripts]
         private static void Init()
         {
-            if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized)
+            if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized && HasOpenInstances<ZSerializerEditorWindow>())//
             {
                 GetWindow<ZSerializerEditorWindow>().minSize = new Vector2(480, 400);
 

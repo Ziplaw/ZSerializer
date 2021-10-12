@@ -9,58 +9,61 @@ using UnityEditor.Build.Reporting;
 using UnityEngine;
 using ZSerializer;
 
-class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithReport
+namespace ZSerializer.Editor
 {
-    public int callbackOrder => 0;
-    private bool errorCs1061;
-
-    // CALLED BEFORE THE BUILD
-    public void OnPreprocessBuild(BuildReport report)
+    class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
-        Application.logMessageReceived += OnBuildError;
-    }
+        public int callbackOrder => 0;
+        private bool errorCs1061;
 
-    // CALLED DURING BUILD TO CHECK FOR ERRORS
-    private void OnBuildError(string condition, string stacktrace, LogType type)
-    {
-        if (condition.Contains("CS1061")) // BUILD ERROR FOR WHEN USING EDITOR ONLY PROPERTIES ON BUILD 
+        // CALLED BEFORE THE BUILD
+        public void OnPreprocessBuild(BuildReport report)
         {
-            errorCs1061 = true;
-            var split = condition.Split('\'');
-            string typeName = split[1]; //EW
-            string propertyName = split[3]; //EWWWWW
-
-            var componentType =
-                FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
-                    "UnityEngine." + typeName); //THIS MIGHT BREAK IN FUTURE VERSIONS
-            
-            ZSerializerSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
+            Application.logMessageReceived += OnBuildError;
         }
 
-        if (condition.Contains("'Failed'") && errorCs1061)
+        // CALLED DURING BUILD TO CHECK FOR ERRORS
+        private void OnBuildError(string condition, string stacktrace, LogType type)
         {
-            Debug.LogWarning(
-                "Some of your build errors had to do with Editor Only Properties being Serialized, rebuilding Unity Component Serializer");
-            EditorUtility.SetDirty(ZSerializerSettings.Instance);
-            AssetDatabase.SaveAssets();
-            ZSerializerEditor.GenerateUnityComponentClasses();
-            
-        }
-    }
-    
-    internal static Type FindTypeInsideAssemblies(Assembly[] assemblies, string typeName)
-    {
-        var assembly = assemblies.First(a => a.GetType(typeName) != null);
-        return assembly.GetType(typeName);
-    }
-    
-    
+            if (condition.Contains("CS1061")) // BUILD ERROR FOR WHEN USING EDITOR ONLY PROPERTIES ON BUILD 
+            {
+                errorCs1061 = true;
+                var split = condition.Split('\'');
+                string typeName = split[1]; //EW
+                string propertyName = split[3]; //EWWWWW
 
-    // CALLED AFTER THE BUILD
-    public void OnPostprocessBuild(BuildReport report)
-    {
-        // IF BUILD FINISHED AND SUCCEEDED, STOP LOOKING FOR ERRORS
-        Application.logMessageReceived -= OnBuildError;
-            
+                var componentType =
+                    FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
+                        "UnityEngine." + typeName); //THIS MIGHT BREAK IN FUTURE VERSIONS
+
+                ZSerializerSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
+            }
+
+            if (condition.Contains("'Failed'") && errorCs1061)
+            {
+                Debug.LogWarning(
+                    "Some of your build errors had to do with Editor Only Properties being Serialized, rebuilding Unity Component Serializer");
+                EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                AssetDatabase.SaveAssets();
+                ZSerializerEditor.GenerateUnityComponentClasses();
+
+            }
+        }
+
+        internal static Type FindTypeInsideAssemblies(Assembly[] assemblies, string typeName)
+        {
+            var assembly = assemblies.First(a => a.GetType(typeName) != null);
+            return assembly.GetType(typeName);
+        }
+
+
+
+        // CALLED AFTER THE BUILD
+        public void OnPostprocessBuild(BuildReport report)
+        {
+            // IF BUILD FINISHED AND SUCCEEDED, STOP LOOKING FOR ERRORS
+            Application.logMessageReceived -= OnBuildError;
+
+        }
     }
 }

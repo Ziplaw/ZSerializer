@@ -4,7 +4,7 @@ using UnityEngine;
 using ZSerializer;
 using Object = UnityEngine.Object;
 
-namespace ZSerializer
+namespace ZSerializer.Internal
 {
     public abstract class ZSerializer<T> where T : Component
     {

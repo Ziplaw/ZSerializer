@@ -7,7 +7,7 @@ namespace ZSerializer
 {
     // [CreateAssetMenu(fileName = "New ZSerializer Settings", menuName = "ZSerializerSettings", order = 0)]
     [Serializable]
-    public class SerializableComponentBlackList
+    public sealed class SerializableComponentBlackList
     {
         public Type Type => Type.GetType(typeFullName);
         [SerializeField] private string typeFullName;
@@ -20,7 +20,7 @@ namespace ZSerializer
         }
     }
 
-    public class ZSerializerSettings : ScriptableObject
+    public sealed class ZSerializerSettings : ScriptableObject
     {
         private static ZSerializerSettings instance;
         public static ZSerializerSettings Instance => instance ? instance : Resources.Load<ZSerializerSettings>("ZSerializerSettings");
@@ -61,7 +61,7 @@ namespace ZSerializer
 
         
         [Serializable]
-        public class ComponentDataDictionary
+        public sealed class ComponentDataDictionary
         {
             public PersistentComponentTypeDataDictionary typeDatas = new PersistentComponentTypeDataDictionary();
             
@@ -69,7 +69,7 @@ namespace ZSerializer
         }
 
         [Serializable]
-        public class PersistentComponentTypeDataDictionary
+        public sealed class PersistentComponentTypeDataDictionary
         {
             public List<string> keys = new List<string>();
             public List<PersistentComponentTypeData> values = new List<PersistentComponentTypeData>();
@@ -87,7 +87,7 @@ namespace ZSerializer
         }
 
         [Serializable]
-        public class PersistentComponentTypeData
+        public sealed class PersistentComponentTypeData
         {
             public bool isOn;
             public int groupID;

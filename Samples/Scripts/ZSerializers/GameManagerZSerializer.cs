@@ -1,5 +1,5 @@
 [System.Serializable]
-public class GameManagerZSerializer : ZSerializer.ZSerializer<GameManager>
+public class GameManagerZSerializer : ZSerializer.Internal.ZSerializer<GameManager>
 {
     public System.Int32 highScore;
     public System.Int32 currentScore;

@@ -8,11 +8,11 @@ using Object = UnityEngine.Object;
 
 namespace ZSerializer
 {
-    public class NonZSerialized : Attribute
+    public sealed class NonZSerialized : Attribute
     {
     }
 
-    public class ForceZSerialized : Attribute
+    public sealed class ForceZSerialized : Attribute
     {
     }
 
@@ -56,7 +56,7 @@ namespace ZSerializer
         [NonZSerialized, HideInInspector] public bool showSettings;
 
         [NonZSerialized, HideInInspector, SerializeField]
-        internal bool isOn;
+        internal bool isOn = true;
 
         [ForceZSerialized, HideInInspector, SerializeField]
         internal int groupID;

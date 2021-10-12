@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using ZSerializer;
 
 [System.Serializable]
-public class PersistentGameObjectZSerializer : ZSerializer.ZSerializer<PersistentGameObject>
+public sealed class PersistentGameObjectZSerializer : ZSerializer.Internal.ZSerializer<PersistentGameObject>
 {
     public int groupID;
     public System.Boolean enabled;
     public UnityEngine.HideFlags hideFlags;
-    public ZSerializer.GameObjectData gameObjectData;
+    public GameObjectData gameObjectData;
     public List<SerializedComponent> serializedComponents;
     public PersistentGameObjectZSerializer (PersistentGameObject PersistentGameObjectInstance) : base(PersistentGameObjectInstance.gameObject, PersistentGameObjectInstance ) {
         enabled = PersistentGameObjectInstance.enabled;
@@ -16,7 +17,7 @@ public class PersistentGameObjectZSerializer : ZSerializer.ZSerializer<Persisten
         serializedComponents = PersistentGameObjectInstance.serializedComponents;
         groupID = (int) typeof(PersistentGameObject).GetField("groupID", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(PersistentGameObjectInstance);
         
-        gameObjectData =new ZSerializer.GameObjectData()
+        gameObjectData =new GameObjectData()
         {
             loadingOrder = new Vector2Int(PersistentGameObject.CountParents(PersistentGameObjectInstance.transform),PersistentGameObjectInstance.transform.GetSiblingIndex()),
             active = _componentParent.activeSelf,

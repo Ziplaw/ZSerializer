@@ -1,55 +1,59 @@
 using UnityEngine;
 using ZSerializer;
 
-public class ZSerializerStyler
+namespace ZSerializer.Editor
 {
-    public Texture2D notMadeImage;
-    public Texture2D needsRebuildingImage;
-    public Texture2D validImage;
-    public Texture2D offImage;
-    internal Texture2D cogWheel;
-    internal Texture2D refreshImage;
-    private Font mainFont;
-    internal ZSerializerSettings settings;
 
-    public ZSerializerStyler()
+    public sealed class ZSerializerStyler
     {
-        GetEveryResource();
-    }
+        public Texture2D notMadeImage;
+        public Texture2D needsRebuildingImage;
+        public Texture2D validImage;
+        public Texture2D offImage;
+        internal Texture2D cogWheel;
+        internal Texture2D refreshImage;
+        private Font mainFont;
+        internal ZSerializerSettings settings;
 
-    public GUIStyle header;
-
-    public static GUIStyle window
-    {
-        get
+        public ZSerializerStyler()
         {
-            var style = new GUIStyle("window");
-            style.overflow = new RectOffset(style.overflow.left, style.overflow.right, style.overflow.top - 19,
-                style.overflow.bottom);
-            return style;
+            GetEveryResource();
         }
-    }
 
-    public void GetEveryResource()
-    {
-        notMadeImage = Resources.Load<Texture2D>("not_made");
-        validImage = Resources.Load<Texture2D>("valid");
-        needsRebuildingImage = Resources.Load<Texture2D>("needs_rebuilding");
-        offImage = Resources.Load<Texture2D>("off");
-        cogWheel = Resources.Load<Texture2D>("cog");
-        refreshImage = Resources.Load<Texture2D>("Refresh");
+        public GUIStyle header;
 
-        mainFont = Resources.Load<Font>("FugazOne");
-        settings = Resources.Load<ZSerializerSettings>("ZSerializerSettings");
-
-        header = new GUIStyle()
+        public static GUIStyle window
         {
-            // alignment = TextAnchor.MiddleCenter,
-            fontSize = 20, // 15 for comfortaa
-            richText = true,
-            font = mainFont
-        };
+            get
+            {
+                var style = new GUIStyle("window");
+                style.overflow = new RectOffset(style.overflow.left, style.overflow.right, style.overflow.top - 19,
+                    style.overflow.bottom);
+                return style;
+            }
+        }
 
-        header.normal.textColor = Color.white;
+        public void GetEveryResource()
+        {
+            notMadeImage = Resources.Load<Texture2D>("not_made");
+            validImage = Resources.Load<Texture2D>("valid");
+            needsRebuildingImage = Resources.Load<Texture2D>("needs_rebuilding");
+            offImage = Resources.Load<Texture2D>("off");
+            cogWheel = Resources.Load<Texture2D>("cog");
+            refreshImage = Resources.Load<Texture2D>("Refresh");
+
+            mainFont = Resources.Load<Font>("FugazOne");
+            settings = Resources.Load<ZSerializerSettings>("ZSerializerSettings");
+
+            header = new GUIStyle()
+            {
+                // alignment = TextAnchor.MiddleCenter,
+                fontSize = 20, // 15 for comfortaa
+                richText = true,
+                font = mainFont
+            };
+
+            header.normal.textColor = Color.white;
+        }
     }
 }

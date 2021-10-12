@@ -1,5 +1,5 @@
 [System.Serializable]
-public class BallMoverZSerializer : ZSerializer.ZSerializer<BallMover>
+public class BallMoverZSerializer : ZSerializer.Internal.ZSerializer<BallMover>
 {
     public int groupID;
     public bool autoSync;

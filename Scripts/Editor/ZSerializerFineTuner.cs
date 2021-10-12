@@ -3,11 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using UnityEditor;
 using UnityEngine;
 using ZSerializer;
 
-public class ZSerializerFineTuner : EditorWindow
+namespace ZSerializer.Editor
+{
+
+
+    public class ZSerializerFineTuner : EditorWindow
     {
         [MenuItem("Tools/ZSerializer/ZSerializer Configurator")]
         internal static void ShowWindow()
@@ -33,24 +38,24 @@ public class ZSerializerFineTuner : EditorWindow
             searchTypes = "";
             searchComponents = "";
         }
-        
-        Dictionary<string,string> aliases = new Dictionary<string, string>()
+
+        Dictionary<string, string> aliases = new Dictionary<string, string>()
         {
-            {"Object", "object"},  
-            {"String", "string"},  
-            {"Boolean", "bool"},    
-            {"Byte", "byte"},    
-            {"SByte", "sbyte"},   
-            {"Int16", "short"},   
-            {"UInt16", "ushort"},  
-            {"Int32", "int"},     
-            {"UInt32", "uint"},    
-            {"Int64", "long"},    
-            {"UInt64", "ulong"},   
-            {"Single", "float"},   
-            {"Double", "double"},  
-            {"Decimal", "decimal"}, 
-            {"Char", "char"} 
+            { "Object", "object" },
+            { "String", "string" },
+            { "Boolean", "bool" },
+            { "Byte", "byte" },
+            { "SByte", "sbyte" },
+            { "Int16", "short" },
+            { "UInt16", "ushort" },
+            { "Int32", "int" },
+            { "UInt32", "uint" },
+            { "Int64", "long" },
+            { "UInt64", "ulong" },
+            { "Single", "float" },
+            { "Double", "double" },
+            { "Decimal", "decimal" },
+            { "Char", "char" }
         };
 
         private void OnGUI()
@@ -63,7 +68,7 @@ public class ZSerializerFineTuner : EditorWindow
                     scrollPosComponentTypes = scrollView.scrollPosition;
 
                     searchTypes = GUILayout.TextField(searchTypes, GUI.skin.FindStyle("ToolbarSeachTextField"));
-                    
+
                     foreach (var componentType in componentTypes.Where(c =>
                         c.Name.ToLower().Contains(searchTypes.ToLower())))
                     {
@@ -83,13 +88,16 @@ public class ZSerializerFineTuner : EditorWindow
                     {
                         if (selectedType != null)
                         {
-                            searchComponents = GUILayout.TextField(searchComponents, GUI.skin.FindStyle("ToolbarSeachTextField"));
+                            searchComponents = GUILayout.TextField(searchComponents,
+                                GUI.skin.FindStyle("ToolbarSeachTextField"));
                             using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPosComponentProps))
                             {
                                 scrollPosComponentProps = scrollView.scrollPosition;
-                                
-                                int longestPropertyName = selectedType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                    .Where(PropertyIsSuitableForAssignmentNoBlackList).Max(p => p.PropertyType.Name.Length);
+
+                                int longestPropertyName = selectedType
+                                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                    .Where(PropertyIsSuitableForAssignmentNoBlackList)
+                                    .Max(p => p.PropertyType.Name.Length);
 
 
 
@@ -106,23 +114,38 @@ public class ZSerializerFineTuner : EditorWindow
 
                                         Color classOrStruct = new Color(0f, 0.79f, 0.69f);
                                         Color nativeTypes = new Color(0f, 0.55f, 0.85f);
-                                        
-                                        string propertyName = aliases.ContainsKey(propertyInfo.PropertyType.Name) ? aliases[propertyInfo.PropertyType.Name]:propertyInfo.PropertyType.Name;
-                                        
-                                        isWhiteListed = GUILayout.Toggle(isWhiteListed,GUIContent.none, GUILayout.Width(15));
-                                        GUILayout.Label(propertyName,new GUIStyle("label"){normal = new GUIStyleState(){textColor = aliases.ContainsKey(propertyInfo.PropertyType.Name) ? nativeTypes : classOrStruct}}, GUILayout.Width(longestPropertyName * 7));
+
+                                        string propertyName = aliases.ContainsKey(propertyInfo.PropertyType.Name)
+                                            ? aliases[propertyInfo.PropertyType.Name]
+                                            : propertyInfo.PropertyType.Name;
+
+                                        isWhiteListed = GUILayout.Toggle(isWhiteListed, GUIContent.none,
+                                            GUILayout.Width(15));
+                                        GUILayout.Label(propertyName,
+                                            new GUIStyle("label")
+                                            {
+                                                normal = new GUIStyleState()
+                                                {
+                                                    textColor = aliases.ContainsKey(propertyInfo.PropertyType.Name)
+                                                        ? nativeTypes
+                                                        : classOrStruct
+                                                }
+                                            }, GUILayout.Width(longestPropertyName * 7));
                                         GUILayout.Label(propertyInfo.Name);
 
                                         if (isWhiteListed != prev)
                                         {
-                                            Undo.RecordObject(ZSerializerSettings.Instance,"Change Component Blacklist");
+                                            Undo.RecordObject(ZSerializerSettings.Instance,
+                                                "Change Component Blacklist");
                                             if (isWhiteListed)
                                             {
-                                                ZSerializerSettings.Instance.componentBlackList.SafeRemove(selectedType, propertyInfo.Name);
+                                                ZSerializerSettings.Instance.componentBlackList.SafeRemove(selectedType,
+                                                    propertyInfo.Name);
                                             }
                                             else
                                             {
-                                                ZSerializerSettings.Instance.componentBlackList.SafeAdd(selectedType, propertyInfo.Name);
+                                                ZSerializerSettings.Instance.componentBlackList.SafeAdd(selectedType,
+                                                    propertyInfo.Name);
                                             }
                                         }
                                     }
@@ -134,20 +157,22 @@ public class ZSerializerFineTuner : EditorWindow
                                 foreach (var propertyInfo in propertyInfoList.Where(c =>
                                     c.Name.ToLower().Contains(searchComponents.ToLower())))
                                 {
-                                    ZSerializerSettings.Instance.componentBlackList.SafeAdd(selectedType, propertyInfo.Name);
+                                    ZSerializerSettings.Instance.componentBlackList.SafeAdd(selectedType,
+                                        propertyInfo.Name);
                                 }
                             }
-                        
+
                             if (GUILayout.Button("Select All"))
                             {
                                 foreach (var propertyInfo in propertyInfoList.Where(c =>
                                     c.Name.ToLower().Contains(searchComponents.ToLower())))
                                 {
-                                    ZSerializerSettings.Instance.componentBlackList.SafeRemove(selectedType, propertyInfo.Name);
+                                    ZSerializerSettings.Instance.componentBlackList.SafeRemove(selectedType,
+                                        propertyInfo.Name);
                                 }
 
                             }
-                        
+
                             if (GUILayout.Button("Save & Apply"))
                             {
                                 ZSerializerEditor.GenerateUnityComponentClasses();
@@ -160,8 +185,8 @@ public class ZSerializerFineTuner : EditorWindow
                         {
                             GUILayout.Label("Select a Component");
                         }
-                        
-                        
+
+
                     }
                 }
             }
@@ -190,3 +215,4 @@ public class ZSerializerFineTuner : EditorWindow
                    fieldInfo.Name != "name";
         }
     }
+}

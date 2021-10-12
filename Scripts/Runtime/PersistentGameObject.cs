@@ -2,145 +2,149 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Xml;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
 using ZSerializer;
 
-public enum PersistentType
+namespace ZSerializer
 {
-    Everything,
-    Component,
-    None
-};
-
-[Serializable]
-public struct SerializedComponent
-{
-    public Type Type => Type.GetType(typeFullName);
-    [SerializeField] private string typeFullName;
-    public PersistentType persistenceType;
-    public int instanceID;
-
-    public SerializedComponent(Component component, PersistentType persistenceType)
+    public enum PersistentType
     {
-        typeFullName = component.GetType().AssemblyQualifiedName;
-        instanceID = component.GetInstanceID();
-        this.persistenceType = persistenceType;
-    }
-}
+        Everything,
+        Component,
+        None
+    };
 
-[AddComponentMenu("ZSaver/Persistent GameObject"), DisallowMultipleComponent]
-public class PersistentGameObject : MonoBehaviour, ISaveGroupID
-{
-    [NonZSerialized] public bool showSettings;
-    [SerializeField] [HideInInspector] private int groupID;
-    public List<SerializedComponent> serializedComponents = new List<SerializedComponent>();
-
-    public int GroupID
+    [Serializable]
+    public struct SerializedComponent
     {
-        get => groupID;
-        set => groupID = value;
-    }
+        public Type Type => Type.GetType(typeFullName);
+        [SerializeField] private string typeFullName;
+        public PersistentType persistenceType;
+        public int instanceID;
 
-    public bool AutoSync => false;
-
-#if UNITY_EDITOR
-    PersistentGameObject()
-    {
-        EditorApplication.hierarchyChanged -= ComponentListChanged;
-        EditorApplication.hierarchyChanged += ComponentListChanged;
-    }
-
-
-    private static void ComponentListChanged()
-    {
-        if (ZSerializerSettings.Instance.advancedSerialization && Selection.activeGameObject && !Application.isPlaying)
+        public SerializedComponent(Component component, PersistentType persistenceType)
         {
-            PersistentGameObject persistentGameObject = Selection.activeGameObject.GetComponent<PersistentGameObject>();
-            if (persistentGameObject)
-            {
-                // Debug.Log("componentListChanged");
-                var list = new List<SerializedComponent>();
-                foreach (var serializedComponent in persistentGameObject.serializedComponents)
-                {
-                    if (persistentGameObject.GetComponents(serializedComponent.Type)
-                        .Any(c => c.GetInstanceID() == serializedComponent.instanceID))
-                    {
-                        list.Add(serializedComponent);
-                    }
-                }
-
-                foreach (var component in persistentGameObject.GetComponents<Component>().Where(c =>
-                    !(c is PersistentGameObject) && ZSerialize.ComponentSerializableTypes.Contains(c.GetType())))
-                {
-                    if (persistentGameObject.serializedComponents.All(sc => sc.instanceID != component.GetInstanceID()))
-                    {
-                        list.Add(new SerializedComponent(component, PersistentType.Everything));
-                    }
-                }
-
-                persistentGameObject.serializedComponents = list;
-            }
+            typeFullName = component.GetType().AssemblyQualifiedName;
+            instanceID = component.GetInstanceID();
+            this.persistenceType = persistenceType;
         }
     }
+
+    [AddComponentMenu("ZSerializer/Persistent GameObject"), DisallowMultipleComponent]
+    public sealed class PersistentGameObject : MonoBehaviour, ISaveGroupID
+    {
+        [NonZSerialized] public bool showSettings;
+        [SerializeField] [HideInInspector] private int groupID;
+        public List<SerializedComponent> serializedComponents = new List<SerializedComponent>();
+
+        public int GroupID
+        {
+            get => groupID;
+            set => groupID = value;
+        }
+
+        public bool AutoSync => false;
+
+#if UNITY_EDITOR
+        PersistentGameObject()
+        {
+            EditorApplication.hierarchyChanged -= ComponentListChanged;
+            EditorApplication.hierarchyChanged += ComponentListChanged;
+        }
+
+
+        private static void ComponentListChanged()
+        {
+            if (ZSerializerSettings.Instance.advancedSerialization && Selection.activeGameObject &&
+                !Application.isPlaying)
+            {
+                PersistentGameObject persistentGameObject =
+                    Selection.activeGameObject.GetComponent<PersistentGameObject>();
+                if (persistentGameObject)
+                {
+                    // Debug.Log("componentListChanged");
+                    var list = new List<SerializedComponent>();
+                    foreach (var serializedComponent in persistentGameObject.serializedComponents)
+                    {
+                        if (persistentGameObject.GetComponents(serializedComponent.Type)
+                            .Any(c => c.GetInstanceID() == serializedComponent.instanceID))
+                        {
+                            list.Add(serializedComponent);
+                        }
+                    }
+
+                    foreach (var component in persistentGameObject.GetComponents<Component>().Where(c =>
+                        !(c is PersistentGameObject) && ZSerialize.ComponentSerializableTypes.Contains(c.GetType())))
+                    {
+                        if (persistentGameObject.serializedComponents.All(sc =>
+                            sc.instanceID != component.GetInstanceID()))
+                        {
+                            list.Add(new SerializedComponent(component, PersistentType.Everything));
+                        }
+                    }
+
+                    persistentGameObject.serializedComponents = list;
+                }
+            }
+        }
 
 #endif
 
-    public void Reset()
-    {
-        if (ZSerializerSettings.Instance.advancedSerialization)
+        public void Reset()
         {
-            foreach (var component in GetComponents<Component>().Where(c =>
-                !(c is PersistentGameObject) && ZSerialize.ComponentSerializableTypes.Contains(c.GetType())))
+            if (ZSerializerSettings.Instance.advancedSerialization)
             {
-                serializedComponents.Add(new SerializedComponent(component, PersistentType.Everything));
-            }
-        }
-    }
-
-    public T AddComponent<T>(PersistentType persistentType) where T : Component
-    {
-        return (T)AddComponent(typeof(T), persistentType);
-    }
-
-    public Component AddComponent(Type type, PersistentType persistentType)
-    {
-        var c = gameObject.AddComponent(type);
-        if (typeof(MonoBehaviour).IsAssignableFrom(type))
-            serializedComponents.Add(new SerializedComponent(c, persistentType));
-        return c;
-    }
-
-    public void RemoveComponent(Component component)
-    {
-        for (var i = 0; i < serializedComponents.Count; i++)
-        {
-            if (serializedComponents[i].Type == component.GetType())
-            {
-                serializedComponents.RemoveAt(i);
-                break;
+                foreach (var component in GetComponents<Component>().Where(c =>
+                    !(c is PersistentGameObject) && ZSerialize.ComponentSerializableTypes.Contains(c.GetType())))
+                {
+                    serializedComponents.Add(new SerializedComponent(component, PersistentType.Everything));
+                }
             }
         }
 
-        Destroy(component);
-    }
-
-    public static int CountParents(Transform transform)
-    {
-        int totalParents = 1;
-        if (transform.parent != null)
+        public T AddComponent<T>(PersistentType persistentType) where T : Component
         {
-            totalParents += CountParents(transform.parent);
+            return (T)AddComponent(typeof(T), persistentType);
         }
 
-        return totalParents;
-    }
-}
+        public Component AddComponent(Type type, PersistentType persistentType)
+        {
+            var c = gameObject.AddComponent(type);
+            if (typeof(MonoBehaviour).IsAssignableFrom(type))
+                serializedComponents.Add(new SerializedComponent(c, persistentType));
+            return c;
+        }
 
-namespace ZSerializer
-{
+        public void RemoveComponent(Component component)
+        {
+            for (var i = 0; i < serializedComponents.Count; i++)
+            {
+                if (serializedComponents[i].Type == component.GetType())
+                {
+                    serializedComponents.RemoveAt(i);
+                    break;
+                }
+            }
+
+            Destroy(component);
+        }
+
+        public static int CountParents(Transform transform)
+        {
+            int totalParents = 1;
+            if (transform.parent != null)
+            {
+                totalParents += CountParents(transform.parent);
+            }
+
+            return totalParents;
+        }
+    }
+
     [Serializable]
     public struct GameObjectData
     {

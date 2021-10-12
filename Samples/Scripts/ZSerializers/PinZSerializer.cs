@@ -1,5 +1,5 @@
 [System.Serializable]
-public class PinZSerializer : ZSerializer.ZSerializer<Pin>
+public class PinZSerializer : ZSerializer.Internal.ZSerializer<Pin>
 {
     public System.Int32 hits;
     public int groupID;
