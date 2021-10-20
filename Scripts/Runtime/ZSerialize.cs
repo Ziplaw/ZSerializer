@@ -273,7 +273,9 @@ namespace ZSerializer
         {
             Type ZSaverType = zsavers.GetType().GetElementType();
             var genericSaveMethodInfo = saveMethod.MakeGenericMethod(ZSaverType);
+            Debug.Log(1+" " + Time.realtimeSinceStartup);
             genericSaveMethodInfo.Invoke(null, new object[] { zsavers });
+            Debug.Log(2+" " +Time.realtimeSinceStartup);
             yield return null;
         }
 
@@ -566,12 +568,6 @@ namespace ZSerializer
                         (Component)zSerializerType.GetField("_component").GetValue(jsonObjects[i]);
 
                     RestoreValues(componentInGameObject, jsonObjects[i]);
-
-                    // if (componentInGameObject is PersistentMonoBehaviour ||
-                    //     componentInGameObject is PersistentGameObject)
-                    //     CopyFieldsToFields(zSerializerType, realType, componentInGameObject, jsonObjects[i]);
-                    // else
-                    //     CopyFieldsToProperties(realType, componentInGameObject, jsonObjects[i]);
                 }
             }
         }
@@ -580,7 +576,6 @@ namespace ZSerializer
 
         static int[] GetIDList()
         {
-            Debug.Log(saveFiles);
             return saveFiles.Select(f =>
             {
                 var split = f.Replace('\\', '/').Split('/');
