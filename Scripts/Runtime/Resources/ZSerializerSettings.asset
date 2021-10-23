@@ -17,8 +17,9 @@ MonoBehaviour:
   autoRebuildZSerializers: 1
   selectedSaveFile: 0
   encryptData: 0
-  stableSave: 1
   advancedSerialization: 0
+  serializationType: 0
+  maxBatchCount: 50
   componentBlackList: []
   saveGroups:
   - Main

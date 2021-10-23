@@ -54,6 +54,8 @@ namespace ZSerializer
         }
 
         [NonZSerialized, HideInInspector] public bool showSettings;
+        [NonZSerialized, HideInInspector] public bool isSaving;
+        [NonZSerialized, HideInInspector] public bool isLoading;
 
         [NonZSerialized, HideInInspector, SerializeField]
         internal bool isOn = true;

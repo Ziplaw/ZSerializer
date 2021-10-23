@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace ZSerializer
 {
+    public enum SerializationType {Sync, Async}
+    
     // [CreateAssetMenu(fileName = "New ZSerializer Settings", menuName = "ZSerializerSettings", order = 0)]
     [Serializable]
     public sealed class SerializableComponentBlackList
@@ -31,8 +33,9 @@ namespace ZSerializer
         public bool autoRebuildZSerializers;
         public int selectedSaveFile;
         public bool encryptData;
-        public bool stableSave = true;
         public bool advancedSerialization;
+        public SerializationType serializationType = SerializationType.Sync;
+        public int maxBatchCount = 50;
         [HideInInspector] public List<SerializableComponentBlackList> componentBlackList;
 
         [HideInInspector] public List<string> saveGroups = new List<string>()
