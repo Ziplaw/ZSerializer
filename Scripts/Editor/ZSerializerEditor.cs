@@ -415,11 +415,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
         static void GenerateZSerializer(Type componentType, ClassState state)
         {
-            if (UnityEngine.Random.Range(0, 100) == 0)
-            {
-                PlayClip(Resources.Load<AudioClip>("surprise"));
-            }
-
             var pathList = Directory.GetFiles("Assets", $"*{componentType.Name}*.cs",
                 SearchOption.AllDirectories)[0].Split('.').ToList();
             pathList.RemoveAt(pathList.Count - 1);
@@ -433,25 +428,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             if (state == ClassState.NotMade)
                 CreateEditorScript(componentType, path);
             AssetDatabase.Refresh();
-        }
-
-        public static void PlayClip(AudioClip clip, int startSample = 0, bool loop = false)
-        {
-            Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
-
-            Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
-            MethodInfo method = audioUtilClass.GetMethod(
-                "PlayPreviewClip",
-                BindingFlags.Static | BindingFlags.Public,
-                null,
-                new Type[] { typeof(AudioClip), typeof(int), typeof(bool) },
-                null
-            );
-
-            method?.Invoke(
-                null,
-                new object[] { clip, startSample, loop }
-            );
         }
 
         public static void BuildButtonAll(Class[] classes, int width, ZSerializerStyler styler)
