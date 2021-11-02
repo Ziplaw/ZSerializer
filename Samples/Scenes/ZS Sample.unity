@@ -506,9 +506,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showSettings: 0
+  isSaving: 0
+  isLoading: 0
   isOn: 1
   groupID: 0
   autoSync: 1
+  _zuid: 
 --- !u!54 &469202270
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -539,23 +542,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  serializedComponents:
-  - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    instanceID: 21574
-  - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    instanceID: 21572
-  - typeFullName: UnityEngine.SphereCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    instanceID: 21570
-  - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 2
-    instanceID: 21580
+  GOZUID: d3e6a89b2a7a51d438f89507f0499853
+  componentZuids:
+  - component: {fileID: 469202267}
+    ZUID: dda3764c93869474fa48a5c9d109bc21
+  - component: {fileID: 469202266}
+    ZUID: 319d5fa3220315641857d268c5251e3e
+  - component: {fileID: 469202265}
+    ZUID: 4bc0dac10db62d9448c4705d0e5fc47f
+  - component: {fileID: 469202270}
+    ZUID: 4c2930900fa5b7f4bb5c477bab403500
+  serializedComponents: []
 --- !u!1001 &822103306
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -610,22 +607,6 @@ PrefabInstance:
     - target: {fileID: 5453140791990679695, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: m_Name
       value: Pin (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: isOn
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: groupID
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: autoSync
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: showSettings
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
@@ -688,18 +669,6 @@ PrefabInstance:
     - target: {fileID: 5453140791990679695, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: m_Name
       value: Pin (2)
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: isOn
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: groupID
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: showSettings
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
@@ -1013,9 +982,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showSettings: 0
+  isSaving: 0
+  isLoading: 0
   isOn: 1
   groupID: 0
   autoSync: 1
+  _zuid: 
   highScore: 0
   currentScore: 0
   playerName: 
@@ -1075,22 +1047,6 @@ PrefabInstance:
     - target: {fileID: 5453140791990679695, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: m_Name
       value: Pin
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: isOn
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: groupID
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: autoSync
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
-      propertyPath: showSettings
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}

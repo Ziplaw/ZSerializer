@@ -16,8 +16,9 @@ public class GameManager : PersistentMonoBehaviour
         ballMover = FindObjectOfType<BallMover>();
     }
 
-    private void Start()
+    private new void Start()
     {
+        base.Start();
         ballMover = FindObjectOfType<BallMover>();
     }
 

@@ -16,7 +16,7 @@ namespace ZSerializer.Editor
 
         public void DrawPersistentMonoBehaviourInspector()
         {
-            if (manager.isOn || ZSerializerSettings.Instance.componentDataDictionary[typeof(T)].isOn)
+            if (manager.IsOn || ZSerializerSettings.Instance.componentDataDictionary[typeof(T)].isOn)
             {
                 styler ??= new ZSerializerStyler();
                 if (manager is PersistentMonoBehaviour)

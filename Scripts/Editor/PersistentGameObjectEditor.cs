@@ -72,7 +72,7 @@ public class PersistentGameObjectEditor : Editor
 
                             GUILayout.Label(
                                 component.Type.Name +
-                                (ZSerializerSettings.Instance.debugMode ? $"({component.instanceID})" : ""),
+                                (ZSerializerSettings.Instance.debugMode ? $"({component.zuid})" : ""),
                                 new GUIStyle("helpbox")
                                 {
                                     font = styler.header.font, normal = new GUIStyleState() {textColor = fontColor},

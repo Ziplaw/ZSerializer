@@ -33,7 +33,7 @@ namespace ZSerializer.Editor
 
         private void OnEnable()
         {
-            componentTypes = ZSerialize.ComponentSerializableTypes.OrderBy(a => a.Name).ToList();
+            componentTypes = ZSerialize.UnitySerializableTypes.OrderBy(a => a.Name).ToList();
             componentTypes.Remove(typeof(PersistentGameObject));
             searchTypes = "";
             searchComponents = "";

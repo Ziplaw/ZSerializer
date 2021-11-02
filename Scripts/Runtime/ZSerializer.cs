@@ -8,17 +8,13 @@ namespace ZSerializer.Internal
 {
     public abstract class ZSerializer<T> where T : Component
     {
-        [NonZSerialized] public int gameObjectInstanceID;
-        [NonZSerialized] public int componentinstanceID;
-        [NonZSerialized] public GameObject _componentParent;
-        [NonZSerialized] public T _component;
+        [NonZSerialized] public string ZUID;
+        [NonZSerialized] public string GOZUID;
 
-        public ZSerializer(GameObject componentParent, T component)
+        public ZSerializer(string ZUID, string GOZUID)
         {
-            _componentParent = componentParent;
-            _component = component;
-            gameObjectInstanceID = componentParent.GetInstanceID();
-            componentinstanceID = component.GetInstanceID();
+            this.ZUID = ZUID;
+            this.GOZUID = GOZUID;
         }
 
         public abstract void RestoreValues(T component);

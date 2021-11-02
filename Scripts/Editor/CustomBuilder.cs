@@ -14,7 +14,8 @@ namespace ZSerializer.Editor
     class CustomBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
         public int callbackOrder => 0;
-        private bool errorCs1061;
+        private bool errorCS1061;
+        private bool errorCS0200;
 
         // CALLED BEFORE THE BUILD
         public void OnPreprocessBuild(BuildReport report)
@@ -27,7 +28,7 @@ namespace ZSerializer.Editor
         {
             if (condition.Contains("CS1061")) // BUILD ERROR FOR WHEN USING EDITOR ONLY PROPERTIES ON BUILD 
             {
-                errorCs1061 = true;
+                errorCS1061 = true;
                 var split = condition.Split('\'');
                 string typeName = split[1]; //EW
                 string propertyName = split[3]; //EWWWWW
@@ -39,10 +40,25 @@ namespace ZSerializer.Editor
                 ZSerializerSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
             }
 
-            if (condition.Contains("'Failed'") && errorCs1061)
+            if (condition.Contains("CS0200"))
+            {
+                errorCS0200 = true;
+                var split = condition.Split('\'')[1];
+                string typeName = split.Split('.')[0];
+                string propertyName = split.Split('.')[1];
+                
+                var componentType =
+                    FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
+                        "UnityEngine." + typeName);
+                
+                ZSerializerSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
+
+            }
+
+            if (condition.Contains("'Failed'") && (errorCS1061 || errorCS0200))
             {
                 Debug.LogWarning(
-                    "Some of your build errors had to do with Editor Only Properties being Serialized, rebuilding Unity Component Serializer");
+                    "<color=cyan>[ZS] Some of your build errors had to do with Editor Only Properties being Serialized, rebuilding Unity Component Serializer</color>");
                 EditorUtility.SetDirty(ZSerializerSettings.Instance);
                 AssetDatabase.SaveAssets();
                 ZSerializerEditor.GenerateUnityComponentClasses();

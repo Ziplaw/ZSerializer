@@ -101,7 +101,7 @@ namespace ZSerializer.Editor
                     GUILayout.MinHeight(100)))
                 {
                     ZSerializerSettings.Instance.packageInitialized = true;
-                    ZSerializerEditor.GenerateUnityComponentClasses(); //
+                    ZSerializerEditor.GenerateUnityComponentClasses();
                     Init();
                 }
             }
@@ -116,6 +116,8 @@ namespace ZSerializer.Editor
                             Init();
                         }
 
+                        if (styler == null) return;
+                        
                         editMode = GUILayout.Toggle(editMode, styler.cogWheel, new GUIStyle("button"),
                             GUILayout.Height(28), GUILayout.Width(28));
                     }

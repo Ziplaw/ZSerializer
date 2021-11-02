@@ -108,6 +108,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aa257885727c124e9953aa5bb4c7f36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groupID: 7
+  showSettings: 0
+  isSaving: 0
+  isLoading: 0
+  isOn: 1
+  groupID: 0
   autoSync: 1
+  ZUID: -1
   hits: 0

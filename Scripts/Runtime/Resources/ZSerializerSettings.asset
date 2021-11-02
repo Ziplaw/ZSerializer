@@ -12,15 +12,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1efd7af9bd4fdc48a69c60405eb42f4, type: 3}
   m_Name: ZSerializerSettings
   m_EditorClassIdentifier: 
-  packageInitialized: 0
+  packageInitialized: 1
   debugMode: 1
   autoRebuildZSerializers: 1
   selectedSaveFile: 0
   encryptData: 0
   advancedSerialization: 0
-  serializationType: 0
+  serializationType: 1
   maxBatchCount: 50
-  componentBlackList: []
+  componentBlackList:
+  - typeFullName: UnityEngine.LightProbeGroup, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - dering
+    - probePositions
+  - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    componentNames:
+    - shadowRadius
+    - shadowAngle
+    - areaSize
+    - lightmapBakeType
+  - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - scaleInLightmap
+    - receiveGI
+    - stitchLightmapSeams
+  - typeFullName: UnityEngine.Terrain, UnityEngine.TerrainModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - bakeLightProbesForTrees
+    - deringLightProbesForTrees
   saveGroups:
   - Main
   - Settings

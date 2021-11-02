@@ -143,11 +143,10 @@ namespace ZSerializer.Editor
     public bool autoSync;
 ";
 
-            string className = type.Name + "Instance";
-
             script +=
-                $"\n    public {type.Name}ZSerializer({type.Name} {className}) : base({className}.gameObject, {className})\n" +
-                "    {\n";
+                $"\n    public {type.Name}ZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)\n" +
+                "    {" +
+                "       var instance = ZSerializer.ZSerialize.idMap[ZUID];\n";
 
             foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
                 .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList())
@@ -163,7 +162,7 @@ namespace ZSerializer.Editor
                 int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
                 script +=
-                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\").GetValue({className});\n"
+                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\").GetValue(instance);\n"
                         .Replace('+', '.');
 
                 if (genericParameterAmount > 0)
@@ -184,8 +183,8 @@ namespace ZSerializer.Editor
             }
 
 
-            script += $"         groupID = (int)typeof({type.Name}).GetProperty(\"GroupID\").GetValue({className});\n" +
-                      $"         autoSync = (bool)typeof({type.Name}).GetProperty(\"AutoSync\").GetValue({className});\n" +
+            script += $"         groupID = (int)typeof({type.Name}).GetProperty(\"GroupID\").GetValue(instance);\n" +
+                      $"         autoSync = (bool)typeof({type.Name}).GetProperty(\"AutoSync\").GetValue(instance);\n" +
                       "    }";
 
             script += "\n\n    public override void RestoreValues(" + type.FullName + " component)\n    {\n";
@@ -193,7 +192,8 @@ namespace ZSerializer.Editor
             foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
                 .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList())
             {
-                script += $"         typeof({type.Name}).GetField(\"{fieldInfo.Name}\").SetValue(component, {fieldInfo.Name});\n";
+                script +=
+                    $"         typeof({type.Name}).GetField(\"{fieldInfo.Name}\").SetValue(component, {fieldInfo.Name});\n";
             }
 
             script += $"         typeof({type.Name}).GetProperty(\"GroupID\").SetValue(component, groupID);\n" +
@@ -228,7 +228,6 @@ namespace ZSerializer.Editor
 
             string editorScript =
                 @"using UnityEditor;
-using ZSerializer;
 using ZSerializer;
 using ZSerializer.Editor;
 
@@ -330,13 +329,12 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 {
                     if (state == ClassState.Valid)
                     {
-
                         bool newOnValue = !ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn;
                         ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn = newOnValue;
                         foreach (var component in Object.FindObjectsOfType(componentType).Where(c =>
                             c.GetType() == componentType && ((PersistentMonoBehaviour)c).AutoSync))
                         {
-                            ((PersistentMonoBehaviour)component).isOn = newOnValue;
+                            ((PersistentMonoBehaviour)component).IsOn = newOnValue;
                             EditorUtility.SetDirty(component);
                         }
 
@@ -361,7 +359,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
             if (state == ClassState.Valid && component)
             {
-                textureToUse = component.isOn ? styler.validImage : styler.offImage;
+                textureToUse = component.IsOn ? styler.validImage : styler.offImage;
             }
 
             if (!Application.isPlaying)
@@ -373,21 +371,21 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         GenerateZSerializer(typeof(T), state);
                     else
                     {
-                        bool componentIsOn = component.isOn;
+                        bool componentIsOn = component.IsOn;
 
                         if (component.AutoSync)
                         {
                             foreach (var persistentMonoBehaviour in Object.FindObjectsOfType<T>()
                                 .Where(t => t.GetType() == component.GetType() && t.AutoSync))
                             {
-                                persistentMonoBehaviour.isOn = !componentIsOn;
+                                persistentMonoBehaviour.IsOn = !componentIsOn;
                                 ZSerializerSettings.Instance.componentDataDictionary[persistentMonoBehaviour.GetType()]
-                                    .isOn = persistentMonoBehaviour.isOn;
+                                    .isOn = persistentMonoBehaviour.IsOn;
                             }
                         }
                         else
                         {
-                            component.isOn = !componentIsOn;
+                            component.IsOn = !componentIsOn;
                         }
 
                         EditorUtility.SetDirty(component);
@@ -458,8 +456,9 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         }
 
 
-        public static void BuildPersistentComponentEditor<T>(T manager, ZSerializerStyler styler, ref bool showSettings,
-            Action<Type, ISaveGroupID, bool> toggleOn) where T : PersistentMonoBehaviour
+        internal static void BuildPersistentComponentEditor<T>(T manager, ZSerializerStyler styler,
+            ref bool showSettings,
+            Action<Type, IZSerialize, bool> toggleOn) where T : PersistentMonoBehaviour
         {
             // Texture2D cogwheel = styler.cogWheel;
 
@@ -467,7 +466,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
             {
                 var state = GetClassState(manager.GetType());
-                string color = state == ClassState.Valid ? manager.isOn ? "29cf42" : "999999" :
+                string color = state == ClassState.Valid ? manager.IsOn ? "29cf42" : "999999" :
                     state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
 
                 GUILayout.Label($"<color=#{color}>  Persistent Component</color>",
@@ -493,7 +492,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 {
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        string color = field.GetCustomAttribute<NonZSerialized>() == null && manager.isOn
+                        string color = field.GetCustomAttribute<NonZSerialized>() == null && manager.IsOn
                             ? "29cf42"
                             : "999999";
                         GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
@@ -535,7 +534,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             return new string(chars.ToArray());
         }
 
-        public static void ShowGroupIDSettings(Type type, ISaveGroupID data, bool canAutoSync)
+        internal static void ShowGroupIDSettings(Type type, IZSerialize data, bool canAutoSync)
         {
             GUILayout.Space(-15);
             using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
@@ -677,7 +676,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                 ZSerialize.Log("<color=cyan>Resetting All Group IDs</color>");
 
                                 foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>()
-                                    .Where(o => o is ISaveGroupID))
+                                    .Where(o => o is IZSerialize))
                                 {
                                     monoBehaviour.GetType().GetField("groupID",
                                             BindingFlags.NonPublic | BindingFlags.Instance)
@@ -791,13 +790,18 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
 ";
 
-            IEnumerable<Type> types = ZSerialize.ComponentSerializableTypes;
+            List<Type> types = ZSerialize.UnitySerializableTypes;
             foreach (var type in types)
             {
+                EditorUtility.DisplayProgressBar("Generating Unity Component ZSerializers", type.Name,
+                    types.IndexOf(type) / (float)types.Count);
+
+
                 if (type != typeof(PersistentGameObject))
                 {
                     longScript +=
-                        "[System.Serializable]\npublic sealed class " + type.Name + "ZSerializer : ZSerializer.Internal.ZSerializer<" +
+                        "[System.Serializable]\npublic sealed class " + type.Name +
+                        "ZSerializer : ZSerializer.Internal.ZSerializer<" +
                         type.FullName +
                         "> {\n";
 
@@ -805,7 +809,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         .Where(ZSerialize.PropertyIsSuitableForZSerializer))
                     {
-
                         longScript +=
                             $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " +
                             propertyInfo.Name +
@@ -848,16 +851,17 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         }
                     }
 
-                    longScript += "    public " + type.Name + "ZSerializer (" + type.FullName + " " + type.Name +
-                                  "Instance) : base(" +
-                                  type.Name + "Instance.gameObject, " + type.Name + "Instance ) {\n";
+                    longScript += "    public " + type.Name +
+                                  "ZSerializer (string ZUID, string GOZUID) : base(ZUID, GOZUID) {\n" +
+                                  "        var instance = ZSerializer.ZSerialize.idMap[ZUID] as " + type.FullName +
+                                  ";\n";
 
                     foreach (var propertyInfo in type
                         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         .Where(ZSerialize.PropertyIsSuitableForZSerializer))
                     {
                         longScript +=
-                            $"        " + propertyInfo.Name + " = " + type.Name + "Instance." + propertyInfo.Name +
+                            $"      " + propertyInfo.Name + " = " + "instance." + propertyInfo.Name +
                             ";\n";
                     }
 
@@ -866,7 +870,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         .Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
                     {
                         longScript +=
-                            $"        " + fieldInfo.Name + " = " + type.Name + "Instance." + fieldInfo.Name + ";\n";
+                            $"        " + fieldInfo.Name + " = " + "instance." + fieldInfo.Name + ";\n";
                     }
 
                     longScript += "    }\n";
@@ -889,6 +893,8 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 }
             }
 
+            EditorUtility.ClearProgressBar();
+
             longScript += "}";
 
             if (!Directory.Exists(Application.dataPath + "/ZResources/ZSerializer"))
@@ -904,6 +910,30 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
             AssetDatabase.Refresh();
             ZSerialize.Log("Unity Component ZSerializers built");
+        }
+
+        [DidReloadScripts]
+        static void OnReload()
+        {
+            EditorApplication.hierarchyChanged += OnHierarchyChanged;
+        }
+
+        private static void OnHierarchyChanged()
+        {
+            Dictionary<string, Object> map = new Dictionary<string, Object>();
+
+            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerialize).Reverse())
+            {
+                var serializable = monoBehaviour as IZSerialize;
+                if (map.TryGetValue(serializable.ZUID, out _))
+                {
+                    serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
+                                                       go != monoBehaviour.gameObject);
+                }
+                
+                map[serializable.ZUID] = serializable as Object;
+                map[serializable.GOZUID] = monoBehaviour.gameObject;
+            }
         }
     }
 }

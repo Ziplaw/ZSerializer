@@ -1,18 +1,18 @@
 [System.Serializable]
-public class BallMoverZSerializer : ZSerializer.Internal.ZSerializer<BallMover>
+public sealed class BallMoverZSerializer : ZSerializer.Internal.ZSerializer<BallMover>
 {
     public int groupID;
     public bool autoSync;
 
-    public BallMoverZSerializer(BallMover BallMoverInstance) : base(BallMoverInstance.gameObject, BallMoverInstance)
-    {
-         groupID = BallMoverInstance.GroupID;
-         autoSync = BallMoverInstance.AutoSync;
+    public BallMoverZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)
+    {       var instance = ZSerializer.ZSerialize.idMap[ZUID];
+         groupID = (int)typeof(BallMover).GetProperty("GroupID").GetValue(instance);
+         autoSync = (bool)typeof(BallMover).GetProperty("AutoSync").GetValue(instance);
     }
 
     public override void RestoreValues(BallMover component)
     {
-         component.GroupID = groupID;
-         component.AutoSync = autoSync;
+         typeof(BallMover).GetProperty("GroupID").SetValue(component, groupID);
+         typeof(BallMover).GetProperty("AutoSync").SetValue(component, autoSync);
     }
 }

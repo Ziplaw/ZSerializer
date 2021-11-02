@@ -1,5 +1,5 @@
 [System.Serializable]
-public class GameManagerZSerializer : ZSerializer.Internal.ZSerializer<GameManager>
+public sealed class GameManagerZSerializer : ZSerializer.Internal.ZSerializer<GameManager>
 {
     public System.Int32 highScore;
     public System.Int32 currentScore;
@@ -9,25 +9,25 @@ public class GameManagerZSerializer : ZSerializer.Internal.ZSerializer<GameManag
     public int groupID;
     public bool autoSync;
 
-    public GameManagerZSerializer(GameManager GameManagerInstance) : base(GameManagerInstance.gameObject, GameManagerInstance)
-    {
-         highScore = GameManagerInstance.highScore;
-         currentScore = GameManagerInstance.currentScore;
-         playerName = GameManagerInstance.playerName;
-         position = GameManagerInstance.position;
-         ballMover = GameManagerInstance.ballMover;
-         groupID = GameManagerInstance.GroupID;
-         autoSync = GameManagerInstance.AutoSync;
+    public GameManagerZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)
+    {       var instance = ZSerializer.ZSerialize.idMap[ZUID];
+         highScore = (System.Int32)typeof(GameManager).GetField("highScore").GetValue(instance);
+         currentScore = (System.Int32)typeof(GameManager).GetField("currentScore").GetValue(instance);
+         playerName = (System.String)typeof(GameManager).GetField("playerName").GetValue(instance);
+         position = (UnityEngine.Vector3)typeof(GameManager).GetField("position").GetValue(instance);
+         ballMover = (BallMover)typeof(GameManager).GetField("ballMover").GetValue(instance);
+         groupID = (int)typeof(GameManager).GetProperty("GroupID").GetValue(instance);
+         autoSync = (bool)typeof(GameManager).GetProperty("AutoSync").GetValue(instance);
     }
 
     public override void RestoreValues(GameManager component)
     {
-         component.highScore = highScore;
-         component.currentScore = currentScore;
-         component.playerName = playerName;
-         component.position = position;
-         component.ballMover = ballMover;
-         component.GroupID = groupID;
-         component.AutoSync = autoSync;
+         typeof(GameManager).GetField("highScore").SetValue(component, highScore);
+         typeof(GameManager).GetField("currentScore").SetValue(component, currentScore);
+         typeof(GameManager).GetField("playerName").SetValue(component, playerName);
+         typeof(GameManager).GetField("position").SetValue(component, position);
+         typeof(GameManager).GetField("ballMover").SetValue(component, ballMover);
+         typeof(GameManager).GetProperty("GroupID").SetValue(component, groupID);
+         typeof(GameManager).GetProperty("AutoSync").SetValue(component, autoSync);
     }
 }
