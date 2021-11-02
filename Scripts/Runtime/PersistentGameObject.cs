@@ -45,15 +45,12 @@ namespace ZSerializer
     {
         [NonZSerialized] public bool showSettings;
         [SerializeField, HideInInspector] private int groupID;
-        [SerializeField, HideInInspector] private string _zuid;
-        [SerializeField, HideInInspector] private string _gozuid;
+        [SerializeField] private string _zuid;
+        [SerializeField] private string _gozuid;
 
         public List<SerializedComponent> serializedComponents = new List<SerializedComponent>();
 
-        public Dictionary<Component, string> ComponentZuidMap
-        {
-            get => serializedComponents.ToDictionary(s => s.component, s => s.zuid);
-        }
+        public Dictionary<Component, string> ComponentZuidMap => serializedComponents.ToDictionary(s => s.component, s => s.zuid);
 
 
         public int GroupID
@@ -142,13 +139,10 @@ namespace ZSerializer
 #if UNITY_EDITOR
 
             ZUID = GUID.Generate().ToString();
-            if (forceGenerateGameObject) GOZUID = GUID.Generate().ToString();
-            else
-            {
-                var pm = GetComponent<PersistentMonoBehaviour>();
-                if (pm)
-                    GOZUID = pm.GOZUID;
-            }
+            var pm = GetComponent<PersistentMonoBehaviour>();
+
+            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : pm ? pm.GOZUID : GUID.Generate().ToString();
+            PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 
             serializedComponents.ForEach(sc => sc.zuid = GUID.Generate().ToString());
             if (forceGenerateGameObject)
@@ -156,11 +150,14 @@ namespace ZSerializer
                 {
                     (monoBehaviour as IZSerialize).GenerateEditorZUIDs(false);
                 }
+            
+            
 #endif
         }
 
         private void Start()
         {
+            name = gameObject.GetInstanceID().ToString();
             GenerateRuntimeZUIDs();
 
             ZSerialize.idMap.TryAdd(ZUID, this);

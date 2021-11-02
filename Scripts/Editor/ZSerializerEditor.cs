@@ -332,9 +332,9 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         bool newOnValue = !ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn;
                         ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn = newOnValue;
                         foreach (var component in Object.FindObjectsOfType(componentType).Where(c =>
-                            c.GetType() == componentType && ((PersistentMonoBehaviour)c).AutoSync))
+                            c.GetType() == componentType && ((PersistentMonoBehaviour) c).AutoSync))
                         {
-                            ((PersistentMonoBehaviour)component).IsOn = newOnValue;
+                            ((PersistentMonoBehaviour) component).IsOn = newOnValue;
                             EditorUtility.SetDirty(component);
                         }
 
@@ -496,7 +496,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                             ? "29cf42"
                             : "999999";
                         GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
-                            new GUIStyle("label") { richText = true },
+                            new GUIStyle("label") {richText = true},
                             GUILayout.Width(EditorGUIUtility.currentViewWidth / 3f));
                         EditorGUILayout.PropertyField(serializedObject.FindProperty(field.Name), GUIContent.none);
                     }
@@ -568,7 +568,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             if (editMode)
             {
                 GUILayout.Label("Select fields to serialize",
-                    new GUIStyle("helpbox") { alignment = TextAnchor.MiddleCenter }, GUILayout.Height(18));
+                    new GUIStyle("helpbox") {alignment = TextAnchor.MiddleCenter}, GUILayout.Height(18));
                 var fields = manager.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
                 for (var i = 0; i < fields.Length; i++)
@@ -601,7 +601,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 .Where(f => f.GetCustomAttribute<HideInInspector>() == null);
             SerializedObject serializedObject = new SerializedObject(styler.settings);
 
-            string[] toolbarNames = { "Settings", "Saving Groups", "Component Blacklist" };
+            string[] toolbarNames = {"Settings", "Saving Groups", "Component Blacklist"};
 
             using (new GUILayout.VerticalScope("box"))
             {
@@ -667,7 +667,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                 {
                                     var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
                                     prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
-                                        new GUIStyle("textField") { alignment = TextAnchor.MiddleCenter });
+                                        new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
                                 }
                             }
 
@@ -761,7 +761,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         else
                         {
                             GUILayout.Label("The Component Blacklist is Empty.",
-                                new GUIStyle("label") { alignment = TextAnchor.MiddleCenter });
+                                new GUIStyle("label") {alignment = TextAnchor.MiddleCenter});
                             if (GUILayout.Button("Open Fine Tuner"))
                             {
                                 ZSerializerFineTuner.ShowWindow();
@@ -794,7 +794,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             foreach (var type in types)
             {
                 EditorUtility.DisplayProgressBar("Generating Unity Component ZSerializers", type.Name,
-                    types.IndexOf(type) / (float)types.Count);
+                    types.IndexOf(type) / (float) types.Count);
 
 
                 if (type != typeof(PersistentGameObject))
@@ -922,17 +922,20 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         {
             Dictionary<string, Object> map = new Dictionary<string, Object>();
 
-            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerialize).Reverse())
+            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerialize)
+                .Reverse())
             {
                 var serializable = monoBehaviour as IZSerialize;
                 if (map.TryGetValue(serializable.ZUID, out _))
                 {
                     serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
-                                                       go != monoBehaviour.gameObject);
+                                                     go != monoBehaviour.gameObject);
                 }
-                
-                map[serializable.ZUID] = serializable as Object;
-                map[serializable.GOZUID] = monoBehaviour.gameObject;
+
+                if (serializable as Object)
+                    map[serializable.ZUID] = serializable as Object;
+                if (monoBehaviour && monoBehaviour.gameObject)
+                    map[serializable.GOZUID] = monoBehaviour.gameObject;
             }
         }
     }

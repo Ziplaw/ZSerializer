@@ -16,7 +16,7 @@ namespace ZSerializer
     {
     }
 
-    public class PersistentMonoBehaviour : MonoBehaviour, IZSerialize
+    public abstract class PersistentMonoBehaviour : MonoBehaviour, IZSerialize
     {
         /// <summary>
         /// OnPreSave is called right before any Save occurs
@@ -139,15 +139,11 @@ namespace ZSerializer
         {
 #if UNITY_EDITOR
             ZUID = GUID.Generate().ToString();
-
-            if (forceGenerateGameObject) GOZUID = GUID.Generate().ToString();
-            else
-            {
-                var pg = GetComponent<PersistentGameObject>();
-                if (pg) GOZUID = pg.GOZUID;
-            }
+            var pg = GetComponent<PersistentGameObject>();
+            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : pg ? pg.GOZUID : GUID.Generate().ToString();
 
             EditorUtility.SetDirty(this);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 
             if (forceGenerateGameObject)
                 foreach (var monoBehaviour in GetComponents<MonoBehaviour>().Where(c => c != this && c is IZSerialize))
