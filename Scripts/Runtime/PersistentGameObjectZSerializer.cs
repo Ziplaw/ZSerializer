@@ -7,7 +7,7 @@ using ZSerializer;
 namespace ZSerializer
 {
     [System.Serializable]
-    public sealed class PersistentGameObjectZSerializer : ZSerializer.Internal.ZSerializer<PersistentGameObject>
+    public sealed class PersistentGameObjectZSerializer : Internal.ZSerializer<PersistentGameObject>
     {
         public int groupID;
         public System.Boolean enabled;
@@ -27,7 +27,8 @@ namespace ZSerializer
             this.ZUID = ZUID;
             this.GOZUID = GOZUID;
 
-            gameObjectData = new GameObjectData()
+            var parent = PersistentGameObjectInstance.transform.parent;
+            gameObjectData = new GameObjectData
             {
                 loadingOrder = new Vector2Int(PersistentGameObject.CountParents(PersistentGameObjectInstance.transform),
                     PersistentGameObjectInstance.transform.GetSiblingIndex()),
@@ -40,8 +41,8 @@ namespace ZSerializer
                 rotation = _componentParent.transform.rotation,
                 size = _componentParent.transform.localScale,
                 tag = _componentParent.tag,
-                parent = PersistentGameObjectInstance.transform.parent
-                    ? _componentParent.gameObject
+                parent = parent
+                    ? parent.gameObject
                     : null
             };
         }

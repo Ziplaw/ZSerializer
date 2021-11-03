@@ -141,7 +141,7 @@ namespace ZSerializer
             ZUID = GUID.Generate().ToString();
             var pm = GetComponent<PersistentMonoBehaviour>();
 
-            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : pm ? pm.GOZUID : GUID.Generate().ToString();
+            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : pm && !string.IsNullOrEmpty(pm.GOZUID) ? pm.GOZUID : GUID.Generate().ToString();
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 
             serializedComponents.ForEach(sc => sc.zuid = GUID.Generate().ToString());
@@ -157,7 +157,7 @@ namespace ZSerializer
 
         private void Start()
         {
-            name = gameObject.GetInstanceID().ToString();
+            // name = gameObject.GetInstanceID().ToString();
             GenerateRuntimeZUIDs();
 
             ZSerialize.idMap.TryAdd(ZUID, this);

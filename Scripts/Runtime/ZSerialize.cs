@@ -211,10 +211,10 @@ namespace ZSerializer
 
         static Object FindObjectFromInstanceID(int instanceID)
         {
-            return (Object) typeof(Object)
+            return (Object)typeof(Object)
                 .GetMethod("FindObjectFromInstanceID",
                     BindingFlags.NonPublic | BindingFlags.Static)
-                ?.Invoke(null, new object[] {instanceID});
+                ?.Invoke(null, new object[] { instanceID });
         }
 
         //Gets all the types from a persistentGameObject that are not monobehaviours
@@ -240,17 +240,12 @@ namespace ZSerializer
             var ZSerializersArray =
                 Activator.CreateInstance(ZSerializerArrayType, components.Count);
 
-            object[] zSavers = (object[]) ZSerializersArray;
+            object[] zSavers = (object[])ZSerializersArray;
 
             int currentComponentCount = 0;
 
             for (var i = 0; i < zSavers.Length; i++)
             {
-                if (components[0].GetType().Name == "Pin")
-                {
-                    
-                }
-                
                 zSavers[i] = Activator.CreateInstance(ZSerializerType, components[i].GetZUID(),
                     components[i].gameObject.GetZUID());
                 currentComponentCount++;
@@ -262,7 +257,7 @@ namespace ZSerializer
                 }
             }
 
-            return (object[]) ZSerializersArray;
+            return (object[])ZSerializersArray;
         }
 
         static async Task<object[]> OrderPersistentGameObjectsByLoadingOrder(object[] zSavers)
@@ -270,17 +265,17 @@ namespace ZSerializer
             return await RunTask(() =>
             {
                 zSavers = zSavers.OrderBy(x =>
-                    ((GameObjectData) x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder.x).ThenBy(x =>
-                    ((GameObjectData) x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder.y).ToArray();
+                    ((GameObjectData)x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder.x).ThenBy(x =>
+                    ((GameObjectData)x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder.y).ToArray();
 
-                MethodInfo cast = castMethod.MakeGenericMethod(new Type[] {typeof(PersistentGameObjectZSerializer)});
+                MethodInfo cast = castMethod.MakeGenericMethod(new Type[] { typeof(PersistentGameObjectZSerializer) });
 
                 MethodInfo toArray =
-                    toArrayMethod.MakeGenericMethod(new Type[] {typeof(PersistentGameObjectZSerializer)});
+                    toArrayMethod.MakeGenericMethod(new Type[] { typeof(PersistentGameObjectZSerializer) });
 
-                var result = cast.Invoke(zSavers, new object[] {zSavers});
+                var result = cast.Invoke(zSavers, new object[] { zSavers });
 
-                return (object[]) toArray.Invoke(result, new object[] {result});
+                return (object[])toArray.Invoke(result, new object[] { result });
             });
         }
 
@@ -289,14 +284,14 @@ namespace ZSerializer
         {
             Type ZSaverType = zsavers.GetType().GetElementType();
             var genericSaveMethodInfo = saveMethod.MakeGenericMethod(ZSaverType);
-            genericSaveMethodInfo.Invoke(null, new object[] {zsavers});
+            genericSaveMethodInfo.Invoke(null, new object[] { zsavers });
             if (ZSerializerSettings.Instance.serializationType == SerializationType.Async) await Task.Yield();
         }
 
         //Restore the values of a given component from a given ZSerializer
         private static void RestoreValues(Component _component, object ZSerializer)
         {
-            ZSerializer.GetType().GetMethod("RestoreValues").Invoke(ZSerializer, new object[] {_component});
+            ZSerializer.GetType().GetMethod("RestoreValues").Invoke(ZSerializer, new object[] { _component });
         }
 
         #endregion
@@ -318,7 +313,7 @@ namespace ZSerializer
             {
                 var type = persistentMonoBehaviour.GetType();
                 if (!componentMap.ContainsKey(type))
-                    componentMap.Add(type, new List<Component> {persistentMonoBehaviour});
+                    componentMap.Add(type, new List<Component> { persistentMonoBehaviour });
                 else componentMap[type].Add(persistentMonoBehaviour);
             }
 
@@ -389,17 +384,19 @@ namespace ZSerializer
             object zSerializerObject)
         {
             GameObjectData gameObjectData =
-                (GameObjectData) ZSaverType.GetField("gameObjectData").GetValue(zSerializerObject);
+                (GameObjectData)ZSaverType.GetField("gameObjectData").GetValue(zSerializerObject);
 
             gameObject = gameObjectData.MakePerfectlyValidGameObject();
         }
 
         //Loads a component no matter the type
-        static async Task LoadObjectsDynamically(Type ZSaverType, Type componentType, object zSerializerObject)
+        static async Task<object[]> LoadObjectsDynamically(Type ZSaverType, Type componentType, int objectIndex,
+            object[] zSerializerObjects, int tupleIndex, JsonFillType jsonFillType)
         {
-            string zuid = (string) typeof(ZSerializer<>).MakeGenericType(componentType).GetField("ZUID")
+            var zSerializerObject = zSerializerObjects[objectIndex];
+            string zuid = (string)typeof(ZSerializer<>).MakeGenericType(componentType).GetField("ZUID")
                 .GetValue(zSerializerObject);
-            string gozuid = (string) typeof(ZSerializer<>).MakeGenericType(componentType).GetField("GOZUID")
+            string gozuid = (string)typeof(ZSerializer<>).MakeGenericType(componentType).GetField("GOZUID")
                 .GetValue(zSerializerObject);
 
             bool componentPresentInGameObject = idMap.TryGetValue(zuid, out var componentObj) && idMap[zuid] != null;
@@ -413,12 +410,11 @@ namespace ZSerializer
                 {
                     Debug.LogWarning(
                         $"GameObject holding {componentType} was destroyed, add the Persistent GameObject component to said GameObject if persistence was intended");
-                    return;
+                    return zSerializerObjects;
                 }
 
                 LoadDestroyedGameObject(out gameObject, ZSaverType, zSerializerObject);
                 idMap[gozuid] = gameObject;
-                Debug.LogError(gozuid + " " + gameObject);
             }
 
             if (!componentPresentInGameObject)
@@ -452,6 +448,16 @@ namespace ZSerializer
 
             if (component is PersistentMonoBehaviour persistentMonoBehaviour)
                 persistentMonoBehaviour.IsOn = true;
+
+            if (!gameObjectPresent)
+            {
+                await FillTemporaryJsonTuples(jsonFillType);
+                var fromJson = fromJsonMethod.MakeGenericMethod(tempTuples[currentGroupID][tupleIndex].Item1);
+                zSerializerObjects =
+                    (object[])await fromJson.InvokeAsync(null, tempTuples[currentGroupID][tupleIndex].Item2);
+            }
+
+            return zSerializerObjects;
         }
 
 
@@ -465,29 +471,26 @@ namespace ZSerializer
                        .FirstOrDefault(t => t != null);
         }
 
-        static async Task LoadComponents(int tupleID, JsonFillType fillType)
+        static async Task LoadComponents(JsonFillType jsonFillType)
         {
-            for (var j = 0; j < tempTuples[tupleID].Length; j++)
+            for (var tupleIndex = 0; tupleIndex < tempTuples[currentGroupID].Length; tupleIndex++)
             {
-                var oldTuple = tempTuples[tupleID][j];
-                Type realType = GetTypeFromZSerializerType(oldTuple.Item1);
+                var currentTuple = tempTuples[currentGroupID][tupleIndex];
+                Type realType = GetTypeFromZSerializerType(currentTuple.Item1);
                 Log("Deserializing " + realType + "s");
                 if (realType == null)
                     Debug.LogError(
                         "ZSerializer type not found, probably because you added ZSerializer somewhere in the name of the class");
 
-                var fromJson = fromJsonMethod.MakeGenericMethod(oldTuple.Item1);
-                object[] zSerializerObjects = (object[]) fromJson.Invoke(null,
-                    new object[]
-                        {oldTuple.Item2});
+                var fromJson = fromJsonMethod.MakeGenericMethod(currentTuple.Item1);
+                object[] zSerializerObjects = (object[])await fromJson.InvokeAsync(null, currentTuple.Item2);
 
                 int currentComponentCount = 0;
 
                 for (var i = 0; i < zSerializerObjects.Length; i++)
                 {
-                    await FillTemporaryJsonTuples(fillType);
-                    zSerializerObjects[i] = ((object[]) fromJson.Invoke(null, new object[] {tempTuples[tupleID][j].Item2}))[i];
-                    await LoadObjectsDynamically(oldTuple.Item1, realType, zSerializerObjects[i]);
+                    zSerializerObjects = await LoadObjectsDynamically(currentTuple.Item1, realType, i,
+                        zSerializerObjects, tupleIndex, jsonFillType);
                     currentComponentCount++;
                     if (ZSerializerSettings.Instance.serializationType == SerializationType.Async &&
                         currentComponentCount >= ZSerializerSettings.Instance.maxBatchCount)
@@ -500,9 +503,10 @@ namespace ZSerializer
         }
 
 //Loads all references and fields from already loaded objects, this is done like this to avoid data loss
-        static async Task LoadReferences(int tupleID)
+        static async Task LoadReferences()
         {
-            foreach (var tuple in tempTuples[tupleID].Where(t => t.Item1 != typeof(PersistentGameObjectZSerializer)))
+            foreach (var tuple in tempTuples[currentGroupID]
+                .Where(t => t.Item1 != typeof(PersistentGameObjectZSerializer)))
             {
                 Type zSerializerType = tuple.Item1;
                 // Type realType = GetTypeFromZSerializerType(zSerializerType);
@@ -510,16 +514,14 @@ namespace ZSerializer
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(zSerializerType);
 
-                object[] jsonObjects = (object[]) fromJson.Invoke(null,
-                    new object[]
-                        {json});
+                object[] jsonObjects = (object[])await fromJson.InvokeAsync(null, json);
 
                 int componentCount = 0;
                 for (var i = 0; i < jsonObjects.Length; i++)
                 {
                     var componentInGameObject =
                         idMap[
-                            (string) typeof(ZSerializer<>).MakeGenericType(GetTypeFromZSerializerType(zSerializerType))
+                            (string)typeof(ZSerializer<>).MakeGenericType(GetTypeFromZSerializerType(zSerializerType))
                                 .GetField("ZUID").GetValue(jsonObjects[i])] as Component;
 
                     RestoreValues(componentInGameObject, jsonObjects[i]);
@@ -558,11 +560,7 @@ namespace ZSerializer
             string fileSize = "";
             var persistentMonoBehavioursInScene = _currentParent.GetComponentsInChildren<PersistentMonoBehaviour>();
 
-            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
-            {
-                persistentMonoBehaviour.OnPreSave();
-                persistentMonoBehaviour.isSaving = true;
-            }
+            OnPreSave(persistentMonoBehavioursInScene);
 
             LogWarning("Saving \"" + _currentLevelName + "\"");
             unityComponentAssemblies.Clear();
@@ -577,14 +575,10 @@ namespace ZSerializer
             await SaveJsonData($"assemblies-{_currentLevelName}.zsave");
 
 
-            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
-            {
-                persistentMonoBehaviour.isSaving = false;
-                persistentMonoBehaviour.OnPostSave();
-            }
+            OnPostSave(persistentMonoBehavioursInScene);
 
             Debug.Log("Serialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
-                      (Time.frameCount - frameCount) + " frames. (" + fileSize + ")");
+                      (Time.frameCount - frameCount) + " frames.");
             currentGroupID = -1;
             _currentLevelName = null;
             _currentParent = null;
@@ -594,6 +588,42 @@ namespace ZSerializer
             #endregion
         }
 
+
+        static void OnPreSave(PersistentMonoBehaviour[] persistentMonoBehavioursInScene)
+        {
+            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+            {
+                UpdateIDMap(persistentMonoBehavioursInScene);
+
+                persistentMonoBehaviour.OnPreSave();
+                persistentMonoBehaviour.isSaving = true;
+            }
+        }
+
+        static void OnPostSave(PersistentMonoBehaviour[] persistentMonoBehavioursInScene)
+        {
+            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+            {
+                persistentMonoBehaviour.isSaving = false;
+                persistentMonoBehaviour.OnPostSave();
+            }
+        }
+
+        static void UpdateIDMap(PersistentMonoBehaviour[] persistentMonoBehavioursInScene)
+        {
+            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene ??
+                                                    Object.FindObjectsOfType<PersistentMonoBehaviour>())
+            {
+                if (string.IsNullOrEmpty(persistentMonoBehaviour.ZUID) ||
+                    string.IsNullOrEmpty(persistentMonoBehaviour.GOZUID))
+                {
+                    persistentMonoBehaviour.GenerateRuntimeZUIDs();
+                }
+
+                idMap.TryAdd(persistentMonoBehaviour.ZUID, persistentMonoBehaviour);
+                idMap.TryAdd(persistentMonoBehaviour.GOZUID, persistentMonoBehaviour.gameObject);
+            }
+        }
 
         /// <summary>
         /// Serialize all Persistent components and GameObjects on the current scene to the selected save file
@@ -628,8 +658,8 @@ namespace ZSerializer
             int[] idList;
             if (isSavingAll)
                 idList = Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerialize)
-                    .Select(o => ((IZSerialize) o).GroupID).Distinct().ToArray();
-            else idList = new[] {currentGroupID};
+                    .Select(o => ((IZSerialize)o).GroupID).Distinct().ToArray();
+            else idList = new[] { currentGroupID };
 
             jsonToSave = "";
 
@@ -641,20 +671,10 @@ namespace ZSerializer
                 currentGroupID = idList[i];
 
                 var persistentMonoBehavioursInScene = Object.FindObjectsOfType<PersistentMonoBehaviour>()
-                    .Where(ShouldBeSerialized);
+                    .Where(ShouldBeSerialized).ToArray();
 
-                foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
-                {
-                    if (string.IsNullOrEmpty(persistentMonoBehaviour.ZUID) ||
-                        string.IsNullOrEmpty(persistentMonoBehaviour.GOZUID))
-                    {
-                        throw new SerializationException(
-                            $"{persistentMonoBehaviour} has not been setup with a ZUID, this may be caused by not calling base.Start() on your Start() method");
-                    }
 
-                    persistentMonoBehaviour.OnPreSave();
-                    persistentMonoBehaviour.isSaving = true;
-                }
+                OnPreSave(persistentMonoBehavioursInScene);
 
                 LogWarning("Saving data on Group: " + ZSerializerSettings.Instance.saveGroups[currentGroupID]);
                 unityComponentAssemblies.Clear();
@@ -675,7 +695,7 @@ namespace ZSerializer
                     .Select(kvp => kvp.Value as PersistentMonoBehaviour).ToList());
 
 
-                await SaveJsonData($"components.zsave");
+                await SaveJsonData("components.zsave");
                 CompileJson(unityComponentAssemblies.Distinct().ToArray());
                 await SaveJsonData("assemblies.zsave");
 
@@ -683,17 +703,13 @@ namespace ZSerializer
                     $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[currentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length * .001f} KB</color>");
                 // if (idList.Length > 1 && i != idList.Length - 1) fileSize += ", ";
 
-                foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
-                {
-                    persistentMonoBehaviour.isSaving = false;
-                    persistentMonoBehaviour.OnPostSave();
-                }
+                OnPostSave(persistentMonoBehavioursInScene);
             }
 
             Debug.Log("Serialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                       (Time.frameCount - frameCount) + " frames.");
-            currentGroupID = -1;
 
+            currentGroupID = -1;
             // await FillTemporaryJsonTuples(idList);
 
             #endregion
@@ -702,7 +718,12 @@ namespace ZSerializer
 
         internal static List<int> restorationIDList = new List<int>();
 
-        enum JsonFillType {All, Level};
+        enum JsonFillType
+        {
+            All,
+            Level
+        };
+
         static async Task FillTemporaryJsonTuples(JsonFillType jsonFillType)
         {
             await RunTask(() =>
@@ -714,13 +735,13 @@ namespace ZSerializer
                             tempTuples = new (Type, string)[ZSerializerSettings.Instance.saveGroups
                                 .Where(s => !string.IsNullOrEmpty(s))
                                 .Max(sg => ZSerializerSettings.Instance.saveGroups.IndexOf(sg)) + 1][];
-                        
+
                         tempTuples[currentGroupID] = ReadFromFile("components.zsave");
                         break;
                     case JsonFillType.Level:
                         if (tempTuples == null || tempTuples.Length == 0)
                             tempTuples = new (Type, string)[1][];
-                        
+
                         tempTuples[0] = ReadFromFile($"{_currentLevelName}.zsave");
                         break;
                 }
@@ -730,10 +751,17 @@ namespace ZSerializer
         /// <summary>
         /// Load all Persistent components and GameObjects from the current scene that have been previously serialized in the given level save file
         /// </summary>
-        public static async Task LoadLevel(string levelName, Transform parent)
+        public static async Task LoadLevel(string levelName, Transform parent, bool destroyChildren = false)
         {
+            if (destroyChildren)
+                foreach (var child in parent.GetComponentsInChildren<Transform>())
+                {
+                    if (child != parent)
+                        Object.Destroy(child.gameObject);
+                }
+
             await Task.Yield();
-            
+
             _currentLevelName = levelName;
             _currentParent = parent;
 
@@ -741,27 +769,30 @@ namespace ZSerializer
                 saveFiles = Directory.GetFiles(GetFilePath(""), $"{levelName}.zsave").ToList();
 
 
-
             LogWarning("Loading Level: " + levelName);
 
-            // var persistentMonoBehavioursInScene = parent.GetComponentsInChildren<PersistentMonoBehaviour>();
-            //
-            // foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
-            // {
-            //     persistentMonoBehaviour.OnPreLoad();
-            //     persistentMonoBehaviour.isLoading = true;
-            // }
+            var persistentMonoBehavioursInScene = parent.GetComponentsInChildren<PersistentMonoBehaviour>();
+
+            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+            {
+                UpdateIDMap(null);
+
+                persistentMonoBehaviour.OnPreLoad();
+                persistentMonoBehaviour.isLoading = true;
+            }
 
             float startingTime = Time.realtimeSinceStartup;
             float frameCount = Time.frameCount;
 
             unityComponentAssemblies =
-                JsonHelper.FromJson<string>(ReadFromFile($"assemblies-{levelName}.zsave")[0].Item2).ToList();
-            
+                (await JsonHelper.FromJson<string>(ReadFromFile($"assemblies-{levelName}.zsave")?[0].Item2))
+                .ToList();
+
+            currentGroupID = 0;
+
             await FillTemporaryJsonTuples(JsonFillType.Level);
-            await LoadComponents(0, JsonFillType.Level);
-            await FillTemporaryJsonTuples(JsonFillType.Level);
-            await LoadReferences(0);
+            await LoadComponents(JsonFillType.Level);
+            await LoadReferences();
 
             Debug.Log(
                 $"Deserialization of level \"{levelName}\" ended in: " +
@@ -789,7 +820,7 @@ namespace ZSerializer
             Log(isLoadingAll ? "Loading All Data" : "Loading Group " + currentGroupID);
 
 
-            var idList = isLoadingAll ? GetIDList() : new[] {currentGroupID};
+            var idList = isLoadingAll ? GetIDList() : new[] { currentGroupID };
 
             restorationIDList.AddRange(idList);
             restorationIDList = restorationIDList.Distinct().ToList();
@@ -802,16 +833,11 @@ namespace ZSerializer
                 LogWarning("Loading Group in disk: " + ZSerializerSettings.Instance.saveGroups[currentGroupID]);
 
                 var persistentMonoBehavioursInScene = Object.FindObjectsOfType<PersistentMonoBehaviour>()
-                    .Where(ShouldBeSerialized);
+                    .Where(ShouldBeSerialized).ToArray();
 
                 foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
                 {
-                    if (string.IsNullOrEmpty(persistentMonoBehaviour.ZUID) ||
-                        string.IsNullOrEmpty(persistentMonoBehaviour.GOZUID))
-                    {
-                        throw new SerializationException(
-                            $"{persistentMonoBehaviour} has not been setup with a ZUID, this may be caused by not calling base.Start() on your Start() method");
-                    }
+                    UpdateIDMap(persistentMonoBehavioursInScene);
 
                     persistentMonoBehaviour.OnPreLoad();
                     persistentMonoBehaviour.isLoading = true;
@@ -821,13 +847,12 @@ namespace ZSerializer
                 float frameCount = Time.frameCount;
 
                 unityComponentAssemblies =
-                    JsonHelper.FromJson<string>(ReadFromFile("assemblies.zsave")[0].Item2).ToList();
+                    (await JsonHelper.FromJson<string>(ReadFromFile("assemblies.zsave")?[0].Item2)).ToList();
 
 
                 await FillTemporaryJsonTuples(JsonFillType.All);
-                await LoadComponents(currentGroupID, JsonFillType.All);
-                await FillTemporaryJsonTuples(JsonFillType.All);
-                await LoadReferences(currentGroupID);
+                await LoadComponents(JsonFillType.All);
+                await LoadReferences();
 
                 Debug.Log(
                     $"Deserialization of group \"{ZSerializerSettings.Instance.saveGroups[currentGroupID]}\" ended in: " +
@@ -857,45 +882,44 @@ namespace ZSerializer
             // WriteToFile(fileName, json, useGlobalID);
         }
 
-        static string ReplaceZUIDs(string json)
+        internal static async Task<string> ReplaceZUIDs(string json)
         {
-            #if UNITY_EDITOR
+            return await RunTask(() =>
+            {
+#if UNITY_EDITOR
+                return Regex.Replace(json, "\"zuid\":\\w+",
+                    match =>
+                    {
+                        if (idMap.TryGetValue(match.Value.Split(':')[1], out var obj))
+                            return "\"instanceID\":" + obj.GetHashCode();
+                        return "\"instanceID\":0";
+                    });
+#else
             return Regex.Replace(json, "\"zuid\":\\w+",
                 match =>
                 {
-                    Debug.LogError(match + " " + idMap[match.Value.Split(':')[1]] + " " + idMap[match.Value.Split(':')[1]].GetHashCode());
-                    return "\"instanceID\":" + idMap[match.Value.Split(':')[1]].GetHashCode();
+                    if (idMap.TryGetValue(match.Value.Split(':')[1], out var obj))
+                        return "\"m_FileID\":" + obj.GetHashCode() + ", \"m_PathID\":0";
+                    return "\"m_FileID\":0, \"m_PathID\":0";
                 });
-            #else
-            return Regex.Replace(json, "\"zuid\":\\w+",
-                match => "\"m_FileID\":" + idMap[match.Value.Split(':')[1]].GetHashCode() + ", \"m_PathID\":0");
-            #endif
+#endif
+            });
         }
 
-        // "other":{"m_FileID":1736,"m_PathID":0} NOT WORKING!!!!!!!!!
-        static string ReplaceInstanceIDs(string json)
+        static string ReplaceInstanceIDs(string json, Dictionary<string, string> tempIDMap)
         {
             string pattern;
             ;
 #if UNITY_EDITOR
-            pattern = "\"instanceID\":\\D?[0-9]+";
+            pattern = "\"instanceID\":\\D?[0-9]{2,}";
 #else
-            pattern = "\"m_FileID:-?[0-9]+,\"m_PathID\":0\"";
+            pattern = "\"m_FileID:-?[0-9]{2,},\"m_PathID\":0";
 #endif
 
             return Regex.Replace(json, pattern, match =>
             {
-#if UNITY_EDITOR
-                string id = match.Value.Split(':')[1];
-                var mappedItem = idMap.FirstOrDefault(kvp => kvp.Value.GetHashCode().ToString() == id);
-                if (!mappedItem.Equals(default(KeyValuePair<string, Object>))) return "\"zuid\":" + mappedItem.Key;
+                if (tempIDMap.TryGetValue(match.Value, out string zuid)) return "\"zuid\":" + zuid;
                 return match.Value;
-#else
-                string id = match.Value.Split(':')[1].Split(',')[0];
-                var mappedItem = idMap.FirstOrDefault(kvp => kvp.Value.GetHashCode().ToString() == id);
-                if (!mappedItem.Equals(default(KeyValuePair<string, Object>))) return "\"zuid\":" + mappedItem.Key;
-                return match.Value;
-#endif
             });
         }
 
@@ -908,9 +932,17 @@ namespace ZSerializer
 //Writes json into file
         static async Task WriteToFile(string fileName, string json, bool useGlobalID = false)
         {
-            json = ReplaceInstanceIDs(json);
             await RunTask(() =>
             {
+                var tempIDMap = idMap.ToDictionary(kvp =>
+                {
+#if UNITY_EDITOR
+                    return "\"instanceID\":" + kvp.Value.GetHashCode();
+#else
+                        return "\"m_FileID:\":" + kvp.Value.GetHashCode() + ", \"m_PathID\":0";
+#endif
+                }, kvp => kvp.Key);
+                json = ReplaceInstanceIDs(json, tempIDMap);
                 if (ZSerializerSettings.Instance.encryptData)
                 {
                     byte[] key =
@@ -919,7 +951,7 @@ namespace ZSerializer
                     };
 
                     File.WriteAllBytes(GetFilePath(fileName, useGlobalID),
-                        EncryptStringToBytes(json, key, key)); 
+                        EncryptStringToBytes(json, key, key));
                 }
                 else
                 {
@@ -954,13 +986,12 @@ namespace ZSerializer
             if (ZSerializerSettings.Instance.encryptData)
             {
                 byte[] key =
-                    {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+                    { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
                 return GetTypesAndJsonFromString(
-                    ReplaceZUIDs(
-                        DecryptStringFromBytes(File.ReadAllBytes(GetFilePath(fileName, useGlobalID)), key, key)));
+                    DecryptStringFromBytes(File.ReadAllBytes(GetFilePath(fileName, useGlobalID)), key, key));
             }
 
-            return GetTypesAndJsonFromString(ReplaceZUIDs(File.ReadAllText(GetFilePath(fileName, useGlobalID))));
+            return GetTypesAndJsonFromString(File.ReadAllText(GetFilePath(fileName, useGlobalID)));
         }
 
         static (Type, string)[] GetTypesAndJsonFromString(string modifiedJson)
@@ -1099,9 +1130,9 @@ namespace ZSerializer
 //Class to help with saving arrays with jsonutility
     static class JsonHelper
     {
-        public static T[] FromJson<T>(string json)
+        public static async Task<T[]> FromJson<T>(string json)
         {
-            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
+            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(await ZSerialize.ReplaceZUIDs(json));
             return wrapper.Items;
         }
 
@@ -1132,7 +1163,9 @@ namespace ZSerializer
             switch (obj)
             {
                 case IZSerialize serializable: return serializable.ZUID;
-                case GameObject gameObject: return (gameObject.GetComponents<MonoBehaviour>().First(m => m is IZSerialize) as IZSerialize).GOZUID;
+                case GameObject gameObject:
+                    return (gameObject.GetComponents<MonoBehaviour>().First(m => m is IZSerialize) as IZSerialize)
+                        .GOZUID;
                 case Component component:
                     return component.GetComponent<PersistentGameObject>()?.ComponentZuidMap[component];
                 default: return null;
@@ -1142,6 +1175,14 @@ namespace ZSerializer
         internal static void TryAdd<TK, TV>(this Dictionary<TK, TV> dictionary, TK key, TV value)
         {
             if (!dictionary.TryGetValue(key, out _)) dictionary[key] = value;
+        }
+
+        public static async Task<object> InvokeAsync(this MethodInfo @this, object obj, params object[] parameters)
+        {
+            var task = (Task)@this.Invoke(obj, parameters);
+            await task.ConfigureAwait(false);
+            var resultProperty = task.GetType().GetProperty("Result");
+            return resultProperty.GetValue(task);
         }
     }
 }

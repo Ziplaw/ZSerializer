@@ -59,9 +59,9 @@ namespace ZSerializer
         [ForceZSerialized, HideInInspector, SerializeField]
         internal bool autoSync = true;
 
-        [NonZSerialized, SerializeField, HideInInspector] private string _zuid;
+        [NonZSerialized, SerializeField] private string _zuid;
 
-        [NonZSerialized, SerializeField, HideInInspector] private string _gozuid;
+        [NonZSerialized, SerializeField] private string _gozuid;
 
 
         public int GroupID
@@ -119,14 +119,6 @@ namespace ZSerializer
             GenerateEditorZUIDs(false);
         }
 
-        public void Start()
-        {
-            GenerateRuntimeZUIDs();
-
-            ZSerialize.idMap.TryAdd(ZUID, this);
-            ZSerialize.idMap.TryAdd(GOZUID, gameObject);
-        }
-
         public void GenerateRuntimeZUIDs()
         {
             if (string.IsNullOrEmpty(ZUID)) ZUID = ZSerialize.GetRuntimeSafeZUID();
@@ -140,7 +132,7 @@ namespace ZSerializer
 #if UNITY_EDITOR
             ZUID = GUID.Generate().ToString();
             var pg = GetComponent<PersistentGameObject>();
-            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : pg ? pg.GOZUID : GUID.Generate().ToString();
+            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : pg && !string.IsNullOrEmpty(pg.GOZUID) ? pg.GOZUID : GUID.Generate().ToString();
 
             EditorUtility.SetDirty(this);
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);

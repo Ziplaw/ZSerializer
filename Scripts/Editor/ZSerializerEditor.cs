@@ -926,16 +926,32 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 .Reverse())
             {
                 var serializable = monoBehaviour as IZSerialize;
-                if (map.TryGetValue(serializable.ZUID, out _))
+                if (!string.IsNullOrEmpty(serializable.ZUID))
                 {
-                    serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
-                                                     go != monoBehaviour.gameObject);
-                }
+                    if (map.TryGetValue(serializable.ZUID, out _))
+                    {
+                        serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
+                                                         go != monoBehaviour.gameObject);
+                        
+                        ZSerialize.idMap.TryAdd(serializable.ZUID, monoBehaviour);
+                        ZSerialize.idMap.TryAdd(serializable.GOZUID, monoBehaviour.gameObject);
 
-                if (serializable as Object)
-                    map[serializable.ZUID] = serializable as Object;
-                if (monoBehaviour && monoBehaviour.gameObject)
-                    map[serializable.GOZUID] = monoBehaviour.gameObject;
+                        if (serializable is PersistentGameObject pg)
+                        {
+                            foreach (var pgSerializedComponent in pg.serializedComponents)
+                            {
+                                ZSerialize.idMap.TryAdd(pgSerializedComponent.zuid,pgSerializedComponent.component);
+                            }
+
+                        }
+                        
+                    }
+
+                    if (serializable as Object)
+                        map[serializable.ZUID] = serializable as Object;
+                    if (monoBehaviour && monoBehaviour.gameObject)
+                        map[serializable.GOZUID] = monoBehaviour.gameObject;
+                }
             }
         }
     }
