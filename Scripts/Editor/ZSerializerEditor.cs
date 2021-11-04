@@ -90,7 +90,7 @@ namespace ZSerializer.Editor
 
             string script =
                 "[System.Serializable]\n" +
-                $"public sealed class {type.Name}ZSerializer : ZSerializer.Internal.ZSerializer<{type.Name}>\n" +
+                $"public sealed class {type.Name}ZSerializer : ZSerializer.Internal.ZSerializer\n" +
                 "{\n";
 
             var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Instance)
@@ -187,7 +187,7 @@ namespace ZSerializer.Editor
                       $"         autoSync = (bool)typeof({type.Name}).GetProperty(\"AutoSync\").GetValue(instance);\n" +
                       "    }";
 
-            script += "\n\n    public override void RestoreValues(" + type.FullName + " component)\n    {\n";
+            script += "\n\n    public override void RestoreValues(UnityEngine.Component component)\n    {\n";
 
             foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
                 .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList())
@@ -801,9 +801,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 {
                     longScript +=
                         "[System.Serializable]\npublic sealed class " + type.Name +
-                        "ZSerializer : ZSerializer.Internal.ZSerializer<" +
-                        type.FullName +
-                        "> {\n";
+                        "ZSerializer : ZSerializer.Internal.ZSerializer {\n";
 
                     foreach (var propertyInfo in type
                         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -877,15 +875,16 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
 
                     longScript +=
-                        @"    public override void RestoreValues(" + type.FullName + @" component)
+                        @"    public override void RestoreValues(UnityEngine.Component component)
     {
+        var _realComponent = component as " + type.FullName + @";
 ";
                     foreach (var propertyInfo in type
                         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         .Where(ZSerialize.PropertyIsSuitableForZSerializer))
                     {
                         longScript +=
-                            $"        component." + propertyInfo.Name + " = " + propertyInfo.Name + ";\n";
+                            $"        _realComponent." + propertyInfo.Name + " = " + propertyInfo.Name + ";\n";
                     }
 
                     longScript += "    }\n";

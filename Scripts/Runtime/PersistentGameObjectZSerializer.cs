@@ -7,7 +7,7 @@ using ZSerializer;
 namespace ZSerializer
 {
     [System.Serializable]
-    public sealed class PersistentGameObjectZSerializer : Internal.ZSerializer<PersistentGameObject>
+    public sealed class PersistentGameObjectZSerializer : Internal.ZSerializer
     {
         public int groupID;
         public System.Boolean enabled;
@@ -24,8 +24,6 @@ namespace ZSerializer
             hideFlags = PersistentGameObjectInstance.hideFlags;
             serializedComponents = PersistentGameObjectInstance.serializedComponents;
             groupID = PersistentGameObjectInstance.GroupID;
-            this.ZUID = ZUID;
-            this.GOZUID = GOZUID;
 
             var parent = PersistentGameObjectInstance.transform.parent;
             gameObjectData = new GameObjectData
@@ -47,14 +45,15 @@ namespace ZSerializer
             };
         }
 
-        public override void RestoreValues(PersistentGameObject component)
+        public override void RestoreValues(Component component)
         {
-            component.GroupID = groupID;
-            component.ZUID = ZUID;
-            component.GOZUID = GOZUID;
-            component.enabled = enabled;
-            component.hideFlags = hideFlags;
-            component.serializedComponents = serializedComponents;
+            var persistentComponent = component as PersistentGameObject;
+            persistentComponent.GroupID = groupID;
+            persistentComponent.ZUID = ZUID;
+            persistentComponent.GOZUID = GOZUID;
+            persistentComponent.enabled = enabled;
+            persistentComponent.hideFlags = hideFlags;
+            persistentComponent.serializedComponents = serializedComponents;
 
             var gameObject = component.gameObject;
             gameObject.hideFlags = gameObjectData.hideFlags;

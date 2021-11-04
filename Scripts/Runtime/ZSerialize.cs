@@ -44,11 +44,6 @@ namespace ZSerializer
         private static List<Type> unitySerializableTypes;
         internal static List<Type> UnitySerializableTypes => unitySerializableTypes ??= GetUnitySerializableTypes();
 
-
-        //Cached methods to be invoked dynamically during serialization
-        private static MethodInfo castMethod = typeof(Enumerable).GetMethod("Cast");
-        private static MethodInfo toArrayMethod = typeof(Enumerable).GetMethod("ToArray");
-
         private static MethodInfo saveMethod =
             typeof(ZSerialize).GetMethod(nameof(CompileJson), BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -100,32 +95,33 @@ namespace ZSerializer
         {
             return AppDomain.CurrentDomain.GetAssemblies(
             ).SelectMany(a =>
-                a.GetTypes().Where(t => t == typeof(PersistentGameObject) ||
-                                        t.IsSubclassOf(typeof(Component)) &&
-                                        !t.IsSubclassOf(typeof(MonoBehaviour)) &&
-                                        t != typeof(Transform) &&
-                                        t != typeof(MonoBehaviour) &&
-                                        t.GetCustomAttribute<ObsoleteAttribute>() == null &&
-                                        t.IsVisible)
+                a.GetTypes().Where(t =>
+                    t == typeof(PersistentGameObject) ||
+                    t.IsSubclassOf(typeof(Component)) &&
+                    !t.IsSubclassOf(typeof(MonoBehaviour)) &&
+                    t != typeof(Transform) &&
+                    t != typeof(MonoBehaviour) &&
+                    t.GetCustomAttribute<ObsoleteAttribute>() == null &&
+                    t.IsVisible)
             ).ToList();
         }
 
         internal static bool PropertyIsSuitableForZSerializer(PropertyInfo propertyInfo)
         {
-            return propertyInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&
-                   propertyInfo.GetCustomAttribute<NonZSerialized>() == null &&
-                   propertyInfo.GetSetMethod() != null &&
-                   propertyInfo.GetSetMethod().IsPublic &&
-                   propertyInfo.CanRead &&
+            return propertyInfo.CanRead &&
                    propertyInfo.CanWrite &&
-                   !ZSerializerSettings.Instance.componentBlackList.IsInBlackList(propertyInfo.ReflectedType,
-                       propertyInfo.Name) &&
                    propertyInfo.Name != "material" &&
                    propertyInfo.Name != "materials" &&
                    propertyInfo.Name != "sharedMaterial" &&
                    propertyInfo.Name != "mesh" &&
                    propertyInfo.Name != "tag" &&
-                   propertyInfo.Name != "name";
+                   propertyInfo.Name != "name" &&
+                   propertyInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&
+                   propertyInfo.GetCustomAttribute<NonZSerialized>() == null &&
+                   propertyInfo.GetSetMethod() != null &&
+                   propertyInfo.GetSetMethod().IsPublic &&
+                   !ZSerializerSettings.Instance.componentBlackList.IsInBlackList(propertyInfo.ReflectedType,
+                       propertyInfo.Name);
         }
 
         [RuntimeInitializeOnLoadMethod]
@@ -160,7 +156,26 @@ namespace ZSerializer
 
         #endregion
 
-        #region Save Group Utilities
+        #region Exposed Utilities
+
+        /// <summary>
+        /// Gets a Scene's saved level names 
+        /// </summary>
+        /// <returns>Save Group's ID</returns>
+        public static List<string> GetLevelNames()
+        {
+            List<string> levels = new List<string>();
+            string[] dPaths = Directory.GetDirectories(GetFilePath("", true), "*levels");
+            if (dPaths.Length > 0)
+            {
+                foreach (var s1 in Directory.GetFiles(dPaths[0]).Where(s => !s.Contains("assemblies-")))
+                {
+                    levels.Add(s1.Split('\\').Last().Split('/').Last().Split('.')[0]);
+                }
+            }
+
+            return levels;
+        }
 
         /// <summary>
         /// Get a Save Group's ID from its name
@@ -218,10 +233,14 @@ namespace ZSerializer
         }
 
         //Gets all the types from a persistentGameObject that are not monobehaviours
-        static List<Type> GetAllPersistentComponents(IEnumerable<PersistentGameObject> objects)
+        static async Task<List<Type>> GetAllPersistentComponents(IEnumerable<PersistentGameObject> objects)
         {
-            return objects.SelectMany(o => o.serializedComponents)
-                .Where(sc => sc.persistenceType == PersistentType.Everything).Select(sc => sc.Type).Distinct().ToList();
+            return await RunTask(() =>
+            {
+                return objects.SelectMany(o => o.serializedComponents)
+                    .Where(sc => sc.persistenceType == PersistentType.Everything).Select(sc => sc.Type).Distinct()
+                    .ToList();
+            });
         }
 
         //Dynamically create array of zsavers based on component
@@ -235,7 +254,6 @@ namespace ZSerializer
             }
 
             var ZSerializerArrayType = ZSerializerType.MakeArrayType();
-
 
             var ZSerializersArray =
                 Activator.CreateInstance(ZSerializerArrayType, components.Count);
@@ -264,18 +282,10 @@ namespace ZSerializer
         {
             return await RunTask(() =>
             {
-                zSavers = zSavers.OrderBy(x =>
-                    ((GameObjectData)x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder.x).ThenBy(x =>
-                    ((GameObjectData)x.GetType().GetField("gameObjectData").GetValue(x)).loadingOrder.y).ToArray();
-
-                MethodInfo cast = castMethod.MakeGenericMethod(new Type[] { typeof(PersistentGameObjectZSerializer) });
-
-                MethodInfo toArray =
-                    toArrayMethod.MakeGenericMethod(new Type[] { typeof(PersistentGameObjectZSerializer) });
-
-                var result = cast.Invoke(zSavers, new object[] { zSavers });
-
-                return (object[])toArray.Invoke(result, new object[] { result });
+                return zSavers.OrderBy(x =>
+                        (x as PersistentGameObjectZSerializer).gameObjectData.loadingOrder.x).ThenBy(x =>
+                        (x as PersistentGameObjectZSerializer).gameObjectData.loadingOrder.y)
+                    .Select(x => x as PersistentGameObjectZSerializer).ToArray();
             });
         }
 
@@ -291,14 +301,14 @@ namespace ZSerializer
         //Restore the values of a given component from a given ZSerializer
         private static void RestoreValues(Component _component, object ZSerializer)
         {
-            ZSerializer.GetType().GetMethod("RestoreValues").Invoke(ZSerializer, new object[] { _component });
+            (ZSerializer as ZSerializer.Internal.ZSerializer).RestoreValues(_component);
         }
 
         #endregion
 
         #region Save
 
-        static bool ShouldBeSerialized([CanBeNull] IZSerialize serializable)
+        static bool ShouldBeSerialized(IZSerialize serializable)
         {
             return serializable != null && (serializable.GroupID == currentGroupID || currentGroupID == -1) &&
                    serializable.IsOn;
@@ -339,7 +349,7 @@ namespace ZSerializer
         //Saves all persistent GameObjects and all of its attached unity components
         static async Task SavePersistentGameObjects(List<PersistentGameObject> persistentGameObjectsToSerialize)
         {
-            var componentTypes = GetAllPersistentComponents(persistentGameObjectsToSerialize);
+            var componentTypes = await GetAllPersistentComponents(persistentGameObjectsToSerialize);
 
             if (persistentGameObjectsToSerialize.Any()) componentTypes.Insert(0, typeof(PersistentGameObject));
 
@@ -358,7 +368,7 @@ namespace ZSerializer
         {
             if (zSaverType == null)
             {
-                LogError("No ZSerializer found for this type");
+                LogError($"No ZSerializer found for {components[0].GetType()}");
                 return;
             }
 
@@ -394,10 +404,8 @@ namespace ZSerializer
             object[] zSerializerObjects, int tupleIndex, JsonFillType jsonFillType)
         {
             var zSerializerObject = zSerializerObjects[objectIndex];
-            string zuid = (string)typeof(ZSerializer<>).MakeGenericType(componentType).GetField("ZUID")
-                .GetValue(zSerializerObject);
-            string gozuid = (string)typeof(ZSerializer<>).MakeGenericType(componentType).GetField("GOZUID")
-                .GetValue(zSerializerObject);
+            string zuid = (zSerializerObject as Internal.ZSerializer)!.ZUID;
+            string gozuid = (zSerializerObject as Internal.ZSerializer)!.GOZUID;
 
             bool componentPresentInGameObject = idMap.TryGetValue(zuid, out var componentObj) && idMap[zuid] != null;
             bool gameObjectPresent = idMap.TryGetValue(gozuid, out var gameObjectObj) && idMap[gozuid] != null;
@@ -520,9 +528,7 @@ namespace ZSerializer
                 for (var i = 0; i < jsonObjects.Length; i++)
                 {
                     var componentInGameObject =
-                        idMap[
-                            (string)typeof(ZSerializer<>).MakeGenericType(GetTypeFromZSerializerType(zSerializerType))
-                                .GetField("ZUID").GetValue(jsonObjects[i])] as Component;
+                        idMap[(jsonObjects[i] as Internal.ZSerializer).ZUID] as Component;
 
                     RestoreValues(componentInGameObject, jsonObjects[i]);
 
@@ -560,7 +566,7 @@ namespace ZSerializer
             string fileSize = "";
             var persistentMonoBehavioursInScene = _currentParent.GetComponentsInChildren<PersistentMonoBehaviour>();
 
-            OnPreSave(persistentMonoBehavioursInScene);
+            await OnPreSave(persistentMonoBehavioursInScene);
 
             LogWarning("Saving \"" + _currentLevelName + "\"");
             unityComponentAssemblies.Clear();
@@ -589,12 +595,11 @@ namespace ZSerializer
         }
 
 
-        static void OnPreSave(PersistentMonoBehaviour[] persistentMonoBehavioursInScene)
+        static async Task OnPreSave(PersistentMonoBehaviour[] persistentMonoBehavioursInScene)
         {
+            await UpdateIDMap(persistentMonoBehavioursInScene);
             foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
             {
-                UpdateIDMap(persistentMonoBehavioursInScene);
-
                 persistentMonoBehaviour.OnPreSave();
                 persistentMonoBehaviour.isSaving = true;
             }
@@ -609,10 +614,11 @@ namespace ZSerializer
             }
         }
 
-        static void UpdateIDMap(PersistentMonoBehaviour[] persistentMonoBehavioursInScene)
+        static async Task UpdateIDMap([NotNull] PersistentMonoBehaviour[] persistentMonoBehavioursInScene)
         {
-            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene ??
-                                                    Object.FindObjectsOfType<PersistentMonoBehaviour>())
+            int currentComponentCount = 0;
+
+            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
             {
                 if (string.IsNullOrEmpty(persistentMonoBehaviour.ZUID) ||
                     string.IsNullOrEmpty(persistentMonoBehaviour.GOZUID))
@@ -622,6 +628,14 @@ namespace ZSerializer
 
                 idMap.TryAdd(persistentMonoBehaviour.ZUID, persistentMonoBehaviour);
                 idMap.TryAdd(persistentMonoBehaviour.GOZUID, persistentMonoBehaviour.gameObject);
+
+                currentComponentCount++;
+                if (ZSerializerSettings.Instance.serializationType == SerializationType.Async &&
+                    currentComponentCount >= ZSerializerSettings.Instance.maxBatchCount)
+                {
+                    currentComponentCount = 0;
+                    await Task.Yield();
+                }
             }
         }
 
@@ -674,7 +688,7 @@ namespace ZSerializer
                     .Where(ShouldBeSerialized).ToArray();
 
 
-                OnPreSave(persistentMonoBehavioursInScene);
+                await OnPreSave(persistentMonoBehavioursInScene);
 
                 LogWarning("Saving data on Group: " + ZSerializerSettings.Instance.saveGroups[currentGroupID]);
                 unityComponentAssemblies.Clear();
@@ -773,10 +787,9 @@ namespace ZSerializer
 
             var persistentMonoBehavioursInScene = parent.GetComponentsInChildren<PersistentMonoBehaviour>();
 
+            await UpdateIDMap(Object.FindObjectsOfType<PersistentMonoBehaviour>());
             foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
             {
-                UpdateIDMap(null);
-
                 persistentMonoBehaviour.OnPreLoad();
                 persistentMonoBehaviour.isLoading = true;
             }
@@ -835,10 +848,9 @@ namespace ZSerializer
                 var persistentMonoBehavioursInScene = Object.FindObjectsOfType<PersistentMonoBehaviour>()
                     .Where(ShouldBeSerialized).ToArray();
 
+                await UpdateIDMap(persistentMonoBehavioursInScene);
                 foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
                 {
-                    UpdateIDMap(persistentMonoBehavioursInScene);
-
                     persistentMonoBehaviour.OnPreLoad();
                     persistentMonoBehaviour.isLoading = true;
                 }
@@ -968,8 +980,16 @@ namespace ZSerializer
 
         static async Task<T> RunTask<T>(Func<T> action)
         {
-            if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) return action();
-            return await Task.Run(action);
+            try
+            {
+                if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) return action();
+                return await Task.Run(action);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                throw;
+            }
         }
 
 //Reads json from file

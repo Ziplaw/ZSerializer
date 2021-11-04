@@ -6,7 +6,7 @@ using Object = UnityEngine.Object;
 
 namespace ZSerializer.Internal
 {
-    public abstract class ZSerializer<T> where T : Component
+    public abstract class ZSerializer
     {
         [NonZSerialized] public string ZUID;
         [NonZSerialized] public string GOZUID;
@@ -17,6 +17,6 @@ namespace ZSerializer.Internal
             this.GOZUID = GOZUID;
         }
 
-        public abstract void RestoreValues(T component);
+        public abstract void RestoreValues(Component component1);
     }
 }
