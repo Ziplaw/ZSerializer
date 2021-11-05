@@ -114,5 +114,6 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  ZUID: -1
+  _zuid: dd111cf2d3d8e904487852c7d6d72181
+  _gozuid: 18272db144888844cbcd89f42f729473
   hits: 0

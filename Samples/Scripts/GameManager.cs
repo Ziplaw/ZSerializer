@@ -8,13 +8,13 @@ public class GameManager : PersistentMonoBehaviour
     public int currentScore;
     public string playerName;
     public Vector3 position;
-
     public BallMover ballMover;
+    public GameObject canvas;
 
-    public override void OnPostLoad()
-    {
-        ballMover = FindObjectOfType<BallMover>();
-    }
+    // public override void OnPostLoad()
+    // {
+    //     ballMover = FindObjectOfType<BallMover>();
+    // }
 
     private void Start()
     {
@@ -22,16 +22,22 @@ public class GameManager : PersistentMonoBehaviour
     }
 
 
-    private void OnGUI()
+    private async void OnGUI()
     {
         if (GUILayout.Button("Save"))
         {
-            ZSerialize.SaveAll();
+            canvas.SetActive(true);
+            await ZSerialize.SaveAll();
+            canvas.SetActive(false);
+            return;
         }
 
         if (GUILayout.Button("Load"))
         {
-            ZSerialize.LoadAll();
+            canvas.SetActive(true);
+            await ZSerialize.LoadAll();
+            canvas.SetActive(false);
+            return;
         }
 
         if (GUILayout.Button("Destroy Player"))

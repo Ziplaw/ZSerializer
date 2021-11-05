@@ -238,7 +238,7 @@ namespace ZSerializer
             return await RunTask(() =>
             {
                 return objects.SelectMany(o => o.serializedComponents)
-                    .Where(sc => sc.persistenceType == PersistentType.Everything).Select(sc => sc.Type).Distinct()
+                    .Where(sc => sc.persistenceType == PersistentType.Everything || !ZSerializerSettings.Instance.advancedSerialization ).Select(sc => sc.Type).Distinct()
                     .ToList();
             });
         }
@@ -341,7 +341,7 @@ namespace ZSerializer
             if (componentType == typeof(PersistentGameObject)) return objects.Select(o => o as Component).ToList();
             return objects.SelectMany(o =>
                     o.serializedComponents.Where(sc =>
-                        sc.Type == componentType && sc.persistenceType == PersistentType.Everything))
+                        sc.Type == componentType && (sc.persistenceType == PersistentType.Everything || !ZSerializerSettings.Instance.advancedSerialization)))
                 .Select(sc => sc.component).ToList();
         }
 
@@ -433,7 +433,7 @@ namespace ZSerializer
                     IZSerialize serializer = component as IZSerialize;
                     idMap[zuid] = component;
                     serializer.ZUID = zuid;
-                    serializer.GOZUID = zuid;
+                    serializer.GOZUID = gozuid;
                 }
             }
 
@@ -444,7 +444,7 @@ namespace ZSerializer
                 PersistentGameObject pg = component as PersistentGameObject;
                 foreach (var pgSerializedComponent in new List<SerializedComponent>(pg.serializedComponents))
                 {
-                    if (pgSerializedComponent.component == null)
+                    if (pgSerializedComponent.component == null && (pgSerializedComponent.persistenceType != PersistentType.None || !ZSerializerSettings.Instance.advancedSerialization))
                     {
                         var addedComponent = pg.gameObject.AddComponent(pgSerializedComponent.Type);
                         pg.serializedComponents[pg.serializedComponents.IndexOf(pgSerializedComponent)].component =
@@ -549,11 +549,11 @@ namespace ZSerializer
         /// <summary>
         /// Serialize all Persistent components and Persistent GameObjects that are children of the given transform, onto a specified save file.
         /// </summary>
-        /// <param name="levelName">The name of the file that will be saved</param>
+        /// <param name="fileName">The name of the file that will be saved</param>
         /// <param name="parent">The parent of the objects you want to save</param>
-        public static async Task SaveLevel(string levelName, Transform parent)
+        public static async Task SaveObjects(string fileName, Transform parent)
         {
-            _currentLevelName = levelName;
+            _currentLevelName = fileName;
             _currentParent = parent;
 
             #region Async
@@ -765,7 +765,7 @@ namespace ZSerializer
         /// <summary>
         /// Load all Persistent components and GameObjects from the current scene that have been previously serialized in the given level save file
         /// </summary>
-        public static async Task LoadLevel(string levelName, Transform parent, bool destroyChildren = false)
+        public static async Task LoadObjects(string levelName, Transform parent, bool destroyChildren = false)
         {
             if (destroyChildren)
                 foreach (var child in parent.GetComponentsInChildren<Transform>())

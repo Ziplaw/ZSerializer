@@ -207,6 +207,11 @@ namespace ZSerializer.Editor
             sw.Write(script);
 
             sw.Close();
+            
+            foreach (var persistentGameObject in Object.FindObjectsOfType<PersistentMonoBehaviour>())
+            {
+                persistentGameObject.GenerateEditorZUIDs(false);
+            }
         }
 
         static Type[] typesImplementingCustomEditor = AppDomain.CurrentDomain.GetAssemblies().SelectMany(ass =>

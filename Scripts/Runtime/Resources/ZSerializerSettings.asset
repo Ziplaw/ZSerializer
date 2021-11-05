@@ -20,30 +20,7 @@ MonoBehaviour:
   advancedSerialization: 0
   serializationType: 1
   maxBatchCount: 50
-  componentBlackList:
-  - typeFullName: UnityEngine.LightProbeGroup, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - dering
-    - probePositions
-  - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-    componentNames:
-    - shadowRadius
-    - shadowAngle
-    - areaSize
-    - lightmapBakeType
-  - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - scaleInLightmap
-    - receiveGI
-    - stitchLightmapSeams
-  - typeFullName: UnityEngine.Terrain, UnityEngine.TerrainModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - bakeLightProbesForTrees
-    - deringLightProbesForTrees
+  componentBlackList: []
   saveGroups:
   - Main
   - Settings

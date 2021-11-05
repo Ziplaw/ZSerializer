@@ -143,6 +143,7 @@ namespace ZSerializer
 
             GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : pm && !string.IsNullOrEmpty(pm.GOZUID) ? pm.GOZUID : GUID.Generate().ToString();
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+            EditorUtility.SetDirty(this);
 
             serializedComponents.ForEach(sc => sc.zuid = GUID.Generate().ToString());
             if (forceGenerateGameObject)

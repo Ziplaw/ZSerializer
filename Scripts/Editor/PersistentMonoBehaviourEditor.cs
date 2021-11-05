@@ -5,7 +5,7 @@ namespace ZSerializer.Editor
 {
     public abstract class PersistentMonoBehaviourEditor<T> : UnityEditor.Editor where T : PersistentMonoBehaviour
     {
-        private T manager;
+        public T manager;
         private static ZSerializerStyler styler;
 
         public virtual void OnEnable()
