@@ -226,10 +226,10 @@ namespace ZSerializer
 
         static Object FindObjectFromInstanceID(int instanceID)
         {
-            return (Object) typeof(Object)
+            return (Object)typeof(Object)
                 .GetMethod("FindObjectFromInstanceID",
                     BindingFlags.NonPublic | BindingFlags.Static)
-                ?.Invoke(null, new object[] {instanceID});
+                ?.Invoke(null, new object[] { instanceID });
         }
 
         //Gets all the types from a persistentGameObject that are not monobehaviours
@@ -260,7 +260,7 @@ namespace ZSerializer
             var ZSerializersArray =
                 Activator.CreateInstance(ZSerializerArrayType, components.Count);
 
-            object[] zSavers = (object[]) ZSerializersArray;
+            object[] zSavers = (object[])ZSerializersArray;
 
             int currentComponentCount = 0;
 
@@ -277,7 +277,7 @@ namespace ZSerializer
                 }
             }
 
-            return (object[]) ZSerializersArray;
+            return (object[])ZSerializersArray;
         }
 
         static async Task<object[]> OrderPersistentGameObjectsByLoadingOrder(object[] zSavers)
@@ -296,7 +296,7 @@ namespace ZSerializer
         {
             Type ZSaverType = zsavers.GetType().GetElementType();
             var genericSaveMethodInfo = saveMethod.MakeGenericMethod(ZSaverType);
-            genericSaveMethodInfo.Invoke(null, new object[] {zsavers});
+            genericSaveMethodInfo.Invoke(null, new object[] { zsavers });
             if (ZSerializerSettings.Instance.serializationType == SerializationType.Async) await Task.Yield();
         }
 
@@ -325,14 +325,14 @@ namespace ZSerializer
             {
                 var type = persistentMonoBehaviour.GetType();
                 if (!componentMap.ContainsKey(type))
-                    componentMap.Add(type, new List<Component> {persistentMonoBehaviour});
+                    componentMap.Add(type, new List<Component> { persistentMonoBehaviour });
                 else componentMap[type].Add(persistentMonoBehaviour);
             }
 
             foreach (var pair in componentMap)
             {
                 await SerializeComponents(componentMap[pair.Key],
-                    pair.Key.Assembly.GetType(pair.Key.Name + "ZSerializer"));
+                    pair.Key.Assembly.GetType((pair.Key.FullName ?? pair.Key.Name) + "ZSerializer"));
             }
         }
 
@@ -397,7 +397,7 @@ namespace ZSerializer
             object zSerializerObject)
         {
             GameObjectData gameObjectData =
-                (GameObjectData) ZSaverType.GetField("gameObjectData").GetValue(zSerializerObject);
+                (GameObjectData)ZSaverType.GetField("gameObjectData").GetValue(zSerializerObject);
 
             gameObject = gameObjectData.MakePerfectlyValidGameObject();
         }
@@ -467,7 +467,7 @@ namespace ZSerializer
                 await FillTemporaryJsonTuples(jsonFillType);
                 var fromJson = fromJsonMethod.MakeGenericMethod(tempTuples[currentGroupID][tupleIndex].Item1);
                 zSerializerObjects =
-                    (object[]) await fromJson.InvokeAsync(null, tempTuples[currentGroupID][tupleIndex].Item2);
+                    (object[])await fromJson.InvokeAsync(null, tempTuples[currentGroupID][tupleIndex].Item2);
             }
 
             return zSerializerObjects;
@@ -477,11 +477,11 @@ namespace ZSerializer
         static Type GetTypeFromZSerializerType(Type ZSerializerType)
         {
             if (ZSerializerType == typeof(PersistentGameObjectZSerializer)) return typeof(PersistentGameObject);
-            return ZSerializerType.Assembly.GetType(ZSerializerType.Name.Replace("ZSerializer", "")) ??
+            return ZSerializerType.Assembly.GetType( (ZSerializerType.FullName ?? ZSerializerType.Name).Replace("ZSerializer", "")) ??
                    unityComponentAssemblies
                        .Select(s =>
                            Assembly.Load(s).GetType("UnityEngine." + ZSerializerType.Name.Replace("ZSerializer", "")))
-                       .FirstOrDefault(t => t != null);
+                       .First(t => t != null);
         }
 
         static async Task LoadComponents(JsonFillType jsonFillType)
@@ -490,13 +490,13 @@ namespace ZSerializer
             {
                 var currentTuple = tempTuples[currentGroupID][tupleIndex];
                 Type realType = GetTypeFromZSerializerType(currentTuple.Item1);
-                Log("Deserializing " + realType + "s");
                 if (realType == null)
                     Debug.LogError(
                         "ZSerializer type not found, probably because you added ZSerializer somewhere in the name of the class");
+                Log("Deserializing " + realType + "s");
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(currentTuple.Item1);
-                object[] zSerializerObjects = (object[]) await fromJson.InvokeAsync(null, currentTuple.Item2);
+                object[] zSerializerObjects = (object[])await fromJson.InvokeAsync(null, currentTuple.Item2);
 
                 int currentComponentCount = 0;
 
@@ -527,7 +527,7 @@ namespace ZSerializer
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(zSerializerType);
 
-                object[] jsonObjects = (object[]) await fromJson.InvokeAsync(null, json);
+                object[] jsonObjects = (object[])await fromJson.InvokeAsync(null, json);
 
                 int componentCount = 0;
                 for (var i = 0; i < jsonObjects.Length; i++)
@@ -578,7 +578,8 @@ namespace ZSerializer
                 LogWarning("Saving \"" + _currentLevelName + "\"");
                 unityComponentAssemblies.Clear();
 
-                await SavePersistentGameObjects(_currentParent.GetComponentsInChildren<PersistentGameObject>().ToList());
+                await SavePersistentGameObjects(_currentParent.GetComponentsInChildren<PersistentGameObject>()
+                    .ToList());
                 await SavePersistentMonoBehaviours(_currentParent.GetComponentsInChildren<PersistentMonoBehaviour>()
                     .Where(ShouldBeSerialized).ToList());
 
@@ -602,11 +603,8 @@ namespace ZSerializer
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
-                throw;
+                throw e;
             }
-            
-            
         }
 
 
@@ -683,8 +681,8 @@ namespace ZSerializer
                 int[] idList;
                 if (isSavingAll)
                     idList = Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerialize)
-                        .Select(o => ((IZSerialize) o).GroupID).Distinct().ToArray();
-                else idList = new[] {currentGroupID};
+                        .Select(o => ((IZSerialize)o).GroupID).Distinct().ToArray();
+                else idList = new[] { currentGroupID };
 
                 jsonToSave = "";
 
@@ -741,8 +739,7 @@ namespace ZSerializer
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
-                throw;
+                throw e;
             }
         }
 
@@ -839,8 +836,7 @@ namespace ZSerializer
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
-                throw;
+                throw e;
             }
         }
 
@@ -860,7 +856,7 @@ namespace ZSerializer
                 Log(isLoadingAll ? "Loading All Data" : "Loading Group " + currentGroupID);
 
 
-                var idList = isLoadingAll ? GetIDList() : new[] {currentGroupID};
+                var idList = isLoadingAll ? GetIDList() : new[] { currentGroupID };
 
                 restorationIDList.AddRange(idList);
                 restorationIDList = restorationIDList.Distinct().ToList();
@@ -910,8 +906,7 @@ namespace ZSerializer
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
-                throw;
+                throw e;
             }
         }
 
@@ -1013,16 +1008,8 @@ namespace ZSerializer
 
         static async Task<T> RunTask<T>(Func<T> action)
         {
-            try
-            {
-                if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) return action();
-                return await Task.Run(action);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                throw;
-            }
+            if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) return action();
+            return await Task.Run(action);
         }
 
 //Reads json from file
@@ -1039,7 +1026,7 @@ namespace ZSerializer
             if (ZSerializerSettings.Instance.encryptData)
             {
                 byte[] key =
-                    {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+                    { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
                 return GetTypesAndJsonFromString(
                     DecryptStringFromBytes(File.ReadAllBytes(GetFilePath(fileName, useGlobalID)), key, key));
             }
@@ -1232,7 +1219,7 @@ namespace ZSerializer
 
         public static async Task<object> InvokeAsync(this MethodInfo @this, object obj, params object[] parameters)
         {
-            var task = (Task) @this.Invoke(obj, parameters);
+            var task = (Task)@this.Invoke(obj, parameters);
             await task.ConfigureAwait(false);
             var resultProperty = task.GetType().GetProperty("Result");
             return resultProperty.GetValue(task);

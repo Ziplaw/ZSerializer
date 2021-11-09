@@ -76,6 +76,8 @@ namespace ZSerializer.Editor
             Debug.Log("Editor script being created at " + newPath + "ZSerializers");
             string relativePath = "Assets" + newPath.Substring(Application.dataPath.Length);
 
+            var ns = type.Namespace;
+            
 
             if (!AssetDatabase.IsValidFolder(relativePath + "ZSerializers"))
             {
@@ -88,13 +90,15 @@ namespace ZSerializer.Editor
             FileStream fileStream = new FileStream(newNewPath, FileMode.Create, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fileStream);
 
+            
+            
             string script =
-                "[System.Serializable]\n" +
+                
+                $"{(string.IsNullOrEmpty(ns) ? "" : $"namespace {ns} " + "{\n")}[System.Serializable]\n" +
                 $"public sealed class {type.Name}ZSerializer : ZSerializer.Internal.ZSerializer\n" +
                 "{\n";
 
-            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-                .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
+            var fieldInfos = GetFieldsThatShouldBeSerialized(type);
 
             var currentType = type;
 
@@ -139,17 +143,16 @@ namespace ZSerializer.Editor
                 }
             }
 
-            script += @"    public int groupID;
-    public bool autoSync;
-";
+//             script += @"    public int groupID;
+//     public bool autoSync;
+// ";
 
             script +=
                 $"\n    public {type.Name}ZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)\n" +
                 "    {" +
                 "       var instance = ZSerializer.ZSerialize.idMap[ZUID];\n";
 
-            foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-                .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList())
+            foreach (var fieldInfo in fieldInfos)
             {
                 var fieldType = fieldInfo.FieldType;
 
@@ -162,7 +165,7 @@ namespace ZSerializer.Editor
                 int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
                 script +=
-                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\").GetValue(instance);\n"
+                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType})typeof({type.Name}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).GetValue(instance);\n"
                         .Replace('+', '.');
 
                 if (genericParameterAmount > 0)
@@ -183,24 +186,28 @@ namespace ZSerializer.Editor
             }
 
 
-            script += $"         groupID = (int)typeof({type.Name}).GetProperty(\"GroupID\").GetValue(instance);\n" +
-                      $"         autoSync = (bool)typeof({type.Name}).GetProperty(\"AutoSync\").GetValue(instance);\n" +
-                      "    }";
+            // script += $"         groupID = (int)typeof({type.FullName}).GetProperty(\"GroupID\").GetValue(instance);\n" +
+            //           $"         autoSync = (bool)typeof({type.FullName}).GetProperty(\"AutoSync\").GetValue(instance);\n" +
+            //           "    }";
+            
+            script += "    }";
 
             script += "\n\n    public override void RestoreValues(UnityEngine.Component component)\n    {\n";
 
-            foreach (var fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-                .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList())
+            foreach (var fieldInfo in fieldInfos)
             {
                 script +=
-                    $"         typeof({type.Name}).GetField(\"{fieldInfo.Name}\").SetValue(component, {fieldInfo.Name});\n";
+                    $"         typeof({type.Name}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).SetValue(component, {fieldInfo.Name});\n";
             }
 
-            script += $"         typeof({type.Name}).GetProperty(\"GroupID\").SetValue(component, groupID);\n" +
-                      $"         typeof({type.Name}).GetProperty(\"AutoSync\").SetValue(component, autoSync);\n" +
-                      "    }";
+            // script += $"         typeof({type.FullName}).GetProperty(\"GroupID\").SetValue(component, groupID);\n" +
+            //           $"         typeof({type.FullName}).GetProperty(\"AutoSync\").SetValue(component, autoSync);\n" +
+            //           "    }";
+            script += "    }";
 
             script += "\n}";
+
+            if (!string.IsNullOrEmpty(ns)) script += "\n}"; 
 
             ZSerialize.Log("ZSerializer script being created at " + newNewPath);
 
@@ -236,8 +243,8 @@ namespace ZSerializer.Editor
 using ZSerializer;
 using ZSerializer.Editor;
 
-[CustomEditor(typeof(" + type.Name + @"))]
-public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.Name + @"> 
+[CustomEditor(typeof(" + type.FullName + @"))]
+public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.FullName + @"> 
 {
     public override void OnInspectorGUI()
     {
@@ -267,35 +274,65 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             AssetDatabase.Refresh();
         }
 
+        static List<FieldInfo> GetFieldsThatShouldBeSerialized(Type type)
+        {
+            //keep an eye on this, seems fishy
+            
+            var fieldInfos = type.GetFields()
+                .Where(f =>
+                {
+                    return (f.GetCustomAttribute(typeof(NonZSerialized)) == null ||
+                            f.GetCustomAttribute<ForceZSerialized>() != null) &&
+                            (f.FieldType.IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) || (f.FieldType.FullName??f.FieldType.Name).StartsWith("UnityEngine.") ) && 
+                           (f.FieldType.IsGenericType ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>) : true);
+                }).ToList();
+            
+            fieldInfos.AddRange(type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Where(f =>
+                {
+                    return f.GetCustomAttribute<SerializeField>() != null &&
+                           f.GetCustomAttribute<NonZSerialized>() == null && 
+                           (f.FieldType.IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) || (f.FieldType.FullName??f.FieldType.Name).StartsWith("UnityEngine.") ) && 
+                           (f.FieldType.IsGenericType ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>) : true);
+                }));
+
+            return fieldInfos;
+        }
+
 
         public static ClassState GetClassState(Type type)
         {
-            Type ZSerializerType = type.Assembly.GetType(type.Name + "ZSerializer");
+            Type ZSerializerType = type.Assembly.GetType(type.FullName + "ZSerializer");
             if (ZSerializerType == null) return ClassState.NotMade;
 
             var fieldsZSerializer = ZSerializerType.GetFields()
                 .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
-            var fieldsType = type.GetFields().Where(f =>
-                    f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null)
-                .ToList();
+            // var fieldsType = type.GetFields().Where(f =>
+            //         f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null)
+            //     .ToList();
+            //
+            // fieldsType.AddRange(type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(f => f.GetCustomAttribute<SerializeField>() != null && f.GetCustomAttribute<NonZSerialized>() == null));
 
+
+            var fieldTypes = GetFieldsThatShouldBeSerialized(type);
+            
             new Color(0, 0, 0, 1);
 
-            while (type.BaseType != typeof(MonoBehaviour))
-            {
-                fieldsType.AddRange(type.BaseType
-                    .GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(f =>
-                        f.GetCustomAttribute<NonZSerialized>() == null ||
-                        f.GetCustomAttribute<ForceZSerialized>() != null));
-                type = type.BaseType;
-            }
+            // while (type.BaseType != typeof(MonoBehaviour))
+            // {
+            //     fieldsType.AddRange(type.BaseType
+            //         .GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(f =>
+            //             f.GetCustomAttribute<NonZSerialized>() == null ||
+            //             f.GetCustomAttribute<ForceZSerialized>() != null));
+            //     type = type.BaseType;
+            // }
 
-            if (fieldsZSerializer.Count == fieldsType.Count)
+            if (fieldsZSerializer.Count == fieldTypes.Count)
             {
                 for (int j = 0; j < fieldsZSerializer.Count; j++)
                 {
-                    if (fieldsZSerializer[j].Name != fieldsType[j].Name ||
-                        fieldsZSerializer[j].FieldType != fieldsType[j].FieldType)
+                    if (fieldsZSerializer[j].Name != fieldTypes[j].Name ||
+                        fieldsZSerializer[j].FieldType != fieldTypes[j].FieldType)
                     {
                         return ClassState.NeedsRebuilding;
                     }
@@ -441,8 +478,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 GUILayout.MaxWidth(width), GUILayout.Height(width)))
             {
                 string path;
-
-                // string folderPath = EditorUtility.SaveFolderPanel("ZSerializer.cs Save Locations", "Assets", "");
 
                 foreach (var c in classes)
                 {

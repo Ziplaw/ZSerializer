@@ -7,8 +7,8 @@ public sealed class GameManagerZSerializer : ZSerializer.Internal.ZSerializer
     public UnityEngine.Vector3 position;
     public BallMover ballMover;
     public UnityEngine.GameObject canvas;
-    public int groupID;
-    public bool autoSync;
+    public System.Int32 groupID;
+    public System.Boolean autoSync;
 
     public GameManagerZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)
     {       var instance = ZSerializer.ZSerialize.idMap[ZUID];
@@ -18,8 +18,8 @@ public sealed class GameManagerZSerializer : ZSerializer.Internal.ZSerializer
          position = (UnityEngine.Vector3)typeof(GameManager).GetField("position").GetValue(instance);
          ballMover = (BallMover)typeof(GameManager).GetField("ballMover").GetValue(instance);
          canvas = (UnityEngine.GameObject)typeof(GameManager).GetField("canvas").GetValue(instance);
-         groupID = (int)typeof(GameManager).GetProperty("GroupID").GetValue(instance);
-         autoSync = (bool)typeof(GameManager).GetProperty("AutoSync").GetValue(instance);
+         groupID = (System.Int32)typeof(GameManager).GetField("groupID", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(instance);
+         autoSync = (System.Boolean)typeof(GameManager).GetField("autoSync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(instance);
     }
 
     public override void RestoreValues(UnityEngine.Component component)
@@ -30,7 +30,7 @@ public sealed class GameManagerZSerializer : ZSerializer.Internal.ZSerializer
          typeof(GameManager).GetField("position").SetValue(component, position);
          typeof(GameManager).GetField("ballMover").SetValue(component, ballMover);
          typeof(GameManager).GetField("canvas").SetValue(component, canvas);
-         typeof(GameManager).GetProperty("GroupID").SetValue(component, groupID);
-         typeof(GameManager).GetProperty("AutoSync").SetValue(component, autoSync);
+         typeof(GameManager).GetField("groupID", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(component, groupID);
+         typeof(GameManager).GetField("autoSync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(component, autoSync);
     }
 }
