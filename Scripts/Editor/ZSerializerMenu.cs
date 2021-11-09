@@ -30,7 +30,7 @@ namespace ZSerializer.Editor
         public Type classType;
     }
 
-    public class ZSerializerEditorWindow : EditorWindow
+    public class ZSerializerMenu : EditorWindow
     {
         private const int fontSize = 20;
         private const int classHeight = 32;
@@ -46,7 +46,7 @@ namespace ZSerializer.Editor
         [MenuItem("Tools/ZSerializer/ZSerializer Menu")]
         internal static void ShowWindow()
         {
-            var window = GetWindow<ZSerializerEditorWindow>();
+            var window = GetWindow<ZSerializerMenu>();
             window.titleContent = new GUIContent("ZSerializer");
             window.Show();
             EditorSceneManager.activeSceneChangedInEditMode += (a, b) => Init();
@@ -55,25 +55,29 @@ namespace ZSerializer.Editor
             Init();
         }
 
+        static void GetClasses()
+        {
+            var types = ZSerialize.GetPersistentTypes().Where(t => FindObjectOfType(t) != null).ToArray();
+            classes = types.Select(t => new Class(t, ZSerializerEditor.GetClassState(t))).ToArray();
+        }
+
+        static void GenerateStyler()
+        {
+            styler = new ZSerializerStyler();
+            styler.GetEveryResource();
+        }
+
         [DidReloadScripts]
         private static void Init()
         {
-            if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized && HasOpenInstances<ZSerializerEditorWindow>())//
+            if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized && HasOpenInstances<ZSerializerMenu>())//
             {
-                GetWindow<ZSerializerEditorWindow>().minSize = new Vector2(480, 400);
+                GetWindow<ZSerializerMenu>().minSize = new Vector2(480, 400);
 
-                styler = new ZSerializerStyler();
+                GenerateStyler();
 
-                var types = ZSerialize.GetPersistentTypes().Where(t => FindObjectOfType(t) != null).ToArray();
+                GetClasses();
 
-                classes = new Class[types.Length];
-
-                for (int i = 0; i < types.Length; i++)
-                {
-                    classes[i] = new Class(types[i], ZSerializerEditor.GetClassState(types[i]));
-                }
-
-                styler.GetEveryResource();
             }
         }
 
@@ -86,12 +90,11 @@ namespace ZSerializer.Editor
             {
                 if (!stylerInitialized)
                 {
-                    ZSerializerEditorWindow w;
+                    ZSerializerMenu w;
 
-                    styler = new ZSerializerStyler();
-                    styler.GetEveryResource();
+                    GenerateStyler();
 
-                    w = GetWindow<ZSerializerEditorWindow>();
+                    w = GetWindow<ZSerializerMenu>();
                     w.position = new Rect(w.position) { height = 104 };
                 }
 
@@ -116,7 +119,7 @@ namespace ZSerializer.Editor
                             Init();
                         }
 
-                        if (styler == null) return;
+                        if (styler == null) GenerateStyler();
                         
                         editMode = GUILayout.Toggle(editMode, styler.cogWheel, new GUIStyle("button"),
                             GUILayout.Height(28), GUILayout.Width(28));
@@ -131,8 +134,10 @@ namespace ZSerializer.Editor
                             ZSerializerEditor.BuildSettingsEditor(styler, ref selectedMenu, ref selectedType,
                                 position.width);
                         }
-                        else if (classes != null)
+                        else
                         {
+                            if (classes == null) GetClasses();
+                            
                             if (classes.Length == 0)
                             {
                                 GUILayout.Label(

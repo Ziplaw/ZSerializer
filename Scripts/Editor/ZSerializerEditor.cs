@@ -24,7 +24,7 @@ namespace ZSerializer.Editor
             if (!ZSerializerSettings.Instance ||
                 ZSerializerSettings.Instance && !ZSerializerSettings.Instance.packageInitialized)
             {
-                ZSerializerEditorWindow.ShowWindow();
+                ZSerializerMenu.ShowWindow();
             }
         }
 
