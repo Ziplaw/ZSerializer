@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace ZSerializer
 {
@@ -22,6 +23,14 @@ namespace ZSerializer
         }
     }
 
+    [Serializable]
+    public sealed class SceneGroup
+    {
+        public string name;
+        public string loadingManagementScenePath;
+        public List<string> scenePaths;
+    }
+
     public sealed class ZSerializerSettings : ScriptableObject
     {
         private static ZSerializerSettings instance;
@@ -36,6 +45,7 @@ namespace ZSerializer
         public bool advancedSerialization;
         public SerializationType serializationType = SerializationType.Sync;
         public int maxBatchCount = 50;
+        [HideInInspector] public List<SceneGroup> sceneGroups;
         [HideInInspector] public List<SerializableComponentBlackList> componentBlackList;
 
         [HideInInspector] public List<string> saveGroups = new List<string>()

@@ -38,6 +38,8 @@ namespace ZSerializer.Editor
         private bool initiated;
         private int selectedMenu;
         private int selectedType;
+        private int selectedGroup;
+        private int selectedGroupIndex = -1;
         private static ZSerializerStyler styler;
         private int selectedTypeToShowSettings = -1;
 
@@ -131,7 +133,7 @@ namespace ZSerializer.Editor
 
                         if (editMode)
                         {
-                            ZSerializerEditor.BuildSettingsEditor(styler, ref selectedMenu, ref selectedType,
+                            ZSerializerEditor.BuildSettingsEditor(styler, ref selectedMenu, ref selectedType, ref selectedGroup,ref selectedGroupIndex,
                                 position.width);
                         }
                         else

@@ -146,7 +146,7 @@ namespace ZSerializer
 
         private static void OnSceneLoad()
         {
-            currentScene = GetCurrentScene();
+            currentScene = UpdateCurrentScene();
         }
 
         private static void OnSceneUnload()
@@ -219,7 +219,12 @@ namespace ZSerializer
 
         #endregion
 
-        static string GetCurrentScene()
+        public static void SetCurrentScene(string sceneName)
+        {
+            currentScene = sceneName;
+        }
+
+        static string UpdateCurrentScene()
         {
             return SceneManager.GetActiveScene().name;
         }

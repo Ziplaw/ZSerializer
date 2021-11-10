@@ -7,8 +7,11 @@ using System.Reflection;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditor.Callbacks;
+using UnityEditor.SceneManagement;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.SceneManagement;
 using ZSerializer;
 using ZSerializer.Editor;
 using Debug = UnityEngine.Debug;
@@ -77,7 +80,7 @@ namespace ZSerializer.Editor
             string relativePath = "Assets" + newPath.Substring(Application.dataPath.Length);
 
             var ns = type.Namespace;
-            
+
 
             if (!AssetDatabase.IsValidFolder(relativePath + "ZSerializers"))
             {
@@ -90,10 +93,8 @@ namespace ZSerializer.Editor
             FileStream fileStream = new FileStream(newNewPath, FileMode.Create, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fileStream);
 
-            
-            
+
             string script =
-                
                 $"{(string.IsNullOrEmpty(ns) ? "" : $"namespace {ns} " + "{\n")}[System.Serializable]\n" +
                 $"public sealed class {type.Name}ZSerializer : ZSerializer.Internal.ZSerializer\n" +
                 "{\n";
@@ -189,7 +190,7 @@ namespace ZSerializer.Editor
             // script += $"         groupID = (int)typeof({type.FullName}).GetProperty(\"GroupID\").GetValue(instance);\n" +
             //           $"         autoSync = (bool)typeof({type.FullName}).GetProperty(\"AutoSync\").GetValue(instance);\n" +
             //           "    }";
-            
+
             script += "    }";
 
             script += "\n\n    public override void RestoreValues(UnityEngine.Component component)\n    {\n";
@@ -207,14 +208,14 @@ namespace ZSerializer.Editor
 
             script += "\n}";
 
-            if (!string.IsNullOrEmpty(ns)) script += "\n}"; 
+            if (!string.IsNullOrEmpty(ns)) script += "\n}";
 
             ZSerialize.Log("ZSerializer script being created at " + newNewPath);
 
             sw.Write(script);
 
             sw.Close();
-            
+
             foreach (var persistentGameObject in Object.FindObjectsOfType<PersistentMonoBehaviour>())
             {
                 persistentGameObject.GenerateEditorZUIDs(false);
@@ -277,23 +278,29 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         static List<FieldInfo> GetFieldsThatShouldBeSerialized(Type type)
         {
             //keep an eye on this, seems fishy
-            
+
             var fieldInfos = type.GetFields()
                 .Where(f =>
                 {
                     return (f.GetCustomAttribute(typeof(NonZSerialized)) == null ||
                             f.GetCustomAttribute<ForceZSerialized>() != null) &&
-                            (f.FieldType.IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) || (f.FieldType.FullName??f.FieldType.Name).StartsWith("UnityEngine.") ) && 
-                           (f.FieldType.IsGenericType ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>) : true);
+                           (f.FieldType.IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) ||
+                            (f.FieldType.FullName ?? f.FieldType.Name).StartsWith("UnityEngine.")) &&
+                           (f.FieldType.IsGenericType
+                               ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>)
+                               : true);
                 }).ToList();
-            
+
             fieldInfos.AddRange(type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
                 .Where(f =>
                 {
                     return f.GetCustomAttribute<SerializeField>() != null &&
-                           f.GetCustomAttribute<NonZSerialized>() == null && 
-                           (f.FieldType.IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) || (f.FieldType.FullName??f.FieldType.Name).StartsWith("UnityEngine.") ) && 
-                           (f.FieldType.IsGenericType ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>) : true);
+                           f.GetCustomAttribute<NonZSerialized>() == null &&
+                           (f.FieldType.IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) ||
+                            (f.FieldType.FullName ?? f.FieldType.Name).StartsWith("UnityEngine.")) &&
+                           (f.FieldType.IsGenericType
+                               ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>)
+                               : true);
                 }));
 
             return fieldInfos;
@@ -307,25 +314,10 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
             var fieldsZSerializer = ZSerializerType.GetFields()
                 .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList();
-            // var fieldsType = type.GetFields().Where(f =>
-            //         f.GetCustomAttribute<NonZSerialized>() == null || f.GetCustomAttribute<ForceZSerialized>() != null)
-            //     .ToList();
-            //
-            // fieldsType.AddRange(type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(f => f.GetCustomAttribute<SerializeField>() != null && f.GetCustomAttribute<NonZSerialized>() == null));
-
 
             var fieldTypes = GetFieldsThatShouldBeSerialized(type);
-            
-            new Color(0, 0, 0, 1);
 
-            // while (type.BaseType != typeof(MonoBehaviour))
-            // {
-            //     fieldsType.AddRange(type.BaseType
-            //         .GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(f =>
-            //             f.GetCustomAttribute<NonZSerialized>() == null ||
-            //             f.GetCustomAttribute<ForceZSerialized>() != null));
-            //     type = type.BaseType;
-            // }
+            new Color(0, 0, 0, 1);
 
             if (fieldsZSerializer.Count == fieldTypes.Count)
             {
@@ -374,9 +366,9 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         bool newOnValue = !ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn;
                         ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn = newOnValue;
                         foreach (var component in Object.FindObjectsOfType(componentType).Where(c =>
-                            c.GetType() == componentType && ((PersistentMonoBehaviour) c).AutoSync))
+                            c.GetType() == componentType && ((PersistentMonoBehaviour)c).AutoSync))
                         {
-                            ((PersistentMonoBehaviour) component).IsOn = newOnValue;
+                            ((PersistentMonoBehaviour)component).IsOn = newOnValue;
                             EditorUtility.SetDirty(component);
                         }
 
@@ -536,7 +528,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                             ? "29cf42"
                             : "999999";
                         GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
-                            new GUIStyle("label") {richText = true},
+                            new GUIStyle("label") { richText = true },
                             GUILayout.Width(EditorGUIUtility.currentViewWidth / 3f));
                         EditorGUILayout.PropertyField(serializedObject.FindProperty(field.Name), GUIContent.none);
                     }
@@ -608,7 +600,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             if (editMode)
             {
                 GUILayout.Label("Select fields to serialize",
-                    new GUIStyle("helpbox") {alignment = TextAnchor.MiddleCenter}, GUILayout.Height(18));
+                    new GUIStyle("helpbox") { alignment = TextAnchor.MiddleCenter }, GUILayout.Height(18));
                 var fields = manager.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
                 for (var i = 0; i < fields.Length; i++)
@@ -634,6 +626,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         private static Vector2 scrollPos;
 
         public static void BuildSettingsEditor(ZSerializerStyler styler, ref int selectedMenu, ref int selectedType,
+            ref int selectedGroup, ref int selectedGroupIndex,
             float width)
         {
             IEnumerable<FieldInfo> fieldInfos = typeof(ZSerializerSettings)
@@ -641,7 +634,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 .Where(f => f.GetCustomAttribute<HideInInspector>() == null);
             SerializedObject serializedObject = new SerializedObject(styler.settings);
 
-            string[] toolbarNames = {"Settings", "Saving Groups", "Component Blacklist"};
+            string[] toolbarNames = { "Settings", "Groups", "Component Blacklist" };
 
             using (new GUILayout.VerticalScope("box"))
             {
@@ -679,7 +672,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                             }
 
                             serializedObject.ApplyModifiedProperties();
-
+#if UNITY_EDITOR_WIN
                             if (GUILayout.Button("Open Save file Directory"))
                             {
                                 Process process = new Process();
@@ -691,40 +684,193 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                 process.StartInfo = startInfo;
                                 process.Start();
                             }
+#endif
                         }
-
 
                         break;
                     case 1:
+
+
                         GUILayout.Space(-15);
                         using (new GUILayout.VerticalScope(ZSerializerStyler.window, GUILayout.Height(1)))
                         {
+                            var groupsNames = new[] { "Serialization Groups", "Scene Groups" };
+                            selectedGroup = GUILayout.Toolbar(selectedGroup, groupsNames);
+
                             serializedObject.Update();
-
-                            for (int i = 0; i < 16; i++)
+                            switch (selectedGroup)
                             {
-                                using (new EditorGUI.DisabledScope(i < 2))
-                                {
-                                    var prop = serializedObject.FindProperty("saveGroups").GetArrayElementAtIndex(i);
-                                    prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
-                                        new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
-                                }
-                            }
+                                case 0:
 
-                            if (GUILayout.Button("Reset all Group IDs from Scene"))
-                            {
-                                ZSerialize.Log("<color=cyan>Resetting All Group IDs</color>");
+                                    for (int i = 0; i < 16; i++)
+                                    {
+                                        using (new EditorGUI.DisabledScope(i < 2))
+                                        {
+                                            var prop = serializedObject.FindProperty("saveGroups")
+                                                .GetArrayElementAtIndex(i);
+                                            prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
+                                                new GUIStyle("textField") { alignment = TextAnchor.MiddleCenter });
+                                        }
+                                    }
 
-                                foreach (var monoBehaviour in GameObject.FindObjectsOfType<MonoBehaviour>()
-                                    .Where(o => o is IZSerialize))
-                                {
-                                    monoBehaviour.GetType().GetField("groupID",
-                                            BindingFlags.NonPublic | BindingFlags.Instance)
-                                        ?.SetValue(monoBehaviour, 0);
-                                    monoBehaviour.GetType().BaseType
-                                        ?.GetField("groupID", BindingFlags.Instance | BindingFlags.NonPublic)
-                                        ?.SetValue(monoBehaviour, 0);
-                                }
+                                    if (GUILayout.Button("Reset all Group IDs from Scene"))
+                                    {
+                                        ZSerialize.Log("<color=cyan>Resetting All Group IDs</color>");
+
+                                        foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>()
+                                            .Where(o => o is IZSerialize))
+                                        {
+                                            var serialize = monoBehaviour as IZSerialize;
+                                            serialize!.GroupID = 0;
+                                            EditorUtility.SetDirty(monoBehaviour);
+
+                                            // monoBehaviour.GetType().GetField("groupID",
+                                            //         BindingFlags.NonPublic | BindingFlags.Instance)
+                                            //     ?.SetValue(monoBehaviour, 0);
+                                            // monoBehaviour.GetType().BaseType
+                                            //     ?.GetField("groupID", BindingFlags.Instance | BindingFlags.NonPublic)
+                                            //     ?.SetValue(monoBehaviour, 0);
+                                        }
+                                    }
+
+                                    break;
+                                case 1:
+
+                                    // ZSerializerSettings.Instance.sceneGroups.Count;
+                                    var groupsProp = serializedObject.FindProperty("sceneGroups");
+                                    for (int i = 0; i < ZSerializerSettings.Instance.sceneGroups.Count; i++)
+                                    {
+                                        if (selectedGroupIndex == -1)
+                                        {
+                                            using (new EditorGUILayout.HorizontalScope())
+                                            {
+                                                var togglePrev = selectedGroupIndex == i;
+                                                var toggle = GUILayout.Toggle(selectedGroupIndex == i, groupsProp
+                                                    .GetArrayElementAtIndex(i)
+                                                    .FindPropertyRelative("name").stringValue, new GUIStyle("button"));
+                                                if (togglePrev != toggle)
+                                                    selectedGroupIndex = toggle ? i : -1;
+
+
+                                                if (GUILayout.Button("-", GUILayout.MaxWidth(20)))
+                                                {
+                                                    ZSerializerSettings.Instance.sceneGroups.RemoveAt(i);
+                                                    EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                                    AssetDatabase.SaveAssets();
+                                                    return;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (selectedGroupIndex == i)
+                                            {
+                                                var togglePrev = selectedGroupIndex == i;
+                                                var toggle = GUILayout.Toggle(selectedGroupIndex == i, groupsProp
+                                                    .GetArrayElementAtIndex(i)
+                                                    .FindPropertyRelative("name").stringValue, new GUIStyle("button"));
+                                                if (togglePrev != toggle)
+                                                    selectedGroupIndex = toggle ? i : -1;
+
+                                                if (toggle)
+                                                {
+                                                    EditorGUILayout.PropertyField(groupsProp.GetArrayElementAtIndex(i)
+                                                        .FindPropertyRelative("name"));
+
+                                                    var path = groupsProp.GetArrayElementAtIndex(i)
+                                                        .FindPropertyRelative("loadingManagementScenePath").stringValue;
+
+
+                                                    var oldScene = string.IsNullOrEmpty(path)
+                                                        ? null
+                                                        : AssetDatabase.LoadAssetAtPath<SceneAsset>(
+                                                            Path.Combine("Assets", path + ".unity"));
+                                                    EditorGUI.BeginChangeCheck();
+                                                    var newScene = EditorGUILayout.ObjectField("Loading Scene",
+                                                        oldScene, typeof(SceneAsset), false) as SceneAsset;
+
+                                                    if (EditorGUI.EndChangeCheck())
+                                                    {
+                                                        var newPath = AssetDatabase.GetAssetPath(newScene);
+                                                        var scenePathProperty = groupsProp.GetArrayElementAtIndex(i)
+                                                            .FindPropertyRelative("loadingManagementScenePath");
+                                                        scenePathProperty.stringValue =
+                                                            newPath.Substring(7, newPath.Length - 13);
+
+                                                        EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                                        AssetDatabase.SaveAssets();
+                                                    }
+
+                                                    var sceneAssetList = ZSerializerSettings.Instance.sceneGroups[i]
+                                                        .scenePaths.Select(s =>
+                                                            string.IsNullOrEmpty(s)
+                                                                ? default(SceneAsset)
+                                                                : AssetDatabase.LoadAssetAtPath<SceneAsset>(
+                                                                    Path.Combine("Assets", s + ".unity"))).ToList();
+
+
+                                                    using (new EditorGUILayout.VerticalScope("box"))
+                                                    {
+                                                        for (var j = 0; j < sceneAssetList.Count; j++)
+                                                        {
+                                                            var sceneAsset = sceneAssetList[j];
+                                                            using (new GUILayout.HorizontalScope())
+                                                            {
+                                                                EditorGUI.BeginChangeCheck();
+                                                                var newSceneAsset = EditorGUILayout.ObjectField(
+                                                                    sceneAsset,
+                                                                    typeof(SceneAsset), false) as SceneAsset;
+                                                                if (EditorGUI.EndChangeCheck())
+                                                                {
+                                                                    var newPath =
+                                                                        AssetDatabase.GetAssetPath(newSceneAsset);
+                                                                    var scenePathProperty = groupsProp
+                                                                        .GetArrayElementAtIndex(i)
+                                                                        .FindPropertyRelative("scenePaths");
+                                                                    scenePathProperty.GetArrayElementAtIndex(
+                                                                            sceneAssetList
+                                                                                .IndexOf(sceneAsset)).stringValue =
+                                                                        newPath.Substring(7, newPath.Length - 13);
+
+                                                                    EditorUtility.SetDirty(ZSerializerSettings
+                                                                        .Instance);
+                                                                    AssetDatabase.SaveAssets();
+                                                                }
+
+                                                                if (GUILayout.Button("-", GUILayout.MaxWidth(20)))
+                                                                {
+                                                                    ZSerializerSettings.Instance.sceneGroups[i].scenePaths.RemoveAt(j);
+                                                                    return;
+                                                                }
+                                                            }
+                                                        }
+
+                                                        if (GUILayout.Button("+"))
+                                                        {
+                                                            ZSerializerSettings.Instance.sceneGroups[i].scenePaths.Add("");
+                                                            EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                                            AssetDatabase.SaveAssets();
+                                                        }
+                                                    }
+
+                                                    // EditorGUILayout.PropertyField(groupsProp.GetArrayElementAtIndex(i)
+                                                    //     .FindPropertyRelative("loadingManagementScene"));
+                                                }
+                                            }
+                                        }
+                                    }
+
+
+                                    if (selectedGroupIndex == -1)
+                                        if (GUILayout.Button("+"))
+                                        {
+                                            ZSerializerSettings.Instance.sceneGroups.Add(new SceneGroup
+                                                { name = "New Scene Group" });
+                                            EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                            AssetDatabase.SaveAssets();
+                                        }
+
+                                    break;
                             }
 
                             serializedObject.ApplyModifiedProperties();
@@ -801,7 +947,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         else
                         {
                             GUILayout.Label("The Component Blacklist is Empty.",
-                                new GUIStyle("label") {alignment = TextAnchor.MiddleCenter});
+                                new GUIStyle("label") { alignment = TextAnchor.MiddleCenter });
                             if (GUILayout.Button("Open Fine Tuner"))
                             {
                                 ZSerializerFineTuner.ShowWindow();
@@ -834,7 +980,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             foreach (var type in types)
             {
                 EditorUtility.DisplayProgressBar("Generating Unity Component ZSerializers", type.Name,
-                    types.IndexOf(type) / (float) types.Count);
+                    types.IndexOf(type) / (float)types.Count);
 
 
                 if (type != typeof(PersistentGameObject))
@@ -971,7 +1117,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                     {
                         serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
                                                          go != monoBehaviour.gameObject);
-                        
+
                         ZSerialize.idMap.TryAdd(serializable.ZUID, monoBehaviour);
                         ZSerialize.idMap.TryAdd(serializable.GOZUID, monoBehaviour.gameObject);
 
@@ -979,11 +1125,9 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         {
                             foreach (var pgSerializedComponent in pg.serializedComponents)
                             {
-                                ZSerialize.idMap.TryAdd(pgSerializedComponent.zuid,pgSerializedComponent.component);
+                                ZSerialize.idMap.TryAdd(pgSerializedComponent.zuid, pgSerializedComponent.component);
                             }
-
                         }
-                        
                     }
 
                     if (serializable as Object)
