@@ -804,7 +804,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                                     var sceneAssetList = ZSerializerSettings.Instance.sceneGroups[i]
                                                         .scenePaths.Select(s =>
                                                             string.IsNullOrEmpty(s)
-                                                                ? default
+                                                                ? null
                                                                 : AssetDatabase.LoadAssetAtPath<SceneAsset>(
                                                                     Path.Combine("Assets", s + ".unity"))).ToList();
 

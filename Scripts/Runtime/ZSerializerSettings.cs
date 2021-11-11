@@ -28,7 +28,7 @@ namespace ZSerializer
     {
         public string name;
         public string loadingManagementScenePath;
-        public List<string> scenePaths;
+        public List<string> scenePaths = new List<string>();
     }
 
     public sealed class ZSerializerSettings : ScriptableObject
