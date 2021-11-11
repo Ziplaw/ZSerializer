@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using ZSerializer.Internal;
@@ -370,7 +371,7 @@ namespace ZSerializer
         static bool ShouldBeSerialized(IZSerialize serializable)
         {
             return serializable != null && (serializable.GroupID == currentGroupID || currentGroupID == -1) &&
-                   serializable.IsOn;
+                   serializable.IsOn && (serializable as MonoBehaviour).gameObject.activeInHierarchy && (serializable as MonoBehaviour).enabled;
         }
 
         //Saves all Persistent Components
@@ -430,7 +431,7 @@ namespace ZSerializer
         {
             if (zSaverType == null)
             {
-                LogError($"No ZSerializer found for {components[0].GetType()}");
+                LogError($"No ZSerializer found for {components[0].GetType()}, this may be caused by a <color=cyan>PersistentMonoBehaviour</color> not having a <color=cyan>ZSerializer.</color>\nGo to <color=cyan>Tools/ZSerializer/ZSerializer</color> Menu and ensure all the class names are <color=green>green</color>");
                 return;
             }
 
