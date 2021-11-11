@@ -18,15 +18,15 @@ MonoBehaviour:
   selectedSaveFile: 0
   encryptData: 0
   advancedSerialization: 0
-  serializationType: 1
+  serializationType: 0
   maxBatchCount: 50
   sceneGroups:
   - name: Scene Group 1
     loadingManagementScenePath: Scenes/SceneTransition/LoadingScreen
     scenePaths:
     - Scenes/SceneTransition/StressTestTransitioned 0
-    - Scenes/SceneTransition/StressTestTransitioned 2
     - Scenes/SceneTransition/StressTestTransitioned 1
+    - Scenes/SceneTransition/StressTestTransitioned 2
   componentBlackList:
   - typeFullName: UnityEngine.LightProbeGroup, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null

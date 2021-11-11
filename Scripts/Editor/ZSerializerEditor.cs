@@ -804,21 +804,26 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                                     var sceneAssetList = ZSerializerSettings.Instance.sceneGroups[i]
                                                         .scenePaths.Select(s =>
                                                             string.IsNullOrEmpty(s)
-                                                                ? default(SceneAsset)
+                                                                ? default
                                                                 : AssetDatabase.LoadAssetAtPath<SceneAsset>(
                                                                     Path.Combine("Assets", s + ".unity"))).ToList();
 
 
                                                     using (new EditorGUILayout.VerticalScope("box"))
                                                     {
+                                                        GUILayout.Label("Scenes", new GUIStyle("label"){alignment = TextAnchor.MiddleCenter});
+                                                        
                                                         for (var j = 0; j < sceneAssetList.Count; j++)
                                                         {
                                                             var sceneAsset = sceneAssetList[j];
                                                             using (new GUILayout.HorizontalScope())
                                                             {
+                                                                if(!EditorBuildSettings.scenes.Select(s => s.path.Substring(7,s.path.Length-13)).Contains(ZSerializerSettings.Instance.sceneGroups[i].scenePaths[j]) && sceneAsset != null)
+                                                                    if(GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("warning"), "Scene not present in Build Settings"), new GUIStyle("label"),GUILayout.Width(20), GUILayout.Height(20)))
+                                                                        EditorWindow.GetWindow(Type.GetType("UnityEditor.BuildPlayerWindow,UnityEditor"));
+                                                                
                                                                 EditorGUI.BeginChangeCheck();
-                                                                var newSceneAsset = EditorGUILayout.ObjectField(
-                                                                    sceneAsset,
+                                                                var newSceneAsset = EditorGUILayout.ObjectField(sceneAsset,
                                                                     typeof(SceneAsset), false) as SceneAsset;
                                                                 if (EditorGUI.EndChangeCheck())
                                                                 {
