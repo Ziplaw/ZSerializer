@@ -18,7 +18,7 @@ MonoBehaviour:
   selectedSaveFile: 0
   encryptData: 0
   advancedSerialization: 0
-  serializationType: 0
+  serializationType: 1
   maxBatchCount: 50
   sceneGroups:
   - name: Scene Group 1
@@ -28,29 +28,19 @@ MonoBehaviour:
     - Scenes/SceneTransition/StressTestTransitioned 1
     - Scenes/SceneTransition/StressTestTransitioned 2
   componentBlackList:
-  - typeFullName: UnityEngine.LightProbeGroup, UnityEngine.CoreModule, Version=0.0.0.0,
+  - typeFullName: UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     componentNames:
-    - dering
-    - probePositions
-  - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
+    - path
+  - typeFullName: UnityEngine.ParticleSystem, UnityEngine.ParticleSystemModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     componentNames:
-    - scaleInLightmap
-    - receiveGI
-    - stitchLightmapSeams
-  - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-    componentNames:
-    - shadowRadius
-    - shadowAngle
-    - areaSize
-    - lightmapBakeType
-  - typeFullName: UnityEngine.Terrain, UnityEngine.TerrainModule, Version=0.0.0.0,
+    - randomSeed
+    - useAutoRandomSeed
+  - typeFullName: UnityEngine.Video.VideoPlayer, UnityEngine.VideoModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     componentNames:
-    - bakeLightProbesForTrees
-    - deringLightProbesForTrees
+    - url
   saveGroups:
   - Main
   - Settings

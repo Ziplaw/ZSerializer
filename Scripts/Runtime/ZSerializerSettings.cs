@@ -2,12 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 
 namespace ZSerializer
 {
-    public enum SerializationType {Sync, Async}
-    
+    public enum SerializationType
+    {
+        Sync,
+        Async
+    }
+
     // [CreateAssetMenu(fileName = "New ZSerializer Settings", menuName = "ZSerializerSettings", order = 0)]
     [Serializable]
     public sealed class SerializableComponentBlackList
@@ -34,7 +40,9 @@ namespace ZSerializer
     public sealed class ZSerializerSettings : ScriptableObject
     {
         private static ZSerializerSettings instance;
-        public static ZSerializerSettings Instance => instance ? instance : Resources.Load<ZSerializerSettings>("ZSerializerSettings");
+
+        public static ZSerializerSettings Instance =>
+            instance ? instance : Resources.Load<ZSerializerSettings>("ZSerializerSettings");
 
 
         [HideInInspector] public bool packageInitialized;
@@ -46,9 +54,19 @@ namespace ZSerializer
         public SerializationType serializationType = SerializationType.Sync;
         public int maxBatchCount = 50;
         [HideInInspector] public List<SceneGroup> sceneGroups;
-        [HideInInspector] public List<SerializableComponentBlackList> componentBlackList;
 
-        [HideInInspector] public List<string> saveGroups = new List<string>()
+        public void DefaultBlackList()
+        {
+            componentBlackList.Clear();
+            componentBlackList.SafeAdd(typeof(NavMeshAgent), "path");
+            componentBlackList.SafeAdd(typeof(ParticleSystem), "randomSeed");
+            componentBlackList.SafeAdd(typeof(ParticleSystem), "useAutoRandomSeed");
+            componentBlackList.SafeAdd(typeof(VideoPlayer), "url");
+        }
+
+        [HideInInspector] public List<SerializableComponentBlackList> componentBlackList = new List<SerializableComponentBlackList>();
+
+        [HideInInspector] public List<string> saveGroups = new List<string>
         {
             "Main",
             "Settings",
@@ -72,12 +90,12 @@ namespace ZSerializer
 
         internal ComponentDataDictionary componentDataDictionary = new ComponentDataDictionary();
 
-        
+
         [Serializable]
         public sealed class ComponentDataDictionary
         {
             public PersistentComponentTypeDataDictionary typeDatas = new PersistentComponentTypeDataDictionary();
-            
+
             public PersistentComponentTypeData this[Type t] => typeDatas[t];
         }
 
@@ -104,22 +122,20 @@ namespace ZSerializer
         {
             public bool isOn;
             public int groupID;
-            
+
             public PersistentComponentTypeData()
             {
                 isOn = true;
                 groupID = 0;
             }
-        } 
-        
-        
+        }
+
+
         [RuntimeInitializeOnLoadMethod]
         static void Init()
         {
             instance = Resources.Load<ZSerializerSettings>("ZSerializerSettings");
         }
-
-        
     }
 
     public static class Extensions

@@ -39,6 +39,8 @@ namespace ZSerializer
 
         //Assemblies in which Unity Components are located
         private static List<string> unityComponentAssemblies = new List<string>();
+        private static List<string> unityComponentNamespaces = new List<string>();
+
 
         //All fields allowed to be added to the Serializable Unity Components list
         private static List<Type> unitySerializableTypes;
@@ -439,7 +441,12 @@ namespace ZSerializer
                 zSavers = await OrderPersistentGameObjectsByLoadingOrder(zSavers);
             }
 
-            if (zSavers.Length > 0) unityComponentAssemblies.Add(components[0].GetType().Assembly.FullName);
+            if (zSavers.Length > 0)
+            {
+                unityComponentAssemblies.Add(components[0].GetType().Assembly.FullName);
+                if (components[0].GetType().Namespace != null)
+                    unityComponentNamespaces.Add(components[0].GetType().Namespace);
+            }
 
 
             await ReflectedSave(zSavers);
@@ -534,11 +541,21 @@ namespace ZSerializer
         static Type GetTypeFromZSerializerType(Type ZSerializerType)
         {
             if (ZSerializerType == typeof(PersistentGameObjectZSerializer)) return typeof(PersistentGameObject);
-            return ZSerializerType.Assembly.GetType( (ZSerializerType.FullName ?? ZSerializerType.Name).Replace("ZSerializer", "")) ??
-                   unityComponentAssemblies
-                       .Select(s =>
-                           Assembly.Load(s).GetType("UnityEngine." + ZSerializerType.Name.Replace("ZSerializer", "")))
-                       .First(t => t != null);
+            var type = ZSerializerType.Assembly.GetType(
+                (ZSerializerType.FullName ?? ZSerializerType.Name).Replace("ZSerializer", ""));
+            if (type != null) return type;
+            
+            foreach (var unityComponentAssembly in unityComponentAssemblies)
+            {
+                foreach (var unityComponentNamespace in unityComponentNamespaces)
+                {
+                    type = Assembly.Load(unityComponentAssembly)
+                        .GetType($"{unityComponentNamespace}.{ZSerializerType.Name.Replace("ZSerializer", "")}");
+                    if (type != null) return type;
+
+                }
+            }
+            throw new Exception($"Could not find real type for {ZSerializerType.Name}");
         }
 
         static async Task LoadComponents(JsonFillType jsonFillType)
@@ -658,6 +675,7 @@ namespace ZSerializer
 
                     LogWarning($"Saving {_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[currentGroupID]}");
                     unityComponentAssemblies.Clear();
+                    unityComponentNamespaces.Clear();
 
                     var persistentGameObjectsInScene = _currentParent.GetComponentsInChildren<PersistentGameObject>();
                     if(persistentGameObjectsInScene != null)
@@ -671,6 +689,7 @@ namespace ZSerializer
 
                     await SaveJsonData($"{_currentLevelName}.zsave");
                     CompileJson(unityComponentAssemblies.Distinct().ToArray());
+                    CompileJson(unityComponentNamespaces.Distinct().ToArray());
                     await SaveJsonData($"assemblies-{_currentLevelName}.zsave");
 
 
@@ -735,6 +754,7 @@ namespace ZSerializer
 
                     LogWarning("Saving data on Group: " + ZSerializerSettings.Instance.saveGroups[currentGroupID]);
                     unityComponentAssemblies.Clear();
+                    unityComponentNamespaces.Clear();
 
                     string[] files = Directory.GetFiles(GetFilePath(""));
                     foreach (string file in files)
@@ -754,6 +774,7 @@ namespace ZSerializer
 
                     await SaveJsonData("components.zsave");
                     CompileJson(unityComponentAssemblies.Distinct().ToArray());
+                    CompileJson(unityComponentNamespaces.Distinct().ToArray());
                     await SaveJsonData("assemblies.zsave");
 
                     Log(
@@ -847,9 +868,10 @@ namespace ZSerializer
                 float startingTime = Time.realtimeSinceStartup;
                 float frameCount = Time.frameCount;
 
-                unityComponentAssemblies =
-                    (await JsonHelper.FromJson<string>(ReadFromFile($"assemblies-{levelName}.zsave")?[0].Item2))
-                    .ToList();
+                var assemblyTuple = ReadFromFile($"assemblies-{levelName}.zsave");
+
+                unityComponentAssemblies = (await JsonHelper.FromJson<string>(assemblyTuple?[0].Item2)).ToList();
+                unityComponentNamespaces = (await JsonHelper.FromJson<string>(assemblyTuple?[1].Item2)).ToList();
 
                 currentGroupID = 0;
 
@@ -915,6 +937,11 @@ namespace ZSerializer
                     float startingTime = Time.realtimeSinceStartup;
                     float frameCount = Time.frameCount;
 
+                    var assemblyTuple = ReadFromFile($"assemblies.zsave");
+
+                    unityComponentAssemblies = (await JsonHelper.FromJson<string>(assemblyTuple?[0].Item2)).ToList();
+                    unityComponentNamespaces = (await JsonHelper.FromJson<string>(assemblyTuple?[1].Item2)).ToList();
+                    
                     unityComponentAssemblies =
                         (await JsonHelper.FromJson<string>(ReadFromFile("assemblies.zsave")?[0].Item2)).ToList();
 
