@@ -1106,6 +1106,11 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         static void OnReload()
         {
             EditorApplication.hierarchyChanged += OnHierarchyChanged;
+
+            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerialize serialize && (string.IsNullOrEmpty(serialize.ZUID) ||string.IsNullOrEmpty(serialize.GOZUID) )))
+            {
+                (monoBehaviour as IZSerialize)!.GenerateEditorZUIDs(true);
+            }
         }
 
         private static void OnHierarchyChanged()

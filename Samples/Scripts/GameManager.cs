@@ -27,7 +27,7 @@ public class GameManager : PersistentMonoBehaviour
         if (GUILayout.Button("Save"))
         {
             canvas.SetActive(true);
-            await ZSerialize.SaveAll();
+            await ZSerialize.SaveScene();
             canvas.SetActive(false);
             return;
         }

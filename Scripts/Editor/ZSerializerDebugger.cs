@@ -28,7 +28,7 @@ namespace ZSerializer.Editor
 
         private void OnGUI()
         {
-            string[] tabs = { "ID Storage", "Active ZUIDs", "Restoration Save Groups" };
+            string[] tabs = { "ID Storage", "Active ZUIDs" };
             selectedTabIndex = GUILayout.Toolbar(selectedTabIndex, tabs);
 
 
@@ -60,13 +60,6 @@ namespace ZSerializer.Editor
                     {
                         GUILayout.Label($"{keyValuePair.Key}: {keyValuePair.Value}");
                     }
-
-                    break;
-                case 2:
-                    GUILayout.Label("Active Groups for ID Restoration:");
-                    ZSerialize.restorationIDList.ForEach(x =>
-                        GUILayout.Label(ZSerializerSettings.Instance.saveGroups[x]));
-
                     break;
             }
         }
