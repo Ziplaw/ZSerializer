@@ -34,7 +34,7 @@ public class PersistentGameObjectEditor : Editor
         GUILayout.Space(-15);
         using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
         {
-            GUILayout.Label("<color=#29cf42>  Persistent GameObject</color>", styler.header, GUILayout.MinHeight(28));
+            GUILayout.Label($"<color=#{ZSerializerStyler.MainHex}>  Persistent GameObject</color>", styler.header, GUILayout.MinHeight(28));
             manager.showSettings = ZSerializerEditor.SettingsButton(manager.showSettings, styler, 28);
             PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
         }

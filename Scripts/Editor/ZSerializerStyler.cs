@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using ZSerializer;
 
@@ -14,7 +15,51 @@ namespace ZSerializer.Editor
         internal Texture2D refreshImage;
         private Font mainFont;
         internal ZSerializerSettings settings;
+        
+        public static string YellowHex
+        {
+            get
+            {
+                if (_yellow == default)
+                    _yellow = new Color(1f, 0.76f, 0.03f).ToHexadecimal();
+                return  _yellow;
+            }
+        }
+        
+        public static string RedHex
+        {
+            get
+            {
+                if (_red == default)
+                    _red = new Color(1f, 0.38f, 0.35f).ToHexadecimal();
+                return  _red;
+            }
+        }
+        
+        public static string OffHex
+        {
+            get
+            {
+                if (_off == default)
+                    _off = new Color(0.6f, 0.6f, 0.6f).ToHexadecimal();
+                return  _off;
+            }
+        }
+        
+        public static string MainHex
+        {
+            get
+            {
+                if (_main == default)
+                    _main = new Color(0.49f, 1f, 0.93f).ToHexadecimal();
+                return  _main;
+            }
+        }
 
+        public static string _yellow;
+        public static string _red;
+        public static string _off;
+        public static string _main;
         public ZSerializerStyler()
         {
             GetEveryResource();
@@ -54,6 +99,37 @@ namespace ZSerializer.Editor
             };
 
             header.normal.textColor = Color.white;
+        }
+    }
+
+    public static class Extensions
+    {
+        public static string ToHexadecimal(this Color color)
+        {
+            return $"{((int)(color.r * 255)).DecimalToHexadecimal()}{((int)(color.g*255)).DecimalToHexadecimal()}{((int)(color.b * 255)).DecimalToHexadecimal()}{((int)(color.a*255)).DecimalToHexadecimal()}";
+        }
+        
+        private static string DecimalToHexadecimal(this int dec)
+        {
+            if (dec <= 0)
+                return "00";
+
+            int hex = dec;
+            string hexStr = string.Empty;
+
+            while (dec > 0)
+            {
+                hex = dec % 16;
+
+                if (hex < 10)
+                    hexStr = hexStr.Insert(0, Convert.ToChar(hex + 48).ToString());
+                else
+                    hexStr = hexStr.Insert(0, Convert.ToChar(hex + 55).ToString());
+
+                dec /= 16;
+            }
+
+            return hexStr;
         }
     }
 }

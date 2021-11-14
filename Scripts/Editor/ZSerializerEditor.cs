@@ -487,7 +487,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             }
         }
 
-
+        
         internal static void BuildPersistentComponentEditor<T>(T manager, ZSerializerStyler styler,
             ref bool showSettings,
             Action<Type, IZSerialize, bool> toggleOn) where T : PersistentMonoBehaviour
@@ -498,8 +498,8 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
             {
                 var state = GetClassState(manager.GetType());
-                string color = state == ClassState.Valid ? manager.IsOn ? "29cf42" : "999999" :
-                    state == ClassState.NeedsRebuilding ? "FFC107" : "FF625A";
+                string color = state == ClassState.Valid ? manager.IsOn ? ZSerializerStyler.MainHex : ZSerializerStyler.OffHex :
+                    state == ClassState.NeedsRebuilding ? ZSerializerStyler.YellowHex : ZSerializerStyler.RedHex;
 
                 GUILayout.Label($"<color=#{color}>  Persistent Component</color>",
                     styler.header, GUILayout.Height(28));
@@ -525,8 +525,8 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         string color = field.GetCustomAttribute<NonZSerialized>() == null && manager.IsOn
-                            ? "29cf42"
-                            : "999999";
+                            ? ZSerializerStyler.MainHex
+                            : ZSerializerStyler.OffHex;
                         GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
                             new GUIStyle("label") { richText = true },
                             GUILayout.Width(EditorGUIUtility.currentViewWidth / 3f));
@@ -1111,9 +1111,11 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         {
             EditorApplication.hierarchyChanged += OnHierarchyChanged;
 
-            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerialize serialize && (string.IsNullOrEmpty(serialize.ZUID) ||string.IsNullOrEmpty(serialize.GOZUID) )))
+            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerialize))
             {
-                (monoBehaviour as IZSerialize)!.GenerateEditorZUIDs(true);
+                var serialize = monoBehaviour as IZSerialize;
+                if(string.IsNullOrEmpty(serialize!.ZUID) || string.IsNullOrEmpty(serialize.GOZUID)) serialize!.GenerateEditorZUIDs(true);
+                if(string.IsNullOrEmpty(ZSerializerSettings.Instance.saveGroups[serialize.GroupID])) Debug.LogError($"{monoBehaviour}'s Save Group is empty and thus will not get Serialized, change the Save Group of {monoBehaviour} or reimplement Save Group number {serialize.GroupID+1}");
             }
         }
 
@@ -1121,7 +1123,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         {
             Dictionary<string, Object> map = new Dictionary<string, Object>();
 
-            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerialize)
+            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerialize)
                 .Reverse())
             {
                 var serializable = monoBehaviour as IZSerialize;

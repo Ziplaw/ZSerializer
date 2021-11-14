@@ -88,7 +88,7 @@ namespace ZSerializer.Editor
 
         private void OnGUI()
         {
-            if (!ZSerializerSettings.Instance.packageInitialized) //
+            if (!ZSerializerSettings.Instance.packageInitialized)
             {
                 if (!stylerInitialized)
                 {
@@ -102,12 +102,11 @@ namespace ZSerializer.Editor
 
                 stylerInitialized = true;
 
-                if (GUILayout.Button("Setup", new GUIStyle("button") { fontSize = 48, font = styler.header.font },
+                if (GUILayout.Button($"<color=#{ZSerializerStyler.MainHex}>Setup</color>", new GUIStyle("button") { fontSize = 48, font = styler.header.font, richText = true},
                     GUILayout.MinHeight(100)))
                 {
                     ZSerializerSettings.Instance.packageInitialized = true;
                     ZSerializerEditor.GenerateUnityComponentClasses();
-                    Init();
                 }
             }
             else
@@ -156,16 +155,16 @@ namespace ZSerializer.Editor
                                     var classInstance = classes[i];
                                     GUILayout.Space(-15);
                                     using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
-                                        GUILayout.Height(32)))
+                                        GUILayout.Height(32),GUILayout.MaxWidth(464)))
                                     {
                                         string color = classInstance.state == ClassState.Valid
                                             ? ZSerializerSettings.Instance
                                                 .componentDataDictionary[classInstance.classType].isOn
-                                                ? "29CF42"
-                                                : "999999"
+                                                ? ZSerializerStyler.MainHex
+                                                : ZSerializerStyler.OffHex
                                             : classInstance.state == ClassState.NeedsRebuilding
-                                                ? "FFC107"
-                                                : "FF625A";
+                                                ? ZSerializerStyler.YellowHex
+                                                : ZSerializerStyler.RedHex;
 
 
                                         if (GUILayout.Button(
@@ -235,7 +234,7 @@ namespace ZSerializer.Editor
                             {
                                 GUILayout.Space(-15);
                                 using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
-                                    GUILayout.Height(32)))
+                                    GUILayout.Height(32),GUILayout.MaxWidth(464)))
                                 {
                                     EditorGUILayout.LabelField("ZSerialize All",
                                         new GUIStyle(styler.header)
