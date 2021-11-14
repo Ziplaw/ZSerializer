@@ -72,14 +72,14 @@ namespace ZSerializer.Editor
         [DidReloadScripts]
         private static void Init()
         {
-            if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized && HasOpenInstances<ZSerializerMenu>())//
+            if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized && HasOpenInstances<ZSerializerMenu>())
             {
                 GetWindow<ZSerializerMenu>().minSize = new Vector2(480, 400);
+                GetWindow<ZSerializerMenu>().maxSize = new Vector2(480, 1200);
 
                 GenerateStyler();
 
                 GetClasses();
-
             }
         }
 

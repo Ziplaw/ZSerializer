@@ -12,15 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1efd7af9bd4fdc48a69c60405eb42f4, type: 3}
   m_Name: ZSerializerSettings
   m_EditorClassIdentifier: 
-  packageInitialized: 0
+  packageInitialized: 1
   debugMode: 1
   autoRebuildZSerializers: 1
   selectedSaveFile: 0
   encryptData: 0
-  advancedSerialization: 0
+  advancedSerialization: 1
   serializationType: 0
   maxBatchCount: 50
-  sceneGroups: []
+  sceneGroups:
+  - name: Main Menu
+    loadingScenePath: 
+    scenePaths: []
+  - name: Dungeon
+    loadingScenePath: Scenes/Docs/DungeonLoadingScene
+    scenePaths:
+    - Scenes/Docs/Dungeon Entrance
+    - Scenes/Docs/Dungeon Catacombs
+    - Scenes/Docs/Dungeon Final Boss
+  - name: Castle
+    loadingScenePath: 
+    scenePaths: []
   componentBlackList:
   - typeFullName: UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
@@ -38,8 +50,8 @@ MonoBehaviour:
   saveGroups:
   - Main
   - Settings
-  - 
-  - 
+  - Points
+  - Inventory
   - 
   - 
   - 

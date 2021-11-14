@@ -60,7 +60,7 @@ public class PersistentGameObjectEditor : Editor
                             switch (component.persistenceType)
                             {
                                 case PersistentType.Everything:
-                                    fontColor = new Color(41 / 255f, 207 / 255f, 66 / 255f);
+                                    fontColor = new Color(0.61f, 1f, 0.94f);
                                     break;
                                 case PersistentType.Component:
                                     fontColor = new Color(1f, 0.79f, 0.47f);
