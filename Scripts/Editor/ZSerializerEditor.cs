@@ -778,7 +778,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                                         .FindPropertyRelative("name"));
 
                                                     var path = groupsProp.GetArrayElementAtIndex(i)
-                                                        .FindPropertyRelative("loadingManagementScenePath").stringValue;
+                                                        .FindPropertyRelative("loadingScenePath").stringValue;
 
 
                                                     var oldScene = string.IsNullOrEmpty(path)
@@ -793,7 +793,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                                     {
                                                         var newPath = AssetDatabase.GetAssetPath(newScene);
                                                         var scenePathProperty = groupsProp.GetArrayElementAtIndex(i)
-                                                            .FindPropertyRelative("loadingManagementScenePath");
+                                                            .FindPropertyRelative("loadingScenePath");
                                                         scenePathProperty.stringValue =
                                                             newPath.Substring(7, newPath.Length - 13);
 
@@ -818,7 +818,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                                             var sceneAsset = sceneAssetList[j];
                                                             using (new GUILayout.HorizontalScope())
                                                             {
-                                                                if(!EditorBuildSettings.scenes.Select(s => s.path.Substring(7,s.path.Length-13)).Contains(ZSerializerSettings.Instance.sceneGroups[i].scenePaths[j]) && sceneAsset != null)
+                                                                if(!EditorBuildSettings.scenes.Select(s => s.path.Length > 7 ? s.path.Substring(7,s.path.Length-13) : null).Contains(ZSerializerSettings.Instance.sceneGroups[i].scenePaths[j]) && sceneAsset != null)
                                                                     if(GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("warning"), "Scene not present in Build Settings"), new GUIStyle("label"),GUILayout.Width(20), GUILayout.Height(20)))
                                                                         EditorWindow.GetWindow(Type.GetType("UnityEditor.BuildPlayerWindow,UnityEditor"));
                                                                 
@@ -845,6 +845,9 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                                                 if (GUILayout.Button("-", GUILayout.MaxWidth(20)))
                                                                 {
                                                                     ZSerializerSettings.Instance.sceneGroups[i].scenePaths.RemoveAt(j);
+                                                                    EditorUtility.SetDirty(ZSerializerSettings
+                                                                        .Instance);
+                                                                    AssetDatabase.SaveAssets();
                                                                     return;
                                                                 }
                                                             }
@@ -866,9 +869,10 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                     }
 
 
-                                    if (selectedGroupIndex == -1)
+                                    if (selectedGroupIndex == -1 || ZSerializerSettings.Instance.sceneGroups.Count == 0)
                                         if (GUILayout.Button("+"))
                                         {
+                                            selectedGroupIndex = -1;
                                             ZSerializerSettings.Instance.sceneGroups.Add(new SceneGroup
                                                 { name = "New Scene Group" });
                                             EditorUtility.SetDirty(ZSerializerSettings.Instance);

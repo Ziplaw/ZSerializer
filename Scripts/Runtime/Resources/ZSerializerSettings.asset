@@ -18,11 +18,11 @@ MonoBehaviour:
   selectedSaveFile: 0
   encryptData: 0
   advancedSerialization: 0
-  serializationType: 0
+  serializationType: 1
   maxBatchCount: 50
   sceneGroups:
   - name: Scene Group 1
-    loadingManagementScenePath: Scenes/SceneTransition/LoadingScreen
+    loadingScenePath: ZSerializer/Scripts/Editor/LoadingSceneTemplate
     scenePaths:
     - Scenes/SceneTransition/StressTestTransitioned 0
     - Scenes/SceneTransition/StressTestTransitioned 1

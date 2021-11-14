@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.Video;
 
 namespace ZSerializer
@@ -33,7 +34,7 @@ namespace ZSerializer
     public sealed class SceneGroup
     {
         public string name;
-        public string loadingManagementScenePath;
+        public string loadingScenePath;
         public List<string> scenePaths = new List<string>();
     }
 

@@ -35,7 +35,7 @@ public class GameManager : PersistentMonoBehaviour
         if (GUILayout.Button("Load"))
         {
             canvas.SetActive(true);
-            await ZSerialize.LoadAll();
+            await ZSerialize.LoadScene();
             canvas.SetActive(false);
             return;
         }

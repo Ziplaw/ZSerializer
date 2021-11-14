@@ -28,7 +28,7 @@ namespace ZSerializer.Editor
 
         private void OnGUI()
         {
-            string[] tabs = { "ID Storage", "Active ZUIDs" };
+            string[] tabs = { "Scene Group Path Map", "Active ZUIDs" };
             selectedTabIndex = GUILayout.Toolbar(selectedTabIndex, tabs);
 
 
@@ -38,20 +38,15 @@ namespace ZSerializer.Editor
                     using (var scrollView = new GUILayout.ScrollViewScope(idStorageScrollPos))
                     {
                         idStorageScrollPos = scrollView.scrollPosition;
-                        GUILayout.Toolbar(-1, new[] { "Original ID", "Temporary ID" });
-
-                        // foreach (var keyValuePair in ZSerialize.idStorage)
-                        // {
-                        //     using (new GUILayout.HorizontalScope("helpbox"))
-                        //     {
-                        //         GUILayout.Label(keyValuePair.Key.ToString(),
-                        //             new GUIStyle("label") { alignment = TextAnchor.MiddleCenter });
-                        //         var color = "FFFFFF";
-                        //         if (keyValuePair.Key != keyValuePair.Value) color = "67C795";
-                        //         GUILayout.Label($"<color=#{color}>{keyValuePair.Value.ToString()}</color>",
-                        //             new GUIStyle("label") { alignment = TextAnchor.MiddleCenter, richText = true });
-                        //     }
-                        // }
+                        foreach (var keyValuePair in ZSerialize.sceneToLoadingSceneMap)
+                        {
+                            using (new GUILayout.HorizontalScope())
+                            {
+                                GUILayout.Label(keyValuePair.Key);
+                                GUILayout.Label(keyValuePair.Value.loadingScenePath);
+                            }
+                            
+                        }
                     }
 
                     break;
