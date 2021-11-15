@@ -147,7 +147,7 @@ namespace ZSerializer
                 {
                     sceneToLoadingSceneMap.Add(scenePath, instanceSceneGroup);
                 }
-                sceneToLoadingSceneMap.Add(instanceSceneGroup.loadingScenePath, instanceSceneGroup);
+                // sceneToLoadingSceneMap.Add(instanceSceneGroup.loadingScenePath, instanceSceneGroup);
             }
 
             OnSceneLoad();
@@ -1040,10 +1040,12 @@ namespace ZSerializer
             }
         }
         
-        public static async Task LoadSceneGroup(string sceneGroup, LoadSceneMode mode = LoadSceneMode.Single)
+        public static AsyncOperation LoadSceneGroup(string sceneGroupName, LoadSceneMode mode = LoadSceneMode.Single, bool loadData = true)
         {
-            var path = await GetLastSavedScenePath(sceneGroup);
-            SceneManager.LoadScene(sceneToLoadingSceneMap[path].loadingScenePath, mode);
+            var path = GetLastSavedScenePath(sceneGroupName).Result;
+            return SceneManager.LoadSceneAsync(path, mode);
+            
+            // SceneManager.LoadScene(sceneToLoadingSceneMap[path].loadingScenePath, mode);
         }
         
         #endregion

@@ -21,18 +21,12 @@ MonoBehaviour:
   serializationType: 0
   maxBatchCount: 50
   sceneGroups:
-  - name: Main Menu
-    loadingScenePath: 
-    scenePaths: []
-  - name: Dungeon
-    loadingScenePath: Scenes/Docs/DungeonLoadingScene
+  - name: Scene Group 1
+    loadingScenePath: New Loading Scene
     scenePaths:
-    - Scenes/Docs/Dungeon Entrance
-    - Scenes/Docs/Dungeon Catacombs
-    - Scenes/Docs/Dungeon Final Boss
-  - name: Castle
-    loadingScenePath: 
-    scenePaths: []
+    - Scenes/SceneTransition/StressTestTransitioned 0
+    - Scenes/SceneTransition/StressTestTransitioned 1
+    - Scenes/SceneTransition/StressTestTransitioned 2
   componentBlackList:
   - typeFullName: UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
@@ -50,8 +44,8 @@ MonoBehaviour:
   saveGroups:
   - Main
   - Settings
-  - Points
-  - Inventory
+  - 
+  - 
   - 
   - 
   - 

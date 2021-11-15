@@ -43,7 +43,6 @@ namespace ZSerializer.Editor
                             using (new GUILayout.HorizontalScope())
                             {
                                 GUILayout.Label(keyValuePair.Key);
-                                GUILayout.Label(keyValuePair.Value.loadingScenePath);
                             }
                             
                         }

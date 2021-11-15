@@ -9,9 +9,12 @@ using ZSerializer;
 [AddComponentMenu("ZSerializer/SceneGroupLoader")]
 public class SceneGroupLoader : MonoBehaviour
 {
+    public bool loadSceneData = true;
     
     async void Start()
     {
+        
+        //Create Camera if not present
         var cam = FindObjectOfType<Camera>();
         if (!cam)
         {
@@ -24,16 +27,23 @@ public class SceneGroupLoader : MonoBehaviour
         
         await CanvasFadeIn();
 
-        var operation = SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
-
-        while (!operation.isDone)
+        //Deactivate previous scene if LoadSceneMode was set to additive.
+        AsyncOperation operation;
+        var currentActiveScene = SceneManager.GetActiveScene();
+        if (currentActiveScene != gameObject.scene)
         {
-            await Task.Yield();
+            operation = SceneManager.UnloadSceneAsync(currentActiveScene);
+
+            while (!operation.isDone)
+            {
+                await Task.Yield();
+            }
         }
-        
+
+        //Loading last saved scene
         var sceneGroup = ZSerialize.sceneToLoadingSceneMap[SceneManager.GetActiveScene().path.ToEditorBuildSettingsPath()];
         var scenePath = await ZSerialize.GetLastSavedScenePath(sceneGroup.name);
-        var sceneLoaderScene = SceneManager.GetSceneByPath(sceneGroup.loadingScenePath.ToAssetPath());
+        // var sceneLoaderScene = SceneManager.GetSceneByPath(sceneGroup.loadingScenePath.ToAssetPath());
         operation = SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
 
         while (!operation.isDone)
@@ -43,19 +53,26 @@ public class SceneGroupLoader : MonoBehaviour
 
         SceneManager.SetActiveScene(SceneManager.GetSceneByPath(scenePath.ToAssetPath()));
         
+        //Destroy unneded camera if it isnt unloaded by now.
         if(cam != null) Destroy(cam.gameObject);
-        ZSerialize.UpdateCurrentScene();
-        await ZSerialize.LoadScene();
+        
+        
+        // Loading data from scene if specified
+        if (loadSceneData)
+        {
+            ZSerialize.UpdateCurrentScene();
+            await ZSerialize.LoadScene();
+        }
+
         await CanvasFadeOut();
 
-        operation = SceneManager.UnloadSceneAsync(sceneLoaderScene);
+        //Unloading loading scene
+        // operation = SceneManager.UnloadSceneAsync(sceneLoaderScene);
 
         while (!operation.isDone)
         {
             await Task.Yield();
         }
-        
-        ZSerialize.UpdateCurrentScene();
     }
     
     public async Task CanvasFadeIn()

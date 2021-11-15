@@ -777,29 +777,29 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                                     EditorGUILayout.PropertyField(groupsProp.GetArrayElementAtIndex(i)
                                                         .FindPropertyRelative("name"));
 
-                                                    var path = groupsProp.GetArrayElementAtIndex(i)
-                                                        .FindPropertyRelative("loadingScenePath").stringValue;
+                                                    // var path = groupsProp.GetArrayElementAtIndex(i)
+                                                    //     .FindPropertyRelative("loadingScenePath").stringValue;
 
 
-                                                    var oldScene = string.IsNullOrEmpty(path)
-                                                        ? null
-                                                        : AssetDatabase.LoadAssetAtPath<SceneAsset>(
-                                                            Path.Combine("Assets", path + ".unity"));
-                                                    EditorGUI.BeginChangeCheck();
-                                                    var newScene = EditorGUILayout.ObjectField("Loading Scene",
-                                                        oldScene, typeof(SceneAsset), false) as SceneAsset;
-
-                                                    if (EditorGUI.EndChangeCheck())
-                                                    {
-                                                        var newPath = AssetDatabase.GetAssetPath(newScene);
-                                                        var scenePathProperty = groupsProp.GetArrayElementAtIndex(i)
-                                                            .FindPropertyRelative("loadingScenePath");
-                                                        scenePathProperty.stringValue =
-                                                            newPath.Substring(7, newPath.Length - 13);
-
-                                                        EditorUtility.SetDirty(ZSerializerSettings.Instance);
-                                                        AssetDatabase.SaveAssets();
-                                                    }
+                                                    // var oldScene = string.IsNullOrEmpty(path)
+                                                    //     ? null
+                                                    //     : AssetDatabase.LoadAssetAtPath<SceneAsset>(
+                                                    //         Path.Combine("Assets", path + ".unity"));
+                                                    // EditorGUI.BeginChangeCheck();
+                                                    // var newScene = EditorGUILayout.ObjectField("Loading Scene",
+                                                    //     oldScene, typeof(SceneAsset), false) as SceneAsset;
+                                                    //
+                                                    // if (EditorGUI.EndChangeCheck())
+                                                    // {
+                                                    //     var newPath = AssetDatabase.GetAssetPath(newScene);
+                                                    //     var scenePathProperty = groupsProp.GetArrayElementAtIndex(i)
+                                                    //         .FindPropertyRelative("loadingScenePath");
+                                                    //     scenePathProperty.stringValue =
+                                                    //         newPath.Substring(7, newPath.Length - 13);
+                                                    //
+                                                    //     EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                                    //     AssetDatabase.SaveAssets();
+                                                    // }
 
                                                     var sceneAssetList = ZSerializerSettings.Instance.sceneGroups[i]
                                                         .scenePaths.Select(s =>

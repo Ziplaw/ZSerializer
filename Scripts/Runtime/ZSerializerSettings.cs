@@ -34,7 +34,6 @@ namespace ZSerializer
     public sealed class SceneGroup
     {
         public string name;
-        public string loadingScenePath;
         public List<string> scenePaths = new List<string>();
     }
 
