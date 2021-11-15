@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Codice.Client.BaseCommands;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
@@ -147,7 +148,6 @@ namespace ZSerializer
                 {
                     sceneToLoadingSceneMap.Add(scenePath, instanceSceneGroup);
                 }
-                // sceneToLoadingSceneMap.Add(instanceSceneGroup.loadingScenePath, instanceSceneGroup);
             }
 
             OnSceneLoad();
@@ -406,25 +406,23 @@ namespace ZSerializer
 
         private async static Task SerializeCurrentScenePath()
         {
-            var path = GetCurrentSceneGroupPath() + "/lastScenePath.zsave";
-            CompileJson(new []{currentScenePath});
             await RunTask(() =>
             {
+                var path = GetCurrentSceneGroupPath() + "/lastScenePath.zsave";
                 if (ZSerializerSettings.Instance.encryptData)
                 {
                     File.WriteAllBytes(path,
-                        EncryptStringToBytes(jsonToSave, key, key));
+                        EncryptStringToBytes(currentScenePath, key, key));
                 }
                 else
                 {
-                    File.WriteAllText(path, jsonToSave);
+                    File.WriteAllText(path, currentScenePath);
                 }
             });
-            jsonToSave = "";
         }
         
         //Load CurrentScenePath
-        public static async Task<string> GetLastSavedScenePath(string sceneGroupName)
+        public static string GetLastSavedScenePath(string sceneGroupName)
         {
             var path = GetSceneGroupPathFromName(sceneGroupName) + "/lastScenePath.zsave";
 
@@ -433,16 +431,16 @@ namespace ZSerializer
                 Debug.LogWarning(
                     $"You attempted to load a file that didn't exist ({path}), Loading first scene in {sceneGroupName} instead");
 
-                return ZSerializerSettings.Instance.sceneGroups.First(sg => sg.name == sceneGroupName).scenePaths[0];
+                return ZSerializerSettings.Instance.sceneGroups.First(sg => sg.name == sceneGroupName)
+                    .scenePaths[0];
             }
 
             if (ZSerializerSettings.Instance.encryptData)
             {
-                return (await JsonHelper.FromJson<string>( GetTypesAndJsonFromString(
-                    DecryptStringFromBytes(File.ReadAllBytes(path), key, key))[0].Item2))[0];
+                return DecryptStringFromBytes(File.ReadAllBytes(path), key, key);
             }
 
-            return (await JsonHelper.FromJson<string>(GetTypesAndJsonFromString(File.ReadAllText(path))[0].Item2))[0];
+            return File.ReadAllText(path);
         }
         
         
@@ -800,21 +798,18 @@ namespace ZSerializer
         {
             await RunTask(() =>
             {
+                if (tempTuples == null || tempTuples.Length == 0)
+                    tempTuples = new (Type, string)[ZSerializerSettings.Instance.saveGroups
+                        .Where(s => !string.IsNullOrEmpty(s))
+                        .Max(sg => ZSerializerSettings.Instance.saveGroups.IndexOf(sg)) + 1][];
+                
                 switch (zSerializationType)
                 {
                     case ZSerializationType.Scene:
-                        if (tempTuples == null || tempTuples.Length == 0)
-                            tempTuples = new (Type, string)[ZSerializerSettings.Instance.saveGroups
-                                .Where(s => !string.IsNullOrEmpty(s))
-                                .Max(sg => ZSerializerSettings.Instance.saveGroups.IndexOf(sg)) + 1][];
-
                         tempTuples[_currentGroupID] = ReadFromFile("components.zsave");
                         break;
                     case ZSerializationType.Level:
-                        if (tempTuples == null || tempTuples.Length == 0)
-                            tempTuples = new (Type, string)[1][];
-
-                        tempTuples[0] = ReadFromFile($"{_currentLevelName}.zsave");
+                        tempTuples[_currentGroupID] = ReadFromFile($"{_currentLevelName}.zsave");
                         break;
                 }
             });
@@ -1040,12 +1035,16 @@ namespace ZSerializer
             }
         }
         
-        public static AsyncOperation LoadSceneGroup(string sceneGroupName, LoadSceneMode mode = LoadSceneMode.Single, bool loadData = true)
+        /// <summary>
+        /// Load the provided Scene Group's last saved scene.
+        /// </summary>
+        /// <param name="sceneGroupName">The name of the Scene Group you want to load.</param>
+        /// <param name="mode">The LoadSceneMode in which the scene will get loaded.</param>
+        /// <returns></returns>
+        public static AsyncOperation LoadSceneGroup(string sceneGroupName, LoadSceneMode mode = LoadSceneMode.Single)
         {
-            var path = GetLastSavedScenePath(sceneGroupName).Result;
+            var path = GetLastSavedScenePath(sceneGroupName);
             return SceneManager.LoadSceneAsync(path, mode);
-            
-            // SceneManager.LoadScene(sceneToLoadingSceneMap[path].loadingScenePath, mode);
         }
         
         #endregion
@@ -1367,7 +1366,7 @@ namespace ZSerializer
         }
     }
 
-    public static class LINQExtensions
+    public static class ZSExtensions
     {
         public static void Append<T1, T2>(this Dictionary<T1, T2> first, Dictionary<T1, T2> second)
         {
@@ -1389,12 +1388,12 @@ namespace ZSerializer
             }
         }
         
-        internal static string ToEditorBuildSettingsPath(this string path)
+        public static string ToEditorBuildSettingsPath(this string path)
         {
             return path.Substring(7, path.Length - 13);
         }
         
-        internal static string ToAssetPath(this string path)
+        public static string ToAssetPath(this string path)
         {
             return $"Assets/{path}.unity";
         }
