@@ -490,7 +490,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         
         internal static void BuildPersistentComponentEditor<T>(T manager, ZSerializerStyler styler,
             ref bool showSettings,
-            Action<Type, IZSerialize, bool> toggleOn) where T : PersistentMonoBehaviour
+            Action<Type, IZSerializable, bool> toggleOn) where T : PersistentMonoBehaviour
         {
             // Texture2D cogwheel = styler.cogWheel;
 
@@ -566,7 +566,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             return new string(chars.ToArray());
         }
 
-        internal static void ShowGroupIDSettings(Type type, IZSerialize data, bool canAutoSync)
+        internal static void ShowGroupIDSettings(Type type, IZSerializable data, bool canAutoSync)
         {
             GUILayout.Space(-15);
             using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
@@ -718,9 +718,9 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                         ZSerialize.Log("<color=cyan>Resetting All Group IDs</color>");
 
                                         foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>()
-                                            .Where(o => o is IZSerialize))
+                                            .Where(o => o is IZSerializable))
                                         {
-                                            var serialize = monoBehaviour as IZSerialize;
+                                            var serialize = monoBehaviour as IZSerializable;
                                             serialize!.GroupID = 0;
                                             EditorUtility.SetDirty(monoBehaviour);
 
@@ -1111,10 +1111,14 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         {
             EditorApplication.hierarchyChanged += OnHierarchyChanged;
 
-            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerialize))
+            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
             {
-                var serialize = monoBehaviour as IZSerialize;
-                if(string.IsNullOrEmpty(serialize!.ZUID) || string.IsNullOrEmpty(serialize.GOZUID)) serialize!.GenerateEditorZUIDs(true);
+                var serialize = monoBehaviour as IZSerializable;
+                if (string.IsNullOrEmpty(serialize!.ZUID) || string.IsNullOrEmpty(serialize.GOZUID))
+                {
+                    serialize!.GenerateEditorZUIDs(true);
+                    EditorUtility.SetDirty(monoBehaviour);
+                }
                 if(string.IsNullOrEmpty(ZSerializerSettings.Instance.saveGroups[serialize.GroupID])) Debug.LogError($"{monoBehaviour}'s Save Group is empty and thus will not get Serialized, change the Save Group of {monoBehaviour} or reimplement Save Group number {serialize.GroupID+1}");
             }
         }
@@ -1123,10 +1127,10 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         {
             Dictionary<string, Object> map = new Dictionary<string, Object>();
 
-            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerialize)
+            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable)
                 .Reverse())
             {
-                var serializable = monoBehaviour as IZSerialize;
+                var serializable = monoBehaviour as IZSerializable;
                 if (!string.IsNullOrEmpty(serializable.ZUID))
                 {
                     if (map.TryGetValue(serializable.ZUID, out _))

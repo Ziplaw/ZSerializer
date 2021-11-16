@@ -16,7 +16,7 @@ namespace ZSerializer
     {
     }
 
-    public abstract class PersistentMonoBehaviour : MonoBehaviour, IZSerialize
+    public abstract class PersistentMonoBehaviour : MonoBehaviour, IZSerializable
     {
         /// <summary>
         /// OnPreSave is called right before any Save occurs
@@ -138,11 +138,17 @@ namespace ZSerializer
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 
             if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<MonoBehaviour>().Where(c => c != this && c is IZSerialize))
+                foreach (var monoBehaviour in GetComponents<MonoBehaviour>().Where(c => c != this && c is IZSerializable))
                 {
-                    (monoBehaviour as IZSerialize).GenerateEditorZUIDs(false);
+                    (monoBehaviour as IZSerializable).GenerateEditorZUIDs(false);
                 }
 #endif
+        }
+
+        public void AddZUIDsToIDMap()
+        {
+            ZSerialize.idMap.TryAdd(ZUID, this);
+            ZSerialize.idMap.TryAdd(GOZUID, gameObject);
         }
 
         // public virtual void OnDestroy()

@@ -171,6 +171,13 @@ namespace ZSerializer
         private static void OnSceneLoad()
         {
             idMap.Clear();
+            
+            //fill idMap
+            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
+            {
+                var zs = monoBehaviour as IZSerializable;
+                zs!.AddZUIDsToIDMap();
+            }
 
             UpdateCurrentScene();
         }
@@ -344,9 +351,8 @@ namespace ZSerializer
             (ZSerializer as ZSerializer.Internal.ZSerializer).RestoreValues(_component);
         }
 
-        static async Task OnPreSave(List<PersistentMonoBehaviour> persistentMonoBehavioursInScene)
+        static void OnPreSave(List<PersistentMonoBehaviour> persistentMonoBehavioursInScene)
         {
-            await UpdateIDMap(persistentMonoBehavioursInScene);
             foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
             {
                 persistentMonoBehaviour.OnPreSave();
@@ -363,20 +369,19 @@ namespace ZSerializer
             }
         }
 
-        static async Task UpdateIDMap([NotNull] List<PersistentMonoBehaviour> persistentMonoBehavioursInScene)
+        static async Task UpdateIDMap(List<IZSerializable> serializablesInScene)
         {
             int currentComponentCount = 0;
 
-            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+            foreach (var serializable in serializablesInScene)
             {
-                if (string.IsNullOrEmpty(persistentMonoBehaviour.ZUID) ||
-                    string.IsNullOrEmpty(persistentMonoBehaviour.GOZUID))
+                if (string.IsNullOrEmpty(serializable.ZUID) ||
+                    string.IsNullOrEmpty(serializable.GOZUID))
                 {
-                    persistentMonoBehaviour.GenerateRuntimeZUIDs();
+                    serializable.GenerateRuntimeZUIDs();
                 }
 
-                idMap.TryAdd(persistentMonoBehaviour.ZUID, persistentMonoBehaviour);
-                idMap.TryAdd(persistentMonoBehaviour.GOZUID, persistentMonoBehaviour.gameObject);
+                serializable.AddZUIDsToIDMap();
 
                 currentComponentCount++;
                 if (ZSerializerSettings.Instance.serializationType == SerializationType.Async &&
@@ -391,8 +396,8 @@ namespace ZSerializer
         static List<int> GetIDListFromGroupID(int groupID)
         {
             if (groupID == -1)
-                return Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerialize)
-                    .Select(o => ((IZSerialize)o).GroupID).Distinct().ToList();
+                return Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerializable)
+                    .Select(o => ((IZSerializable)o).GroupID).Distinct().ToList();
             return new List<int>() { groupID };
         }
 
@@ -451,7 +456,7 @@ namespace ZSerializer
 
         #region Save
 
-        static bool ShouldBeSerialized(IZSerialize serializable)
+        static bool ShouldBeSerialized(IZSerializable serializable)
         {
             return serializable != null && (serializable.GroupID == _currentGroupID || _currentGroupID == -1) &&
                    serializable.IsOn && (serializable as MonoBehaviour).gameObject.activeInHierarchy &&
@@ -543,17 +548,17 @@ namespace ZSerializer
         #region Load
 
         //Loads a new GameObject with the exact same properties as the one which was destroyed
-        static void LoadDestroyedGameObject(out GameObject gameObject, Type ZSaverType,
+        static void LoadDestroyedGameObject(out GameObject gameObject, 
             object zSerializerObject)
         {
-            GameObjectData gameObjectData =
-                (GameObjectData)ZSaverType.GetField("gameObjectData").GetValue(zSerializerObject);
+            Log("Found destroyed GameObject, Regenerating.");
+            GameObjectData gameObjectData = (zSerializerObject as PersistentGameObjectZSerializer)!.gameObjectData;
 
             gameObject = gameObjectData.MakePerfectlyValidGameObject();
         }
 
         //Loads a component no matter the type
-        static async Task<object[]> LoadObjectsDynamically(Type ZSaverType, Type componentType, int objectIndex,
+        static async Task<object[]> LoadObjectsDynamically(Type componentType, int objectIndex,
             object[] zSerializerObjects, int tupleIndex, ZSerializationType jsonFillType)
         {
             var zSerializerObject = zSerializerObjects[objectIndex];
@@ -574,16 +579,16 @@ namespace ZSerializer
                     return zSerializerObjects;
                 }
 
-                LoadDestroyedGameObject(out gameObject, ZSaverType, zSerializerObject);
+                LoadDestroyedGameObject(out gameObject, zSerializerObject);
                 idMap[gozuid] = gameObject;
             }
 
             if (!componentPresentInGameObject)
             {
-                if (typeof(IZSerialize).IsAssignableFrom(componentType))
+                if (typeof(IZSerializable).IsAssignableFrom(componentType))
                 {
                     component = gameObject.AddComponent(componentType);
-                    IZSerialize serializer = component as IZSerialize;
+                    IZSerializable serializer = component as IZSerializable;
                     idMap[zuid] = component;
                     serializer.ZUID = zuid;
                     serializer.GOZUID = gozuid;
@@ -662,7 +667,7 @@ namespace ZSerializer
 
                 for (var i = 0; i < zSerializerObjects.Length; i++)
                 {
-                    zSerializerObjects = await LoadObjectsDynamically(currentTuple.Item1, realType, i,
+                    zSerializerObjects = await LoadObjectsDynamically(realType, i,
                         zSerializerObjects, tupleIndex, zSerializationType);
                     currentComponentCount++;
                     if (ZSerializerSettings.Instance.serializationType == SerializationType.Async &&
@@ -878,8 +883,12 @@ namespace ZSerializer
 
                     var persistentMonoBehavioursInScene = GetPersistentMonoBehavioursInScene(zSerializationType);
                     var persistentGameObjectsInScene = GetPersistentGameObjectsInScene(zSerializationType);
-
-                    await OnPreSave(persistentMonoBehavioursInScene);
+                    
+                    List<IZSerializable> serializables = new List<IZSerializable>(persistentGameObjectsInScene);
+                    serializables.AddRange(persistentMonoBehavioursInScene);
+                    
+                    await UpdateIDMap(serializables);
+                    OnPreSave(persistentMonoBehavioursInScene);
 
                     LogCurrentSave(zSerializationType);
                     unityComponentAssemblies.Clear();
@@ -924,8 +933,12 @@ namespace ZSerializer
                 LogLevelLoading(zSerializationType);
 
                 var persistentMonoBehavioursInScene = GetPersistentMonoBehavioursInScene(zSerializationType);
-
-                await UpdateIDMap(persistentMonoBehavioursInScene.ToList());
+                var persistentGameObjectsInScene = GetPersistentGameObjectsInScene(zSerializationType);
+                
+                var serializableList = new List<IZSerializable>(persistentMonoBehavioursInScene);
+                serializableList.AddRange(persistentGameObjectsInScene);
+                
+                await UpdateIDMap(serializableList);
                 foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
                 {
                     persistentMonoBehaviour.OnPreLoad();
@@ -1381,9 +1394,9 @@ namespace ZSerializer
         {
             switch (obj)
             {
-                case IZSerialize serializable: return serializable.ZUID;
+                case IZSerializable serializable: return serializable.ZUID;
                 case GameObject gameObject:
-                    return (gameObject.GetComponents<MonoBehaviour>().First(m => m is IZSerialize) as IZSerialize)
+                    return (gameObject.GetComponents<MonoBehaviour>().First(m => m is IZSerializable) as IZSerializable)
                         .GOZUID;
                 case Component component:
                     return component.GetComponent<PersistentGameObject>()?.ComponentZuidMap[component];

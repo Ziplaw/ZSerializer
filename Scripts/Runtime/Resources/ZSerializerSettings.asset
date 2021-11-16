@@ -18,14 +18,13 @@ MonoBehaviour:
   selectedSaveFile: 0
   encryptData: 0
   advancedSerialization: 0
-  serializationType: 1
+  serializationType: 0
   maxBatchCount: 50
   sceneGroups:
-  - name: Scene Group 1
+  - name: Home
     scenePaths:
-    - Scenes/SceneTransition/StressTestTransitioned 0
-    - Scenes/SceneTransition/StressTestTransitioned 1
-    - Scenes/SceneTransition/StressTestTransitioned 2
+    - ZSerializer/Samples/House/Scenes/Bedroom
+    - ZSerializer/Samples/House/Scenes/Kitchen
   componentBlackList:
   - typeFullName: UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ZSerializer
 {
-    internal interface IZSerialize
+    internal interface IZSerializable
     {
         public int GroupID { get; set; }
         public bool AutoSync { get; }
@@ -13,5 +13,6 @@ namespace ZSerializer
         public bool IsOn { get; set; }
         void GenerateRuntimeZUIDs();
         void GenerateEditorZUIDs(bool forceGenerateGameObject);
+        void AddZUIDsToIDMap();
     }
 }

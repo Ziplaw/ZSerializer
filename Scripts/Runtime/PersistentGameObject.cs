@@ -41,7 +41,7 @@ namespace ZSerializer
     }
 
     [AddComponentMenu("ZSerializer/Persistent GameObject"), DisallowMultipleComponent]
-    public sealed class PersistentGameObject : MonoBehaviour, IZSerialize
+    public sealed class PersistentGameObject : MonoBehaviour, IZSerializable
     {
         [NonZSerialized] public bool showSettings;
         [SerializeField, HideInInspector] private int groupID;
@@ -91,7 +91,7 @@ namespace ZSerializer
             var czlist = new List<SerializedComponent>();
 
             foreach (var component in GetComponents<Component>().Where(c =>
-                !(c is IZSerialize) && ZSerialize.UnitySerializableTypes.Contains(c.GetType())))
+                !(c is IZSerializable) && ZSerialize.UnitySerializableTypes.Contains(c.GetType())))
             {
                 var thisComponentZuid =
                     serializedComponents.FirstOrDefault(cz => cz.component == component);
@@ -147,26 +147,29 @@ namespace ZSerializer
 
             serializedComponents.ForEach(sc => sc.zuid = GUID.Generate().ToString());
             if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<MonoBehaviour>().Where(c => c != this && c is IZSerialize))
+                foreach (var monoBehaviour in GetComponents<MonoBehaviour>().Where(c => c != this && c is IZSerializable))
                 {
-                    (monoBehaviour as IZSerialize).GenerateEditorZUIDs(false);
+                    (monoBehaviour as IZSerializable).GenerateEditorZUIDs(false);
                 }
             
             
 #endif
         }
 
-        private void Start()
+        public void AddZUIDsToIDMap()
         {
-            // name = gameObject.GetInstanceID().ToString();
-            GenerateRuntimeZUIDs();
-
             ZSerialize.idMap.TryAdd(ZUID, this);
             ZSerialize.idMap.TryAdd(GOZUID, gameObject);
-            foreach (var keyValuePair in ComponentZuidMap)
+            foreach (var serializedComponent in serializedComponents)
             {
-                ZSerialize.idMap.TryAdd(keyValuePair.Value, keyValuePair.Key);
+                ZSerialize.idMap.TryAdd(serializedComponent.zuid, serializedComponent.component);
             }
+        }
+
+        private void Start()
+        {
+            GenerateRuntimeZUIDs();
+            AddZUIDsToIDMap();
         }
 
         public T AddComponent<T>(PersistentType persistentType = PersistentType.Everything) where T : Component
