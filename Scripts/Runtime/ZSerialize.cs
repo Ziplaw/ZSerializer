@@ -40,6 +40,7 @@ namespace ZSerializer
         {
             0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
         };
+
         public static Dictionary<string, Object> idMap = new Dictionary<string, Object>();
         public static Dictionary<string, SceneGroup> sceneToLoadingSceneMap = new Dictionary<string, SceneGroup>();
 
@@ -155,6 +156,8 @@ namespace ZSerializer
             SceneManager.sceneUnloaded += scene => { OnSceneUnload(); };
 
             SceneManager.sceneLoaded += (scene, mode) => { OnSceneLoad(); };
+            
+            SceneManager.activeSceneChanged += (oldScene, newScene) => { UpdateCurrentScene(); };
 
             Application.wantsToQuit += () =>
             {
@@ -168,14 +171,13 @@ namespace ZSerializer
         private static void OnSceneLoad()
         {
             idMap.Clear();
-            
-            currentSceneName = SetCurrentScene();
-            currentScenePath = SetCurrentScenePath();
+
+            UpdateCurrentScene();
         }
 
         private static void OnSceneUnload()
         {
-            //Scene unloading stuff
+            UpdateCurrentScene();
         }
 
         #endregion
@@ -247,12 +249,14 @@ namespace ZSerializer
         {
             currentSceneName = SetCurrentScene();
             currentScenePath = SetCurrentScenePath();
+            Log($"New scene set to {currentScenePath}");
         }
 
         static string SetCurrentScene()
         {
             return SceneManager.GetActiveScene().name;
         }
+
         static string SetCurrentScenePath()
         {
             return SceneManager.GetActiveScene().path.ToEditorBuildSettingsPath();
@@ -420,7 +424,7 @@ namespace ZSerializer
                 }
             });
         }
-        
+
         //Load CurrentScenePath
         public static string GetLastSavedScenePath(string sceneGroupName)
         {
@@ -442,9 +446,7 @@ namespace ZSerializer
 
             return File.ReadAllText(path);
         }
-        
-        
-        
+
         #endregion
 
         #region Save
@@ -715,7 +717,7 @@ namespace ZSerializer
             Level,
             Scene,
         };
-        
+
         static List<PersistentMonoBehaviour> GetPersistentMonoBehavioursInScene(ZSerializationType zSerializationType)
         {
             switch (zSerializationType)
@@ -793,7 +795,7 @@ namespace ZSerializer
                 default: throw new SerializationException("Serialization Type not implemented");
             }
         }
-        
+
         static async Task FillTemporaryJsonTuples(ZSerializationType zSerializationType)
         {
             await RunTask(() =>
@@ -802,7 +804,7 @@ namespace ZSerializer
                     tempTuples = new (Type, string)[ZSerializerSettings.Instance.saveGroups
                         .Where(s => !string.IsNullOrEmpty(s))
                         .Max(sg => ZSerializerSettings.Instance.saveGroups.IndexOf(sg)) + 1][];
-                
+
                 switch (zSerializationType)
                 {
                     case ZSerializationType.Scene:
@@ -814,7 +816,7 @@ namespace ZSerializer
                 }
             });
         }
-        
+
         static (Type, string)[] GetAssemblyTuple(ZSerializationType zSerializationType)
         {
             switch (zSerializationType)
@@ -854,11 +856,11 @@ namespace ZSerializer
                     break;
             }
         }
-        
+
         #endregion
-        
+
         #region Internals
-        
+
         private async static Task SaveInternal(ZSerializationType zSerializationType)
         {
             try
@@ -909,7 +911,7 @@ namespace ZSerializer
                 throw e;
             }
         }
-        
+
         private static async Task LoadInternal(ZSerializationType zSerializationType)
         {
             GetSaveFiles(zSerializationType);
@@ -959,11 +961,11 @@ namespace ZSerializer
             _currentParent = null;
             _currentGroupID = -1;
         }
-        
+
         #endregion
 
         #region Externals
-        
+
         /// <summary>
         /// Serialize all Persistent components and Persistent GameObjects that are children of the given transform, onto a specified save file.
         /// </summary>
@@ -989,7 +991,7 @@ namespace ZSerializer
             await SerializeCurrentScenePath();
             await SaveInternal(ZSerializationType.Scene);
         }
-        
+
         /// <summary>
         /// Load all Persistent components and GameObjects from the current scene that have been previously serialized in the given level save file
         /// </summary>
@@ -1034,21 +1036,23 @@ namespace ZSerializer
                 throw e;
             }
         }
-        
+
         /// <summary>
         /// Load the provided Scene Group's last saved scene.
         /// </summary>
         /// <param name="sceneGroupName">The name of the Scene Group you want to load.</param>
+        /// <param name="lastSavedScenePath">The asset path to the last saved scene of this scene group</param>
         /// <param name="mode">The LoadSceneMode in which the scene will get loaded.</param>
         /// <returns></returns>
-        public static AsyncOperation LoadSceneGroup(string sceneGroupName, LoadSceneMode mode = LoadSceneMode.Single)
+        public static AsyncOperation LoadSceneGroup(string sceneGroupName, out string lastSavedScenePath,
+            LoadSceneMode mode = LoadSceneMode.Single)
         {
-            var path = GetLastSavedScenePath(sceneGroupName);
-            return SceneManager.LoadSceneAsync(path, mode);
+            lastSavedScenePath = GetLastSavedScenePath(sceneGroupName).ToAssetPath();
+            return SceneManager.LoadSceneAsync(lastSavedScenePath, mode);
         }
-        
+
         #endregion
-        
+
         #region JSON Formatting
 
 //Saves an array of objects to a file
@@ -1187,7 +1191,7 @@ namespace ZSerializer
             return String.Join("",
                 tuples.Select(t => "{" + t.Item1.AssemblyQualifiedName + "}" + t.Item2 + "\n"));
         }
-        
+
         static string GetSceneGroupPath(string scenePath)
         {
             return sceneToLoadingSceneMap.TryGetValue(scenePath, out var sceneGroup) ? sceneGroup.name : "no-group";
@@ -1203,11 +1207,11 @@ namespace ZSerializer
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             return path;
         }
-        
+
         static string GetCurrentSceneGroupPath()
         {
             string sceneGroupName = GetSceneGroupPath(currentScenePath);
-            
+
             var path = Path.Combine(
                 persistentDataPath,
                 "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile,
@@ -1231,7 +1235,6 @@ namespace ZSerializer
             return path;
         }
 
-        
 
 //Gets complete filepath for a specific filename
         static string GetFilePath(string fileName)
@@ -1387,15 +1390,25 @@ namespace ZSerializer
                 default: return null;
             }
         }
-        
+
         public static string ToEditorBuildSettingsPath(this string path)
         {
             return path.Substring(7, path.Length - 13);
         }
-        
+
         public static string ToAssetPath(this string path)
         {
             return $"Assets/{path}.unity";
+        }
+
+        public static async Task<AsyncOperation> WaitUntilDone(this AsyncOperation op)
+        {
+            while (!op.isDone)
+            {
+                await Task.Yield();
+            }
+
+            return op;
         }
 
         internal static void TryAdd<TK, TV>(this Dictionary<TK, TV> dictionary, TK key, TV value)
