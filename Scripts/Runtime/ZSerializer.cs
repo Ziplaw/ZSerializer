@@ -17,6 +17,6 @@ namespace ZSerializer.Internal
             this.GOZUID = GOZUID;
         }
 
-        public abstract void RestoreValues(Component component1);
+        public abstract void RestoreValues(Component component);
     }
 }

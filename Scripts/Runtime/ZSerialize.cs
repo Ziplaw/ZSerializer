@@ -344,12 +344,6 @@ namespace ZSerializer
             if (ZSerializerSettings.Instance.serializationType == SerializationType.Async) await Task.Yield();
         }
 
-        //Restore the values of a given component from a given ZSerializer
-        private static void RestoreValues(Component _component, object ZSerializer)
-        {
-            (ZSerializer as ZSerializer.Internal.ZSerializer).RestoreValues(_component);
-        }
-
         static void OnPreSave(List<PersistentMonoBehaviour> persistentMonoBehavioursInScene)
         {
             foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
@@ -551,9 +545,9 @@ namespace ZSerializer
             object zSerializerObject)
         {
             Log("Found destroyed GameObject, Regenerating.");
-            GameObjectData gameObjectData = (zSerializerObject as PersistentGameObjectZSerializer)!.gameObjectData;
+            // GameObjectData gameObjectData = (zSerializerObject as PersistentGameObjectZSerializer)!.gameObjectData;
 
-            gameObject = gameObjectData.MakePerfectlyValidGameObject();
+            gameObject = new GameObject();
         }
 
         //Loads a component no matter the type
@@ -578,7 +572,7 @@ namespace ZSerializer
                     return zSerializerObjects;
                 }
 
-                LoadDestroyedGameObject(out gameObject, zSerializerObject);
+                gameObject = new GameObject(); //LoadDestroyedGameObject(out gameObject, zSerializerObject);
                 idMap[gozuid] = gameObject;
             }
 
@@ -596,33 +590,22 @@ namespace ZSerializer
 
             if (componentType == typeof(PersistentGameObject))
             {
-                RestoreValues(component, zSerializerObject);
-
-                PersistentGameObject pg = component as PersistentGameObject;
-                foreach (var pgSerializedComponent in new List<SerializedComponent>(pg.serializedComponents))
-                {
-                    if (pgSerializedComponent.component == null &&
-                        (pgSerializedComponent.persistenceType != PersistentType.None ||
-                         !ZSerializerSettings.Instance.advancedSerialization))
-                    {
-                        var addedComponent = pg.gameObject.AddComponent(pgSerializedComponent.Type);
-                        pg.serializedComponents[pg.serializedComponents.IndexOf(pgSerializedComponent)].component =
-                            addedComponent;
-                        idMap[pgSerializedComponent.zuid] = addedComponent;
-                    }
-                }
+                // RestoreValues(component, zSerializerObject);
+                //
+                // PersistentGameObject pg = component as PersistentGameObject;
+                //
             }
 
             if (component is PersistentMonoBehaviour persistentMonoBehaviour)
                 persistentMonoBehaviour.IsOn = true;
 
-            if (!gameObjectPresent)
-            {
-                await FillTemporaryJsonTuples(jsonFillType);
-                var fromJson = fromJsonMethod.MakeGenericMethod(tempTuples[_currentGroupID][tupleIndex].Item1);
-                zSerializerObjects =
-                    (object[])await fromJson.InvokeAsync(null, tempTuples[_currentGroupID][tupleIndex].Item2);
-            }
+            // if (!gameObjectPresent)
+            // {
+            //     await FillTemporaryJsonTuples(jsonFillType);
+            //     var fromJson = fromJsonMethod.MakeGenericMethod(tempTuples[_currentGroupID][tupleIndex].Item1);
+            //     zSerializerObjects =
+            //         (object[])await fromJson.InvokeAsync(null, tempTuples[_currentGroupID][tupleIndex].Item2);
+            // }
 
             return zSerializerObjects;
         }
@@ -682,8 +665,7 @@ namespace ZSerializer
 //Loads all references and fields from already loaded objects, this is done like this to avoid data loss
         static async Task LoadReferences()
         {
-            foreach (var tuple in tempTuples[_currentGroupID]
-                .Where(t => t.Item1 != typeof(PersistentGameObjectZSerializer)))
+            foreach (var tuple in tempTuples[_currentGroupID])
             {
                 Type zSerializerType = tuple.Item1;
                 // Type realType = GetTypeFromZSerializerType(zSerializerType);
@@ -699,7 +681,7 @@ namespace ZSerializer
                     var componentInGameObject =
                         idMap[(jsonObjects[i] as Internal.ZSerializer).ZUID] as Component;
 
-                    RestoreValues(componentInGameObject, jsonObjects[i]);
+                    (jsonObjects[i] as ZSerializer.Internal.ZSerializer).RestoreValues(componentInGameObject);
 
                     componentCount++;
                     if (ZSerializerSettings.Instance.serializationType == SerializationType.Async &&

@@ -25,6 +25,11 @@ MonoBehaviour:
     scenePaths:
     - ZSerializer/Samples/House/Scenes/Bedroom
     - ZSerializer/Samples/House/Scenes/Kitchen
+  - name: Scene Group 1
+    scenePaths:
+    - Scenes/SceneTransition/StressTestTransitioned 0
+    - Scenes/SceneTransition/StressTestTransitioned 1
+    - Scenes/SceneTransition/StressTestTransitioned 2
   componentBlackList:
   - typeFullName: UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null

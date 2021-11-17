@@ -56,19 +56,20 @@ namespace ZSerializer
             persistentComponent.serializedComponents = serializedComponents;
 
             var gameObject = component.gameObject;
-            gameObject.hideFlags = gameObjectData.hideFlags;
-            gameObject.name = gameObjectData.name;
-            gameObject.SetActive(gameObjectData.active);
-            gameObject.isStatic = gameObjectData.isStatic;
-            gameObject.layer = gameObjectData.layer;
-            gameObject.tag = gameObjectData.tag;
-
-            gameObject.transform.position = gameObjectData.position;
-            gameObject.transform.rotation = gameObjectData.rotation;
-            gameObject.transform.localScale = gameObjectData.size;
-
-            gameObject.transform.SetParent(gameObjectData.parent != null ? gameObjectData.parent.transform : null);
-            gameObject.transform.SetSiblingIndex(gameObjectData.loadingOrder.y);
+            gameObject.ApplyValues(gameObjectData);
+            
+            foreach (var pgSerializedComponent in new List<SerializedComponent>(serializedComponents))
+            {
+                if (pgSerializedComponent.component == null &&
+                    (pgSerializedComponent.persistenceType != PersistentType.None ||
+                     !ZSerializerSettings.Instance.advancedSerialization))
+                {
+                    var addedComponent = gameObject.AddComponent(pgSerializedComponent.Type);
+                    serializedComponents[serializedComponents.IndexOf(pgSerializedComponent)].component =
+                        addedComponent;
+                    ZSerialize.idMap[pgSerializedComponent.zuid] = addedComponent;
+                }
+            }
         }
     }
 }
