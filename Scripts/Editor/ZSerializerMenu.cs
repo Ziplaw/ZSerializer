@@ -155,7 +155,7 @@ namespace ZSerializer.Editor
                                     var classInstance = classes[i];
                                     GUILayout.Space(-15);
                                     using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
-                                        GUILayout.Height(32),GUILayout.MaxWidth(464)))
+                                        GUILayout.Height(32),GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth-20)))
                                     {
                                         string color = classInstance.state == ClassState.Valid
                                             ? ZSerializerSettings.Instance
@@ -234,7 +234,7 @@ namespace ZSerializer.Editor
                             {
                                 GUILayout.Space(-15);
                                 using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
-                                    GUILayout.Height(32),GUILayout.MaxWidth(464)))
+                                    GUILayout.Height(32),GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth-20)))
                                 {
                                     EditorGUILayout.LabelField("ZSerialize All",
                                         new GUIStyle(styler.header)

@@ -256,7 +256,6 @@ namespace ZSerializer
         {
             currentSceneName = SetCurrentScene();
             currentScenePath = SetCurrentScenePath();
-            Log($"New scene set to {currentScenePath}");
         }
 
         static string SetCurrentScene()
