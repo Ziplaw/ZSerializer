@@ -92,7 +92,7 @@ namespace ZSerializer
 
         internal static string GetRuntimeSafeZUID()
         {
-            return (Random.value * 100000000).ToString();
+            return ((int)(Random.value * 10000000)).ToString();
         }
 
         static int[] GetIDList()
@@ -156,7 +156,7 @@ namespace ZSerializer
             SceneManager.sceneUnloaded += scene => { OnSceneUnload(); };
 
             SceneManager.sceneLoaded += (scene, mode) => { OnSceneLoad(); };
-            
+
             SceneManager.activeSceneChanged += (oldScene, newScene) => { UpdateCurrentScene(); };
 
             Application.wantsToQuit += () =>
@@ -171,7 +171,7 @@ namespace ZSerializer
         private static void OnSceneLoad()
         {
             idMap.Clear();
-            
+
             //fill idMap
             foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
             {
@@ -191,27 +191,32 @@ namespace ZSerializer
 
         #region Exposed Utilities
 
+        /*
         #region Instantiate Overloads
+
         public static T Instantiate<T>(T original) where T : Object
         {
             return Instantiate(original, Vector3.zero, Quaternion.identity, null);
         }
-        
+
         public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation) where T : Object
         {
             return Instantiate(original, position, rotation, null);
         }
-        
-        public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent) where T : Object
+
+        public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent)
+            where T : Object
         {
             var obj = Object.Instantiate(original, position, rotation, parent);
-            ((obj as GameObject).GetComponents<MonoBehaviour>().First(m => m is IZSerializable) as IZSerializable).GenerateRuntimeZUIDs(true);
+            ((obj as GameObject).GetComponents<MonoBehaviour>().First(m => m is IZSerializable) as IZSerializable)
+                .GenerateRuntimeZUIDs(true);
             return obj;
         }
-        
-        
+
         #endregion
         
+        */
+
         /// <summary>
         /// Gets a Scene's saved level names 
         /// </summary>
@@ -860,10 +865,10 @@ namespace ZSerializer
 
                     var persistentMonoBehavioursInScene = GetPersistentMonoBehavioursInScene(zSerializationType);
                     var persistentGameObjectsInScene = GetPersistentGameObjectsInScene(zSerializationType);
-                    
+
                     List<IZSerializable> serializables = new List<IZSerializable>(persistentGameObjectsInScene);
                     serializables.AddRange(persistentMonoBehavioursInScene);
-                    
+
                     await UpdateIDMap(serializables);
                     OnPreSave(persistentMonoBehavioursInScene);
 
@@ -911,10 +916,10 @@ namespace ZSerializer
 
                 var persistentMonoBehavioursInScene = GetPersistentMonoBehavioursInScene(zSerializationType);
                 var persistentGameObjectsInScene = GetPersistentGameObjectsInScene(zSerializationType);
-                
+
                 var serializableList = new List<IZSerializable>(persistentMonoBehavioursInScene);
                 serializableList.AddRange(persistentGameObjectsInScene);
-                
+
                 await UpdateIDMap(serializableList);
                 foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
                 {
@@ -964,11 +969,18 @@ namespace ZSerializer
         /// <param name="groupID">The Save Group of objects that will be saved for this specific level</param>
         public static async Task SaveLevel(string fileName, Transform parent, int groupID = -1)
         {
-            _currentLevelName = fileName;
-            _currentParent = parent;
-            _currentGroupID = groupID;
+            try
+            {
+                _currentLevelName = fileName;
+                _currentParent = parent;
+                _currentGroupID = groupID;
 
-            await SaveInternal(ZSerializationType.Level);
+                await SaveInternal(ZSerializationType.Level);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         /// <summary>
@@ -977,9 +989,16 @@ namespace ZSerializer
         /// <param name="groupID">The ID for the objects you want to save</param>
         public static async Task SaveScene(int groupID = -1)
         {
-            _currentGroupID = groupID;
-            await SerializeCurrentScenePath();
-            await SaveInternal(ZSerializationType.Scene);
+            try
+            {
+                _currentGroupID = groupID;
+                await SerializeCurrentScenePath();
+                await SaveInternal(ZSerializationType.Scene);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         /// <summary>
@@ -1373,7 +1392,8 @@ namespace ZSerializer
             {
                 case IZSerializable serializable: return serializable.ZUID;
                 case GameObject gameObject:
-                    return (gameObject.GetComponents<MonoBehaviour>().First(m => m is IZSerializable) as IZSerializable)
+                    return (gameObject.GetComponents<MonoBehaviour>().First(m => m is IZSerializable) as
+                            IZSerializable)
                         .GOZUID;
                 case Component component:
                     return component.GetComponent<PersistentGameObject>()?.ComponentZuidMap[component];
@@ -1401,12 +1421,32 @@ namespace ZSerializer
             return op;
         }
 
-        internal static void TryAdd(this Dictionary<string, Object> dictionary, string key, Object value)
+        internal static void TryAdd(this Dictionary<string, Object> dictionary,
+            string key, Object value)
         {
-            if (!dictionary.TryGetValue(key, out _))
+            while (dictionary.TryGetValue(key, out var _value))
             {
-                dictionary[key] = value;
+                if (_value == value) break;
+                switch (value)
+                {
+                    case GameObject gameObject:
+                        var zs =
+                            gameObject.GetComponentsInChildren<MonoBehaviour>()
+                                .First(m => m is IZSerializable) as IZSerializable;
+                        zs.GenerateRuntimeZUIDs(true);
+                        key = zs.GOZUID;
+                        break;
+                    case IZSerializable serializable:
+                        serializable.GenerateRuntimeZUIDs(true);
+                        key = serializable.ZUID;
+                        break;
+                    default:
+                        throw new SerializationException(
+                            "Found duplicated ZUIDs, if these are caused by Instantiation, use ZSerialize.Instantiate instead.");
+                }
             }
+
+            dictionary[key] = value;
         }
 
         public static async Task<object> InvokeAsync(this MethodInfo @this, object obj, params object[] parameters)

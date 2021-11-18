@@ -1140,9 +1140,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                             serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
                                                              go != monoBehaviour.gameObject);
 
-                            ZSerialize.idMap.TryAdd(serializable.ZUID, monoBehaviour);
-                            ZSerialize.idMap.TryAdd(serializable.GOZUID, monoBehaviour.gameObject);
-
                             if (serializable is PersistentGameObject pg)
                             {
                                 foreach (var pgSerializedComponent in pg.serializedComponents)
