@@ -1148,8 +1148,18 @@ namespace ZSerializer
 
         static async Task RunTask(Action action)
         {
-            if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) action();
-            else await Task.Run(action);
+            try
+            {
+                if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) action();
+                else await Task.Run(action).ContinueWith(t =>
+                {
+                    if (t.IsFaulted) throw t.Exception!;
+                });
+            }
+            catch (Exception up)
+            {
+                throw up;
+            }
         }
 
         static async Task<T> RunTask<T>(Func<T> action)
