@@ -119,12 +119,18 @@ namespace ZSerializer
             GenerateEditorZUIDs(false);
         }
 
-        public void GenerateRuntimeZUIDs()
+        public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
-            if (string.IsNullOrEmpty(ZUID)) ZUID = ZSerialize.GetRuntimeSafeZUID();
+            ZUID = ZSerialize.GetRuntimeSafeZUID();
             var pg = GetComponent<PersistentGameObject>();
-            if (string.IsNullOrEmpty(GOZUID))
-                GOZUID = pg ? pg.GOZUID : ZSerialize.GetRuntimeSafeZUID();
+            GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID() : pg && !string.IsNullOrEmpty(pg.GOZUID) ? pg.GOZUID : ZSerialize.GetRuntimeSafeZUID();
+
+
+            if (forceGenerateGameObject)
+                foreach (var monoBehaviour in GetComponents<MonoBehaviour>().Where(c => c != this && c is IZSerializable))
+                {
+                    (monoBehaviour as IZSerializable).GenerateRuntimeZUIDs(false);
+                }
         }
 
         public void GenerateEditorZUIDs(bool forceGenerateGameObject)

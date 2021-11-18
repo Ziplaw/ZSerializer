@@ -191,6 +191,27 @@ namespace ZSerializer
 
         #region Exposed Utilities
 
+        #region Instantiate Overloads
+        public static T Instantiate<T>(T original) where T : Object
+        {
+            return Instantiate(original, Vector3.zero, Quaternion.identity, null);
+        }
+        
+        public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation) where T : Object
+        {
+            return Instantiate(original, position, rotation, null);
+        }
+        
+        public static T Instantiate<T>(T original, Vector3 position, Quaternion rotation, Transform parent) where T : Object
+        {
+            var obj = Object.Instantiate(original, position, rotation, parent);
+            ((obj as GameObject).GetComponents<MonoBehaviour>().First(m => m is IZSerializable) as IZSerializable).GenerateRuntimeZUIDs(true);
+            return obj;
+        }
+        
+        
+        #endregion
+        
         /// <summary>
         /// Gets a Scene's saved level names 
         /// </summary>
@@ -252,7 +273,7 @@ namespace ZSerializer
 
         #endregion
 
-        public static void UpdateCurrentScene()
+        private static void UpdateCurrentScene()
         {
             currentSceneName = SetCurrentScene();
             currentScenePath = SetCurrentScenePath();
@@ -371,7 +392,7 @@ namespace ZSerializer
                 if (string.IsNullOrEmpty(serializable.ZUID) ||
                     string.IsNullOrEmpty(serializable.GOZUID))
                 {
-                    serializable.GenerateRuntimeZUIDs();
+                    serializable.GenerateRuntimeZUIDs(false);
                 }
 
                 serializable.AddZUIDsToIDMap();
@@ -540,19 +561,9 @@ namespace ZSerializer
 
         #region Load
 
-        //Loads a new GameObject with the exact same properties as the one which was destroyed
-        static void LoadDestroyedGameObject(out GameObject gameObject, 
-            object zSerializerObject)
-        {
-            Log("Found destroyed GameObject, Regenerating.");
-            // GameObjectData gameObjectData = (zSerializerObject as PersistentGameObjectZSerializer)!.gameObjectData;
-
-            gameObject = new GameObject();
-        }
-
         //Loads a component no matter the type
-        static async Task<object[]> LoadObjectsDynamically(Type componentType, int objectIndex,
-            object[] zSerializerObjects, int tupleIndex, ZSerializationType jsonFillType)
+        static object[] LoadObjectsDynamically(Type componentType, int objectIndex,
+            object[] zSerializerObjects)
         {
             var zSerializerObject = zSerializerObjects[objectIndex];
             string zuid = (zSerializerObject as Internal.ZSerializer)!.ZUID;
@@ -588,24 +599,9 @@ namespace ZSerializer
                 }
             }
 
-            if (componentType == typeof(PersistentGameObject))
-            {
-                // RestoreValues(component, zSerializerObject);
-                //
-                // PersistentGameObject pg = component as PersistentGameObject;
-                //
-            }
-
             if (component is PersistentMonoBehaviour persistentMonoBehaviour)
                 persistentMonoBehaviour.IsOn = true;
 
-            // if (!gameObjectPresent)
-            // {
-            //     await FillTemporaryJsonTuples(jsonFillType);
-            //     var fromJson = fromJsonMethod.MakeGenericMethod(tempTuples[_currentGroupID][tupleIndex].Item1);
-            //     zSerializerObjects =
-            //         (object[])await fromJson.InvokeAsync(null, tempTuples[_currentGroupID][tupleIndex].Item2);
-            // }
 
             return zSerializerObjects;
         }
@@ -649,8 +645,8 @@ namespace ZSerializer
 
                 for (var i = 0; i < zSerializerObjects.Length; i++)
                 {
-                    zSerializerObjects = await LoadObjectsDynamically(realType, i,
-                        zSerializerObjects, tupleIndex, zSerializationType);
+                    zSerializerObjects = LoadObjectsDynamically(realType, i,
+                        zSerializerObjects);
                     currentComponentCount++;
                     if (ZSerializerSettings.Instance.serializationType == SerializationType.Async &&
                         currentComponentCount >= ZSerializerSettings.Instance.maxBatchCount)
@@ -1405,9 +1401,12 @@ namespace ZSerializer
             return op;
         }
 
-        internal static void TryAdd<TK, TV>(this Dictionary<TK, TV> dictionary, TK key, TV value)
+        internal static void TryAdd(this Dictionary<string, Object> dictionary, string key, Object value)
         {
-            if (!dictionary.TryGetValue(key, out _)) dictionary[key] = value;
+            if (!dictionary.TryGetValue(key, out _))
+            {
+                dictionary[key] = value;
+            }
         }
 
         public static async Task<object> InvokeAsync(this MethodInfo @this, object obj, params object[] parameters)

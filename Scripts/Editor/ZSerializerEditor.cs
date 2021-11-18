@@ -1125,35 +1125,39 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
         private static void OnHierarchyChanged()
         {
-            Dictionary<string, Object> map = new Dictionary<string, Object>();
-
-            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable)
-                .Reverse())
+            if (!Application.isPlaying)
             {
-                var serializable = monoBehaviour as IZSerializable;
-                if (!string.IsNullOrEmpty(serializable.ZUID))
+                Dictionary<string, Object> map = new Dictionary<string, Object>();
+
+                foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable)
+                    .Reverse())
                 {
-                    if (map.TryGetValue(serializable.ZUID, out _))
+                    var serializable = monoBehaviour as IZSerializable;
+                    if (!string.IsNullOrEmpty(serializable.ZUID))
                     {
-                        serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
-                                                         go != monoBehaviour.gameObject);
-
-                        ZSerialize.idMap.TryAdd(serializable.ZUID, monoBehaviour);
-                        ZSerialize.idMap.TryAdd(serializable.GOZUID, monoBehaviour.gameObject);
-
-                        if (serializable is PersistentGameObject pg)
+                        if (map.TryGetValue(serializable.ZUID, out _))
                         {
-                            foreach (var pgSerializedComponent in pg.serializedComponents)
+                            serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
+                                                             go != monoBehaviour.gameObject);
+
+                            ZSerialize.idMap.TryAdd(serializable.ZUID, monoBehaviour);
+                            ZSerialize.idMap.TryAdd(serializable.GOZUID, monoBehaviour.gameObject);
+
+                            if (serializable is PersistentGameObject pg)
                             {
-                                ZSerialize.idMap.TryAdd(pgSerializedComponent.zuid, pgSerializedComponent.component);
+                                foreach (var pgSerializedComponent in pg.serializedComponents)
+                                {
+                                    ZSerialize.idMap.TryAdd(pgSerializedComponent.zuid,
+                                        pgSerializedComponent.component);
+                                }
                             }
                         }
-                    }
 
-                    if (serializable as Object)
-                        map[serializable.ZUID] = serializable as Object;
-                    if (monoBehaviour && monoBehaviour.gameObject)
-                        map[serializable.GOZUID] = monoBehaviour.gameObject;
+                        if (serializable as Object)
+                            map[serializable.ZUID] = serializable as Object;
+                        if (monoBehaviour && monoBehaviour.gameObject)
+                            map[serializable.GOZUID] = monoBehaviour.gameObject;
+                    }
                 }
             }
         }

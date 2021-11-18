@@ -50,7 +50,8 @@ namespace ZSerializer
 
         public List<SerializedComponent> serializedComponents = new List<SerializedComponent>();
 
-        public Dictionary<Component, string> ComponentZuidMap => serializedComponents.ToDictionary(s => s.component, s => s.zuid);
+        public Dictionary<Component, string> ComponentZuidMap =>
+            serializedComponents.ToDictionary(s => s.component, s => s.zuid);
 
 
         public int GroupID
@@ -79,13 +80,6 @@ namespace ZSerializer
             set => throw new SerializationException("You can't change a PersistentGameObject's On/Off state");
         }
 
-#if UNITY_EDITOR
-        PersistentGameObject()
-        {
-            EditorApplication.hierarchyChanged -= ComponentListChanged;
-            EditorApplication.hierarchyChanged += ComponentListChanged;
-        }
-
         void GenerateComponentZUIDs()
         {
             var czlist = new List<SerializedComponent>();
@@ -99,10 +93,19 @@ namespace ZSerializer
                 if (thisComponentZuid != default) czlist.Add(thisComponentZuid);
                 else
                     czlist.Add(
-                        new SerializedComponent(component, GUID.Generate().ToString(), PersistentType.Everything));
+                        new SerializedComponent(component,
+                            Application.isPlaying ? ZSerialize.GetRuntimeSafeZUID() : GUID.Generate().ToString(),
+                            PersistentType.Everything));
             }
 
             serializedComponents = czlist;
+        }
+
+#if UNITY_EDITOR
+        PersistentGameObject()
+        {
+            EditorApplication.hierarchyChanged -= ComponentListChanged;
+            EditorApplication.hierarchyChanged += ComponentListChanged;
         }
 
         private static void ComponentListChanged()
@@ -127,11 +130,23 @@ namespace ZSerializer
 #endif
 
 
-        public void GenerateRuntimeZUIDs()
+        public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
-            if (string.IsNullOrEmpty(ZUID)) ZUID = ZSerialize.GetRuntimeSafeZUID();
-            var pm = GetComponent<PersistentMonoBehaviour>();
-            if (string.IsNullOrEmpty(GOZUID)) GOZUID = pm ? pm.GOZUID : ZSerialize.GetRuntimeSafeZUID();
+            ZUID = ZSerialize.GetRuntimeSafeZUID();
+            var pg = GetComponent<PersistentGameObject>();
+            GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID() :
+                pg && !string.IsNullOrEmpty(pg.GOZUID) ? pg.GOZUID : ZSerialize.GetRuntimeSafeZUID();
+            GenerateComponentZUIDs();
+            
+            serializedComponents.ForEach(sc => sc.zuid = ZSerialize.GetRuntimeSafeZUID());
+
+
+            if (forceGenerateGameObject)
+                foreach (var monoBehaviour in GetComponents<MonoBehaviour>()
+                    .Where(c => c != this && c is IZSerializable))
+                {
+                    (monoBehaviour as IZSerializable).GenerateRuntimeZUIDs(false);
+                }
         }
 
         public void GenerateEditorZUIDs(bool forceGenerateGameObject)
@@ -141,18 +156,18 @@ namespace ZSerializer
             ZUID = GUID.Generate().ToString();
             var pm = GetComponent<PersistentMonoBehaviour>();
 
-            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : pm && !string.IsNullOrEmpty(pm.GOZUID) ? pm.GOZUID : GUID.Generate().ToString();
+            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() :
+                pm && !string.IsNullOrEmpty(pm.GOZUID) ? pm.GOZUID : GUID.Generate().ToString();
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
             EditorUtility.SetDirty(this);
 
             serializedComponents.ForEach(sc => sc.zuid = GUID.Generate().ToString());
             if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<MonoBehaviour>().Where(c => c != this && c is IZSerializable))
+                foreach (var monoBehaviour in GetComponents<MonoBehaviour>()
+                    .Where(c => c != this && c is IZSerializable))
                 {
                     (monoBehaviour as IZSerializable).GenerateEditorZUIDs(false);
                 }
-            
-            
 #endif
         }
 
@@ -168,8 +183,8 @@ namespace ZSerializer
 
         private void Start()
         {
-            GenerateRuntimeZUIDs();
-            AddZUIDsToIDMap();
+            // GenerateRuntimeZUIDs(false);
+            // AddZUIDsToIDMap();
         }
 
         public T AddComponent<T>(PersistentType persistentType = PersistentType.Everything) where T : Component

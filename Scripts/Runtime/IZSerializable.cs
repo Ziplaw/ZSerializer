@@ -11,7 +11,7 @@ namespace ZSerializer
         public string ZUID { get; set; }
         public string GOZUID { get; set; }
         public bool IsOn { get; set; }
-        void GenerateRuntimeZUIDs();
+        void GenerateRuntimeZUIDs(bool forceGenerateGameObject);
         void GenerateEditorZUIDs(bool forceGenerateGameObject);
         void AddZUIDsToIDMap();
     }
