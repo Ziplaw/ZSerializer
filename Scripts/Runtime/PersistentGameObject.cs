@@ -125,6 +125,7 @@ namespace ZSerializer
             GenerateEditorZUIDs(false);
 
             EditorUtility.SetDirty(this);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(this);
         }
 
 #endif
