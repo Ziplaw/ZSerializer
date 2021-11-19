@@ -181,13 +181,6 @@ namespace ZSerializer
                 ZSerialize.idMap.TryAdd(serializedComponent.zuid, serializedComponent.component);
             }
         }
-
-        private void Start()
-        {
-            // GenerateRuntimeZUIDs(false);
-            // AddZUIDsToIDMap();
-        }
-
         public T AddComponent<T>(PersistentType persistentType = PersistentType.Everything) where T : Component
         {
             return (T)AddComponent(typeof(T), persistentType);

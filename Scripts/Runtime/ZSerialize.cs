@@ -173,7 +173,7 @@ namespace ZSerializer
             idMap.Clear();
 
             //fill idMap
-            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
+            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>(true).Where(m => m is IZSerializable))
             {
                 var zs = monoBehaviour as IZSerializable;
                 zs!.AddZUIDsToIDMap();
@@ -415,9 +415,11 @@ namespace ZSerializer
         static List<int> GetIDListFromGroupID(int groupID)
         {
             if (groupID == -1)
-                return Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerializable)
-                    .Select(o => ((IZSerializable)o).GroupID).Distinct().ToList();
-            return new List<int>() { groupID };
+                // return Object.FindObjectsOfType<MonoBehaviour>().Where(o => o is IZSerializable)
+                //     .Select(o => ((IZSerializable)o).GroupID).Distinct().ToList();
+                return ZSerializerSettings.Instance.saveGroups.Where(sg => !string.IsNullOrEmpty(sg))
+                    .Select(sg => ZSerializerSettings.Instance.saveGroups.IndexOf(sg)).ToList();
+            return new List<int> { groupID };
         }
 
         private static void DeleteComponentFiles()
@@ -478,7 +480,7 @@ namespace ZSerializer
         static bool ShouldBeSerialized(IZSerializable serializable)
         {
             return serializable != null && (serializable.GroupID == _currentGroupID || _currentGroupID == -1) &&
-                   serializable.IsOn && (serializable as MonoBehaviour).gameObject.activeInHierarchy &&
+                   serializable.IsOn &&
                    (serializable as MonoBehaviour).enabled;
         }
 
@@ -522,7 +524,7 @@ namespace ZSerializer
         {
             var componentTypes = await GetAllPersistentComponents(persistentGameObjectsToSerialize);
 
-            if (persistentGameObjectsToSerialize.Any()) componentTypes.Insert(0, typeof(PersistentGameObject));
+            componentTypes.Insert(0, typeof(PersistentGameObject));
 
             foreach (var componentType in componentTypes)
             {
@@ -710,9 +712,10 @@ namespace ZSerializer
             switch (zSerializationType)
             {
                 case ZSerializationType.Scene:
-                    return Object.FindObjectsOfType<PersistentMonoBehaviour>().Where(ShouldBeSerialized).ToList();
+                    return Object.FindObjectsOfType<PersistentMonoBehaviour>(true).Where(ShouldBeSerialized).ToList();
                 case ZSerializationType.Level:
-                    return _currentParent.GetComponentsInChildren<PersistentMonoBehaviour>().Where(ShouldBeSerialized)
+                    return _currentParent.GetComponentsInChildren<PersistentMonoBehaviour>(true)
+                        .Where(ShouldBeSerialized)
                         .ToList();
                 default: throw new SerializationException("Serialization Type not implemented");
             }
@@ -723,9 +726,9 @@ namespace ZSerializer
             switch (zSerializationType)
             {
                 case ZSerializationType.Scene:
-                    return Object.FindObjectsOfType<PersistentGameObject>().Where(ShouldBeSerialized).ToList();
+                    return Object.FindObjectsOfType<PersistentGameObject>(true).Where(ShouldBeSerialized).ToList();
                 case ZSerializationType.Level:
-                    return _currentParent.GetComponentsInChildren<PersistentGameObject>().Where(ShouldBeSerialized)
+                    return _currentParent.GetComponentsInChildren<PersistentGameObject>(true).Where(ShouldBeSerialized)
                         .ToList();
                 default: throw new SerializationException("Serialization Type not implemented");
             }
@@ -937,6 +940,24 @@ namespace ZSerializer
                 unityComponentNamespaces = (await JsonHelper.FromJson<string>(assemblyTuple?[1].Item2)).ToList();
 
                 await FillTemporaryJsonTuples(zSerializationType);
+                var persistentGameObjectTuple =
+                    tempTuples[idList[i]].FirstOrDefault(t => t.Item1 == typeof(PersistentGameObjectZSerializer));
+
+                var pgList =
+                    await JsonHelper.FromJson<PersistentGameObjectZSerializer>(persistentGameObjectTuple.Item2);
+
+                var gozuidList = pgList.Select(pg => pg.GOZUID).ToList();
+                foreach (var kvp in idMap)
+                {
+                    if (!gozuidList.Contains(kvp.Key) && 
+                        kvp.Value is GameObject go &&
+                        (go.GetComponentsInChildren<MonoBehaviour>().First(m => m is IZSerializable) as IZSerializable)!
+                        .GroupID == idList[i])
+                    {
+                        Object.Destroy(kvp.Value);
+                    }
+                }
+
                 await LoadComponents(zSerializationType);
                 await LoadReferences();
 
@@ -1151,10 +1172,11 @@ namespace ZSerializer
             try
             {
                 if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) action();
-                else await Task.Run(action).ContinueWith(t =>
-                {
-                    if (t.IsFaulted) throw t.Exception!;
-                });
+                else
+                    await Task.Run(action).ContinueWith(t =>
+                    {
+                        if (t.IsFaulted) throw t.Exception!;
+                    });
             }
             catch (Exception up)
             {
