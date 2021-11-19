@@ -1118,6 +1118,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 {
                     serialize!.GenerateEditorZUIDs(true);
                     EditorUtility.SetDirty(monoBehaviour);
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(monoBehaviour);
                 }
                 if(string.IsNullOrEmpty(ZSerializerSettings.Instance.saveGroups[serialize.GroupID])) Debug.LogError($"{monoBehaviour}'s Save Group is empty and thus will not get Serialized, change the Save Group of {monoBehaviour} or reimplement Save Group number {serialize.GroupID+1}");
             }

@@ -1452,7 +1452,7 @@ namespace ZSerializer
                         break;
                     default:
                         throw new SerializationException(
-                            "Found duplicated ZUIDs, if these are caused by Instantiation, use ZSerialize.Instantiate instead.");
+                            $"{value} and {_value} have the same ZUID. Reset both PersistentGameObject components to fix it.");
                 }
             }
 
