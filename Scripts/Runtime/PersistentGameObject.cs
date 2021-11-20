@@ -1,17 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Xml;
-using JetBrains.Annotations;
 #if UNITY_EDITOR
 using UnityEditor;
-using ZSerializer.Internal;
 #endif
 using UnityEngine;
-using ZSerializer;
-using Random = UnityEngine.Random;
 
 namespace ZSerializer
 {
@@ -174,11 +168,11 @@ namespace ZSerializer
 
         public void AddZUIDsToIDMap()
         {
-            ZSerialize.idMap.TryAdd(ZUID, this);
-            ZSerialize.idMap.TryAdd(GOZUID, gameObject);
+            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(ZUID, this);
+            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(GOZUID, gameObject);
             foreach (var serializedComponent in serializedComponents)
             {
-                ZSerialize.idMap.TryAdd(serializedComponent.zuid, serializedComponent.component);
+                ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(serializedComponent.zuid, serializedComponent.component);
             }
         }
         public T AddComponent<T>(PersistentType persistentType = PersistentType.Everything) where T : Component
@@ -194,7 +188,7 @@ namespace ZSerializer
                 string zuid = ZSerialize.GetRuntimeSafeZUID();
                 serializedComponents.Add(new SerializedComponent(c, zuid,
                     persistentType));
-                ZSerialize.idMap[zuid] = c;
+                ZSerialize.idMap[ZSerialize.CurrentGroupID][zuid] = c;
             }
 
             return c;
@@ -202,7 +196,7 @@ namespace ZSerializer
 
         public void RemoveComponent(Component component)
         {
-            ZSerialize.idMap.Remove(ComponentZuidMap[component]);
+            ZSerialize.idMap[ZSerialize.CurrentGroupID].Remove(ComponentZuidMap[component]);
             serializedComponents.Remove(serializedComponents.First(c => c.component == component));
             Destroy(component);
         }

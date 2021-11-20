@@ -151,7 +151,7 @@ namespace ZSerializer.Editor
             script +=
                 $"\n    public {type.Name}ZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)\n" +
                 "    {" +
-                "       var instance = ZSerializer.ZSerialize.idMap[ZUID];\n";
+                "       var instance = ZSerializer.ZSerialize.idMap[ZSerializer.ZSerialize.CurrentGroupID][ZUID];\n";
 
             foreach (var fieldInfo in fieldInfos)
             {
@@ -950,7 +950,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
                             if (GUILayout.Button("Open ZSerializer Configurator"))
                             {
-                                ZSerializerFineTuner.ShowWindow();
+                                ZSerializerConfigurator.ShowWindow();
                             }
                         }
                         else
@@ -959,7 +959,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                 new GUIStyle("label") { alignment = TextAnchor.MiddleCenter });
                             if (GUILayout.Button("Open Fine Tuner"))
                             {
-                                ZSerializerFineTuner.ShowWindow();
+                                ZSerializerConfigurator.ShowWindow();
                             }
                         }
 
@@ -978,7 +978,13 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             }
         }
 
-        [MenuItem("Tools/ZSerializer/Generate Unity Component ZSerializers")]
+        [MenuItem("Tools/ZSerializer/Refresh Project ZUIDs", priority = 21)]
+        public static void RefreshZUIDs()
+        {
+            throw new NotImplementedException();
+        }
+
+        [MenuItem("Tools/ZSerializer/Generate Unity Component ZSerializers", priority = 20)]
         public static void GenerateUnityComponentClasses()
         {
             string longScript = @"namespace ZSerializer {
@@ -1046,7 +1052,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
                     longScript += "    public " + type.Name +
                                   "ZSerializer (string ZUID, string GOZUID) : base(ZUID, GOZUID) {\n" +
-                                  "        var instance = ZSerializer.ZSerialize.idMap[ZUID] as " + type.FullName +
+                                  "        var instance = ZSerializer.ZSerialize.idMap[ZSerializer.ZSerialize.CurrentGroupID][ZUID] as " + type.FullName +
                                   ";\n";
 
                     foreach (var propertyInfo in type
@@ -1141,14 +1147,14 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                             serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
                                                              go != monoBehaviour.gameObject);
 
-                            if (serializable is PersistentGameObject pg)
-                            {
-                                foreach (var pgSerializedComponent in pg.serializedComponents)
-                                {
-                                    ZSerialize.idMap.TryAdd(pgSerializedComponent.zuid,
-                                        pgSerializedComponent.component);
-                                }
-                            }
+                            // if (serializable is PersistentGameObject pg)
+                            // {
+                            //     foreach (var pgSerializedComponent in pg.serializedComponents)
+                            //     {
+                            //         ZSerialize.idMap[ZSerialize.currentGroupID].TryAdd(pgSerializedComponent.zuid,
+                            //             pgSerializedComponent.component);
+                            //     }
+                            // }
                         }
 
                         if (serializable as Object)

@@ -6,7 +6,7 @@ public sealed class PinZSerializer : ZSerializer.Internal.ZSerializer
     public System.Boolean autoSync;
 
     public PinZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)
-    {       var instance = ZSerializer.ZSerialize.idMap[ZUID];
+    {       var instance = ZSerializer.ZSerialize.idMap[ZSerializer.ZSerialize.CurrentGroupID][ZUID];
          hits = (System.Int32)typeof(Pin).GetField("hits").GetValue(instance);
          groupID = (System.Int32)typeof(Pin).GetField("groupID", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(instance);
          autoSync = (System.Boolean)typeof(Pin).GetField("autoSync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(instance);

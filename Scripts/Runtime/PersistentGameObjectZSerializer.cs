@@ -18,8 +18,8 @@ namespace ZSerializer
         public PersistentGameObjectZSerializer(string ZUID, string GOZUID) : base(
             ZUID, GOZUID)
         {
-            var PersistentGameObjectInstance = ZSerialize.idMap[ZUID] as PersistentGameObject;
-            var _componentParent = ZSerialize.idMap[GOZUID] as GameObject;
+            var PersistentGameObjectInstance = ZSerialize.idMap[ZSerialize.CurrentGroupID][ZUID] as PersistentGameObject;
+            var _componentParent = ZSerialize.idMap[ZSerialize.CurrentGroupID][GOZUID] as GameObject;
             enabled = PersistentGameObjectInstance.enabled;
             hideFlags = PersistentGameObjectInstance.hideFlags;
             serializedComponents = PersistentGameObjectInstance.serializedComponents;
@@ -67,7 +67,7 @@ namespace ZSerializer
                     var addedComponent = gameObject.AddComponent(pgSerializedComponent.Type);
                     serializedComponents[serializedComponents.IndexOf(pgSerializedComponent)].component =
                         addedComponent;
-                    ZSerialize.idMap[pgSerializedComponent.zuid] = addedComponent;
+                    ZSerialize.idMap[ZSerialize.CurrentGroupID][pgSerializedComponent.zuid] = addedComponent;
                 }
             }
         }

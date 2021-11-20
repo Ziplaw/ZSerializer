@@ -5,7 +5,7 @@ public sealed class BallMoverZSerializer : ZSerializer.Internal.ZSerializer
     public System.Boolean autoSync;
 
     public BallMoverZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)
-    {       var instance = ZSerializer.ZSerialize.idMap[ZUID];
+    {       var instance = ZSerializer.ZSerialize.idMap[ZSerializer.ZSerialize.CurrentGroupID][ZUID];
          groupID = (System.Int32)typeof(BallMover).GetField("groupID", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(instance);
          autoSync = (System.Boolean)typeof(BallMover).GetField("autoSync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(instance);
     }

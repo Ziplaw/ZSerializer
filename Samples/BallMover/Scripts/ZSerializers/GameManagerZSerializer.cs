@@ -11,7 +11,7 @@ public sealed class GameManagerZSerializer : ZSerializer.Internal.ZSerializer
     public System.Boolean autoSync;
 
     public GameManagerZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)
-    {       var instance = ZSerializer.ZSerialize.idMap[ZUID];
+    {       var instance = ZSerializer.ZSerialize.idMap[ZSerializer.ZSerialize.CurrentGroupID][ZUID];
          highScore = (System.Int32)typeof(GameManager).GetField("highScore").GetValue(instance);
          currentScore = (System.Int32)typeof(GameManager).GetField("currentScore").GetValue(instance);
          playerName = (System.String)typeof(GameManager).GetField("playerName").GetValue(instance);

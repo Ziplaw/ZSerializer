@@ -708,7 +708,7 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 31d4cc6b6e866f041b161305f43a10e3
+  _zuid: a869f2246dbff504c83a1dbae156baf2
   _gozuid: 2472f67ce3616424883b1e4429548a83
 --- !u!54 &469202270
 Rigidbody:
@@ -824,11 +824,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: dde1ba72212a8014190e02e810a649d7
+      value: 3a6373b85bcb4aa449c91c9b96791f50
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
-      value: 450022efe13ea9e4c8c6613949ab0415
+      value: c617f7f92aef463459a0eaf2aa0ef408
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
@@ -898,11 +898,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 8a746570a8972b745ad488bfdf0d718b
+      value: 3d59728f2a6b8c54da8f241765110dcd
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
-      value: 0d17e21e0b193e54283d395b2e8474f7
+      value: b2669487658ffa24196187a01d4c8bea
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
@@ -1223,8 +1223,8 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: cdca311287c4d5045858225a6877e591
-  _gozuid: bbffdbf7265972f4191a9078cf761021
+  _zuid: 4e00d8c298063454b96ec08b808e76b3
+  _gozuid: 79b8185ced6eb6c478d0531f14c0484e
   highScore: 0
   currentScore: 0
   playerName: 
@@ -1390,11 +1390,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: e9e13a0edc3f667428c9d4a9d5c7febd
+      value: 38765f96eb2b5e849afe44aff4934118
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
-      value: 4b445d1af3254de448c65e53ee396326
+      value: f9050bfe97cd8804db2a6239e8546484
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}

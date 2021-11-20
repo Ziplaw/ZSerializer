@@ -12,12 +12,12 @@ namespace ZSerializer.Editor
 {
 
 
-    public class ZSerializerFineTuner : EditorWindow
+    public class ZSerializerConfigurator : EditorWindow
     {
-        [MenuItem("Tools/ZSerializer/ZSerializer Configurator")]
+        [MenuItem("Tools/ZSerializer/ZSerializer Configurator", priority = 1)]
         internal static void ShowWindow()
         {
-            var window = GetWindow<ZSerializerFineTuner>();
+            var window = GetWindow<ZSerializerConfigurator>();
             window.titleContent = new GUIContent("ZSerializer Configurator");
             window.Show();
         }

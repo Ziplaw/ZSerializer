@@ -14,6 +14,7 @@ using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngineInternal;
 using ZSerializer.Internal;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -27,7 +28,9 @@ namespace ZSerializer
     {
         #region Variables
 
-        internal static int _currentGroupID = -1;
+        private static int currentGroupID = -1;
+        public static int CurrentGroupID => currentGroupID;
+
         private static string currentSceneName;
         private static string currentScenePath;
         private static string persistentDataPath;
@@ -41,7 +44,7 @@ namespace ZSerializer
             0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
         };
 
-        public static Dictionary<string, Object> idMap = new Dictionary<string, Object>();
+        public static List<Dictionary<string, Object>> idMap = new List<Dictionary<string, Object>>();
         public static Dictionary<string, SceneGroup> sceneToLoadingSceneMap = new Dictionary<string, SceneGroup>();
 
         internal static (Type, string)[][] tempTuples;
@@ -56,6 +59,7 @@ namespace ZSerializer
         //Scene fields allowed to be added to the Serializable Unity Components list
         private static List<Type> unitySerializableTypes;
         internal static List<Type> UnitySerializableTypes => unitySerializableTypes ??= GetUnitySerializableTypes();
+
 
         private static MethodInfo saveMethod =
             typeof(ZSerialize).GetMethod(nameof(CompileJson), BindingFlags.NonPublic | BindingFlags.Static);
@@ -173,11 +177,11 @@ namespace ZSerializer
             idMap.Clear();
 
             //fill idMap
-            foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>(true).Where(m => m is IZSerializable))
-            {
-                var zs = monoBehaviour as IZSerializable;
-                zs!.AddZUIDsToIDMap();
-            }
+            // foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>(true).Where(m => m is IZSerializable))
+            // {
+            //     var zs = monoBehaviour as IZSerializable;
+            //     zs!.AddZUIDsToIDMap();
+            // }
 
             UpdateCurrentScene();
         }
@@ -397,7 +401,9 @@ namespace ZSerializer
                 if (string.IsNullOrEmpty(serializable.ZUID) ||
                     string.IsNullOrEmpty(serializable.GOZUID))
                 {
-                    serializable.GenerateRuntimeZUIDs(false);
+                    Debug.LogError($"{serializable} found with empty ZUID, go to Tools/ZSerializer/Restore all ZUIDs");
+                    continue;
+                    // serializable.GenerateRuntimeZUIDs(false);
                 }
 
                 serializable.AddZUIDsToIDMap();
@@ -479,7 +485,7 @@ namespace ZSerializer
 
         static bool ShouldBeSerialized(IZSerializable serializable)
         {
-            return serializable != null && (serializable.GroupID == _currentGroupID || _currentGroupID == -1) &&
+            return serializable != null && (serializable.GroupID == CurrentGroupID || CurrentGroupID == -1) &&
                    serializable.IsOn &&
                    (serializable as MonoBehaviour).enabled;
         }
@@ -576,8 +582,8 @@ namespace ZSerializer
             string zuid = (zSerializerObject as Internal.ZSerializer)!.ZUID;
             string gozuid = (zSerializerObject as Internal.ZSerializer)!.GOZUID;
 
-            bool componentPresentInGameObject = idMap.TryGetValue(zuid, out var componentObj) && idMap[zuid] != null;
-            bool gameObjectPresent = idMap.TryGetValue(gozuid, out var gameObjectObj) && idMap[gozuid] != null;
+            bool componentPresentInGameObject = idMap[CurrentGroupID].TryGetValue(zuid, out var componentObj) && idMap[CurrentGroupID][zuid] != null;
+            bool gameObjectPresent = idMap[CurrentGroupID].TryGetValue(gozuid, out var gameObjectObj) && idMap[CurrentGroupID][gozuid] != null;
             GameObject gameObject = gameObjectObj as GameObject;
             Component component = componentObj as Component;
 
@@ -591,7 +597,7 @@ namespace ZSerializer
                 }
 
                 gameObject = new GameObject(); //LoadDestroyedGameObject(out gameObject, zSerializerObject);
-                idMap[gozuid] = gameObject;
+                idMap[CurrentGroupID][gozuid] = gameObject;
             }
 
             if (!componentPresentInGameObject)
@@ -600,7 +606,7 @@ namespace ZSerializer
                 {
                     component = gameObject.AddComponent(componentType);
                     IZSerializable serializer = component as IZSerializable;
-                    idMap[zuid] = component;
+                    idMap[CurrentGroupID][zuid] = component;
                     serializer.ZUID = zuid;
                     serializer.GOZUID = gozuid;
                 }
@@ -636,9 +642,9 @@ namespace ZSerializer
 
         static async Task LoadComponents(ZSerializationType zSerializationType)
         {
-            for (var tupleIndex = 0; tupleIndex < tempTuples[_currentGroupID].Length; tupleIndex++)
+            for (var tupleIndex = 0; tupleIndex < tempTuples[CurrentGroupID].Length; tupleIndex++)
             {
-                var currentTuple = tempTuples[_currentGroupID][tupleIndex];
+                var currentTuple = tempTuples[CurrentGroupID][tupleIndex];
                 Type realType = GetTypeFromZSerializerType(currentTuple.Item1);
                 if (realType == null)
                     Debug.LogError(
@@ -668,7 +674,7 @@ namespace ZSerializer
 //Loads all references and fields from already loaded objects, this is done like this to avoid data loss
         static async Task LoadReferences()
         {
-            foreach (var tuple in tempTuples[_currentGroupID])
+            foreach (var tuple in tempTuples[CurrentGroupID])
             {
                 Type zSerializerType = tuple.Item1;
                 // Type realType = GetTypeFromZSerializerType(zSerializerType);
@@ -682,7 +688,7 @@ namespace ZSerializer
                 for (var i = 0; i < jsonObjects.Length; i++)
                 {
                     var componentInGameObject =
-                        idMap[(jsonObjects[i] as Internal.ZSerializer).ZUID] as Component;
+                        idMap[CurrentGroupID][(jsonObjects[i] as Internal.ZSerializer).ZUID] as Component;
 
                     (jsonObjects[i] as ZSerializer.Internal.ZSerializer).RestoreValues(componentInGameObject);
 
@@ -739,11 +745,11 @@ namespace ZSerializer
             switch (zSerializationType)
             {
                 case ZSerializationType.Scene:
-                    LogWarning($"Saving {ZSerializerSettings.Instance.saveGroups[_currentGroupID]}");
+                    LogWarning($"Saving {ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}");
                     break;
                 case ZSerializationType.Level:
                     LogWarning(
-                        $"Saving {_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[_currentGroupID]}");
+                        $"Saving {_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}");
                     break;
 
                 default: throw new SerializationException("Serialization Type not implemented");
@@ -776,11 +782,11 @@ namespace ZSerializer
             {
                 case ZSerializationType.Scene:
                     Log(
-                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[_currentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length * .001f} KB</color>");
+                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length * .001f} KB</color>");
                     break;
                 case ZSerializationType.Level:
                     Log(
-                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[_currentGroupID]}: {new FileInfo(GetFilePath($"{_currentLevelName}.zsave")).Length * .001f} KB</color>");
+                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath($"{_currentLevelName}.zsave")).Length * .001f} KB</color>");
                     break;
                 default: throw new SerializationException("Serialization Type not implemented");
             }
@@ -798,10 +804,10 @@ namespace ZSerializer
                 switch (zSerializationType)
                 {
                     case ZSerializationType.Scene:
-                        tempTuples[_currentGroupID] = ReadFromFile("components.zsave");
+                        tempTuples[CurrentGroupID] = ReadFromFile("components.zsave");
                         break;
                     case ZSerializationType.Level:
-                        tempTuples[_currentGroupID] = ReadFromFile($"{_currentLevelName}.zsave");
+                        tempTuples[CurrentGroupID] = ReadFromFile($"{_currentLevelName}.zsave");
                         break;
                 }
             });
@@ -839,10 +845,10 @@ namespace ZSerializer
             {
                 case ZSerializationType.Level:
                     LogWarning(
-                        $"Loading Level: {_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[_currentGroupID]}");
+                        $"Loading Level: {_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}");
                     break;
                 case ZSerializationType.Scene:
-                    LogWarning($"Loading Group: {ZSerializerSettings.Instance.saveGroups[_currentGroupID]}");
+                    LogWarning($"Loading Group: {ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}");
                     break;
             }
         }
@@ -855,16 +861,17 @@ namespace ZSerializer
         {
             try
             {
-                if (_currentGroupID == -1) DeleteComponentFiles();
+                if (CurrentGroupID == -1) DeleteComponentFiles();
 
                 float startingTime = Time.realtimeSinceStartup;
                 float frameCount = Time.frameCount;
 
-                var idList = GetIDListFromGroupID(_currentGroupID);
+                var idList = GetIDListFromGroupID(CurrentGroupID);
 
                 for (int i = 0; i < idList.Count; i++)
                 {
-                    _currentGroupID = idList[i];
+                    currentGroupID = idList[i];
+                    idMap.Add(new Dictionary<string, Object>());
 
                     var persistentMonoBehavioursInScene = GetPersistentMonoBehavioursInScene(zSerializationType);
                     var persistentGameObjectsInScene = GetPersistentGameObjectsInScene(zSerializationType);
@@ -896,9 +903,10 @@ namespace ZSerializer
                           (Time.frameCount - frameCount) + " frames.");
 
                 jsonToSave = "";
-                _currentGroupID = -1;
+                currentGroupID = -1;
                 _currentLevelName = null;
                 _currentParent = null;
+                idMap.Clear();
             }
             catch (Exception e)
             {
@@ -909,11 +917,12 @@ namespace ZSerializer
         private static async Task LoadInternal(ZSerializationType zSerializationType)
         {
             GetSaveFiles(zSerializationType);
-            var idList = _currentGroupID == -1 ? GetIDList() : new[] { _currentGroupID };
+            var idList = CurrentGroupID == -1 ? GetIDList() : new[] { CurrentGroupID };
 
             foreach (var i in idList)
             {
-                _currentGroupID = idList[i];
+                currentGroupID = idList[i];
+                idMap.Add(new Dictionary<string, Object>());
 
                 LogLevelLoading(zSerializationType);
 
@@ -947,14 +956,19 @@ namespace ZSerializer
                     await JsonHelper.FromJson<PersistentGameObjectZSerializer>(persistentGameObjectTuple.Item2);
 
                 var gozuidList = pgList.Select(pg => pg.GOZUID).ToList();
-                foreach (var kvp in idMap)
+                foreach (var kvp in idMap[CurrentGroupID])
                 {
-                    if (!gozuidList.Contains(kvp.Key) && 
-                        kvp.Value is GameObject go &&
-                        (go.GetComponentsInChildren<MonoBehaviour>().First(m => m is IZSerializable) as IZSerializable)!
-                        .GroupID == idList[i])
+                    if (!gozuidList.Contains(kvp.Key) &&
+                        kvp.Value is GameObject go)
                     {
-                        Object.Destroy(kvp.Value);
+                        if (go)
+                        {
+                            var pg = go.GetComponent<PersistentGameObject>();
+                            if (pg && pg.GroupID == CurrentGroupID)
+                            {
+                                Object.Destroy(kvp.Value);
+                            }
+                        }
                     }
                 }
 
@@ -962,7 +976,7 @@ namespace ZSerializer
                 await LoadReferences();
 
                 Debug.Log(
-                    $"Deserialization of group \"{ZSerializerSettings.Instance.saveGroups[_currentGroupID]}\" ended in: " +
+                    $"Deserialization of group \"{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}\" ended in: " +
                     (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                     (Time.frameCount - frameCount) + " frames");
 
@@ -975,7 +989,8 @@ namespace ZSerializer
 
             _currentLevelName = null;
             _currentParent = null;
-            _currentGroupID = -1;
+            currentGroupID = -1;
+            idMap.Clear();
         }
 
         #endregion
@@ -994,7 +1009,7 @@ namespace ZSerializer
             {
                 _currentLevelName = fileName;
                 _currentParent = parent;
-                _currentGroupID = groupID;
+                currentGroupID = groupID;
 
                 await SaveInternal(ZSerializationType.Level);
             }
@@ -1012,7 +1027,7 @@ namespace ZSerializer
         {
             try
             {
-                _currentGroupID = groupID;
+                currentGroupID = groupID;
                 await SerializeCurrentScenePath();
                 await SaveInternal(ZSerializationType.Scene);
             }
@@ -1041,7 +1056,7 @@ namespace ZSerializer
 
                 _currentLevelName = levelName;
                 _currentParent = parent;
-                _currentGroupID = groupID;
+                currentGroupID = groupID;
 
                 await LoadInternal(ZSerializationType.Level);
             }
@@ -1058,7 +1073,7 @@ namespace ZSerializer
         {
             try
             {
-                _currentGroupID = groupID;
+                currentGroupID = groupID;
                 await LoadInternal(ZSerializationType.Scene);
             }
             catch (Exception e)
@@ -1102,7 +1117,7 @@ namespace ZSerializer
                 return Regex.Replace(json, "\"zuid\":\\w+",
                     match =>
                     {
-                        if (idMap.TryGetValue(match.Value.Split(':')[1], out var obj))
+                        if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj))
                             return "\"instanceID\":" + obj.GetHashCode();
                         return "\"instanceID\":0";
                     });
@@ -1146,7 +1161,7 @@ namespace ZSerializer
         {
             await RunTask(() =>
             {
-                var tempIDMap = idMap.ToDictionary(kvp =>
+                var tempIDMap = idMap[CurrentGroupID].ToDictionary(kvp =>
                 {
 #if UNITY_EDITOR
                     return "\"instanceID\":" + kvp.Value.GetHashCode();
@@ -1282,8 +1297,8 @@ namespace ZSerializer
         {
             string sceneGroupName = GetSceneGroupPath(currentScenePath);
             string sceneDir = string.IsNullOrEmpty(_currentLevelName)
-                ? $"data/{ZSerializerSettings.Instance.saveGroups[_currentGroupID]}"
-                : $"levels/{_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[_currentGroupID]}";
+                ? $"data/{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}"
+                : $"levels/{_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}";
 
             string path = Path.Combine(
                 persistentDataPath,

@@ -58,10 +58,8 @@ namespace ZSerializer
 
         [ForceZSerialized, HideInInspector, SerializeField]
         internal bool autoSync = true;
-
-        [NonZSerialized, SerializeField, HideInInspector] private string _zuid;
-
-        [NonZSerialized, SerializeField, HideInInspector] private string _gozuid;
+        [NonZSerialized, SerializeField] private string _zuid;
+        [NonZSerialized, SerializeField] private string _gozuid;
 
 
         public int GroupID
@@ -153,8 +151,8 @@ namespace ZSerializer
 
         public void AddZUIDsToIDMap()
         {
-            ZSerialize.idMap.TryAdd(ZUID, this);
-            ZSerialize.idMap.TryAdd(GOZUID, gameObject);
+            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(ZUID, this);
+            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(GOZUID, gameObject);
         }
 
         // public virtual void OnDestroy()

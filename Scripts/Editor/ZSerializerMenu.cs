@@ -45,7 +45,7 @@ namespace ZSerializer.Editor
 
         private static Class[] classes;
 
-        [MenuItem("Tools/ZSerializer/ZSerializer Menu")]
+        [MenuItem("Tools/ZSerializer/ZSerializer Menu", priority = 0)]
         internal static void ShowWindow()
         {
             var window = GetWindow<ZSerializerMenu>();
