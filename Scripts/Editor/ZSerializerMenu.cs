@@ -41,20 +41,45 @@ namespace ZSerializer.Editor
         private int selectedGroup;
         private int selectedGroupIndex = -1;
         private static ZSerializerStyler styler;
-        private int selectedTypeToShowSettings = -1;
+        private static ZSerializerStyler Styler
+        {
+            get
+            {
+                if(styler == null) GenerateStyler();
+                return styler;
+            }
+        }
 
+        private int selectedTypeToShowSettings = -1;
+        
+        static ZSerializerMenu window;
         private static Class[] classes;
+
+
 
         [MenuItem("Tools/ZSerializer/ZSerializer Menu", priority = 0)]
         internal static void ShowWindow()
         {
-            var window = GetWindow<ZSerializerMenu>();
-            window.titleContent = new GUIContent("ZSerializer");
+            window = GetWindow<ZSerializerMenu>();
             window.Show();
-            EditorSceneManager.activeSceneChangedInEditMode += (a, b) => Init();
-            SceneManager.activeSceneChanged += (a, b) => Init();
-            SceneManager.sceneLoaded += (a, b) => Init();
+            window.titleContent = new GUIContent("ZSerializer Menu");
             Init();
+        }
+
+        void SceneUpdate(Scene prevScene, Scene newScene) => Init();
+        void SceneUpdate(Scene prevScene, LoadSceneMode newScene) => Init();
+        
+        private void OnEnable()
+        {
+            EditorSceneManager.activeSceneChangedInEditMode += SceneUpdate;
+            SceneManager.activeSceneChanged += SceneUpdate;
+            SceneManager.sceneLoaded += SceneUpdate;
+        }
+        private void OnDisable()
+        {
+            EditorSceneManager.activeSceneChangedInEditMode -= SceneUpdate;
+            SceneManager.activeSceneChanged -= SceneUpdate;
+            SceneManager.sceneLoaded -= SceneUpdate;
         }
 
         static void GetClasses()
@@ -66,7 +91,7 @@ namespace ZSerializer.Editor
         static void GenerateStyler()
         {
             styler = new ZSerializerStyler();
-            styler.GetEveryResource();
+            Styler.GetEveryResource();
         }
 
         [DidReloadScripts]
@@ -74,11 +99,7 @@ namespace ZSerializer.Editor
         {
             if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized && HasOpenInstances<ZSerializerMenu>())
             {
-                GetWindow<ZSerializerMenu>().minSize = new Vector2(480, 400);
-                GetWindow<ZSerializerMenu>().maxSize = new Vector2(480, 1200);
-
                 GenerateStyler();
-
                 GetClasses();
             }
         }
@@ -90,23 +111,13 @@ namespace ZSerializer.Editor
         {
             if (!ZSerializerSettings.Instance.packageInitialized)
             {
-                if (!stylerInitialized)
-                {
-                    ZSerializerMenu w;
-
-                    GenerateStyler();
-
-                    w = GetWindow<ZSerializerMenu>();
-                    w.position = new Rect(w.position) { height = 104 };
-                }
-
-                stylerInitialized = true;
-
-                if (GUILayout.Button($"<color=#{ZSerializerStyler.MainHex}>Setup</color>", new GUIStyle("button") { fontSize = 48, font = styler.header.font, richText = true},
+                if (GUILayout.Button($"<color=#{ZSerializerStyler.MainHex}>Setup</color>", new GUIStyle("button") { fontSize = 48, font = Styler.header.font, richText = true},
                     GUILayout.MinHeight(100)))
                 {
                     ZSerializerSettings.Instance.packageInitialized = true;
                     ZSerializerEditor.GenerateUnityComponentClasses();
+                    ZSerializerEditor.RefreshZUIDs();
+                    
                 }
             }
             else
@@ -120,9 +131,9 @@ namespace ZSerializer.Editor
                             Init();
                         }
 
-                        if (styler == null) GenerateStyler();
+                        if (Styler == null) GenerateStyler();
                         
-                        editMode = GUILayout.Toggle(editMode, styler.cogWheel, new GUIStyle("button"),
+                        editMode = GUILayout.Toggle(editMode, Styler.cogWheel, new GUIStyle("button"),
                             GUILayout.Height(28), GUILayout.Width(28));
                     }
 
@@ -132,7 +143,7 @@ namespace ZSerializer.Editor
 
                         if (editMode)
                         {
-                            ZSerializerEditor.BuildSettingsEditor(styler, ref selectedMenu, ref selectedType, ref selectedGroup,ref selectedGroupIndex,
+                            ZSerializerEditor.BuildSettingsEditor(Styler, ref selectedMenu, ref selectedType, ref selectedGroup,ref selectedGroupIndex,
                                 position.width);
                         }
                         else
@@ -169,7 +180,7 @@ namespace ZSerializer.Editor
 
                                         if (GUILayout.Button(
                                             $"<color=#{color}>{classInstance.classType.Name}</color>",
-                                            new GUIStyle(styler.header)
+                                            new GUIStyle(Styler.header)
                                                 { alignment = TextAnchor.MiddleCenter, fontSize = fontSize },
                                             GUILayout.Height(classHeight)))
                                         {
@@ -190,9 +201,9 @@ namespace ZSerializer.Editor
                                             EditorGUIUtility.PingObject(obj);
                                         }
 
-                                        ZSerializerEditor.BuildWindowValidityButton(classInstance.classType, styler);
+                                        ZSerializerEditor.BuildWindowValidityButton(classInstance.classType, Styler);
 
-                                        if (GUILayout.Button(styler.cogWheel,
+                                        if (GUILayout.Button(Styler.cogWheel,
                                             GUILayout.MaxHeight(32), GUILayout.MaxWidth(32)))
                                         {
                                             selectedTypeToShowSettings = selectedTypeToShowSettings == i ? -1 : i;
@@ -237,11 +248,11 @@ namespace ZSerializer.Editor
                                     GUILayout.Height(32),GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth-20)))
                                 {
                                     EditorGUILayout.LabelField("ZSerialize All",
-                                        new GUIStyle(styler.header)
+                                        new GUIStyle(Styler.header)
                                             { alignment = TextAnchor.MiddleCenter, fontSize = fontSize },
                                         GUILayout.Height(classHeight));
 
-                                    ZSerializerEditor.BuildButtonAll(classes, classHeight, styler);
+                                    ZSerializerEditor.BuildButtonAll(classes, classHeight, Styler);
                                 }
 
                                 GUILayout.Space(15);

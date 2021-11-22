@@ -978,10 +978,35 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             }
         }
 
-        [MenuItem("Tools/ZSerializer/Refresh Project ZUIDs", priority = 21)]
+        [MenuItem("Tools/ZSerializer/Reset Project ZUIDs", priority = 21)]
         public static void RefreshZUIDs()
         {
-            throw new NotImplementedException();
+            var dialog = EditorUtility.DisplayDialog("Reset ZUIDs", "This will corrupt any save files made prior to this moment. Are you sure you want to Reset your project's ZUIDs?", "Yes", "No");
+            if (!dialog) return;
+            
+            var originalScenePath = SceneManager.GetActiveScene().path;
+            var paths = AssetDatabase.GetAllAssetPaths().Where(s => s.EndsWith(".unity")).ToList();
+            
+            foreach (var path in paths)
+            {
+                var split = path.Split('/').Last();
+                
+                AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<SceneAsset>(path));
+                foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
+                {
+                    EditorUtility.DisplayProgressBar("Refreshing Project ZUIDs", $"{monoBehaviour}, {split}", paths.IndexOf(path) / (float)paths.Count);
+                    var serializable = monoBehaviour as IZSerializable;
+                    serializable.GenerateEditorZUIDs(false);
+                }
+                EditorSceneManager.SaveOpenScenes();
+                // EditorSceneManager.LoadScene(SceneManager.GetSceneByPath(path).name);
+            }
+            
+            Debug.Log("<color=cyan>All ZUIDs have been reset!</color>");
+            EditorUtility.ClearProgressBar();
+            EditorSceneManager.OpenScene(originalScenePath);
+
+            // throw new NotImplementedException();
         }
 
         [MenuItem("Tools/ZSerializer/Generate Unity Component ZSerializers", priority = 20)]
