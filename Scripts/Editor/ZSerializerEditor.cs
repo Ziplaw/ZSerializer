@@ -981,11 +981,11 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         [MenuItem("Tools/ZSerializer/Reset Project ZUIDs", priority = 21)]
         public static void RefreshZUIDs()
         {
-            var dialog = EditorUtility.DisplayDialog("Reset ZUIDs", "This will corrupt any save files made prior to this moment. Are you sure you want to Reset your project's ZUIDs?", "Yes", "No");
-            if (!dialog) return;
-            
+            var updateNonEmptyZUIDs = EditorUtility.DisplayDialog("Reset ZUIDs", "Would you like to reset your current ZUIDs? This will cause player save files to be unusable", "Yes", "No");
+
             var originalScenePath = SceneManager.GetActiveScene().path;
             var paths = AssetDatabase.GetAllAssetPaths().Where(s => s.EndsWith(".unity")).ToList();
+            int numberOfUpdatedZUIDs = 0;
             
             foreach (var path in paths)
             {
@@ -996,13 +996,17 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 {
                     EditorUtility.DisplayProgressBar("Refreshing Project ZUIDs", $"{monoBehaviour}, {split}", paths.IndexOf(path) / (float)paths.Count);
                     var serializable = monoBehaviour as IZSerializable;
-                    serializable.GenerateEditorZUIDs(false);
+                    if (string.IsNullOrEmpty(serializable.ZUID) || updateNonEmptyZUIDs)
+                    {
+                        serializable.GenerateEditorZUIDs(false);
+                        numberOfUpdatedZUIDs++;
+                    }
                 }
                 EditorSceneManager.SaveOpenScenes();
                 // EditorSceneManager.LoadScene(SceneManager.GetSceneByPath(path).name);
             }
             
-            Debug.Log("<color=cyan>All ZUIDs have been reset!</color>");
+            Debug.Log($"<color=cyan>{numberOfUpdatedZUIDs} ZUIDs have been reset!</color>");
             EditorUtility.ClearProgressBar();
             EditorSceneManager.OpenScene(originalScenePath);
 
@@ -1134,7 +1138,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             sw.Close();
 
             AssetDatabase.Refresh();
-            ZSerialize.Log("Unity Component ZSerializers built");
+            Debug.Log("<color=cyan>Unity Component ZSerializers built</color>");
         }
 
         [DidReloadScripts]

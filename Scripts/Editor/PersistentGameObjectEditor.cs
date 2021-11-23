@@ -41,6 +41,7 @@ public class PersistentGameObjectEditor : Editor
 
         if (manager.showSettings)
         {
+
             ZSerializerEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager, false);
             if (ZSerializerSettings.Instance.advancedSerialization)
             {
@@ -92,6 +93,17 @@ public class PersistentGameObjectEditor : Editor
                         manager.serializedComponents.Clear();
                         manager.Reset();
                     }
+                }
+            }
+        }
+        else
+        {
+            if (ZSerializerSettings.Instance.debugMode)
+            {
+                using (new EditorGUI.DisabledScope(true))
+                {
+                    EditorGUILayout.TextField("ZUID", manager.ZUID);
+                    EditorGUILayout.TextField("GameObject ZUID", manager.GOZUID);
                 }
             }
         }

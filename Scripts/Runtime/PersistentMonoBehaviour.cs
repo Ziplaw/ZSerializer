@@ -58,8 +58,8 @@ namespace ZSerializer
 
         [ForceZSerialized, HideInInspector, SerializeField]
         internal bool autoSync = true;
-        [NonZSerialized, SerializeField] private string _zuid;
-        [NonZSerialized, SerializeField] private string _gozuid;
+        [NonZSerialized, SerializeField, HideInInspector] private string _zuid;
+        [NonZSerialized, SerializeField, HideInInspector] private string _gozuid;
 
 
         public int GroupID

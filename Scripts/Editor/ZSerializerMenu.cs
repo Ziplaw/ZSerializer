@@ -117,7 +117,6 @@ namespace ZSerializer.Editor
                     ZSerializerSettings.Instance.packageInitialized = true;
                     ZSerializerEditor.GenerateUnityComponentClasses();
                     ZSerializerEditor.RefreshZUIDs();
-                    
                 }
             }
             else

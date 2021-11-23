@@ -401,9 +401,8 @@ namespace ZSerializer
                 if (string.IsNullOrEmpty(serializable.ZUID) ||
                     string.IsNullOrEmpty(serializable.GOZUID))
                 {
-                    Debug.LogError($"{serializable} found with empty ZUID, go to Tools/ZSerializer/Restore all ZUIDs");
-                    continue;
-                    // serializable.GenerateRuntimeZUIDs(false);
+                    LogWarning($"{serializable} found with empty ZUID, if this is not an instanced object, please go to Tools/ZSerializer/Reset Project ZUIDs");
+                    serializable.GenerateRuntimeZUIDs(false);
                 }
 
                 serializable.AddZUIDsToIDMap();
@@ -428,17 +427,7 @@ namespace ZSerializer
             return new List<int> { groupID };
         }
 
-        private static void DeleteComponentFiles()
-        {
-            string[] files;
-
-            files = Directory.GetFiles(GetGlobalFilePath(), "*", SearchOption.AllDirectories);
-
-            foreach (string file in files)
-            {
-                File.Delete(file);
-            }
-        }
+        
 
         private async static Task SerializeCurrentScenePath()
         {
@@ -712,6 +701,27 @@ namespace ZSerializer
             Level,
             Scene,
         };
+        
+        private static void DeleteComponentFiles(ZSerializationType zSerializationType)
+        {
+            string[] files;
+
+            switch (zSerializationType)
+            {
+                case ZSerializationType.Scene:
+                    files = Directory.GetFiles(GetGlobalFilePath(), "*", SearchOption.AllDirectories);
+                    break;
+                case ZSerializationType.Level:
+                    files = Directory.GetFiles(GetSaveGrouplessFilePath(), "*", SearchOption.AllDirectories);
+                    break;
+                default: throw new SerializationException("Serialization Type not implemented");
+            }
+
+            foreach (string file in files)
+            {
+                File.Delete(file);
+            }
+        }
 
         static List<PersistentMonoBehaviour> GetPersistentMonoBehavioursInScene(ZSerializationType zSerializationType)
         {
@@ -861,7 +871,7 @@ namespace ZSerializer
         {
             try
             {
-                if (CurrentGroupID == -1) DeleteComponentFiles();
+                if (CurrentGroupID == -1) DeleteComponentFiles(zSerializationType);
 
                 float startingTime = Time.realtimeSinceStartup;
                 float frameCount = Time.frameCount;
@@ -1291,6 +1301,24 @@ namespace ZSerializer
             return path;
         }
 
+        static string GetSaveGrouplessFilePath()
+        {
+            string sceneGroupName = GetSceneGroupPath(currentScenePath);
+            string sceneDir = string.IsNullOrEmpty(_currentLevelName)
+                ? "data"
+                : $"levels/{_currentLevelName}";
+
+            string path = Path.Combine(
+                persistentDataPath,
+                "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile,
+                sceneGroupName,
+                currentSceneName,
+                sceneDir);
+
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            return path;
+        }
+        
 
 //Gets complete filepath for a specific filename
         static string GetFilePath(string fileName)

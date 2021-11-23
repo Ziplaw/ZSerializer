@@ -115,7 +115,6 @@ namespace ZSerializer
 
         public void Reset()
         {
-            GenerateComponentZUIDs();
             GenerateEditorZUIDs(false);
 
             EditorUtility.SetDirty(this);
@@ -123,8 +122,7 @@ namespace ZSerializer
         }
 
 #endif
-
-
+        
         public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
             ZUID = ZSerialize.GetRuntimeSafeZUID();
@@ -188,7 +186,7 @@ namespace ZSerializer
                 string zuid = ZSerialize.GetRuntimeSafeZUID();
                 serializedComponents.Add(new SerializedComponent(c, zuid,
                     persistentType));
-                ZSerialize.idMap[ZSerialize.CurrentGroupID][zuid] = c;
+                // ZSerialize.idMap[ZSerialize.CurrentGroupID][zuid] = c;
             }
 
             return c;
@@ -196,7 +194,7 @@ namespace ZSerializer
 
         public void RemoveComponent(Component component)
         {
-            ZSerialize.idMap[ZSerialize.CurrentGroupID].Remove(ComponentZuidMap[component]);
+            // ZSerialize.idMap[ZSerialize.CurrentGroupID].Remove(ComponentZuidMap[component]);
             serializedComponents.Remove(serializedComponents.First(c => c.component == component));
             Destroy(component);
         }

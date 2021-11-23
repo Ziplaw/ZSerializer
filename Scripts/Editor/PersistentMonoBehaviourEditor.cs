@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 using ZSerializer;
 
 namespace ZSerializer.Editor
@@ -22,7 +23,19 @@ namespace ZSerializer.Editor
                 if (manager is PersistentMonoBehaviour)
                     ZSerializerEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings,
                         ZSerializerEditor.ShowGroupIDSettings);
-                if (!manager.showSettings) base.OnInspectorGUI();
+                if (!manager.showSettings)
+                {
+                    if (ZSerializerSettings.Instance.debugMode)
+                    {
+                        using (new EditorGUI.DisabledScope(true))
+                        {
+                            EditorGUILayout.TextField("ZUID", manager.ZUID);
+                            EditorGUILayout.TextField("GameObject ZUID", manager.GOZUID);
+                        }
+                    }
+
+                    base.OnInspectorGUI();
+                }
             }
             else
             {
