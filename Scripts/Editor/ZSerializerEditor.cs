@@ -366,9 +366,9 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         bool newOnValue = !ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn;
                         ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn = newOnValue;
                         foreach (var component in Object.FindObjectsOfType(componentType).Where(c =>
-                            c.GetType() == componentType && ((PersistentMonoBehaviour)c).AutoSync))
+                            c.GetType() == componentType && ((PersistentMonoBehaviour) c).AutoSync))
                         {
-                            ((PersistentMonoBehaviour)component).IsOn = newOnValue;
+                            ((PersistentMonoBehaviour) component).IsOn = newOnValue;
                             EditorUtility.SetDirty(component);
                         }
 
@@ -487,7 +487,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             }
         }
 
-        
+
         internal static void BuildPersistentComponentEditor<T>(T manager, ZSerializerStyler styler,
             ref bool showSettings,
             Action<Type, IZSerializable, bool> toggleOn) where T : PersistentMonoBehaviour
@@ -498,7 +498,8 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
             {
                 var state = GetClassState(manager.GetType());
-                string color = state == ClassState.Valid ? manager.IsOn ? ZSerializerStyler.MainHex : ZSerializerStyler.OffHex :
+                string color = state == ClassState.Valid ? manager.IsOn ? ZSerializerStyler.MainHex :
+                    ZSerializerStyler.OffHex :
                     state == ClassState.NeedsRebuilding ? ZSerializerStyler.YellowHex : ZSerializerStyler.RedHex;
 
                 GUILayout.Label($"<color=#{color}>  Persistent Component</color>",
@@ -528,7 +529,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                             ? ZSerializerStyler.MainHex
                             : ZSerializerStyler.OffHex;
                         GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
-                            new GUIStyle("label") { richText = true },
+                            new GUIStyle("label") {richText = true},
                             GUILayout.Width(EditorGUIUtility.currentViewWidth / 3f));
                         EditorGUILayout.PropertyField(serializedObject.FindProperty(field.Name), GUIContent.none);
                     }
@@ -600,7 +601,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             if (editMode)
             {
                 GUILayout.Label("Select fields to serialize",
-                    new GUIStyle("helpbox") { alignment = TextAnchor.MiddleCenter }, GUILayout.Height(18));
+                    new GUIStyle("helpbox") {alignment = TextAnchor.MiddleCenter}, GUILayout.Height(18));
                 var fields = manager.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
                 for (var i = 0; i < fields.Length; i++)
@@ -634,7 +635,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 .Where(f => f.GetCustomAttribute<HideInInspector>() == null);
             SerializedObject serializedObject = new SerializedObject(styler.settings);
 
-            string[] toolbarNames = { "Settings", "Groups", "Component Blacklist" };
+            string[] toolbarNames = {"Settings", "Groups", "Component Blacklist"};
 
             using (new GUILayout.VerticalScope("box"))
             {
@@ -694,7 +695,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         GUILayout.Space(-15);
                         using (new GUILayout.VerticalScope(ZSerializerStyler.window, GUILayout.Height(1)))
                         {
-                            var groupsNames = new[] { "Serialization Groups", "Scene Groups" };
+                            var groupsNames = new[] {"Serialization Groups", "Scene Groups"};
                             selectedGroup = GUILayout.Toolbar(selectedGroup, groupsNames);
 
                             serializedObject.Update();
@@ -709,7 +710,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                             var prop = serializedObject.FindProperty("saveGroups")
                                                 .GetArrayElementAtIndex(i);
                                             prop.stringValue = EditorGUILayout.TextArea(prop.stringValue,
-                                                new GUIStyle("textField") { alignment = TextAnchor.MiddleCenter });
+                                                new GUIStyle("textField") {alignment = TextAnchor.MiddleCenter});
                                         }
                                     }
 
@@ -811,19 +812,36 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
                                                     using (new EditorGUILayout.VerticalScope("box"))
                                                     {
-                                                        GUILayout.Label("Scenes", new GUIStyle("label"){alignment = TextAnchor.MiddleCenter});
-                                                        
+                                                        GUILayout.Label("Scenes",
+                                                            new GUIStyle("label")
+                                                                {alignment = TextAnchor.MiddleCenter});
+
                                                         for (var j = 0; j < sceneAssetList.Count; j++)
                                                         {
                                                             var sceneAsset = sceneAssetList[j];
                                                             using (new GUILayout.HorizontalScope())
                                                             {
-                                                                if(!EditorBuildSettings.scenes.Select(s => s.path.Length > 7 ? s.path.Substring(7,s.path.Length-13) : null).Contains(ZSerializerSettings.Instance.sceneGroups[i].scenePaths[j]) && sceneAsset != null)
-                                                                    if(GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("warning"), "Scene not present in Build Settings"), new GUIStyle("label"),GUILayout.Width(20), GUILayout.Height(20)))
-                                                                        EditorWindow.GetWindow(Type.GetType("UnityEditor.BuildPlayerWindow,UnityEditor"));
-                                                                
+                                                                if (!EditorBuildSettings.scenes
+                                                                        .Select(s =>
+                                                                            s.path.Length > 7
+                                                                                ? s.path.Substring(7,
+                                                                                    s.path.Length - 13)
+                                                                                : null).Contains(ZSerializerSettings
+                                                                            .Instance.sceneGroups[i].scenePaths[j]) &&
+                                                                    sceneAsset != null)
+                                                                    if (GUILayout.Button(
+                                                                        new GUIContent(
+                                                                            Resources.Load<Texture2D>("warning"),
+                                                                            "Scene not present in Build Settings"),
+                                                                        new GUIStyle("label"), GUILayout.Width(20),
+                                                                        GUILayout.Height(20)))
+                                                                        EditorWindow.GetWindow(
+                                                                            Type.GetType(
+                                                                                "UnityEditor.BuildPlayerWindow,UnityEditor"));
+
                                                                 EditorGUI.BeginChangeCheck();
-                                                                var newSceneAsset = EditorGUILayout.ObjectField(sceneAsset,
+                                                                var newSceneAsset = EditorGUILayout.ObjectField(
+                                                                    sceneAsset,
                                                                     typeof(SceneAsset), false) as SceneAsset;
                                                                 if (EditorGUI.EndChangeCheck())
                                                                 {
@@ -844,7 +862,8 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
                                                                 if (GUILayout.Button("-", GUILayout.MaxWidth(20)))
                                                                 {
-                                                                    ZSerializerSettings.Instance.sceneGroups[i].scenePaths.RemoveAt(j);
+                                                                    ZSerializerSettings.Instance.sceneGroups[i]
+                                                                        .scenePaths.RemoveAt(j);
                                                                     EditorUtility.SetDirty(ZSerializerSettings
                                                                         .Instance);
                                                                     AssetDatabase.SaveAssets();
@@ -855,7 +874,8 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
                                                         if (GUILayout.Button("+"))
                                                         {
-                                                            ZSerializerSettings.Instance.sceneGroups[i].scenePaths.Add("");
+                                                            ZSerializerSettings.Instance.sceneGroups[i].scenePaths
+                                                                .Add("");
                                                             EditorUtility.SetDirty(ZSerializerSettings.Instance);
                                                             AssetDatabase.SaveAssets();
                                                         }
@@ -874,7 +894,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                         {
                                             selectedGroupIndex = -1;
                                             ZSerializerSettings.Instance.sceneGroups.Add(new SceneGroup
-                                                { name = "New Scene Group" });
+                                                {name = "New Scene Group"});
                                             EditorUtility.SetDirty(ZSerializerSettings.Instance);
                                             AssetDatabase.SaveAssets();
                                         }
@@ -888,7 +908,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         break;
                     case 2:
                         if (ZSerializerSettings.Instance
-                            .componentBlackList.Count > 0)
+                            .unityComponentDataList.Count > 0)
                         {
                             using (new GUILayout.HorizontalScope(GUILayout.Width(1)))
                             {
@@ -898,16 +918,16 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                     using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window,
                                         GUILayout.Height(1),
                                         GUILayout.Height(Mathf.Max(88,
-                                            20.6f * ZSerializerSettings.Instance.componentBlackList.Count))))
+                                            20.6f * ZSerializerSettings.Instance.unityComponentDataList.Count))))
                                     {
                                         foreach (var serializableComponentBlackList in ZSerializerSettings.Instance
-                                            .componentBlackList)
+                                            .unityComponentDataList)
                                         {
                                             if (GUILayout.Button(serializableComponentBlackList.Type.Name,
                                                 GUILayout.Width(150)))
                                             {
                                                 selectedType =
-                                                    ZSerializerSettings.Instance.componentBlackList.IndexOf(
+                                                    ZSerializerSettings.Instance.unityComponentDataList.IndexOf(
                                                         serializableComponentBlackList);
                                             }
                                         }
@@ -925,15 +945,21 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                             new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
                                                 GUILayout.Width(width - 196),
                                                 GUILayout.Height(Mathf.Max(61.8f,
-                                                    20.6f * ZSerializerSettings.Instance.componentBlackList.Count))))
+                                                    20.6f * ZSerializerSettings.Instance.unityComponentDataList
+                                                        .Count))))
                                         {
                                             scrollPos = scrollView.scrollPosition;
-                                            foreach (var componentName in ZSerializerSettings.Instance
-                                                .componentBlackList[selectedType]
-                                                .componentNames)
-                                            {
-                                                GUILayout.Label(componentName);
-                                            }
+
+                                            if (selectedType < ZSerializerSettings.Instance
+                                                .unityComponentDataList.Count && ZSerializerSettings.Instance
+                                                .unityComponentDataList[selectedType].componentNames != null)
+
+                                                foreach (var componentName in ZSerializerSettings.Instance
+                                                    .unityComponentDataList[selectedType]
+                                                    .componentNames)
+                                                {
+                                                    GUILayout.Label(componentName);
+                                                }
                                         }
                                     }
                                 }
@@ -941,7 +967,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
                             if (GUILayout.Button("Delete Blacklist"))
                             {
-                                ZSerializerSettings.Instance.componentBlackList.Clear();
+                                ZSerializerSettings.Instance.unityComponentDataList.Clear();
                                 EditorUtility.SetDirty(ZSerializerSettings.Instance);
                                 AssetDatabase.SaveAssets();
                                 selectedType = 0;
@@ -956,7 +982,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         else
                         {
                             GUILayout.Label("The Component Blacklist is Empty.",
-                                new GUIStyle("label") { alignment = TextAnchor.MiddleCenter });
+                                new GUIStyle("label") {alignment = TextAnchor.MiddleCenter});
                             if (GUILayout.Button("Open Fine Tuner"))
                             {
                                 ZSerializerConfigurator.ShowWindow();
@@ -981,20 +1007,23 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         [MenuItem("Tools/ZSerializer/Reset Project ZUIDs", priority = 21)]
         public static void RefreshZUIDs()
         {
-            var updateNonEmptyZUIDs = EditorUtility.DisplayDialog("Reset ZUIDs", "Would you like to reset your current ZUIDs? This will cause player save files to be unusable", "Yes", "No");
+            var updateNonEmptyZUIDs = EditorUtility.DisplayDialog("Reset ZUIDs",
+                "Would you like to reset your current ZUIDs? This will cause player save files to be unusable", "Yes",
+                "No");
 
             var originalScenePath = SceneManager.GetActiveScene().path;
             var paths = AssetDatabase.GetAllAssetPaths().Where(s => s.EndsWith(".unity")).ToList();
             int numberOfUpdatedZUIDs = 0;
-            
+
             foreach (var path in paths)
             {
                 var split = path.Split('/').Last();
-                
+
                 AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<SceneAsset>(path));
                 foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
                 {
-                    EditorUtility.DisplayProgressBar("Refreshing Project ZUIDs", $"{monoBehaviour}, {split}", paths.IndexOf(path) / (float)paths.Count);
+                    EditorUtility.DisplayProgressBar("Refreshing Project ZUIDs", $"{monoBehaviour}, {split}",
+                        paths.IndexOf(path) / (float) paths.Count);
                     var serializable = monoBehaviour as IZSerializable;
                     if (string.IsNullOrEmpty(serializable.ZUID) || updateNonEmptyZUIDs)
                     {
@@ -1002,10 +1031,11 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         numberOfUpdatedZUIDs++;
                     }
                 }
+
                 EditorSceneManager.SaveOpenScenes();
                 // EditorSceneManager.LoadScene(SceneManager.GetSceneByPath(path).name);
             }
-            
+
             Debug.Log($"<color=cyan>{numberOfUpdatedZUIDs} ZUIDs have been reset!</color>");
             EditorUtility.ClearProgressBar();
             EditorSceneManager.OpenScene(originalScenePath);
@@ -1016,7 +1046,10 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         [MenuItem("Tools/ZSerializer/Generate Unity Component ZSerializers", priority = 20)]
         public static void GenerateUnityComponentClasses()
         {
-            string longScript = @"namespace ZSerializer {
+            string longScript = @"
+using System.Linq;
+using System.Collections.Generic;
+namespace ZSerializer {
 
 ";
 
@@ -1024,7 +1057,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             foreach (var type in types)
             {
                 EditorUtility.DisplayProgressBar("Generating Unity Component ZSerializers", type.Name,
-                    types.IndexOf(type) / (float)types.Count);
+                    types.IndexOf(type) / (float) types.Count);
 
 
                 if (type != typeof(PersistentGameObject))
@@ -1079,27 +1112,42 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                         }
                     }
 
+                    var data = ZSerializerSettings.Instance.unityComponentDataList.FirstOrDefault(data =>
+                        data.Type == type);
+
+                    if (data != null)
+                        foreach (var customVariableEntry in data.customVariableEntries)
+                        {
+                            longScript += $"    public {customVariableEntry.variableType} {customVariableEntry.variableName};\n";
+                        }
+
+
                     longScript += "    public " + type.Name +
                                   "ZSerializer (string ZUID, string GOZUID) : base(ZUID, GOZUID) {\n" +
-                                  "        var instance = ZSerializer.ZSerialize.idMap[ZSerializer.ZSerialize.CurrentGroupID][ZUID] as " + type.FullName +
+                                  "        var instance = ZSerializer.ZSerialize.idMap[ZSerializer.ZSerialize.CurrentGroupID][ZUID] as " +
+                                  type.FullName +
                                   ";\n";
 
                     foreach (var propertyInfo in type
                         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         .Where(ZSerialize.PropertyIsSuitableForZSerializer))
                     {
-                        longScript +=
-                            $"      " + propertyInfo.Name + " = " + "instance." + propertyInfo.Name +
-                            ";\n";
+                        longScript += $"        " + propertyInfo.Name + " = " + "instance." + propertyInfo.Name +
+                                      ";\n";
                     }
 
                     foreach (var fieldInfo in type
                         .GetFields(BindingFlags.Public | BindingFlags.Instance)
                         .Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
                     {
-                        longScript +=
-                            $"        " + fieldInfo.Name + " = " + "instance." + fieldInfo.Name + ";\n";
+                        longScript += $"        " + fieldInfo.Name + " = " + "instance." + fieldInfo.Name + ";\n";
                     }
+                    
+                    if (data != null)
+                        foreach (var customVariableEntry in data.customVariableEntries)
+                        {
+                            longScript += $"        {customVariableEntry.onSerializeVariable};\n";
+                        }
 
                     longScript += "    }\n";
 
@@ -1107,15 +1155,20 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                     longScript +=
                         @"    public override void RestoreValues(UnityEngine.Component component)
     {
-        var _realComponent = component as " + type.FullName + @";
+        var instance = component as " + type.FullName + @";
 ";
                     foreach (var propertyInfo in type
                         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         .Where(ZSerialize.PropertyIsSuitableForZSerializer))
                     {
-                        longScript +=
-                            $"        _realComponent." + propertyInfo.Name + " = " + propertyInfo.Name + ";\n";
+                        longScript += $"        instance." + propertyInfo.Name + " = " + propertyInfo.Name + ";\n";
                     }
+                    
+                    if (data != null)
+                        foreach (var customVariableEntry in data.customVariableEntries)
+                        {
+                            longScript += $"        {customVariableEntry.onDeserializeVariable};\n";
+                        }
 
                     longScript += "    }\n";
                     longScript += "}\n";
@@ -1155,7 +1208,10 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                     EditorUtility.SetDirty(monoBehaviour);
                     PrefabUtility.RecordPrefabInstancePropertyModifications(monoBehaviour);
                 }
-                if(string.IsNullOrEmpty(ZSerializerSettings.Instance.saveGroups[serialize.GroupID])) Debug.LogError($"{monoBehaviour}'s Save Group is empty and thus will not get Serialized, change the Save Group of {monoBehaviour} or reimplement Save Group number {serialize.GroupID+1}");
+
+                if (string.IsNullOrEmpty(ZSerializerSettings.Instance.saveGroups[serialize.GroupID]))
+                    Debug.LogError(
+                        $"{monoBehaviour}'s Save Group is empty and thus will not get Serialized, change the Save Group of {monoBehaviour} or reimplement Save Group number {serialize.GroupID + 1}");
             }
         }
 

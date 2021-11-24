@@ -13,6 +13,7 @@ using Codice.Client.BaseCommands;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
 using UnityEngineInternal;
 using ZSerializer.Internal;
@@ -137,7 +138,7 @@ namespace ZSerializer
                    propertyInfo.GetCustomAttribute<NonZSerialized>() == null &&
                    propertyInfo.GetSetMethod() != null &&
                    propertyInfo.GetSetMethod().IsPublic &&
-                   !ZSerializerSettings.Instance.componentBlackList.IsInBlackList(propertyInfo.ReflectedType,
+                   !ZSerializerSettings.Instance.unityComponentDataList.IsInBlackList(propertyInfo.ReflectedType,
                        propertyInfo.Name);
         }
 
@@ -340,8 +341,17 @@ namespace ZSerializer
 
             for (var i = 0; i < zSavers.Length; i++)
             {
-                zSavers[i] = Activator.CreateInstance(ZSerializerType, components[i].GetZUID(),
-                    components[i].gameObject.GetZUID());
+                try
+                {
+                    zSavers[i] = Activator.CreateInstance(ZSerializerType, components[i].GetZUID(),
+                        components[i].gameObject.GetZUID());
+                }
+                catch (Exception)
+                {
+                    Debug.LogError($"An exception was thrown when trying to create a {ZSerializerType}. This may be caused by an error derived from a Custom Variable Entry. ");
+                    throw;
+                }
+                
                 currentComponentCount++;
                 if (ZSerializerSettings.Instance.serializationType == SerializationType.Async &&
                     currentComponentCount >= ZSerializerSettings.Instance.maxBatchCount)
@@ -867,7 +877,7 @@ namespace ZSerializer
 
         #region Internals
 
-        private async static Task SaveInternal(ZSerializationType zSerializationType)
+        private static async Task SaveInternal(ZSerializationType zSerializationType)
         {
             try
             {

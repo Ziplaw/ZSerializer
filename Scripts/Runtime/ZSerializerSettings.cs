@@ -17,16 +17,41 @@ namespace ZSerializer
 
     // [CreateAssetMenu(fileName = "New ZSerializer Settings", menuName = "ZSerializerSettings", order = 0)]
     [Serializable]
-    public sealed class SerializableComponentBlackList
+    public sealed class UnityComponentData
     {
+        [Serializable]
+        public struct CustomVariableEntry
+        {
+            public string variableType;
+            public string variableName;
+
+            public string onSerializeVariable;
+            public string onDeserializeVariable;
+
+            public CustomVariableEntry(string variableType, string variableName, string onSerializeVariable, string onDeserializeVariable)
+            {
+                this.variableType = variableType;
+                this.variableName = variableName;
+                this.onSerializeVariable = onSerializeVariable;
+                this.onDeserializeVariable = onDeserializeVariable;
+            }
+        }
+
         public Type Type => Type.GetType(typeFullName);
         [SerializeField] private string typeFullName;
-        public List<string> componentNames;
+        public List<string> componentNames = new List<string>();
+        public List<CustomVariableEntry> customVariableEntries = new List<CustomVariableEntry>();
 
-        public SerializableComponentBlackList(Type type, string componentName)
+        public UnityComponentData(Type type, string componentName)
         {
             typeFullName = type.AssemblyQualifiedName;
-            componentNames = new List<string> { componentName };
+            componentNames = new List<string> {componentName};
+        }
+        
+        public UnityComponentData(Type type, CustomVariableEntry customVariableEntry)
+        {
+            typeFullName = type.AssemblyQualifiedName;
+            customVariableEntries = new List<CustomVariableEntry> {customVariableEntry};
         }
     }
 
@@ -57,14 +82,14 @@ namespace ZSerializer
 
         public void DefaultBlackList()
         {
-            componentBlackList.Clear();
-            componentBlackList.SafeAdd(typeof(NavMeshAgent), "path");
-            componentBlackList.SafeAdd(typeof(ParticleSystem), "randomSeed");
-            componentBlackList.SafeAdd(typeof(ParticleSystem), "useAutoRandomSeed");
-            componentBlackList.SafeAdd(typeof(VideoPlayer), "url");
+            unityComponentDataList.Clear();
+            unityComponentDataList.SafeAdd(typeof(NavMeshAgent), "path");
+            unityComponentDataList.SafeAdd(typeof(ParticleSystem), "randomSeed");
+            unityComponentDataList.SafeAdd(typeof(ParticleSystem), "useAutoRandomSeed");
+            unityComponentDataList.SafeAdd(typeof(VideoPlayer), "url");
         }
 
-        [HideInInspector] public List<SerializableComponentBlackList> componentBlackList = new List<SerializableComponentBlackList>();
+        [FormerlySerializedAs("componentBlackList")] [HideInInspector] public List<UnityComponentData> unityComponentDataList = new List<UnityComponentData>();
 
         [HideInInspector] public List<string> saveGroups = new List<string>
         {
@@ -140,7 +165,7 @@ namespace ZSerializer
 
     public static class Extensions
     {
-        public static void SafeAdd(this List<SerializableComponentBlackList> list, Type componentType,
+        public static void SafeAdd(this List<UnityComponentData> list, Type componentType,
             string propertyName)
         {
             var s = list.FirstOrDefault(c => c.Type == componentType);
@@ -155,11 +180,26 @@ namespace ZSerializer
             else
             {
                 list.Add(
-                    new SerializableComponentBlackList(componentType, propertyName));
+                    new UnityComponentData(componentType, propertyName));
             }
         }
 
-        public static void SafeRemove(this List<SerializableComponentBlackList> list, Type componentType,
+        public static void SafeAdd(this List<UnityComponentData> list, Type componentType,
+            UnityComponentData.CustomVariableEntry customVariableEntry)
+        {
+            var s = list.FirstOrDefault(c => c.Type == componentType);
+
+            if (s != null)
+            {
+                s.customVariableEntries.Add(customVariableEntry);
+            }
+            else
+            {
+                list.Add(new UnityComponentData(componentType, customVariableEntry));
+            }
+        }
+
+        public static void SafeRemove(this List<UnityComponentData> list, Type componentType,
             string propertyName)
         {
             var s = list.FirstOrDefault(c => c.Type == componentType);
@@ -168,17 +208,36 @@ namespace ZSerializer
             {
                 s.componentNames.Remove(propertyName);
 
-                if (s.componentNames.Count == 0)
+                if (s.componentNames.Count == 0 && s.customVariableEntries.Count == 0)
+                {
+                    list.Remove(s);
+                }
+                {
+                    list.Remove(s);
+                }
+            }
+        }
+        
+        public static void SafeRemove(this List<UnityComponentData> list, Type componentType,
+            int customEntryIndex)
+        {
+            var s = list.FirstOrDefault(c => c.Type == componentType);
+
+            if (s != null && s.customVariableEntries.Count > customEntryIndex)
+            {
+                s.customVariableEntries.RemoveAt(customEntryIndex);
+
+                if (s.componentNames.Count == 0 && s.customVariableEntries.Count == 0)
                 {
                     list.Remove(s);
                 }
             }
         }
 
-        public static bool IsInBlackList(this List<SerializableComponentBlackList> list, Type componentType,
+        public static bool IsInBlackList(this List<UnityComponentData> list, Type componentType,
             string propertyName)
         {
-            return list.Any(a => a.Type == componentType && a.componentNames.Contains(propertyName));
+            return list.Any(a => a.Type == componentType && a.componentNames != null && a.componentNames.Contains(propertyName));
         }
     }
 }

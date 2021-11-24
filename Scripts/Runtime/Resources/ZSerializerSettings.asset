@@ -25,20 +25,34 @@ MonoBehaviour:
     scenePaths:
     - ZSerializer/Samples/2 - Scene Groups/House/Scenes/Bedroom
     - ZSerializer/Samples/2 - Scene Groups/House/Scenes/Kitchen
-  componentBlackList:
+  unityComponentDataList:
   - typeFullName: UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     componentNames:
     - path
+    customVariableEntries: []
   - typeFullName: UnityEngine.ParticleSystem, UnityEngine.ParticleSystemModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     componentNames:
     - randomSeed
     - useAutoRandomSeed
+    customVariableEntries: []
   - typeFullName: UnityEngine.Video.VideoPlayer, UnityEngine.VideoModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     componentNames:
     - url
+    customVariableEntries: []
+  - typeFullName: UnityEngine.Animations.ParentConstraint, UnityEngine.AnimationModule,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    componentNames: []
+    customVariableEntries:
+    - variableType: List<(UnityEngine.Transform,int)>
+      variableName: sources = new List<(UnityEngine.Transform,int)>()
+      onSerializeVariable: "sources = \nvar list = new List<UnityEngine.Animations.Source>()\ninstance.GetSources(sources.Select(s
+        => new UnityEngine.Animations.ConstraintSource{sourceTransform = s.Item1,
+        weight = s.Item2}).ToList())"
+      onDeserializeVariable: instance.SetSources(sources.Select(s => new UnityEngine.Animations.ConstraintSource{sourceTransform
+        = s.Item1, weight = s.Item2}).ToList())
   saveGroups:
   - Main
   - Settings

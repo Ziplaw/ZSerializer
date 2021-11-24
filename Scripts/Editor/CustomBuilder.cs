@@ -37,7 +37,7 @@ namespace ZSerializer.Editor
                     FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
                         "UnityEngine." + typeName); //THIS MIGHT BREAK IN FUTURE VERSIONS
 
-                ZSerializerSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
+                ZSerializerSettings.Instance.unityComponentDataList.SafeAdd(componentType, propertyName);
             }
 
             if (condition.Contains("CS0200"))
@@ -51,7 +51,7 @@ namespace ZSerializer.Editor
                     FindTypeInsideAssemblies(AppDomain.CurrentDomain.GetAssemblies(),
                         "UnityEngine." + typeName);
                 
-                ZSerializerSettings.Instance.componentBlackList.SafeAdd(componentType, propertyName);
+                ZSerializerSettings.Instance.unityComponentDataList.SafeAdd(componentType, propertyName);
 
             }
 

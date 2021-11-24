@@ -10,8 +10,6 @@ using ZSerializer;
 
 namespace ZSerializer.Editor
 {
-
-
     public class ZSerializerConfigurator : EditorWindow
     {
         [MenuItem("Tools/ZSerializer/ZSerializer Configurator", priority = 1)]
@@ -25,10 +23,23 @@ namespace ZSerializer.Editor
         private List<Type> componentTypes;
         private Type selectedType;
         private List<PropertyInfo> propertyInfoList;
+        private List<UnityComponentData.CustomVariableEntry> _customVariableEntries;
+        private int customVariableEntryEditIndex = -1;
+
+        readonly Color classOrStruct = new Color(0f, 0.79f, 0.69f);
+        readonly Color nativeTypes = new Color(0f, 0.55f, 0.85f);
+
+
+        private string variableType;
+        private string variableName;
+        private string onVariableSerialize;
+        private string onVariableDeserialize;
+
         private string searchTypes;
         private string searchComponents;
         Vector2 scrollPosComponentTypes;
         Vector2 scrollPosComponentProps;
+        Vector2 scrollPosCustomVariableEntry;
 
 
         private void OnEnable()
@@ -39,24 +50,25 @@ namespace ZSerializer.Editor
             searchComponents = "";
         }
 
-        Dictionary<string, string> aliases = new Dictionary<string, string>()
+        readonly Dictionary<string, string> aliases = new Dictionary<string, string>()
         {
-            { "Object", "object" },
-            { "String", "string" },
-            { "Boolean", "bool" },
-            { "Byte", "byte" },
-            { "SByte", "sbyte" },
-            { "Int16", "short" },
-            { "UInt16", "ushort" },
-            { "Int32", "int" },
-            { "UInt32", "uint" },
-            { "Int64", "long" },
-            { "UInt64", "ulong" },
-            { "Single", "float" },
-            { "Double", "double" },
-            { "Decimal", "decimal" },
-            { "Char", "char" }
+            {"Object", "object"},
+            {"String", "string"},
+            {"Boolean", "bool"},
+            {"Byte", "byte"},
+            {"SByte", "sbyte"},
+            {"Int16", "short"},
+            {"UInt16", "ushort"},
+            {"Int32", "int"},
+            {"UInt32", "uint"},
+            {"Int64", "long"},
+            {"UInt64", "ulong"},
+            {"Single", "float"},
+            {"Double", "double"},
+            {"Decimal", "decimal"},
+            {"Char", "char"}
         };
+
 
         private void OnGUI()
         {
@@ -77,6 +89,9 @@ namespace ZSerializer.Editor
                             selectedType = componentType;
                             propertyInfoList = selectedType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                 .Where(PropertyIsSuitableForAssignmentNoBlackList).ToList();
+                            _customVariableEntries = ZSerializerSettings.Instance.unityComponentDataList
+                                .FirstOrDefault(s => s.Type == selectedType)?.customVariableEntries;
+                            customVariableEntryEditIndex = -1;
                         }
                     }
                 }
@@ -84,9 +99,10 @@ namespace ZSerializer.Editor
 
                 using (new EditorGUILayout.VerticalScope(GUILayout.Height(position.height - 5)))
                 {
-                    using (new EditorGUILayout.VerticalScope("helpbox", GUILayout.Height(position.height - 5)))
+                    if (selectedType != null)
                     {
-                        if (selectedType != null)
+                        using (new EditorGUILayout.VerticalScope(
+                            "helpbox" /*, GUILayout.Height(position.height - 10 - 20*3)*/))
                         {
                             searchComponents = GUILayout.TextField(searchComponents,
                                 GUI.skin.FindStyle("ToolbarSeachTextField"));
@@ -100,20 +116,18 @@ namespace ZSerializer.Editor
                                     .Max(p => p.PropertyType.Name.Length);
 
 
-
                                 foreach (var propertyInfo in propertyInfoList.Where(c =>
                                     c.Name.ToLower().Contains(searchComponents.ToLower())))
                                 {
                                     using (new EditorGUILayout.HorizontalScope())
                                     {
                                         bool isWhiteListed =
-                                            !ZSerializerSettings.Instance.componentBlackList.IsInBlackList(selectedType,
+                                            !ZSerializerSettings.Instance.unityComponentDataList.IsInBlackList(
+                                                selectedType,
                                                 propertyInfo.Name);
 
                                         var prev = isWhiteListed;
 
-                                        Color classOrStruct = new Color(0f, 0.79f, 0.69f);
-                                        Color nativeTypes = new Color(0f, 0.55f, 0.85f);
 
                                         string propertyName = aliases.ContainsKey(propertyInfo.PropertyType.Name)
                                             ? aliases[propertyInfo.PropertyType.Name]
@@ -139,54 +153,181 @@ namespace ZSerializer.Editor
                                                 "Change Component Blacklist");
                                             if (isWhiteListed)
                                             {
-                                                ZSerializerSettings.Instance.componentBlackList.SafeRemove(selectedType,
+                                                ZSerializerSettings.Instance.unityComponentDataList.SafeRemove(
+                                                    selectedType,
                                                     propertyInfo.Name);
                                             }
                                             else
                                             {
-                                                ZSerializerSettings.Instance.componentBlackList.SafeAdd(selectedType,
+                                                ZSerializerSettings.Instance.unityComponentDataList.SafeAdd(
+                                                    selectedType,
                                                     propertyInfo.Name);
                                             }
                                         }
                                     }
                                 }
                             }
+                        }
 
-                            if (GUILayout.Button("Remove All"))
-                            {
-                                foreach (var propertyInfo in propertyInfoList.Where(c =>
-                                    c.Name.ToLower().Contains(searchComponents.ToLower())))
+                        using (var scrollView = new GUILayout.ScrollViewScope(scrollPosCustomVariableEntry,
+                            "helpbox" /*, GUILayout.Height(position.height - 10 - 20*3)*/))
+                        {
+                            scrollPosCustomVariableEntry = scrollView.scrollPosition;
+                            GUILayout.Label("Custom Variable Entries",
+                                new GUIStyle("box") {alignment = TextAnchor.MiddleCenter, stretchWidth = true});
+
+                            if (_customVariableEntries != null)
+                                for (var i = 0; i < _customVariableEntries.Count; i++)
                                 {
-                                    ZSerializerSettings.Instance.componentBlackList.SafeAdd(selectedType,
-                                        propertyInfo.Name);
+                                    var customVariableEntry = _customVariableEntries[i];
+                                    using (new GUILayout.HorizontalScope())
+                                    {
+                                        if (i == customVariableEntryEditIndex)
+                                        {
+                                            using (new GUILayout.VerticalScope())
+                                            {
+                                                using (new GUILayout.HorizontalScope())
+                                                {
+                                                    variableType = GUILayout.TextArea(variableType);
+                                                    variableName = GUILayout.TextArea(variableName);
+                                                }
+
+                                                onVariableSerialize = GUILayout.TextArea(onVariableSerialize);
+                                                onVariableDeserialize = GUILayout.TextArea(onVariableDeserialize);
+                                            }
+
+                                            if (GUILayout.Button("Save", GUILayout.Width(50)))
+                                            {
+                                                _customVariableEntries[i] =
+                                                    new UnityComponentData.CustomVariableEntry(variableType,
+                                                        variableName, onVariableSerialize, onVariableDeserialize);
+
+                                                ZSerializerSettings.Instance.unityComponentDataList.First(data =>
+                                                        data.Type == selectedType).customVariableEntries[i] =
+                                                    _customVariableEntries[i];
+
+                                                EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                                AssetDatabase.SaveAssets();
+                                                customVariableEntryEditIndex = -1;
+                                            }
+
+                                            if (GUILayout.Button("-", GUILayout.Width(20)))
+                                            {
+                                                ZSerializerSettings.Instance.unityComponentDataList.SafeRemove(
+                                                    selectedType, i);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            GUILayout.Label(
+                                                string.IsNullOrEmpty(customVariableEntry.variableType)
+                                                    ? ""
+                                                    : customVariableEntry.variableType.Substring(0,
+                                                        Mathf.Min(customVariableEntry.onSerializeVariable.Length - 1,
+                                                            20)) + "...",
+                                                new GUIStyle("label")
+                                                {
+                                                    normal = new GUIStyleState()
+                                                    {
+                                                        textColor = aliases.ContainsValue(customVariableEntry
+                                                            .variableType)
+                                                            ? nativeTypes
+                                                            : classOrStruct
+                                                    }
+                                                });
+
+                                            GUILayout.Label(string.IsNullOrEmpty(customVariableEntry.variableName)
+                                                ? ""
+                                                : customVariableEntry.variableName.Substring(0,
+                                                      Mathf.Min(
+                                                          customVariableEntry.onSerializeVariable.Length -
+                                                          1,
+                                                          30)) +
+                                                  "...");
+
+                                            GUILayout.Label(string.IsNullOrEmpty(customVariableEntry.variableType)
+                                                ? ""
+                                                : customVariableEntry.onSerializeVariable.Substring(0,
+                                                      Mathf.Min(
+                                                          customVariableEntry.onSerializeVariable.Length -
+                                                          1,
+                                                          30)) +
+                                                  "...");
+
+                                            GUILayout.Label(string.IsNullOrEmpty(customVariableEntry.variableType)
+                                                ? ""
+                                                : customVariableEntry.onDeserializeVariable.Substring(0,
+                                                      Mathf.Min(
+                                                          customVariableEntry.onSerializeVariable.Length -
+                                                          1,
+                                                          30)) +
+                                                  "...");
+
+                                            if (GUILayout.Button("Edit", GUILayout.Width(50)))
+                                            {
+                                                variableType = customVariableEntry.variableType;
+                                                variableName = customVariableEntry.variableName;
+                                                onVariableSerialize = customVariableEntry.onSerializeVariable;
+                                                onVariableDeserialize = customVariableEntry.onDeserializeVariable;
+
+                                                customVariableEntryEditIndex = i;
+                                            }
+
+                                            if (GUILayout.Button("-", GUILayout.Width(20)))
+                                            {
+                                                ZSerializerSettings.Instance.unityComponentDataList.SafeRemove(
+                                                    selectedType, i);
+                                            }
+                                        }
+                                    }
                                 }
-                            }
 
-                            if (GUILayout.Button("Select All"))
+                            if (GUILayout.Button("+"))
                             {
-                                foreach (var propertyInfo in propertyInfoList.Where(c =>
-                                    c.Name.ToLower().Contains(searchComponents.ToLower())))
-                                {
-                                    ZSerializerSettings.Instance.componentBlackList.SafeRemove(selectedType,
-                                        propertyInfo.Name);
-                                }
-
-                            }
-
-                            if (GUILayout.Button("Save & Apply"))
-                            {
-                                ZSerializerEditor.GenerateUnityComponentClasses();
+                                ZSerializerSettings.Instance.unityComponentDataList.SafeAdd(selectedType,
+                                    new UnityComponentData.CustomVariableEntry("", "", "", ""));
+                                _customVariableEntries = ZSerializerSettings.Instance.unityComponentDataList
+                                    .FirstOrDefault(s => s.Type == selectedType)?.customVariableEntries;
                                 EditorUtility.SetDirty(ZSerializerSettings.Instance);
                                 AssetDatabase.SaveAssets();
                             }
-
                         }
-                        else
+                    }
+
+                    else
+                    {
+                        GUILayout.Label("Select a Component");
+                    }
+
+                    if (selectedType != null)
+                    {
+                        if (GUILayout.Button("Remove All"))
                         {
-                            GUILayout.Label("Select a Component");
+                            foreach (var propertyInfo in propertyInfoList.Where(c =>
+                                c.Name.ToLower().Contains(searchComponents.ToLower())))
+                            {
+                                ZSerializerSettings.Instance.unityComponentDataList.SafeAdd(selectedType,
+                                    propertyInfo.Name);
+                            }
+                        }
+
+                        if (GUILayout.Button("Select All"))
+                        {
+                            foreach (var propertyInfo in propertyInfoList.Where(c =>
+                                c.Name.ToLower().Contains(searchComponents.ToLower())))
+                            {
+                                ZSerializerSettings.Instance.unityComponentDataList.SafeRemove(selectedType,
+                                    propertyInfo.Name);
+                            }
                         }
 
 
+                        if (GUILayout.Button("Save & Apply"))
+                        {
+                            ZSerializerEditor.GenerateUnityComponentClasses();
+                            EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                            AssetDatabase.SaveAssets();
+                        }
                     }
                 }
             }
@@ -194,8 +335,8 @@ namespace ZSerializer.Editor
 
         internal static bool PropertyIsSuitableForAssignmentNoBlackList(PropertyInfo fieldInfo)
         {
-            // SerializableComponentBlackList blackList =
-            //     ZSerializerSettings.Instance.componentBlackList.FirstOrDefault(c => c.Type == fieldInfo.DeclaringType);
+            // UnityComponentData blackList =
+            //     ZSerializerSettings.Instance.unityComponentDataList.FirstOrDefault(c => c.Type == fieldInfo.DeclaringType);
             // bool isInBlackList = blackList != null;
 
             return fieldInfo.GetCustomAttribute<ObsoleteAttribute>() == null &&
