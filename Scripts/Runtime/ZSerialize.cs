@@ -117,7 +117,6 @@ namespace ZSerializer
                     t == typeof(PersistentGameObject) ||
                     t.IsSubclassOf(typeof(Component)) &&
                     !t.IsSubclassOf(typeof(MonoBehaviour)) &&
-                    t != typeof(Transform) &&
                     t != typeof(MonoBehaviour) &&
                     t.GetCustomAttribute<ObsoleteAttribute>() == null &&
                     t.IsVisible)

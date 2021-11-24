@@ -708,7 +708,7 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 4e91fcb2a3ae29241a246ce682cdb09d
+  _zuid: 8031160004ad9ab44878eac446f6f946
   _gozuid: 2472f67ce3616424883b1e4429548a83
 --- !u!54 &469202270
 Rigidbody:
@@ -740,29 +740,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 1
   groupID: 0
-  _zuid: 7b775fc3f6c1aab47b5757400097c947
+  _zuid: 46891b3ad4c46db46a08446e3f04eee4
   _gozuid: 2472f67ce3616424883b1e4429548a83
   serializedComponents:
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202267}
-    zuid: a54db0b587ac31d49b73763d81b2f962
+    zuid: e64a52dc09c5fac47b35a3818084daa8
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202266}
-    zuid: 039d341c097f2c64ba71b8cfcae8b16e
+    zuid: 587b28d035ec7534ca6e62fa4f982145
   - typeFullName: UnityEngine.SphereCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202265}
-    zuid: 4c10f508141f91741ac91c4d2c7c8218
+    zuid: faf2ade29d39c3743b40cc9f24c03b3f
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202270}
-    zuid: 774f41abe49d49c4ab3fdfb11c2bddc7
+    zuid: 3c33cb41d6eca334d8f51c43ca315d76
 --- !u!1001 &822103306
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -824,11 +824,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 6eb58d02ae4e4de4b955e09d3f258b59
+      value: 429c954860fdabb4ba16692ebfad42a9
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
-      value: 794821728fe9b894dae1cd83f8d84966
+      value: 716c7f2e2722c8141a7c60558dda7114
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
@@ -898,11 +898,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 8077726370ffa87429b05e7ffaa8a0d6
+      value: c87f3931eb96d9745a110e65329036cd
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
-      value: 4b4f3416fbc6b4248803ac99933f9399
+      value: e50e033d6a274ec499c791f6596570de
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
@@ -1223,8 +1223,8 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: cf68b2c1e0da88342a5868800e0fa31e
-  _gozuid: 6316ebdd7bb9c84458b2b0449f2d6341
+  _zuid: e6d0ef9ed6209c84e965a600d0ac4def
+  _gozuid: 4170217b360893643ada680f0b0a0bef
   highScore: 0
   currentScore: 0
   playerName: 
@@ -1390,11 +1390,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: b5777322bce9c30448cd5084a29b0796
+      value: d2d3a3b753075d94f8d7574e00675654
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
-      value: b34dc58d158cfe140b2de03dd6a15208
+      value: ec4cf70b3e030594fbdaef663137424f
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}

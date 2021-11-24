@@ -34,7 +34,7 @@ public class ObjectSpawner : PersistentMonoBehaviour
                 
                 var pg = go.AddComponent<PersistentGameObject>();
                 pg.AddComponent<Rigidbody>(PersistentType.Component);
-                pg.AddComponent<MeshCollider>().convex = true;
+                pg.AddComponent<MeshCollider>(PersistentType.Everything).convex = true;
             }
         }
 

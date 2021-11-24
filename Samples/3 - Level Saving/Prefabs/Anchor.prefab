@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4761420894585310061}
   - component: {fileID: -408583232395929077}
   - component: {fileID: 4095969009253119821}
+  - component: {fileID: 1087470111}
   m_Layer: 0
   m_Name: Anchor
   m_TagString: Untagged
@@ -45,6 +46,7 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -125,19 +127,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: 84d47b368a7220947baadf475edc254a
-  _gozuid: 44e01cd696f5e97439e6affe744d01a3
-  serializedComponents:
-  - typeFullName: UnityEngine.SpriteRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    component: {fileID: 4761420894585310050}
-    zuid: 11d7156878f71474fbb2cf337631295b
-  - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    component: {fileID: 4761420894585310061}
-    zuid: d3a3b7925e680b34f90321ba79e43230
+  _zuid: 08a8a07367f4c374f82ad60e6254c0f7
+  _gozuid: f0054091ecedd7c4cab01a35b0a1f278
+  serializedComponents: []
 --- !u!114 &4095969009253119821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,5 +148,69 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 443bc2c421e041a47baa4e931266fd9b
-  _gozuid: 44e01cd696f5e97439e6affe744d01a3
+  _zuid: 7d8018a2726f7504bb448d7b3d603199
+  _gozuid: f0054091ecedd7c4cab01a35b0a1f278
+  position: {x: 0, y: 0, z: 0}
+  nodeTransform: {fileID: 0}
+--- !u!108 &1087470111
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4761420894585310049}
+  m_Enabled: 1
+  serializedVersion: 10
+  m_Type: 2
+  m_Shape: 0
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Intensity: 1
+  m_Range: 10
+  m_SpotAngle: 30
+  m_InnerSpotAngle: 21.80208
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0

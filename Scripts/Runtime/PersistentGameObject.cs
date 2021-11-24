@@ -173,7 +173,7 @@ namespace ZSerializer
                 ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(serializedComponent.zuid, serializedComponent.component);
             }
         }
-        public T AddComponent<T>(PersistentType persistentType = PersistentType.Everything) where T : Component
+        public T AddComponent<T>(PersistentType persistentType) where T : Component
         {
             return (T)AddComponent(typeof(T), persistentType);
         }

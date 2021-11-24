@@ -31,28 +31,87 @@ MonoBehaviour:
     componentNames:
     - path
     customVariableEntries: []
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls: []
   - typeFullName: UnityEngine.ParticleSystem, UnityEngine.ParticleSystemModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     componentNames:
     - randomSeed
     - useAutoRandomSeed
     customVariableEntries: []
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls: []
   - typeFullName: UnityEngine.Video.VideoPlayer, UnityEngine.VideoModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     componentNames:
     - url
     customVariableEntries: []
-  - typeFullName: UnityEngine.Animations.ParentConstraint, UnityEngine.AnimationModule,
-      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls: []
+  - typeFullName: UnityEngine.HingeJoint, UnityEngine.PhysicsModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
     componentNames: []
     customVariableEntries:
-    - variableType: List<(UnityEngine.Transform,int)>
-      variableName: sources = new List<(UnityEngine.Transform,int)>()
-      onSerializeVariable: "sources = \nvar list = new List<UnityEngine.Animations.Source>()\ninstance.GetSources(sources.Select(s
-        => new UnityEngine.Animations.ConstraintSource{sourceTransform = s.Item1,
-        weight = s.Item2}).ToList())"
-      onDeserializeVariable: instance.SetSources(sources.Select(s => new UnityEngine.Animations.ConstraintSource{sourceTransform
-        = s.Item1, weight = s.Item2}).ToList())
+    - variableType: int
+      variableName: amount
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls: []
+  - typeFullName: UnityEngine.HingeJoint2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - motor
+    - limits
+    customVariableEntries:
+    - variableType: Vector2
+      variableName: serializableLimits
+    - variableType: Vector2
+      variableName: serializableMotor
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -7866980211983801819, guid: 800c2cad99a8dcc489f9ebd3db087bc2, type: 3}
+          m_TargetAssemblyTypeName: CustomHingeSerializer, Assembly-CSharp
+          m_MethodName: SerializeJoint
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -7866980211983801819, guid: 800c2cad99a8dcc489f9ebd3db087bc2, type: 3}
+          m_TargetAssemblyTypeName: CustomHingeSerializer, Assembly-CSharp
+          m_MethodName: DeserializeJoint
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
   saveGroups:
   - Main
   - Settings

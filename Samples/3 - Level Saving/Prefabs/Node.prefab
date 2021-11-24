@@ -43,6 +43,7 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -115,8 +116,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1689612743638498566}
   - component: {fileID: 1689612743638498564}
-  - component: {fileID: 1689612743638498565}
   - component: {fileID: -63413333840498845}
+  - component: {fileID: 1688716198872695089}
   m_Layer: 0
   m_Name: Node
   m_TagString: Untagged
@@ -160,7 +161,39 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!61 &1689612743638498565
+--- !u!114 &-63413333840498845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689612743638498561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showSettings: 0
+  groupID: 0
+  _zuid: e31e17ece52ff044c9c58e6c96ef70aa
+  _gozuid: cb5ab91e6934c374db3d6f7d83cfe065
+  serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 1689612743638498566}
+    zuid: 869fd03426868e84ab9f97c66130fe2d
+  - typeFullName: UnityEngine.Rigidbody2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 1689612743638498564}
+    zuid: 58fb3028dcfb11c4eb3785002a4e5fb4
+  - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 1688716198872695089}
+    zuid: 38387b2a79b81a446b0250cbbba80b2d
+--- !u!61 &1688716198872695089
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -186,30 +219,3 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 0.4}
   m_EdgeRadius: 0
---- !u!114 &-63413333840498845
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1689612743638498561}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  showSettings: 0
-  groupID: 0
-  _zuid: 717b4899b9d928f4b880c7340b5785d3
-  _gozuid: 77995560441b5db4985c7052704df5fe
-  serializedComponents:
-  - typeFullName: UnityEngine.Rigidbody2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    component: {fileID: 1689612743638498564}
-    zuid: f1dc93c69f81ecb41bb8eb8aeadc0052
-  - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    component: {fileID: 1689612743638498565}
-    zuid: 0505e410e36704d4097ece69112205ea

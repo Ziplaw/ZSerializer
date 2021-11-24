@@ -53,6 +53,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -114,6 +115,6 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: dd111cf2d3d8e904487852c7d6d72181
-  _gozuid: 18272db144888844cbcd89f42f729473
+  _zuid: 8d7c393a6009bc247842b4e43fd0fccd
+  _gozuid: 2d06ccf81ec53f942a09ecf7ef18420d
   hits: 0

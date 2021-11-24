@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.Video;
@@ -25,15 +26,10 @@ namespace ZSerializer
             public string variableType;
             public string variableName;
 
-            public string onSerializeVariable;
-            public string onDeserializeVariable;
-
-            public CustomVariableEntry(string variableType, string variableName, string onSerializeVariable, string onDeserializeVariable)
+            public CustomVariableEntry(string variableType, string variableName)
             {
                 this.variableType = variableType;
                 this.variableName = variableName;
-                this.onSerializeVariable = onSerializeVariable;
-                this.onDeserializeVariable = onDeserializeVariable;
             }
         }
 
@@ -41,6 +37,8 @@ namespace ZSerializer
         [SerializeField] private string typeFullName;
         public List<string> componentNames = new List<string>();
         public List<CustomVariableEntry> customVariableEntries = new List<CustomVariableEntry>();
+        public UnityEvent<ZSerializer.Internal.ZSerializer, Component> OnSerialize;
+        public UnityEvent<ZSerializer.Internal.ZSerializer, Component> OnDeserialize;
 
         public UnityComponentData(Type type, string componentName)
         {

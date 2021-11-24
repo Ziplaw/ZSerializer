@@ -64,7 +64,10 @@ namespace ZSerializer
                     (pgSerializedComponent.persistenceType != PersistentType.None ||
                      !ZSerializerSettings.Instance.advancedSerialization))
                 {
-                    var addedComponent = gameObject.AddComponent(pgSerializedComponent.Type);
+                    Component addedComponent;
+                    if (pgSerializedComponent.Type == typeof(Transform)) addedComponent = gameObject.transform;
+                    else addedComponent = gameObject.AddComponent(pgSerializedComponent.Type);
+                    
                     serializedComponents[serializedComponents.IndexOf(pgSerializedComponent)].component =
                         addedComponent;
                     ZSerialize.idMap[ZSerialize.CurrentGroupID][pgSerializedComponent.zuid] = addedComponent;

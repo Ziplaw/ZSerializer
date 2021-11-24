@@ -52,21 +52,21 @@ namespace ZSerializer.Editor
 
         readonly Dictionary<string, string> aliases = new Dictionary<string, string>()
         {
-            {"Object", "object"},
-            {"String", "string"},
-            {"Boolean", "bool"},
-            {"Byte", "byte"},
-            {"SByte", "sbyte"},
-            {"Int16", "short"},
-            {"UInt16", "ushort"},
-            {"Int32", "int"},
-            {"UInt32", "uint"},
-            {"Int64", "long"},
-            {"UInt64", "ulong"},
-            {"Single", "float"},
-            {"Double", "double"},
-            {"Decimal", "decimal"},
-            {"Char", "char"}
+            { "Object", "object" },
+            { "String", "string" },
+            { "Boolean", "bool" },
+            { "Byte", "byte" },
+            { "SByte", "sbyte" },
+            { "Int16", "short" },
+            { "UInt16", "ushort" },
+            { "Int32", "int" },
+            { "UInt32", "uint" },
+            { "Int64", "long" },
+            { "UInt64", "ulong" },
+            { "Single", "float" },
+            { "Double", "double" },
+            { "Decimal", "decimal" },
+            { "Char", "char" }
         };
 
 
@@ -101,80 +101,75 @@ namespace ZSerializer.Editor
                 {
                     if (selectedType != null)
                     {
-                        using (new EditorGUILayout.VerticalScope(
-                            "helpbox" /*, GUILayout.Height(position.height - 10 - 20*3)*/))
+                        using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPosComponentProps, "helpbox"))
                         {
+                            scrollPosComponentProps = scrollView.scrollPosition;
                             searchComponents = GUILayout.TextField(searchComponents,
                                 GUI.skin.FindStyle("ToolbarSeachTextField"));
-                            using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPosComponentProps))
+
+                            GUILayout.Label("Unity Variables",
+                                new GUIStyle("box") { alignment = TextAnchor.MiddleCenter, stretchWidth = true });
+
+
+                            int longestPropertyName = selectedType
+                                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                .Where(PropertyIsSuitableForAssignmentNoBlackList)
+                                .Max(p => p.PropertyType.Name.Length);
+
+
+                            foreach (var propertyInfo in propertyInfoList.Where(c =>
+                                c.Name.ToLower().Contains(searchComponents.ToLower())))
                             {
-                                scrollPosComponentProps = scrollView.scrollPosition;
-
-                                int longestPropertyName = selectedType
-                                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                    .Where(PropertyIsSuitableForAssignmentNoBlackList)
-                                    .Max(p => p.PropertyType.Name.Length);
-
-
-                                foreach (var propertyInfo in propertyInfoList.Where(c =>
-                                    c.Name.ToLower().Contains(searchComponents.ToLower())))
+                                using (new EditorGUILayout.HorizontalScope())
                                 {
-                                    using (new EditorGUILayout.HorizontalScope())
+                                    bool isWhiteListed =
+                                        !ZSerializerSettings.Instance.unityComponentDataList.IsInBlackList(
+                                            selectedType,
+                                            propertyInfo.Name);
+
+                                    var prev = isWhiteListed;
+
+
+                                    string propertyName = aliases.ContainsKey(propertyInfo.PropertyType.Name)
+                                        ? aliases[propertyInfo.PropertyType.Name]
+                                        : propertyInfo.PropertyType.Name;
+
+                                    isWhiteListed = GUILayout.Toggle(isWhiteListed, GUIContent.none,
+                                        GUILayout.Width(15));
+                                    GUILayout.Label(propertyName,
+                                        new GUIStyle("label")
+                                        {
+                                            normal = new GUIStyleState()
+                                            {
+                                                textColor = aliases.ContainsKey(propertyInfo.PropertyType.Name)
+                                                    ? nativeTypes
+                                                    : classOrStruct
+                                            }
+                                        }, GUILayout.Width(longestPropertyName * 7));
+                                    GUILayout.Label(propertyInfo.Name);
+
+                                    if (isWhiteListed != prev)
                                     {
-                                        bool isWhiteListed =
-                                            !ZSerializerSettings.Instance.unityComponentDataList.IsInBlackList(
+                                        Undo.RecordObject(ZSerializerSettings.Instance,
+                                            "Change Component Blacklist");
+                                        if (isWhiteListed)
+                                        {
+                                            ZSerializerSettings.Instance.unityComponentDataList.SafeRemove(
                                                 selectedType,
                                                 propertyInfo.Name);
-
-                                        var prev = isWhiteListed;
-
-
-                                        string propertyName = aliases.ContainsKey(propertyInfo.PropertyType.Name)
-                                            ? aliases[propertyInfo.PropertyType.Name]
-                                            : propertyInfo.PropertyType.Name;
-
-                                        isWhiteListed = GUILayout.Toggle(isWhiteListed, GUIContent.none,
-                                            GUILayout.Width(15));
-                                        GUILayout.Label(propertyName,
-                                            new GUIStyle("label")
-                                            {
-                                                normal = new GUIStyleState()
-                                                {
-                                                    textColor = aliases.ContainsKey(propertyInfo.PropertyType.Name)
-                                                        ? nativeTypes
-                                                        : classOrStruct
-                                                }
-                                            }, GUILayout.Width(longestPropertyName * 7));
-                                        GUILayout.Label(propertyInfo.Name);
-
-                                        if (isWhiteListed != prev)
+                                        }
+                                        else
                                         {
-                                            Undo.RecordObject(ZSerializerSettings.Instance,
-                                                "Change Component Blacklist");
-                                            if (isWhiteListed)
-                                            {
-                                                ZSerializerSettings.Instance.unityComponentDataList.SafeRemove(
-                                                    selectedType,
-                                                    propertyInfo.Name);
-                                            }
-                                            else
-                                            {
-                                                ZSerializerSettings.Instance.unityComponentDataList.SafeAdd(
-                                                    selectedType,
-                                                    propertyInfo.Name);
-                                            }
+                                            ZSerializerSettings.Instance.unityComponentDataList.SafeAdd(
+                                                selectedType,
+                                                propertyInfo.Name);
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        using (var scrollView = new GUILayout.ScrollViewScope(scrollPosCustomVariableEntry,
-                            "helpbox" /*, GUILayout.Height(position.height - 10 - 20*3)*/))
-                        {
-                            scrollPosCustomVariableEntry = scrollView.scrollPosition;
                             GUILayout.Label("Custom Variable Entries",
-                                new GUIStyle("box") {alignment = TextAnchor.MiddleCenter, stretchWidth = true});
+                                new GUIStyle("box") { alignment = TextAnchor.MiddleCenter, stretchWidth = true });
 
                             if (_customVariableEntries != null)
                                 for (var i = 0; i < _customVariableEntries.Count; i++)
@@ -188,19 +183,16 @@ namespace ZSerializer.Editor
                                             {
                                                 using (new GUILayout.HorizontalScope())
                                                 {
-                                                    variableType = GUILayout.TextArea(variableType);
-                                                    variableName = GUILayout.TextArea(variableName);
+                                                    variableType = GUILayout.TextField(variableType);
+                                                    variableName = GUILayout.TextField(variableName);
                                                 }
-
-                                                onVariableSerialize = GUILayout.TextArea(onVariableSerialize);
-                                                onVariableDeserialize = GUILayout.TextArea(onVariableDeserialize);
                                             }
 
                                             if (GUILayout.Button("Save", GUILayout.Width(50)))
                                             {
                                                 _customVariableEntries[i] =
                                                     new UnityComponentData.CustomVariableEntry(variableType,
-                                                        variableName, onVariableSerialize, onVariableDeserialize);
+                                                        variableName);
 
                                                 ZSerializerSettings.Instance.unityComponentDataList.First(data =>
                                                         data.Type == selectedType).customVariableEntries[i] =
@@ -213,70 +205,48 @@ namespace ZSerializer.Editor
 
                                             if (GUILayout.Button("-", GUILayout.Width(20)))
                                             {
+                                                customVariableEntryEditIndex = -1;
+
                                                 ZSerializerSettings.Instance.unityComponentDataList.SafeRemove(
                                                     selectedType, i);
+                                                EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                                AssetDatabase.SaveAssets();
                                             }
                                         }
                                         else
                                         {
-                                            GUILayout.Label(
-                                                string.IsNullOrEmpty(customVariableEntry.variableType)
-                                                    ? ""
-                                                    : customVariableEntry.variableType.Substring(0,
-                                                        Mathf.Min(customVariableEntry.onSerializeVariable.Length - 1,
-                                                            20)) + "...",
-                                                new GUIStyle("label")
+                                            using (new EditorGUILayout.VerticalScope())
+                                            {
+                                                using (new EditorGUILayout.HorizontalScope())
                                                 {
-                                                    normal = new GUIStyleState()
+                                                    using (new EditorGUI.DisabledScope(true))
                                                     {
-                                                        textColor = aliases.ContainsValue(customVariableEntry
-                                                            .variableType)
-                                                            ? nativeTypes
-                                                            : classOrStruct
+                                                        GUILayout.Toggle(true, GUIContent.none, GUILayout.Width(15));
                                                     }
-                                                });
 
-                                            GUILayout.Label(string.IsNullOrEmpty(customVariableEntry.variableName)
-                                                ? ""
-                                                : customVariableEntry.variableName.Substring(0,
-                                                      Mathf.Min(
-                                                          customVariableEntry.onSerializeVariable.Length -
-                                                          1,
-                                                          30)) +
-                                                  "...");
 
-                                            GUILayout.Label(string.IsNullOrEmpty(customVariableEntry.variableType)
-                                                ? ""
-                                                : customVariableEntry.onSerializeVariable.Substring(0,
-                                                      Mathf.Min(
-                                                          customVariableEntry.onSerializeVariable.Length -
-                                                          1,
-                                                          30)) +
-                                                  "...");
+                                                    GUILayout.Label(customVariableEntry.variableType,
+                                                        new GUIStyle("label")
+                                                        {
+                                                            normal = new GUIStyleState
+                                                            {
+                                                                textColor = aliases.ContainsValue(customVariableEntry
+                                                                    .variableType)
+                                                                    ? nativeTypes
+                                                                    : classOrStruct
+                                                            }
+                                                        }, GUILayout.Width(longestPropertyName * 7));
 
-                                            GUILayout.Label(string.IsNullOrEmpty(customVariableEntry.variableType)
-                                                ? ""
-                                                : customVariableEntry.onDeserializeVariable.Substring(0,
-                                                      Mathf.Min(
-                                                          customVariableEntry.onSerializeVariable.Length -
-                                                          1,
-                                                          30)) +
-                                                  "...");
+                                                    GUILayout.Label(customVariableEntry.variableName);
+                                                }
+                                            }
 
                                             if (GUILayout.Button("Edit", GUILayout.Width(50)))
                                             {
                                                 variableType = customVariableEntry.variableType;
                                                 variableName = customVariableEntry.variableName;
-                                                onVariableSerialize = customVariableEntry.onSerializeVariable;
-                                                onVariableDeserialize = customVariableEntry.onDeserializeVariable;
 
                                                 customVariableEntryEditIndex = i;
-                                            }
-
-                                            if (GUILayout.Button("-", GUILayout.Width(20)))
-                                            {
-                                                ZSerializerSettings.Instance.unityComponentDataList.SafeRemove(
-                                                    selectedType, i);
                                             }
                                         }
                                     }
@@ -285,12 +255,38 @@ namespace ZSerializer.Editor
                             if (GUILayout.Button("+"))
                             {
                                 ZSerializerSettings.Instance.unityComponentDataList.SafeAdd(selectedType,
-                                    new UnityComponentData.CustomVariableEntry("", "", "", ""));
+                                    new UnityComponentData.CustomVariableEntry("type", "name"));
                                 _customVariableEntries = ZSerializerSettings.Instance.unityComponentDataList
                                     .FirstOrDefault(s => s.Type == selectedType)?.customVariableEntries;
+
+                                if (_customVariableEntries != null)
+                                    customVariableEntryEditIndex = _customVariableEntries.Count - 1;
+                                variableType = "type";
+                                variableName = "name";
                                 EditorUtility.SetDirty(ZSerializerSettings.Instance);
                                 AssetDatabase.SaveAssets();
                             }
+                        }
+
+                        using (new EditorGUILayout.HorizontalScope("helpbox"))
+                        {
+                            var serializedObject = new SerializedObject(ZSerializerSettings.Instance);
+
+                            serializedObject.Update();
+                            for (var i = 0; i < ZSerializerSettings.Instance.unityComponentDataList.Count; i++)
+                            {
+                                if (ZSerializerSettings.Instance.unityComponentDataList[i].Type == selectedType)
+                                {
+                                    EditorGUILayout.PropertyField(serializedObject
+                                        .FindProperty("unityComponentDataList").GetArrayElementAtIndex(i)
+                                        .FindPropertyRelative("OnSerialize"));
+                                    EditorGUILayout.PropertyField(serializedObject
+                                        .FindProperty("unityComponentDataList").GetArrayElementAtIndex(i)
+                                        .FindPropertyRelative("OnDeserialize"));
+                                }
+                            }
+
+                            serializedObject.ApplyModifiedProperties();
                         }
                     }
 

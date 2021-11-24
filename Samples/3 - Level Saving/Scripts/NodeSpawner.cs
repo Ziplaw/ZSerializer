@@ -6,14 +6,17 @@ using UnityEngine;
 using UnityEngine.Animations;
 using ZSerializer;
 
-public class NodeSpawner : MonoBehaviour
+public class NodeSpawner : PersistentMonoBehaviour
 {
     private Camera cam;
     public GameObject roadPrefab;
     public GameObject anchorPrefab;
-    public Transform currentInstancedRoad;
+    public Transform currentInstancedNode;
+    public Transform lastPlacedNode;
+    public Anchor lastPlacedAnchor;
     public UIManager uiManager;
 
+    [Serializable]
     public struct TransformData
     {
         public Transform transform;
@@ -27,7 +30,7 @@ public class NodeSpawner : MonoBehaviour
         }
     }
     
-    private List<TransformData> initialTransformDatas = new List<TransformData>();
+    public List<TransformData> initialTransformDatas = new List<TransformData>();
 
     private void Start()
     {
@@ -36,19 +39,22 @@ public class NodeSpawner : MonoBehaviour
 
     void CreateNode(Transform anchor)
     {
-        currentInstancedRoad = Instantiate(roadPrefab, anchor.position, Quaternion.identity, transform).transform;
-        var dj = currentInstancedRoad.GetComponent<PersistentGameObject>().AddComponent<HingeJoint2D>();
-        dj.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-        var pc = anchor.GetComponent<ParentConstraint>();
-        if (pc)
+        lastPlacedNode = currentInstancedNode;
+        currentInstancedNode = Instantiate(roadPrefab, anchor.position, Quaternion.identity, transform).transform;
+        var hingeJoint2D = currentInstancedNode.GetComponent<PersistentGameObject>().AddComponent<HingeJoint2D>(PersistentType.Everything);
+        hingeJoint2D.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+        var anchorComponent = anchor.GetComponent<Anchor>();
+        if (anchorComponent.nodeTransform)
         {
-            dj.connectedBody = pc.GetSource(0).sourceTransform.GetComponent<Rigidbody2D>();
+            hingeJoint2D.connectedBody = anchorComponent.nodeTransform.GetComponent<Rigidbody2D>();
         }
     }
+    
+    
 
     private void Update()
     {
-        if (!currentInstancedRoad)
+        if (!currentInstancedNode)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -82,26 +88,27 @@ public class NodeSpawner : MonoBehaviour
             mousePosition.z = 0f;
 
             Vector2 v = cam.ScreenToWorldPoint(mousePosition);
-            var localScale = currentInstancedRoad.localScale;
-            localScale.x = Mathf.Clamp((v - (Vector2)currentInstancedRoad.position).magnitude, 0, 2);
-            currentInstancedRoad.localScale = localScale;
+            var localScale = currentInstancedNode.localScale;
+            localScale.x = Mathf.Clamp((v - (Vector2)currentInstancedNode.position).magnitude, 0, 2);
+            currentInstancedNode.localScale = localScale;
 
-            var quaternion = currentInstancedRoad.rotation;
-            quaternion.eulerAngles = new Vector3(0, 0, Mathf.Atan2(v.y - currentInstancedRoad.position.y, v.x - currentInstancedRoad.position.x) * Mathf.Rad2Deg);
-            currentInstancedRoad.rotation = quaternion;
+            var quaternion = currentInstancedNode.rotation;
+            quaternion.eulerAngles = new Vector3(0, 0, Mathf.Atan2(v.y - currentInstancedNode.position.y, v.x - currentInstancedNode.position.x) * Mathf.Rad2Deg);
+            currentInstancedNode.rotation = quaternion;
 
             if (Input.GetMouseButtonDown(0))
             {
-                var pc = Instantiate(anchorPrefab, currentInstancedRoad.position + currentInstancedRoad.right * currentInstancedRoad.localScale.x, Quaternion.identity, transform).GetComponent<PersistentGameObject>().AddComponent<ParentConstraint>();
-                pc.AddSource(new ConstraintSource { sourceTransform = currentInstancedRoad, weight = 1 });
-                pc.SetTranslationOffset(0, new Vector3(currentInstancedRoad.localScale.x, 0, 0));
-                pc.constraintActive = true;
-                CreateNode(pc.transform);
+                lastPlacedAnchor = Instantiate(anchorPrefab, currentInstancedNode.position + currentInstancedNode.right * currentInstancedNode.localScale.x, Quaternion.identity, transform).GetComponent<Anchor>();
+                lastPlacedAnchor.nodeTransform = currentInstancedNode;
+                CreateNode(lastPlacedAnchor.transform);
             }
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                Destroy(currentInstancedRoad.gameObject);
+                var hinge = lastPlacedAnchor.GetComponent<PersistentGameObject>().AddComponent<HingeJoint2D>(PersistentType.Everything);
+                hinge.GetComponent<BoxCollider2D>().isTrigger = false;
+                hinge.connectedBody = lastPlacedNode.GetComponent<Rigidbody2D>();
+                Destroy(currentInstancedNode.gameObject);
             }
         }
     }
