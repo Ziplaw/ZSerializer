@@ -228,12 +228,12 @@ namespace ZSerializer
         public static List<string> GetLevelNames()
         {
             List<string> levels = new List<string>();
-            string[] dPaths = Directory.GetDirectories(GetGlobalFilePath(), "*levels");
+            string[] dPaths = Directory.GetDirectories(GetGlobalFilePath(), "levels");
             if (dPaths.Length > 0)
             {
-                foreach (var s1 in Directory.GetFiles(dPaths[0]).Where(s => !s.Contains("assemblies-")))
+                foreach (var s1 in Directory.GetDirectories(dPaths[0]))
                 {
-                    levels.Add(s1.Split('\\').Last().Split('/').Last().Split('.')[0]);
+                    levels.Add(s1.Split('/','\\').Last());
                 }
             }
 

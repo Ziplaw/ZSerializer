@@ -222,8 +222,8 @@ namespace ZSerializer
         public int layer;
         public string tag;
 
-        public Vector3 position;
-        public Quaternion rotation;
+        public Vector3 localPosition;
+        public Quaternion localRotation;
         public Vector3 size;
 
         public GameObject parent;
@@ -245,12 +245,14 @@ namespace ZSerializer
             o.layer = data.layer;
             o.tag = data.tag;
 
-            o.transform.position = data.position;
-            o.transform.rotation = data.rotation;
-            o.transform.localScale = data.size;
-
             o.transform.SetParent(data.parent != null ? data.parent.transform : null);
             o.transform.SetSiblingIndex(data.loadingOrder.y);
+            
+            o.transform.localPosition = data.localPosition;
+            o.transform.localRotation = data.localRotation;
+            o.transform.localScale = data.size;
+
+            
 
             return o;
         }

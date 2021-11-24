@@ -35,8 +35,8 @@ namespace ZSerializer
                 isStatic = _componentParent.isStatic,
                 layer = PersistentGameObjectInstance.gameObject.layer,
                 name = _componentParent.name,
-                position = _componentParent.transform.position,
-                rotation = _componentParent.transform.rotation,
+                localPosition = _componentParent.transform.localPosition,
+                localRotation = _componentParent.transform.localRotation,
                 size = _componentParent.transform.localScale,
                 tag = _componentParent.tag,
                 parent = parent
