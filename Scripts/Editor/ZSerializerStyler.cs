@@ -51,15 +51,19 @@ namespace ZSerializer.Editor
             get
             {
                 if (_main == default)
-                    _main = new Color(0.49f, 1f, 0.93f).ToHexadecimal();
+                    _main = _mainColor.ToHexadecimal();
                 return  _main;
             }
         }
 
-        public static string _yellow;
-        public static string _red;
-        public static string _off;
-        public static string _main;
+        public static Color MainColor => _mainColor;
+
+        private static readonly Color _mainColor = new Color(0.49f, 1f, 0.93f);
+
+        private static string _yellow;
+        private static string _red;
+        private static string _off;
+        private static string _main;
         public ZSerializerStyler()
         {
             GetEveryResource();

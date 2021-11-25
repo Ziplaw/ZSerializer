@@ -232,7 +232,6 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -1493,12 +1492,7 @@ MonoBehaviour:
   groupID: 0
   _zuid: c12e02ad40c41354c8a758c10e62f772
   _gozuid: e64ccc49508fd2e43ba0d4048df025fa
-  serializedComponents:
-  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    component: {fileID: 1865041213}
-    zuid: eb2c8bff2dbf21f43a8c22361fc53ac3
+  serializedComponents: []
 --- !u!1 &1933510813
 GameObject:
   m_ObjectHideFlags: 0
@@ -1761,7 +1755,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _zuid
-      value: a3368d97cd2653741a6c17a4a762e22a
+      value: 6b2aad5f809782c49a28194a49731afd
+      objectReference: {fileID: 0}
+    - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
+      propertyPath: _gozuid
+      value: 3e71ee542bfb0f7428e3aa4c2c8eb990
       objectReference: {fileID: 0}
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: serializedComponents.Array.data[0].zuid
@@ -1781,7 +1779,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4095969009253119821, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _zuid
-      value: ccb468655b62b154ea5e2ed8118907d8
+      value: 28e355ec1bce93142bbf69a554c80343
+      objectReference: {fileID: 0}
+    - target: {fileID: 4095969009253119821, guid: cf542704a29200d4385b3da3071d854c, type: 3}
+      propertyPath: _gozuid
+      value: 3e71ee542bfb0f7428e3aa4c2c8eb990
       objectReference: {fileID: 0}
     - target: {fileID: 4761420894585310049, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: m_Name

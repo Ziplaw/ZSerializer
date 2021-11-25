@@ -76,7 +76,7 @@ public class PersistentGameObjectEditor : Editor
                                 (ZSerializerSettings.Instance.debugMode ? $"({component.zuid})" : ""),
                                 new GUIStyle("helpbox")
                                 {
-                                    font = styler.header.font, normal = new GUIStyleState() { textColor = fontColor },
+                                    font = styler.header.font, normal = new GUIStyleState() {textColor = fontColor},
                                     alignment = TextAnchor.MiddleCenter
                                 }, GUILayout.MaxWidth(ZSerializerSettings.Instance.debugMode ? 150 : 100));
 
@@ -98,23 +98,36 @@ public class PersistentGameObjectEditor : Editor
         }
         else
         {
+            // GUILayout.Label("Serialized Components",
+            //     new GUIStyle("box") {alignment = TextAnchor.MiddleCenter, stretchWidth = true});
+                    GUILayout.Space(-15);
+
+            using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
+            {
+                for (var i = 0; i < manager.serializedComponents.Count; i++)
+                {
+                    var serializedComponent = manager.serializedComponents[i];
+                    
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Box(EditorGUIUtility.ObjectContent(null,
+                            serializedComponent.component.GetType()).image, new GUIStyle("label"),
+                        GUILayout.Width(16), GUILayout.Height(16));
+                    // GUILayout.Label(serializedComponent.component.GetType().Name,
+                    //     new GUIStyle("label") {fontSize = 12});
+                    GUILayout.FlexibleSpace();
+                    if (i != manager.serializedComponents.Count - 1)
+                    {
+                        GUILayout.Label("|", new GUIStyle("label") {fontSize = 12, normal = {textColor = new Color(0.51f, 0.51f, 0.51f)}});
+                    }
+                }
+            }
+
             if (ZSerializerSettings.Instance.debugMode)
             {
                 using (new EditorGUI.DisabledScope(true))
                 {
                     EditorGUILayout.TextField("ZUID", manager.ZUID);
                     EditorGUILayout.TextField("GameObject ZUID", manager.GOZUID);
-                }
-            }
-            
-            GUILayout.Label("Serialized Components", new GUIStyle("box"){alignment = TextAnchor.MiddleCenter, stretchWidth = true});
-            foreach (var managerSerializedComponent in manager.serializedComponents)
-            {
-                using (new GUILayout.HorizontalScope("box"))
-                {
-                    GUILayout.Box(EditorGUIUtility.ObjectContent(null,
-                        managerSerializedComponent.component.GetType()).image, GUILayout.Width(20), GUILayout.Height(20));
-                    GUILayout.Label(managerSerializedComponent.component.GetType().Name);
                 }
             }
         }

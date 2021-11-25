@@ -27,7 +27,7 @@ public class CustomHingeSerializer : MonoBehaviour
             motorSpeed = hingeSerializer.serializableMotor.x,
             maxMotorTorque = hingeSerializer.serializableMotor.y
         };
-
+        
         hinge.useLimits = hingeSerializer.useLimits;
         hinge.useMotor = hingeSerializer.useMotor;
     }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ZSerializerSettings
   m_EditorClassIdentifier: 
   packageInitialized: 1
-  debugMode: 1
+  debugMode: 0
   autoRebuildZSerializers: 1
   selectedSaveFile: 0
   encryptData: 0
