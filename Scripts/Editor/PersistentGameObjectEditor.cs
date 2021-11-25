@@ -34,14 +34,14 @@ public class PersistentGameObjectEditor : Editor
         GUILayout.Space(-15);
         using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
         {
-            GUILayout.Label($"<color=#{ZSerializerStyler.MainHex}>  Persistent GameObject</color>", styler.header, GUILayout.MinHeight(28));
+            GUILayout.Label($"<color=#{ZSerializerStyler.MainHex}>  Persistent GameObject</color>", styler.header,
+                GUILayout.MinHeight(28));
             manager.showSettings = ZSerializerEditor.SettingsButton(manager.showSettings, styler, 28);
             PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
         }
 
         if (manager.showSettings)
         {
-
             ZSerializerEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager, false);
             if (ZSerializerSettings.Instance.advancedSerialization)
             {
@@ -76,7 +76,7 @@ public class PersistentGameObjectEditor : Editor
                                 (ZSerializerSettings.Instance.debugMode ? $"({component.zuid})" : ""),
                                 new GUIStyle("helpbox")
                                 {
-                                    font = styler.header.font, normal = new GUIStyleState() {textColor = fontColor},
+                                    font = styler.header.font, normal = new GUIStyleState() { textColor = fontColor },
                                     alignment = TextAnchor.MiddleCenter
                                 }, GUILayout.MaxWidth(ZSerializerSettings.Instance.debugMode ? 150 : 100));
 
@@ -104,6 +104,17 @@ public class PersistentGameObjectEditor : Editor
                 {
                     EditorGUILayout.TextField("ZUID", manager.ZUID);
                     EditorGUILayout.TextField("GameObject ZUID", manager.GOZUID);
+                }
+            }
+            
+            GUILayout.Label("Serialized Components", new GUIStyle("box"){alignment = TextAnchor.MiddleCenter, stretchWidth = true});
+            foreach (var managerSerializedComponent in manager.serializedComponents)
+            {
+                using (new GUILayout.HorizontalScope("box"))
+                {
+                    GUILayout.Box(EditorGUIUtility.ObjectContent(null,
+                        managerSerializedComponent.component.GetType()).image, GUILayout.Width(20), GUILayout.Height(20));
+                    GUILayout.Label(managerSerializedComponent.component.GetType().Name);
                 }
             }
         }
