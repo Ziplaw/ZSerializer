@@ -91,8 +91,18 @@ namespace ZSerializer
                             Application.isPlaying ? ZSerialize.GetRuntimeSafeZUID() : GUID.Generate().ToString(),
                             PersistentType.Everything));
             }
+            
+#if UNITY_EDITOR
+            if (!serializedComponents.SequenceEqual(czlist))
+            {
+                // PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+                EditorUtility.SetDirty(this);
+            }
+#endif
 
             serializedComponents = czlist;
+            
+            
         }
 
 #if UNITY_EDITOR
@@ -116,13 +126,12 @@ namespace ZSerializer
         public void Reset()
         {
             GenerateEditorZUIDs(false);
-
-            EditorUtility.SetDirty(this);
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+            EditorUtility.SetDirty(this);
         }
 
 #endif
-        
+
         public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
             ZUID = ZSerialize.GetRuntimeSafeZUID();
@@ -130,7 +139,7 @@ namespace ZSerializer
             GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID() :
                 pg && !string.IsNullOrEmpty(pg.GOZUID) ? pg.GOZUID : ZSerialize.GetRuntimeSafeZUID();
             GenerateComponentZUIDs();
-            
+
             serializedComponents.ForEach(sc => sc.zuid = ZSerialize.GetRuntimeSafeZUID());
 
 
@@ -170,9 +179,11 @@ namespace ZSerializer
             ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(GOZUID, gameObject);
             foreach (var serializedComponent in serializedComponents)
             {
-                ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(serializedComponent.zuid, serializedComponent.component);
+                ZSerialize.idMap[ZSerialize.CurrentGroupID]
+                    .TryAdd(serializedComponent.zuid, serializedComponent.component);
             }
         }
+
         public T AddComponent<T>(PersistentType persistentType) where T : Component
         {
             return (T)AddComponent(typeof(T), persistentType);
@@ -247,12 +258,11 @@ namespace ZSerializer
 
             o.transform.SetParent(data.parent != null ? data.parent.transform : null);
             o.transform.SetSiblingIndex(data.loadingOrder.y);
-            
+
             o.transform.localPosition = data.localPosition;
             o.transform.localRotation = data.localRotation;
             o.transform.localScale = data.size;
 
-            
 
             return o;
         }

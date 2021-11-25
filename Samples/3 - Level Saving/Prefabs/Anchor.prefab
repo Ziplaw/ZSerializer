@@ -127,7 +127,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: 08a8a07367f4c374f82ad60e6254c0f7
+  _zuid: b8a779638e804cd44ace0c486da33d6a
   _gozuid: f0054091ecedd7c4cab01a35b0a1f278
   serializedComponents: []
 --- !u!114 &4095969009253119821
@@ -198,7 +198,7 @@ Light:
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
   m_Flare: {fileID: 0}
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295

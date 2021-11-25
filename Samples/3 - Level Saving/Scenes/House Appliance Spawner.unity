@@ -173,8 +173,8 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: bc8ab647de3c2f940a74bd30744d187f
-  _gozuid: 3c98aeab5d1dbab4e87a9dc0559c67d3
+  _zuid: d91a1bedbf2a16e49994fc5b779e152a
+  _gozuid: 31817d1468f35964baf00d900072107e
   objects:
   - {fileID: 6479137908180158667, guid: 60d668722cb6d5645addb34e2e86e9c1, type: 3}
   - {fileID: -6167593772302693946, guid: 60d668722cb6d5645addb34e2e86e9c1, type: 3}

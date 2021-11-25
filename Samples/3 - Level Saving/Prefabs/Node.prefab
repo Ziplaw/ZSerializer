@@ -98,14 +98,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: c357fe859c1cfd84f9f6bbdadc7c455b
-  _gozuid: 3551405df9929024d8a8533890c945fb
+  _zuid: 0444d9aa6c7d7bb46ad0f3790705d03f
+  _gozuid: 54714e1302bcd3c46be95cc234cb6902
   serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 1689612743213554894}
+    zuid: 36110cc07d7295044ad54c494c12c0b6
   - typeFullName: UnityEngine.SpriteRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743213554895}
-    zuid: e8dab0aca3f5c8042920089a0ef10969
+    zuid: 6c356fb3c99ff874fa607de494bdff1d
 --- !u!1 &1689612743638498561
 GameObject:
   m_ObjectHideFlags: 0
@@ -175,24 +180,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: e31e17ece52ff044c9c58e6c96ef70aa
-  _gozuid: cb5ab91e6934c374db3d6f7d83cfe065
+  _zuid: b9d567c7e0d50664e93594c49196664e
+  _gozuid: daad300a7933cdc4bac5ac2767a85781
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743638498566}
-    zuid: 869fd03426868e84ab9f97c66130fe2d
+    zuid: 77b4f1dca23c51140957c4548d7c52ca
   - typeFullName: UnityEngine.Rigidbody2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743638498564}
-    zuid: 58fb3028dcfb11c4eb3785002a4e5fb4
+    zuid: c55ac5c21a6e67949a2b6b1eaed15ce6
   - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1688716198872695089}
-    zuid: 38387b2a79b81a446b0250cbbba80b2d
+    zuid: edb464b05342ebf46a172e739353e08e
 --- !u!61 &1688716198872695089
 BoxCollider2D:
   m_ObjectHideFlags: 0

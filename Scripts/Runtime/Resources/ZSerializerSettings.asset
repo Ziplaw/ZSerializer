@@ -112,6 +112,17 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+  - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - density
+    customVariableEntries: []
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls: []
   saveGroups:
   - Main
   - Settings
