@@ -1492,7 +1492,12 @@ MonoBehaviour:
   groupID: 0
   _zuid: c12e02ad40c41354c8a758c10e62f772
   _gozuid: e64ccc49508fd2e43ba0d4048df025fa
-  serializedComponents: []
+  serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 1865041213}
+    zuid: 59e93752c269b254a8b7e36016768e05
 --- !u!1 &1933510813
 GameObject:
   m_ObjectHideFlags: 0

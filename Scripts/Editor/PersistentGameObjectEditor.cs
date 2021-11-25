@@ -98,26 +98,29 @@ public class PersistentGameObjectEditor : Editor
         }
         else
         {
-            // GUILayout.Label("Serialized Components",
-            //     new GUIStyle("box") {alignment = TextAnchor.MiddleCenter, stretchWidth = true});
-                    GUILayout.Space(-15);
-
-            using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
+            if (manager.serializedComponents.Count > 0)
             {
-                for (var i = 0; i < manager.serializedComponents.Count; i++)
+                GUILayout.Space(-15);
+
+                using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
                 {
-                    var serializedComponent = manager.serializedComponents[i];
-                    
-                    GUILayout.FlexibleSpace();
-                    GUILayout.Box(EditorGUIUtility.ObjectContent(null,
-                            serializedComponent.component.GetType()).image, new GUIStyle("label"),
-                        GUILayout.Width(16), GUILayout.Height(16));
-                    // GUILayout.Label(serializedComponent.component.GetType().Name,
-                    //     new GUIStyle("label") {fontSize = 12});
-                    GUILayout.FlexibleSpace();
-                    if (i != manager.serializedComponents.Count - 1)
+                    for (var i = 0; i < manager.serializedComponents.Count; i++)
                     {
-                        GUILayout.Label("|", new GUIStyle("label") {fontSize = 12, normal = {textColor = new Color(0.51f, 0.51f, 0.51f)}});
+                        var serializedComponent = manager.serializedComponents[i];
+
+                        GUILayout.FlexibleSpace();
+                        GUILayout.Box(EditorGUIUtility.ObjectContent(null,
+                                serializedComponent.component.GetType()).image, new GUIStyle("label"),
+                            GUILayout.Width(16), GUILayout.Height(16));
+                        // GUILayout.Label(serializedComponent.component.GetType().Name,
+                        //     new GUIStyle("label") {fontSize = 12});
+                        GUILayout.FlexibleSpace();
+                        if (i != manager.serializedComponents.Count - 1)
+                        {
+                            GUILayout.Label("|",
+                                new GUIStyle("label")
+                                    {fontSize = 12, normal = {textColor = new Color(0.51f, 0.51f, 0.51f)}});
+                        }
                     }
                 }
             }
