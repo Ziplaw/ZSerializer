@@ -88,7 +88,11 @@ namespace ZSerializer
                 else
                     czlist.Add(
                         new SerializedComponent(component,
-                            Application.isPlaying ? ZSerialize.GetRuntimeSafeZUID() : GUID.Generate().ToString(),
+                            #if UNITY_EDITOR
+                            GUID.Generate().ToString(),
+                                #else
+                                ZSerialize.GetRuntimeSafeZUID(),
+                                #endif
                             PersistentType.Everything));
             }
             

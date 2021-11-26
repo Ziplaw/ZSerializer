@@ -98,6 +98,57 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+  - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    componentNames:
+    - shadowRadius
+    - shadowAngle
+    - areaSize
+    - lightmapBakeType
+    customVariableEntries: []
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls: []
+  - typeFullName: UnityEngine.LightProbeGroup, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - dering
+    - probePositions
+    customVariableEntries: []
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls: []
+  - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - scaleInLightmap
+    - receiveGI
+    - stitchLightmapSeams
+    customVariableEntries: []
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls: []
+  - typeFullName: UnityEngine.Terrain, UnityEngine.TerrainModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    componentNames:
+    - bakeLightProbesForTrees
+    - deringLightProbesForTrees
+    customVariableEntries: []
+    OnSerialize:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeserialize:
+      m_PersistentCalls:
+        m_Calls: []
   saveGroups:
   - Main
   - Settings

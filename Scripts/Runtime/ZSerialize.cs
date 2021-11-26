@@ -9,9 +9,6 @@ using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Codice.Client.BaseCommands;
-using JetBrains.Annotations;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
@@ -1144,7 +1141,7 @@ namespace ZSerializer
             return Regex.Replace(json, "\"zuid\":\\w+",
                 match =>
                 {
-                    if (idMap.TryGetValue(match.Value.Split(':')[1], out var obj))
+                    if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj))
                         return "\"m_FileID\":" + obj.GetHashCode() + ", \"m_PathID\":0";
                     return "\"m_FileID\":0, \"m_PathID\":0";
                 });
