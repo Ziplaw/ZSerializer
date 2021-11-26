@@ -15,6 +15,7 @@ public class NodeSpawner : PersistentMonoBehaviour
     public Transform lastPlacedNode;
     public Anchor lastPlacedAnchor;
     public UIManager uiManager;
+    public GameObject tutorialCanvas;
 
     [Serializable]
     public struct TransformData
@@ -116,6 +117,7 @@ public class NodeSpawner : PersistentMonoBehaviour
     private void ToggleCanvas()
     {
         uiManager.gameObject.SetActive(!uiManager.gameObject.activeSelf);
+        tutorialCanvas.SetActive(!tutorialCanvas.activeSelf);
         uiManager.DestroyAllButtons();
         var levelNames = ZSerialize.GetLevelNames();
         foreach (var levelName in levelNames)

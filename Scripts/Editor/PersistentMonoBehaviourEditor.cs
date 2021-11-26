@@ -25,7 +25,7 @@ namespace ZSerializer.Editor
                         ZSerializerEditor.ShowGroupIDSettings);
                 if (!manager.showSettings)
                 {
-                    if (ZSerializerSettings.Instance.debugMode)
+                    if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
                     {
                         using (new EditorGUI.DisabledScope(true))
                         {

@@ -8,20 +8,22 @@ public class CustomHingeSerializer : MonoBehaviour
     public static void SerializeJoint(ZSerializer.Internal.ZSerializer serializer, Component component)
     {
         var hinge = (HingeJoint2D)component;
-        ((HingeJoint2DZSerializer)serializer).serializableLimits = new Vector2(hinge.limits.min, hinge.limits.max);
-        ((HingeJoint2DZSerializer)serializer).serializableMotor =
-            new Vector2(hinge.motor.motorSpeed, hinge.motor.maxMotorTorque);
+        var zserializer = (HingeJoint2DZSerializer)serializer;
+        zserializer.serializableLimits = new Vector2(hinge.limits.min, hinge.limits.max);
+        zserializer.serializableMotor = new Vector2(hinge.motor.motorSpeed, hinge.motor.maxMotorTorque);
     }
 
     public static void DeserializeJoint(ZSerializer.Internal.ZSerializer serializer, Component component)
     {
         var hinge = (HingeJoint2D)component;
         var hingeSerializer = (HingeJoint2DZSerializer)serializer;
+        
         hinge.limits = new JointAngleLimits2D
         {
             min = hingeSerializer.serializableLimits.x,
             max = hingeSerializer.serializableLimits.y
         };
+        
         hinge.motor = new JointMotor2D
         {
             motorSpeed = hingeSerializer.serializableMotor.x,

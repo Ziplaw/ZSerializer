@@ -209,7 +209,7 @@ namespace ZSerializer.Editor
 
             if (!string.IsNullOrEmpty(ns)) script += "\n}";
 
-            ZSerialize.Log("ZSerializer script being created at " + newNewPath);
+            ZSerialize.Log("ZSerializer script being created at " + newNewPath, DebugMode.Off);
 
             sw.Write(script);
 
@@ -715,7 +715,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
                                     if (GUILayout.Button("Reset all Group IDs from Scene"))
                                     {
-                                        ZSerialize.Log("<color=cyan>Resetting All Group IDs</color>");
+                                        ZSerialize.Log("<color=cyan>Resetting All Group IDs</color>", DebugMode.Off);
 
                                         foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>()
                                             .Where(o => o is IZSerializable))

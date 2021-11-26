@@ -7,6 +7,7 @@ public sealed class NodeSpawnerZSerializer : ZSerializer.Internal.ZSerializer
     public UnityEngine.Transform lastPlacedNode;
     public Anchor lastPlacedAnchor;
     public UIManager uiManager;
+    public UnityEngine.GameObject tutorialCanvas;
     public System.Collections.Generic.List<NodeSpawner.TransformData> initialTransformDatas;
     public System.Int32 groupID;
     public System.Boolean autoSync;
@@ -19,6 +20,7 @@ public sealed class NodeSpawnerZSerializer : ZSerializer.Internal.ZSerializer
          lastPlacedNode = (UnityEngine.Transform)typeof(NodeSpawner).GetField("lastPlacedNode").GetValue(instance);
          lastPlacedAnchor = (Anchor)typeof(NodeSpawner).GetField("lastPlacedAnchor").GetValue(instance);
          uiManager = (UIManager)typeof(NodeSpawner).GetField("uiManager").GetValue(instance);
+         tutorialCanvas = (UnityEngine.GameObject)typeof(NodeSpawner).GetField("tutorialCanvas").GetValue(instance);
          initialTransformDatas = (System.Collections.Generic.List<NodeSpawner.TransformData>)typeof(NodeSpawner).GetField("initialTransformDatas").GetValue(instance);
          groupID = (System.Int32)typeof(NodeSpawner).GetField("groupID", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(instance);
          autoSync = (System.Boolean)typeof(NodeSpawner).GetField("autoSync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(instance);
@@ -32,6 +34,7 @@ public sealed class NodeSpawnerZSerializer : ZSerializer.Internal.ZSerializer
          typeof(NodeSpawner).GetField("lastPlacedNode").SetValue(component, lastPlacedNode);
          typeof(NodeSpawner).GetField("lastPlacedAnchor").SetValue(component, lastPlacedAnchor);
          typeof(NodeSpawner).GetField("uiManager").SetValue(component, uiManager);
+         typeof(NodeSpawner).GetField("tutorialCanvas").SetValue(component, tutorialCanvas);
          typeof(NodeSpawner).GetField("initialTransformDatas").SetValue(component, initialTransformDatas);
          typeof(NodeSpawner).GetField("groupID", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(component, groupID);
          typeof(NodeSpawner).GetField("autoSync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(component, autoSync);

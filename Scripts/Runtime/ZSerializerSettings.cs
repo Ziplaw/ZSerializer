@@ -59,6 +59,9 @@ namespace ZSerializer
         public string name;
         public List<string> scenePaths = new List<string>();
     }
+    
+    public enum DebugMode {Off = 0, Informational = 1, Developer = 2}
+
 
     public sealed class ZSerializerSettings : ScriptableObject
     {
@@ -66,10 +69,10 @@ namespace ZSerializer
 
         public static ZSerializerSettings Instance =>
             instance ? instance : Resources.Load<ZSerializerSettings>("ZSerializerSettings");
-
+        
 
         [HideInInspector] public bool packageInitialized;
-        public bool debugMode;
+        public DebugMode debugMode;
         public bool autoRebuildZSerializers;
         public int selectedSaveFile;
         public bool encryptData;
@@ -78,13 +81,15 @@ namespace ZSerializer
         public int maxBatchCount = 50;
         [HideInInspector] public List<SceneGroup> sceneGroups;
 
-        public void DefaultBlackList()
+        public void DefaultComponentData()
         {
             unityComponentDataList.Clear();
             unityComponentDataList.SafeAdd(typeof(NavMeshAgent), "path");
             unityComponentDataList.SafeAdd(typeof(ParticleSystem), "randomSeed");
             unityComponentDataList.SafeAdd(typeof(ParticleSystem), "useAutoRandomSeed");
             unityComponentDataList.SafeAdd(typeof(VideoPlayer), "url");
+            unityComponentDataList.SafeAdd(typeof(HingeJoint2D), new UnityComponentData.CustomVariableEntry("Vector2","serializableLimits" ));
+            unityComponentDataList.SafeAdd(typeof(HingeJoint2D), new UnityComponentData.CustomVariableEntry("Vector2","serializableMotor" ));
         }
 
         [FormerlySerializedAs("componentBlackList")] [HideInInspector] public List<UnityComponentData> unityComponentDataList = new List<UnityComponentData>();

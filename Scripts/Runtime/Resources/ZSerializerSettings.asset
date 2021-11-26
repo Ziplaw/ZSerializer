@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1efd7af9bd4fdc48a69c60405eb42f4, type: 3}
   m_Name: ZSerializerSettings
   m_EditorClassIdentifier: 
-  packageInitialized: 1
-  debugMode: 0
+  packageInitialized: 0
+  debugMode: 1
   autoRebuildZSerializers: 1
   selectedSaveFile: 0
   encryptData: 0
@@ -60,23 +60,9 @@ MonoBehaviour:
     OnDeserialize:
       m_PersistentCalls:
         m_Calls: []
-  - typeFullName: UnityEngine.HingeJoint, UnityEngine.PhysicsModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames: []
-    customVariableEntries:
-    - variableType: int
-      variableName: amount
-    OnSerialize:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeserialize:
-      m_PersistentCalls:
-        m_Calls: []
   - typeFullName: UnityEngine.HingeJoint2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - motor
-    - limits
+    componentNames: []
     customVariableEntries:
     - variableType: Vector2
       variableName: serializableLimits
@@ -112,17 +98,6 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - density
-    customVariableEntries: []
-    OnSerialize:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeserialize:
-      m_PersistentCalls:
-        m_Calls: []
   saveGroups:
   - Main
   - Settings

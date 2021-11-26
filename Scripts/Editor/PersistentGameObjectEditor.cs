@@ -73,12 +73,12 @@ public class PersistentGameObjectEditor : Editor
 
                             GUILayout.Label(
                                 component.Type.Name +
-                                (ZSerializerSettings.Instance.debugMode ? $"({component.zuid})" : ""),
+                                (ZSerializerSettings.Instance.debugMode == DebugMode.Developer ? $"({component.zuid})" : ""),
                                 new GUIStyle("helpbox")
                                 {
                                     font = styler.header.font, normal = new GUIStyleState() {textColor = fontColor},
                                     alignment = TextAnchor.MiddleCenter
-                                }, GUILayout.MaxWidth(ZSerializerSettings.Instance.debugMode ? 150 : 100));
+                                }, GUILayout.MaxWidth(ZSerializerSettings.Instance.debugMode == DebugMode.Developer ? 150 : 100));
 
                             EditorGUILayout.PropertyField(serializedObject
                                 .FindProperty(nameof(manager.serializedComponents)).GetArrayElementAtIndex(i)
@@ -125,7 +125,7 @@ public class PersistentGameObjectEditor : Editor
                 }
             }
 
-            if (ZSerializerSettings.Instance.debugMode)
+            if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
             {
                 using (new EditorGUI.DisabledScope(true))
                 {

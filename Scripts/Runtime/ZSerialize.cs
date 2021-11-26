@@ -265,19 +265,19 @@ namespace ZSerializer
         #region Logging
 
         //internal functions to Log stuff for Debug Mode
-        internal static void Log(object obj)
+        internal static void Log(object obj, DebugMode debugMode)
         {
-            if (ZSerializerSettings.Instance.debugMode) Debug.Log(obj);
+            if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.Log(obj);
         }
 
-        internal static void LogWarning(object obj)
+        internal static void LogWarning(object obj, DebugMode debugMode)
         {
-            if (ZSerializerSettings.Instance.debugMode) Debug.LogWarning(obj);
+            if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.LogWarning(obj);
         }
 
-        internal static void LogError(object obj)
+        internal static void LogError(object obj, DebugMode debugMode)
         {
-            if (ZSerializerSettings.Instance.debugMode) Debug.LogError(obj);
+            if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.LogError(obj);
         }
 
         #endregion
@@ -410,7 +410,7 @@ namespace ZSerializer
                 if (string.IsNullOrEmpty(serializable.ZUID) ||
                     string.IsNullOrEmpty(serializable.GOZUID))
                 {
-                    LogWarning($"{serializable} found with empty ZUID, if this is not an instanced object, please go to Tools/ZSerializer/Reset Project ZUIDs");
+                    LogWarning($"{serializable} found with empty ZUID, if this is not an instanced object, please go to Tools/ZSerializer/Reset Project ZUIDs", DebugMode.Off);
                     serializable.GenerateRuntimeZUIDs(false);
                 }
 
@@ -546,7 +546,7 @@ namespace ZSerializer
             if (zSaverType == null)
             {
                 LogError(
-                    $"No ZSerializer found for {components[0].GetType()}, this may be caused by a <color=cyan>{components[0].GetType()}</color> not having a <color=cyan>ZSerializer.</color>\nGo to <color=cyan>Tools/ZSerializer/ZSerializer</color> Menu and ensure all the class names are <color=green>green</color>");
+                    $"No ZSerializer found for {components[0].GetType()}, this may be caused by a <color=cyan>{components[0].GetType()}</color> not having a <color=cyan>ZSerializer.</color>\nGo to <color=cyan>Tools/ZSerializer/ZSerializer</color> Menu and ensure all the class names are <color=green>green</color>", DebugMode.Off);
                 return;
             }
 
@@ -647,7 +647,7 @@ namespace ZSerializer
                 if (realType == null)
                     Debug.LogError(
                         "ZSerializer type not found, probably because you added ZSerializer somewhere in the name of the class");
-                Log("Deserializing " + realType + "s");
+                Log("Deserializing " + realType + "s", DebugMode.Informational);
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(currentTuple.Item1);
                 object[] zSerializerObjects = (object[])await fromJson.InvokeAsync(null, currentTuple.Item2);
@@ -764,11 +764,11 @@ namespace ZSerializer
             switch (zSerializationType)
             {
                 case ZSerializationType.Scene:
-                    LogWarning($"Saving {ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}");
+                    LogWarning($"Saving {ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}", DebugMode.Off);
                     break;
                 case ZSerializationType.Level:
                     LogWarning(
-                        $"Saving {_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}");
+                        $"Saving {_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}", DebugMode.Off);
                     break;
 
                 default: throw new SerializationException("Serialization Type not implemented");
@@ -801,11 +801,11 @@ namespace ZSerializer
             {
                 case ZSerializationType.Scene:
                     Log(
-                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length * .001f} KB</color>");
+                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length * .001f} KB</color>", DebugMode.Informational);
                     break;
                 case ZSerializationType.Level:
                     Log(
-                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath($"{_currentLevelName}.zsave")).Length * .001f} KB</color>");
+                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath($"{_currentLevelName}.zsave")).Length * .001f} KB</color>", DebugMode.Informational);
                     break;
                 default: throw new SerializationException("Serialization Type not implemented");
             }
@@ -864,10 +864,10 @@ namespace ZSerializer
             {
                 case ZSerializationType.Level:
                     LogWarning(
-                        $"Loading Level: {_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}");
+                        $"Loading Level: {_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}", DebugMode.Off);
                     break;
                 case ZSerializationType.Scene:
-                    LogWarning($"Loading Group: {ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}");
+                    LogWarning($"Loading Group: {ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}", DebugMode.Off);
                     break;
             }
         }
@@ -1123,7 +1123,7 @@ namespace ZSerializer
         static void CompileJson<T>(T[] objectsToPersist)
         {
             string json = "{" + typeof(T).AssemblyQualifiedName + "}" + JsonHelper.ToJson(objectsToPersist);
-            Log("Serializing: " + typeof(T) + " " + json);
+            Log("Serializing: " + typeof(T) + " " + json, DebugMode.Informational);
             jsonToSave += json + "\n";
             // WriteToFile(fileName, json, useGlobalID);
         }
