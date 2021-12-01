@@ -13,6 +13,16 @@ public class ButtonInfo : MonoBehaviour
     {
         FindObjectOfType<NodeSpawner>().ResetNodes();
         ZSerialize.SaveLevel(levelName, levelParent);
+        var uiManager = FindObjectOfType<UIManager>();
+        uiManager.DestroyAllButtons();
+        var levelNames = ZSerialize.GetLevelNames();
+        foreach (var levelName in levelNames)
+        {
+            uiManager.CreateButton(levelName, transform, () =>
+            {
+                ZSerialize.LoadLevel(levelName, transform, true);
+            });
+        }
     }
     
     public void SetLevelName(string name)

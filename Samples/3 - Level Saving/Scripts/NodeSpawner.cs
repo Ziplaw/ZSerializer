@@ -147,28 +147,31 @@ public class NodeSpawner : PersistentMonoBehaviour
 
     private void OnGUI()
     {
-        if (GUILayout.Button("Play"))
+        if (!uiManager.gameObject.activeSelf)
         {
-            foreach (var component in GetComponentsInChildren<Transform>())
+            if (GUILayout.Button("Play"))
             {
-                initialTransformDatas.Add(new TransformData
+                foreach (var component in GetComponentsInChildren<Transform>())
                 {
-                    transform = component,
-                    position = component.position,
-                    rotation = component.rotation
-                });
+                    initialTransformDatas.Add(new TransformData
+                    {
+                        transform = component,
+                        position = component.position,
+                        rotation = component.rotation
+                    });
 
-                var rb = component.GetComponent<Rigidbody2D>();
-                if (rb && rb.bodyType == RigidbodyType2D.Kinematic)
-                {
-                    rb.bodyType = RigidbodyType2D.Dynamic;
+                    var rb = component.GetComponent<Rigidbody2D>();
+                    if (rb && rb.bodyType == RigidbodyType2D.Kinematic)
+                    {
+                        rb.bodyType = RigidbodyType2D.Dynamic;
+                    }
                 }
             }
-        }
-        
-        if (GUILayout.Button("Reset"))
-        {
-            ResetNodes();
+
+            if (GUILayout.Button("Reset"))
+            {
+                ResetNodes();
+            }
         }
     }
 }
