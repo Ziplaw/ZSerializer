@@ -151,8 +151,8 @@ namespace ZSerializer
 
         public void AddZUIDsToIDMap()
         {
-            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(ZUID, this);
-            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(GOZUID, gameObject);
+            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAddToDictionary(ZUID, this);
+            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAddToDictionary(GOZUID, gameObject);
         }
 
         // public virtual void OnDestroy()

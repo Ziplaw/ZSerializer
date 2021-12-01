@@ -654,21 +654,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                 EditorGUI.BeginChangeCheck();
 
                                 EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
-
-                                if (EditorGUI.EndChangeCheck())
-                                {
-                                    if (fieldInfo.Name == "advancedSerialization")
-                                    {
-                                        if (!ZSerializerSettings.Instance.advancedSerialization)
-                                        {
-                                            foreach (var persistentGameObject in Object
-                                                .FindObjectsOfType<PersistentGameObject>())
-                                            {
-                                                persistentGameObject.serializedComponents.Clear();
-                                            }
-                                        }
-                                    }
-                                }
                             }
 
                             serializedObject.ApplyModifiedProperties();
@@ -777,29 +762,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                                     EditorGUILayout.PropertyField(groupsProp.GetArrayElementAtIndex(i)
                                                         .FindPropertyRelative("name"));
 
-                                                    // var path = groupsProp.GetArrayElementAtIndex(i)
-                                                    //     .FindPropertyRelative("loadingScenePath").stringValue;
-
-
-                                                    // var oldScene = string.IsNullOrEmpty(path)
-                                                    //     ? null
-                                                    //     : AssetDatabase.LoadAssetAtPath<SceneAsset>(
-                                                    //         Path.Combine("Assets", path + ".unity"));
-                                                    // EditorGUI.BeginChangeCheck();
-                                                    // var newScene = EditorGUILayout.ObjectField("Loading Scene",
-                                                    //     oldScene, typeof(SceneAsset), false) as SceneAsset;
-                                                    //
-                                                    // if (EditorGUI.EndChangeCheck())
-                                                    // {
-                                                    //     var newPath = AssetDatabase.GetAssetPath(newScene);
-                                                    //     var scenePathProperty = groupsProp.GetArrayElementAtIndex(i)
-                                                    //         .FindPropertyRelative("loadingScenePath");
-                                                    //     scenePathProperty.stringValue =
-                                                    //         newPath.Substring(7, newPath.Length - 13);
-                                                    //
-                                                    //     EditorUtility.SetDirty(ZSerializerSettings.Instance);
-                                                    //     AssetDatabase.SaveAssets();
-                                                    // }
 
                                                     var sceneAssetList = ZSerializerSettings.Instance.sceneGroups[i]
                                                         .scenePaths.Select(s =>
@@ -1246,6 +1208,18 @@ namespace ZSerializer {
                     }
                 }
             }
+        }
+
+        public static void AddSampleScenesToBuildSettings()
+        {
+            var bedroom = "Assets/ZSerializer/Samples/2 - Scene Groups/House/Scenes/Bedroom.unity";
+            var kitchen = "Assets/ZSerializer/Samples/2 - Scene Groups/House/Scenes/Kitchen.unity";
+
+            var scenes = EditorBuildSettings.scenes.ToList();
+            scenes.Add(new EditorBuildSettingsScene(bedroom, true));
+            scenes.Add(new EditorBuildSettingsScene(kitchen, true));
+
+            EditorBuildSettings.scenes = scenes.ToArray();
         }
     }
 }

@@ -7,6 +7,7 @@ public class CustomHingeSerializer : MonoBehaviour
 {
     public static void SerializeJoint(ZSerializer.Internal.ZSerializer serializer, Component component)
     {
+        Debug.LogWarning("<color=yellow>SerializeJoint has been disabled prior to the building of the Unity Component's ZSerializers. Please uncomment these lines for the serializer to work.</color>");
         var hinge = (HingeJoint2D)component;
         var zserializer = (HingeJoint2DZSerializer)serializer;
         zserializer.serializableLimits = new Vector2(hinge.limits.min, hinge.limits.max);
@@ -15,6 +16,9 @@ public class CustomHingeSerializer : MonoBehaviour
 
     public static void DeserializeJoint(ZSerializer.Internal.ZSerializer serializer, Component component)
     {
+        Debug.LogWarning("<color=yellow>DeserializeJoint has been disabled prior to the building of the Unity Component's ZSerializers. Please uncomment these lines for the serializer to work.</color>");
+
+        
         var hinge = (HingeJoint2D)component;
         var hingeSerializer = (HingeJoint2DZSerializer)serializer;
         

@@ -138,6 +138,7 @@ namespace ZSerializer
 
         public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
+            // GenerateComponentZUIDs();
             ZUID = ZSerialize.GetRuntimeSafeZUID();
             var pg = GetComponent<PersistentGameObject>();
             GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID() :
@@ -159,6 +160,8 @@ namespace ZSerializer
         {
 #if UNITY_EDITOR
 
+            GenerateComponentZUIDs();
+            
             ZUID = GUID.Generate().ToString();
             var pm = GetComponent<PersistentMonoBehaviour>();
 
@@ -179,12 +182,13 @@ namespace ZSerializer
 
         public void AddZUIDsToIDMap()
         {
-            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(ZUID, this);
-            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAdd(GOZUID, gameObject);
+            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAddToDictionary(ZUID, this);
+            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAddToDictionary(GOZUID, gameObject);
             foreach (var serializedComponent in serializedComponents)
             {
+                if(!serializedComponent.component) Debug.LogError("Component is null");
                 ZSerialize.idMap[ZSerialize.CurrentGroupID]
-                    .TryAdd(serializedComponent.zuid, serializedComponent.component);
+                    .TryAddToDictionary(serializedComponent.zuid, serializedComponent.component);
             }
         }
 

@@ -151,6 +151,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4931218026671430088}
   - {fileID: 9110437652930418273}
@@ -189,9 +190,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: 7f348d186b140a54f83b0f035b0bc4e7
-  _gozuid: 9671cf4f07f2a86488dcb766f596e348
-  serializedComponents: []
+  _zuid: 53b3b5f7f953769408023cc5fb6b1bc3
+  _gozuid: c483d1d3f3b6b6244b630a1bc31fa521
+  serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 498202717}
+    zuid: a73863685666f1a42ad3c75107edca32
 --- !u!54 &686571013
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -373,6 +379,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7202193380919453109}
   - {fileID: 7685259906574329615}
@@ -391,6 +398,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 272.0829, y: 272.08286, z: 272.08286}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 498202717}
   m_RootOrder: 4
@@ -405,6 +413,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 272.0829, y: 272.08286, z: 272.08286}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 498202717}
   m_RootOrder: 6
@@ -474,29 +483,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: 67182b29a96f6d34baa1095c9d4ea26a
-  _gozuid: 3951296790ac4294d857a7448bf105d5
+  _zuid: ba66c9317ab9a6d43a68a0c440e443d6
+  _gozuid: 601620d1a3b9a0344802f8081ac0a552
   serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 4582063438328926035}
+    zuid: 204bc965022588b41af53b49d81544b6
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 6486163908580175623}
-    zuid: 281c4900e3be5044cbd23c05b54a0d3c
+    zuid: 7a32e0e472cdb1249afbcfbf3da5b1d4
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 7076017419213536501}
-    zuid: 358cb452b1614fe4ab09a8e9f6a37d39
+    zuid: 85a53a7c1ad030f4d9eee073adf32df5
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 686571013}
-    zuid: 6c3fd89981c11ae46a3a7853a79f2fc8
+    zuid: 1b38fc84878abd44f86106029838f2c3
   - typeFullName: UnityEngine.MeshCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 996808589018769971}
-    zuid: 5a11821b01f02c046b2895c68cb6b448
+    zuid: 73a3bd6afbd4c2040a3c46abcc1a49a5
 --- !u!4 &1121976164661522523
 Transform:
   m_ObjectHideFlags: 0
@@ -507,6 +521,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 272.0829, y: 272.08286, z: 272.08286}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 498202717}
   m_RootOrder: 3
@@ -610,29 +625,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: b6fb2bc8c57280247a562a7e69d0a446
-  _gozuid: 61cad4f99d4d34b459830357f326be34
+  _zuid: abe6259eb1143c74e82bfd0a1a592156
+  _gozuid: 6e4c5fdf4221b6149b20d879bc47f9f1
   serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 8119214460974427619}
+    zuid: 1ac36ec7d230b444b800df160873c58c
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 3658226471888719870}
-    zuid: e2159fec0e3322a4cbfd274e852f4a53
+    zuid: 497b2e003c1cef640b9d9f37a5b336a9
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 8995423334271011637}
-    zuid: c302dba937e100445b6ea057d28ea0c0
+    zuid: 184846d7c07ee574495bf4f180f548dd
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 686571018}
-    zuid: 49c5e6405c2fa9c4c91e8f23d2fd45e5
+    zuid: 89c7a7b66a6c2d442a31c7bdc9079eec
   - typeFullName: UnityEngine.MeshCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1585015376012841311}
-    zuid: c5ef050def07a254fa11ef18a676e139
+    zuid: b990f210f9d1c43468e02224788bd32c
 --- !u!33 &1658815281732820315
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -690,29 +710,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: db5e6b34fc00f234cac00da312e9f3b6
-  _gozuid: 81b1de473eb97dd48813f4d1912c3c34
+  _zuid: 9e80a8fe586f38f4ba3b1663b9e1854c
+  _gozuid: 535d6bcf5ffe18c4db2a344fb53f0472
   serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 4931218026671430088}
+    zuid: 46801762e9d1dec4d8706af952693237
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 4876933053017252811}
-    zuid: 79acd0532773402469b4a6bd8c62e41e
+    zuid: 8665a1a08531d044aa87f875289d4985
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1305037034544291622}
-    zuid: 1d8451e9892c48d4083838ad171709e2
+    zuid: 419b4551d96b00d4fb744ac9162d892c
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 686571020}
-    zuid: 5d28e1eb64e246b44b310ce74d0d88c0
+    zuid: 66813f6502d6c5f4d97faa0751683e0e
   - typeFullName: UnityEngine.MeshCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 2193423313716732039}
-    zuid: daa8ef2c0a8c69c4ca0577c225c5bcb4
+    zuid: 6cfc649177f3b5343ad5031f36980bff
 --- !u!1 &2501848140471558421
 GameObject:
   m_ObjectHideFlags: 0
@@ -762,29 +787,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: ed472b015cb44d845abeccecfbe3b3ea
-  _gozuid: 551a05a60713ac041be9567baca32b1f
+  _zuid: 7cf889a78a0366c4aa55bcfca3f7deeb
+  _gozuid: 0820f7b3f73cc17448f6db506ec316ef
   serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 3855532475199358400}
+    zuid: 478af63eb164af540b88aeee4fb9cc5d
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1445590216656747576}
-    zuid: 3d6f2941f08b81045b68082f6940b7b9
+    zuid: 435671cb4e3bfd845869eaa102cb760d
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 8428140087090978842}
-    zuid: 454fc2848711f594c83f5e968af49016
+    zuid: 35f23f2b65d4a224fa7899d4684c0c51
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 686571015}
-    zuid: 58293fab613809a4893cf9386e6174b6
+    zuid: 7e3b72774c29cd44ba68dd133c4462ea
   - typeFullName: UnityEngine.MeshCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 2501848140471558422}
-    zuid: cd1737c55ffaa9f4d9c44d0c05295223
+    zuid: cb59f75e034b2964baf07edd454ec3e4
 --- !u!23 &2587262376204779051
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -935,29 +965,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: 3e5d40b68efc37b42a5e69605f620f0c
-  _gozuid: 332b2864b5aa375458306f4b5f32d3a9
+  _zuid: 400290c4510c15b47a68112fbf6dc07b
+  _gozuid: 2a5786457938f1849b425b7b65cdf45b
   serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 835821626908604501}
+    zuid: b31b966aec8ba244fbbc6618266383df
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 7829778758801088599}
-    zuid: 75f476b717c2b1c469f00ad7c7ac8a6b
+    zuid: 05896b7c09761244dae1a8bcc781bbf2
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 2587262376204779051}
-    zuid: 22e23fb171ec2f54d9de21fd80ec36d3
+    zuid: c04f3f6cd6d978e479e880ca9a52dab2
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 686571014}
-    zuid: be170c3778271a94b86686e8214513de
+    zuid: 05c7f7f666063e348ba38d574c289013
   - typeFullName: UnityEngine.MeshCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 3638088937399108535}
-    zuid: 6585273b849863c42abf105ab10bfec7
+    zuid: 7d2e4948c68db1444ad24c8125b20711
 --- !u!33 &3658226471888719870
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -976,6 +1011,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 272.0829, y: 272.08286, z: 272.08286}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 498202717}
   m_RootOrder: 5
@@ -1037,29 +1073,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: ee4bfcb1b20eced4fa1af87dc62509be
-  _gozuid: 8b6033bec55551243a49505b684ca8c4
+  _zuid: 984d7a10377fbb146a6bd9a1478d5b11
+  _gozuid: 86373268a3d6c7646ad4f9405c4f3596
   serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 1121976164661522523}
+    zuid: e50b39480beac774991219fd14789a67
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 5700249661714440767}
-    zuid: 09399f787ecd63c4691f224d8620d528
+    zuid: 5b66d006d561e2b4ea4ccc244ecd44a1
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 2832818611125311968}
-    zuid: a645e04f7698b2e43a0d027c28f1b8e3
+    zuid: 757b1fcdca1356d42a3cdf279a30b3ba
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 686571017}
-    zuid: 69754a0c82c8733419eed2f8cca352a7
+    zuid: a453f206533b99d409080b105c3a8c6b
   - typeFullName: UnityEngine.MeshCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 4210489979025127868}
-    zuid: e28907b6beb018f4b83570524e800264
+    zuid: 8efec75ec43fa9c48a42881133672a7a
 --- !u!4 &4334170693369757272
 Transform:
   m_ObjectHideFlags: 0
@@ -1070,6 +1111,7 @@ Transform:
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -0.06531948, y: 4.212164, z: 0.3097275}
   m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 543450653021788695}
   m_RootOrder: 2
@@ -1084,6 +1126,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 272.0829, y: 272.08286, z: 272.08286}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 498202717}
   m_RootOrder: 7
@@ -1106,6 +1149,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 272.0829, y: 272.08286, z: 272.08286}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 498202717}
   m_RootOrder: 0
@@ -1159,29 +1203,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: da1614a36b1032f4c837f280e88f84b5
-  _gozuid: f343ac062c5512c469f286ad75d384df
+  _zuid: d93fe53a408588e4a85e5e85f6143d3e
+  _gozuid: 84e1f51ba8d4b09489a902d423ac4aba
   serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 9110437652930418273}
+    zuid: a798b88ac54eea0498d1ab60d47d885b
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1658815281732820315}
-    zuid: 2dd0e04ed1b5ec949bda0e6d412ce500
+    zuid: a022189a69e0f2e4a9ad8e6975da3460
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 7293059143622262898}
-    zuid: 01ec989f0fac59e49a335fe1c8a5f4b7
+    zuid: 7bfb23dc8daae56468dbd5132185be56
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 686571019}
-    zuid: bc7456903ba3e4c45b25243cad5b8bb1
+    zuid: 43357b92d3f6f874d8c7598c47964615
   - typeFullName: UnityEngine.MeshCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 5402118295562355532}
-    zuid: 17c9ee842a304784283b1f63c7360e5d
+    zuid: ce5d9e6d3aee8b745b9c2532e03eb39c
 --- !u!33 &5700249661714440767
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1283,6 +1332,7 @@ Transform:
   m_LocalRotation: {x: 0.09904576, y: 0.8923992, z: -0.2391176, w: 0.36964372}
   m_LocalPosition: {x: -4.546082, y: 5.6576123, z: 4.3768153}
   m_LocalScale: {x: 100, y: 100.00001, z: 99.99999}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 543450653021788695}
   m_RootOrder: 0
@@ -1466,6 +1516,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 272.0829, y: 272.0829, z: 272.0829}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 543450653021788695}
   m_RootOrder: 1
@@ -1527,29 +1578,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: 62b8b00f2624d1647819cd0987c4411d
-  _gozuid: 86fb2c689aa87b0449b410f84e0f6977
+  _zuid: 20c146484182b2a4dae79f1f4991836a
+  _gozuid: d0af99c840c93d74081a07eb60ce6a43
   serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 791661026262737930}
+    zuid: 6416ec1621c6db849b6d54e0e22ef6e8
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 3864587738128905714}
-    zuid: d1346be6f6de433498acce0a48e3208f
+    zuid: 4fd78f4134cdca441b41bf897bd60c31
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 7326973270782340565}
-    zuid: 4ebde018c2160f240a2e8681b0aa343f
+    zuid: 89291f1303ed89e478242192940f8911
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 686571016}
-    zuid: 116943786ab346b4b91a1a28ffa61aed
+    zuid: bcc065d2959f99142a0bae0120cd1279
   - typeFullName: UnityEngine.MeshCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 7979137832079930186}
-    zuid: 172c1b1526ee8af438594b71888d5342
+    zuid: e2d6b33781efea048a0dd3ee1a1ccaaf
 --- !u!4 &8119214460974427619
 Transform:
   m_ObjectHideFlags: 0
@@ -1560,6 +1616,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 272.0829, y: 272.08286, z: 272.08286}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 498202717}
   m_RootOrder: 2
@@ -1720,6 +1777,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 272.0829, y: 272.08286, z: 272.08286}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 498202717}
   m_RootOrder: 1

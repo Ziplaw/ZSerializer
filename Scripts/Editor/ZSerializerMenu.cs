@@ -111,13 +111,99 @@ namespace ZSerializer.Editor
         {
             if (!ZSerializerSettings.Instance.packageInitialized)
             {
-                if (GUILayout.Button($"<color=#{ZSerializerStyler.MainHex}>Setup</color>", new GUIStyle("button") { fontSize = 48, font = Styler.header.font, richText = true},
-                    GUILayout.MinHeight(100)))
+                GUILayout.Space(-15);
+                using (new GUILayout.VerticalScope(ZSerializerStyler.window,
+                    GUILayout.MaxHeight(1)))
                 {
-                    ZSerializerSettings.Instance.packageInitialized = true;
-                    ZSerializerEditor.GenerateUnityComponentClasses();
-                    ZSerializerEditor.RefreshZUIDs();
+                    GUILayout.Label($"<color=#{ZSerializerStyler.MainHex}>ZSerializer Setup Wizard</color>",
+                        new GUIStyle("label") { alignment = TextAnchor.MiddleCenter, fontSize = 32, font = Styler.header.font,richText = true },
+                        GUILayout.MaxHeight(100));
                 }
+                
+                GUILayout.Space(-15);
+                using (new GUILayout.VerticalScope(ZSerializerStyler.window,
+                    GUILayout.MaxHeight(1)))
+                {
+                    Dictionary<bool,List<Texture2D>> icons = new Dictionary<bool, List<Texture2D>>
+                    {
+                        {true,new List<Texture2D> {Resources.Load<Texture2D>("valid"), Resources.Load<Texture2D>("valid")}}, //repeated to not cause index out of range
+                        {false,new List<Texture2D> {Resources.Load<Texture2D>("not_made"), Resources.Load<Texture2D>("needs_rebuilding")}}
+                    };
+                    
+                    bool hasZSerializers = File.Exists(Path.Combine(Application.dataPath,
+                        "ZResources/ZSerializer/UnityComponentZSerializers.cs"));
+                    bool zuidsAreSetup = !FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable).Any(m => string.IsNullOrEmpty((m as IZSerializable).ZUID) || string.IsNullOrEmpty((m as IZSerializable).ZUID));
+                    bool areSampleScenesIn = EditorBuildSettings.scenes.Any(s => s.path.Contains("ZSerializer/Samples/2 - Scene Groups/House/Scenes"));
+
+
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        
+                        
+                        GUILayout.Label(new GUIContent(
+                            icons[hasZSerializers][0]),GUILayout.Width(20), GUILayout.Height(20));
+                        GUILayout.Label("Unity Component ZSerializers Built", GUILayout.Width(200));
+
+                        using (new EditorGUI.DisabledScope(hasZSerializers))
+                        {
+                            if (GUILayout.Button("Solve", GUILayout.Width(50)))
+                            {
+                                ZSerializerEditor.GenerateUnityComponentClasses();
+                            }
+                        }
+                    }
+                    
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        
+                        GUILayout.Label(new GUIContent(
+                            icons[zuidsAreSetup][0]),GUILayout.Width(20), GUILayout.Height(20));
+                        GUILayout.Label("ZUIDs Are correctly set ", GUILayout.Width(200));
+
+                        using (new EditorGUI.DisabledScope(zuidsAreSetup))
+                        {
+                            if (GUILayout.Button("Solve", GUILayout.Width(50)))
+                            {
+                                ZSerializerEditor.GenerateUnityComponentClasses();
+                            }
+                        }
+                    }
+                    
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.Label(new GUIContent(
+                            icons[areSampleScenesIn][1]),GUILayout.Width(20), GUILayout.Height(20));
+                        GUILayout.Label("Sample Scenes setup ", GUILayout.Width(200));
+
+                        using (new EditorGUI.DisabledScope(areSampleScenesIn))
+                        {
+                            if (GUILayout.Button("Solve", GUILayout.Width(50)))
+                            {
+                                ZSerializerEditor.AddSampleScenesToBuildSettings();
+                            }
+                        }
+                    }
+
+                    using (new EditorGUI.DisabledScope(!zuidsAreSetup && !hasZSerializers))
+                    {
+                        if (GUILayout.Button("Finish Setup"))
+                        {
+                            ZSerializerSettings.Instance.packageInitialized = true;
+                        }
+                    }
+                    
+                }
+
+
+
+                // if (GUILayout.Button($"<color=#{ZSerializerStyler.MainHex}>Setup</color>", new GUIStyle("button") { fontSize = 48, font = Styler.header.font, richText = true},
+                //     GUILayout.MinHeight(100)))
+                // {
+                //     ZSerializerSettings.Instance.packageInitialized = true;
+                //     ZSerializerEditor.GenerateUnityComponentClasses();
+                //     ZSerializerEditor.RefreshZUIDs();
+                //     ZSerializerEditor.AddSampleScenesToBuildSettings();
+                // }
             }
             else
             {

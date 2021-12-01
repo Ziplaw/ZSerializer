@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +15,7 @@ using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
 using UnityEngineInternal;
 using ZSerializer.Internal;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -342,10 +344,14 @@ namespace ZSerializer
                     zSavers[i] = Activator.CreateInstance(ZSerializerType, components[i].GetZUID(),
                         components[i].gameObject.GetZUID());
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    Debug.LogError($"An exception was thrown when trying to create a {ZSerializerType}. This may be caused by an error derived from a Custom Variable Entry. ");
-                    throw;
+                    Debug.LogError($"An exception was thrown when trying to create a {ZSerializerType} for {components[i]}. This may be caused by an error derived from a Custom Variable Entry.");
+                    // var st = new StackTrace(e, true);
+                    // var frame = st.GetFrame(0);
+                    // var line = frame.GetFileLineNumber();
+                    // Debug.LogError(line);
+                    throw e;
                 }
                 
                 currentComponentCount++;
@@ -1134,7 +1140,7 @@ namespace ZSerializer
                     match =>
                     {
                         if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj))
-                            return "\"instanceID\":" + obj.GetHashCode();
+                            return "\"instanceID\":" + obj.GetInstanceID();
                         return "\"instanceID\":0";
                     });
 #else
@@ -1142,7 +1148,7 @@ namespace ZSerializer
                 match =>
                 {
                     if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj))
-                        return "\"m_FileID\":" + obj.GetHashCode() + ", \"m_PathID\":0";
+                        return "\"m_FileID\":" + obj.GetInstanceID() + ", \"m_PathID\":0";
                     return "\"m_FileID\":0, \"m_PathID\":0";
                 });
 #endif
@@ -1156,7 +1162,7 @@ namespace ZSerializer
 #if UNITY_EDITOR
             pattern = "\"instanceID\":\\D?[0-9]{2,}";
 #else
-            pattern = "\"m_FileID:-?[0-9]{2,},\"m_PathID\":0";
+            pattern = "\"m_FileID\":-?[0-9]{2,},\"m_PathID\":0";
 #endif
 
             return Regex.Replace(json, pattern, match =>
@@ -1175,16 +1181,18 @@ namespace ZSerializer
 //Writes json into file
         static async Task WriteToFile(string fileName, string json)
         {
+            var tempIDMap = idMap[CurrentGroupID].ToDictionary(kvp =>
+            {
+#if UNITY_EDITOR
+                return "\"instanceID\":" + kvp.Value.GetInstanceID();
+#else
+                return "\"m_FileID\":" + kvp.Value.GetInstanceID() + ",\"m_PathID\":0";
+#endif
+            }, kvp => kvp.Key);
+            
             await RunTask(() =>
             {
-                var tempIDMap = idMap[CurrentGroupID].ToDictionary(kvp =>
-                {
-#if UNITY_EDITOR
-                    return "\"instanceID\":" + kvp.Value.GetHashCode();
-#else
-                    return "\"m_FileID:\":" + kvp.Value.GetHashCode() + ", \"m_PathID\":0";
-#endif
-                }, kvp => kvp.Key);
+                
                 json = ReplaceInstanceIDs(json, tempIDMap);
                 if (ZSerializerSettings.Instance.encryptData)
                 {
@@ -1502,7 +1510,7 @@ namespace ZSerializer
             return op;
         }
 
-        internal static void TryAdd(this Dictionary<string, Object> dictionary,
+        internal static void TryAddToDictionary(this Dictionary<string, Object> dictionary,
             string key, Object value)
         {
             while (dictionary.TryGetValue(key, out var _value))
