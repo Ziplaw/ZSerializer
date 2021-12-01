@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1efd7af9bd4fdc48a69c60405eb42f4, type: 3}
   m_Name: ZSerializerSettings
   m_EditorClassIdentifier: 
-  packageInitialized: 1
-  debugMode: 2
+  packageInitialized: 0
+  debugMode: 1
   autoRebuildZSerializers: 1
   selectedSaveFile: 0
   encryptData: 0
@@ -100,68 +100,6 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - typeFullName: UnityEngine.AudioSource, UnityEngine.AudioModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - gamepadSpeakerOutputType
-    customVariableEntries: []
-    OnSerialize:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeserialize:
-      m_PersistentCalls:
-        m_Calls: []
-  - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-    componentNames:
-    - shadowRadius
-    - shadowAngle
-    - areaSize
-    - lightmapBakeType
-    customVariableEntries: []
-    OnSerialize:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeserialize:
-      m_PersistentCalls:
-        m_Calls: []
-  - typeFullName: UnityEngine.LightProbeGroup, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - dering
-    - probePositions
-    customVariableEntries: []
-    OnSerialize:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeserialize:
-      m_PersistentCalls:
-        m_Calls: []
-  - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - scaleInLightmap
-    - receiveGI
-    - stitchLightmapSeams
-    customVariableEntries: []
-    OnSerialize:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeserialize:
-      m_PersistentCalls:
-        m_Calls: []
-  - typeFullName: UnityEngine.Terrain, UnityEngine.TerrainModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - bakeLightProbesForTrees
-    - deringLightProbesForTrees
-    customVariableEntries: []
-    OnSerialize:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeserialize:
-      m_PersistentCalls:
-        m_Calls: []
   saveGroups:
   - Main
   - Settings
