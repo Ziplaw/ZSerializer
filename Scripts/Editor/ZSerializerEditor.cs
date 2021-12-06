@@ -1048,36 +1048,46 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 "Would you like to reset your current ZUIDs? This will cause player save files to be unusable", "Yes",
                 "No");
 
-            var originalScenePath = SceneManager.GetActiveScene().path;
-            var paths = AssetDatabase.GetAllAssetPaths().Where(s => s.EndsWith(".unity")).ToList();
-            int numberOfUpdatedZUIDs = 0;
-
-            foreach (var path in paths)
+            try
             {
-                var split = path.Split('/').Last();
+                var originalScenePath = SceneManager.GetActiveScene().path;
+                var paths = AssetDatabase.GetAllAssetPaths().Where(s => s.EndsWith(".unity")).ToList();
+                int numberOfUpdatedZUIDs = 0;
 
-                AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<SceneAsset>(path));
-                foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
+                foreach (var path in paths)
                 {
-                    EditorUtility.DisplayProgressBar("Refreshing Project ZUIDs", $"{monoBehaviour}, {split}",
-                        paths.IndexOf(path) / (float)paths.Count);
-                    var serializable = monoBehaviour as IZSerializable;
-                    if (string.IsNullOrEmpty(serializable.ZUID) || updateNonEmptyZUIDs)
-                    {
-                        if (serializable is PersistentGameObject pg) pg.Reset();
-                        else serializable.GenerateEditorZUIDs(false);
+                    var split = path.Split('/').Last();
 
-                        numberOfUpdatedZUIDs++;
+                    AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<SceneAsset>(path));
+                    foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>()
+                        .Where(m => m is IZSerializable))
+                    {
+                        EditorUtility.DisplayProgressBar("Refreshing Project ZUIDs", $"{monoBehaviour}, {split}",
+                            paths.IndexOf(path) / (float)paths.Count);
+                        var serializable = monoBehaviour as IZSerializable;
+                        if (string.IsNullOrEmpty(serializable.ZUID) || updateNonEmptyZUIDs)
+                        {
+                            if (serializable is PersistentGameObject pg) pg.Reset();
+                            else serializable.GenerateEditorZUIDs(false);
+
+                            numberOfUpdatedZUIDs++;
+                        }
                     }
+
+                    EditorSceneManager.SaveOpenScenes();
+                    // EditorSceneManager.LoadScene(SceneManager.GetSceneByPath(path).name);
                 }
 
-                EditorSceneManager.SaveOpenScenes();
-                // EditorSceneManager.LoadScene(SceneManager.GetSceneByPath(path).name);
+                Debug.Log($"<color=cyan>{numberOfUpdatedZUIDs} ZUIDs have been reset!</color>");
+                EditorUtility.ClearProgressBar();
+                EditorSceneManager.OpenScene(originalScenePath);
+            }
+            catch (Exception e)
+            {
+                EditorUtility.ClearProgressBar();
+                throw e;
             }
 
-            Debug.Log($"<color=cyan>{numberOfUpdatedZUIDs} ZUIDs have been reset!</color>");
-            EditorUtility.ClearProgressBar();
-            EditorSceneManager.OpenScene(originalScenePath);
 
             // throw new NotImplementedException();
         }
