@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditor.Callbacks;
@@ -16,6 +17,8 @@ using ZSerializer;
 using ZSerializer.Editor;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
+
+[assembly: InternalsVisibleTo("ZSerializer.Runtime")]
 
 namespace ZSerializer.Editor
 {
@@ -125,7 +128,7 @@ namespace ZSerializer.Editor
                 int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
                 script +=
-                    $"    public {fieldInfo.FieldType.ToString().Replace('+','.')} {fieldInfo.Name};\n";
+                    $"    public {fieldInfo.FieldType.ToString().Replace('+', '.')} {fieldInfo.Name};\n";
 
                 if (genericParameterAmount > 0)
                 {
@@ -136,8 +139,10 @@ namespace ZSerializer.Editor
 
                     for (var i = 0; i < genericArguments.Length; i++)
                     {
-                        oldString += genericArguments[i].ToString().Replace('+','.') + (i == genericArguments.Length - 1 ? "]" : ",");
-                        newString += genericArguments[i].ToString().Replace('+','.') + (i == genericArguments.Length - 1 ? ">" : ",");
+                        oldString += genericArguments[i].ToString().Replace('+', '.') +
+                                     (i == genericArguments.Length - 1 ? "]" : ",");
+                        newString += genericArguments[i].ToString().Replace('+', '.') +
+                                     (i == genericArguments.Length - 1 ? ">" : ",");
                     }
 
                     script = script.Replace(oldString, newString);
@@ -166,7 +171,7 @@ namespace ZSerializer.Editor
                 int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
                 script +=
-                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType.ToString().Replace('+','.')})typeof({type.Name}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).GetValue(instance);\n";
+                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType.ToString().Replace('+', '.')})typeof({fieldInfo.DeclaringType.FullName}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).GetValue(instance);\n";
 
                 if (genericParameterAmount > 0)
                 {
@@ -177,8 +182,10 @@ namespace ZSerializer.Editor
 
                     for (var i = 0; i < genericArguments.Length; i++)
                     {
-                        oldString += genericArguments[i].ToString().Replace('+','.') + (i == genericArguments.Length - 1 ? "]" : ",");
-                        newString += genericArguments[i].ToString().Replace('+','.') + (i == genericArguments.Length - 1 ? ">" : ",");
+                        oldString += genericArguments[i].ToString().Replace('+', '.') +
+                                     (i == genericArguments.Length - 1 ? "]" : ",");
+                        newString += genericArguments[i].ToString().Replace('+', '.') +
+                                     (i == genericArguments.Length - 1 ? ">" : ",");
                     }
 
                     script = script.Replace(oldString, newString);
@@ -197,7 +204,7 @@ namespace ZSerializer.Editor
             foreach (var fieldInfo in fieldInfos)
             {
                 script +=
-                    $"         typeof({type.Name}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).SetValue(component, {fieldInfo.Name});\n";
+                    $"         typeof({fieldInfo.DeclaringType.FullName}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).SetValue(component, {fieldInfo.Name});\n";
             }
 
             // script += $"         typeof({type.FullName}).GetProperty(\"GroupID\").SetValue(component, groupID);\n" +
@@ -290,17 +297,35 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                                : true);
                 }).ToList();
 
-            fieldInfos.AddRange(type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(f =>
-                {
-                    return f.GetCustomAttribute<SerializeField>() != null &&
-                           f.GetCustomAttribute<NonZSerialized>() == null &&
-                           (f.FieldType.IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) ||
-                            (f.FieldType.FullName ?? f.FieldType.Name).StartsWith("UnityEngine.")) &&
-                           (f.FieldType.IsGenericType
-                               ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>)
-                               : true);
-                }));
+            // fieldInfos.AddRange(type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+            //     .Where(f =>
+            //     {
+            //         return f.GetCustomAttribute<SerializeField>() != null &&
+            //                f.GetCustomAttribute<NonZSerialized>() == null &&
+            //                (f.FieldType.IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) ||
+            //                 (f.FieldType.FullName ?? f.FieldType.Name).StartsWith("UnityEngine.")) &&
+            //                (f.FieldType.IsGenericType
+            //                    ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>)
+            //                    : true);
+            //     }));
+
+            while (type != typeof(MonoBehaviour))
+            {
+                fieldInfos.AddRange(type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                    .Where(f =>
+                    {
+                        return f.DeclaringType == type &&
+                               f.GetCustomAttribute<SerializeField>() != null &&
+                               f.GetCustomAttribute<NonZSerialized>() == null &&
+                               (f.FieldType.IsSerializable ||
+                                typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) ||
+                                (f.FieldType.FullName ?? f.FieldType.Name).StartsWith("UnityEngine.")) &&
+                               (f.FieldType.IsGenericType
+                                   ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>)
+                                   : true);
+                    }));
+                type = type.BaseType;
+            }
 
             return fieldInfos;
         }
@@ -317,7 +342,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             var fieldTypes = GetFieldsThatShouldBeSerialized(type);
 
             new Color(0, 0, 0, 1);
-
             if (fieldsZSerializer.Count == fieldTypes.Count)
             {
                 for (int j = 0; j < fieldsZSerializer.Count; j++)
@@ -626,7 +650,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
         private static Vector2 scrollPos;
 
         public static void BuildSettingsEditor(ZSerializerStyler styler, ref int selectedMenu, ref int selectedType,
-            ref int selectedGroup, ref int selectedGroupIndex,
+            ref int selectedGroup, ref int selectedComponentSettings, ref int selectedGroupIndex,
             float width)
         {
             IEnumerable<FieldInfo> fieldInfos = typeof(ZSerializerSettings)
@@ -634,7 +658,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                 .Where(f => f.GetCustomAttribute<HideInInspector>() == null);
             SerializedObject serializedObject = new SerializedObject(styler.settings);
 
-            string[] toolbarNames = { "Settings", "Groups", "Component Blacklist" };
+            string[] toolbarNames = { "Settings", "Groups", "Component Settings" };
 
             using (new GUILayout.VerticalScope("box"))
             {
@@ -868,87 +892,139 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
                         break;
                     case 2:
-                        if (ZSerializerSettings.Instance
-                            .unityComponentDataList.Count > 0)
+
+                        var componentSettings = new[] { "Blacklist", "Whitelist" };
+                        if (GUILayout.Button("Build ZSerializers"))
                         {
-                            using (new GUILayout.HorizontalScope(GUILayout.Width(1)))
-                            {
-                                using (new EditorGUILayout.VerticalScope())
+                            ZSerializerEditorRuntime.GenerateUnityComponentClasses();
+                        }
+
+                        selectedComponentSettings = GUILayout.Toolbar(selectedComponentSettings, componentSettings);
+
+                        switch (selectedComponentSettings)
+                        {
+                            case 0:
+                                if (ZSerializerSettings.Instance
+                                    .unityComponentDataList.Count > 0)
                                 {
-                                    GUILayout.Space(-15);
-                                    using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window,
-                                        GUILayout.Height(1),
-                                        GUILayout.Height(Mathf.Max(88,
-                                            20.6f * ZSerializerSettings.Instance.unityComponentDataList.Count))))
+                                    using (new GUILayout.HorizontalScope(GUILayout.Width(1)))
                                     {
-                                        foreach (var serializableComponentBlackList in ZSerializerSettings.Instance
-                                            .unityComponentDataList.Where(data => data.componentNames.Count > 0))
+                                        using (new EditorGUILayout.VerticalScope())
                                         {
-                                            if (GUILayout.Button(serializableComponentBlackList.Type.Name,
-                                                GUILayout.Width(150)))
+                                            GUILayout.Space(-15);
+                                            using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window,
+                                                GUILayout.Height(1),
+                                                GUILayout.Height(Mathf.Max(88,
+                                                    20.6f * ZSerializerSettings.Instance.unityComponentDataList
+                                                        .Count))))
                                             {
-                                                selectedType =
-                                                    ZSerializerSettings.Instance.unityComponentDataList.IndexOf(
-                                                        serializableComponentBlackList);
+                                                foreach (var serializableComponentBlackList in ZSerializerSettings
+                                                    .Instance
+                                                    .unityComponentDataList
+                                                    .Where(data => data.componentNames.Count > 0))
+                                                {
+                                                    if (GUILayout.Button(serializableComponentBlackList.Type.Name,
+                                                        GUILayout.Width(150)))
+                                                    {
+                                                        selectedType =
+                                                            ZSerializerSettings.Instance.unityComponentDataList.IndexOf(
+                                                                serializableComponentBlackList);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+
+                                        using (new EditorGUILayout.VerticalScope())
+                                        {
+                                            GUILayout.Space(-15);
+                                            using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window,
+                                                GUILayout.Height(1)))
+                                            {
+                                                using (var scrollView =
+                                                    new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
+                                                        GUILayout.Width(width - 196),
+                                                        GUILayout.Height(Mathf.Max(61.8f,
+                                                            20.6f * ZSerializerSettings.Instance.unityComponentDataList
+                                                                .Count(data => data.componentNames.Count > 0)))))
+                                                {
+                                                    scrollPos = scrollView.scrollPosition;
+
+                                                    if (selectedType < ZSerializerSettings.Instance
+                                                        .unityComponentDataList.Count && ZSerializerSettings.Instance
+                                                        .unityComponentDataList[selectedType].componentNames != null)
+
+                                                        foreach (var componentName in ZSerializerSettings.Instance
+                                                            .unityComponentDataList[selectedType]
+                                                            .componentNames)
+                                                        {
+                                                            GUILayout.Label(componentName);
+                                                        }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (GUILayout.Button("Delete Blacklist"))
+                                    {
+                                        ZSerializerSettings.Instance.DefaultComponentData();
+                                        EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                        AssetDatabase.SaveAssets();
+                                        selectedType = 0;
+                                        ZSerializerEditorRuntime.GenerateUnityComponentClasses();
+                                    }
+
+                                    if (GUILayout.Button("Open ZSerializer Configurator"))
+                                    {
+                                        ZSerializerConfigurator.ShowWindow();
+                                    }
+                                }
+                                else
+                                {
+                                    GUILayout.Label("The Component Blacklist is Empty.",
+                                        new GUIStyle("label") { alignment = TextAnchor.MiddleCenter });
+                                    if (GUILayout.Button("Open Fine Tuner"))
+                                    {
+                                        ZSerializerConfigurator.ShowWindow();
+                                    }
+                                }
+
+                                break;
+                            case 1:
+                                var list = ZSerializerSettings.Instance.unityComponentTypes
+                                    .Select(t => Type.GetType(t).Name).ToList();
+
+                                GUILayout.Space(-15);
+                                using (new GUILayout.VerticalScope(ZSerializerStyler.window))
+                                {
+                                    for (var i = 0; i < list.Count; i++)
+                                    {
+                                        var typeName = list[i];
+                                        using (new EditorGUILayout.HorizontalScope())
+                                        {
+                                            GUILayout.Label(typeName,
+                                                new GUIStyle("box")
+                                                    { alignment = TextAnchor.MiddleCenter, stretchWidth = true });
+                                            if (GUILayout.Button("-", GUILayout.Width(20)))
+                                            {
+                                                ZSerializerSettings.Instance.unityComponentTypes.RemoveAt(i);
+                                                EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                                AssetDatabase.SaveAssets();
                                             }
                                         }
                                     }
                                 }
 
-
-                                using (new EditorGUILayout.VerticalScope())
+                                if (GUILayout.Button("Delete All"))
                                 {
-                                    GUILayout.Space(-15);
-                                    using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window,
-                                        GUILayout.Height(1)))
-                                    {
-                                        using (var scrollView =
-                                            new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
-                                                GUILayout.Width(width - 196),
-                                                GUILayout.Height(Mathf.Max(61.8f,
-                                                    20.6f * ZSerializerSettings.Instance.unityComponentDataList
-                                                        .Count(data => data.componentNames.Count > 0)))))
-                                        {
-                                            scrollPos = scrollView.scrollPosition;
-
-                                            if (selectedType < ZSerializerSettings.Instance
-                                                .unityComponentDataList.Count && ZSerializerSettings.Instance
-                                                .unityComponentDataList[selectedType].componentNames != null)
-
-                                                foreach (var componentName in ZSerializerSettings.Instance
-                                                    .unityComponentDataList[selectedType]
-                                                    .componentNames)
-                                                {
-                                                    GUILayout.Label(componentName);
-                                                }
-                                        }
-                                    }
+                                    ZSerializerSettings.Instance.unityComponentTypes.Clear();
+                                    EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                                    AssetDatabase.SaveAssets();
                                 }
-                            }
 
-                            if (GUILayout.Button("Delete Blacklist"))
-                            {
-                                ZSerializerSettings.Instance.unityComponentDataList.Clear();
-                                EditorUtility.SetDirty(ZSerializerSettings.Instance);
-                                AssetDatabase.SaveAssets();
-                                selectedType = 0;
-                                GenerateUnityComponentClasses();
-                            }
+                                break;
+                        }
 
-                            if (GUILayout.Button("Open ZSerializer Configurator"))
-                            {
-                                ZSerializerConfigurator.ShowWindow();
-                            }
-                        }
-                        else
-                        {
-                            GUILayout.Label("The Component Blacklist is Empty.",
-                                new GUIStyle("label") { alignment = TextAnchor.MiddleCenter });
-                            if (GUILayout.Button("Open Fine Tuner"))
-                            {
-                                ZSerializerConfigurator.ShowWindow();
-                            }
-                        }
 
                         break;
                     // case 3:
@@ -988,7 +1064,9 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                     var serializable = monoBehaviour as IZSerializable;
                     if (string.IsNullOrEmpty(serializable.ZUID) || updateNonEmptyZUIDs)
                     {
-                        serializable.GenerateEditorZUIDs(false);
+                        if (serializable is PersistentGameObject pg) pg.Reset();
+                        else serializable.GenerateEditorZUIDs(false);
+
                         numberOfUpdatedZUIDs++;
                     }
                 }
@@ -1004,154 +1082,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             // throw new NotImplementedException();
         }
 
-        [MenuItem("Tools/ZSerializer/Generate Unity Component ZSerializers", priority = 20)]
-        public static void GenerateUnityComponentClasses()
-        {
-            string longScript = @"
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
-namespace ZSerializer {
-
-";
-
-            List<Type> types = ZSerialize.UnitySerializableTypes;
-            foreach (var type in types)
-            {
-                EditorUtility.DisplayProgressBar("Generating Unity Component ZSerializers", type.Name,
-                    types.IndexOf(type) / (float)types.Count);
-
-
-                if (type != typeof(PersistentGameObject))
-                {
-                    longScript +=
-                        "[System.Serializable]\npublic sealed class " + type.Name +
-                        "ZSerializer : ZSerializer.Internal.ZSerializer {\n";
-
-                    foreach (var propertyInfo in type
-                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(ZSerialize.PropertyIsSuitableForZSerializer))
-                    {
-                        longScript +=
-                            $"    public {propertyInfo.PropertyType.ToString().Replace('+', '.')} " +
-                            propertyInfo.Name +
-                            ";\n";
-                    }
-
-                    foreach (var fieldInfo in type
-                        .GetFields(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
-                    {
-                        var fieldType = fieldInfo.FieldType;
-
-                        if (fieldInfo.FieldType.IsArray)
-                        {
-                            fieldType = fieldInfo.FieldType.GetElementType();
-                        }
-
-                        int genericParameterAmount = fieldType.GenericTypeArguments.Length;
-
-                        longScript +=
-                            $"    public {fieldInfo.FieldType.ToString().Replace('+', '.')} " + fieldInfo.Name +
-                            ";\n";
-
-                        if (genericParameterAmount > 0)
-                        {
-                            string oldString = $"`{genericParameterAmount}[";
-                            string newString = "<";
-
-                            var genericArguments = fieldType.GenericTypeArguments;
-
-                            for (var i = 0; i < genericArguments.Length; i++)
-                            {
-                                oldString += genericArguments[i].ToString().Replace('+', '.') +
-                                             (i == genericArguments.Length - 1 ? "]" : ",");
-                                newString += genericArguments[i].ToString().Replace('+', '.') +
-                                             (i == genericArguments.Length - 1 ? ">" : ",");
-                            }
-
-                            longScript = longScript.Replace(oldString, newString);
-                        }
-                    }
-
-                    var data = ZSerializerSettings.Instance.unityComponentDataList.FirstOrDefault(data =>
-                        data.Type == type);
-
-                    if (data != null)
-                        foreach (var customVariableEntry in data.customVariableEntries)
-                        {
-                            longScript +=
-                                $"    public {customVariableEntry.variableType} {customVariableEntry.variableName};\n";
-                        }
-
-
-                    longScript += "    public " + type.Name +
-                                  "ZSerializer (string ZUID, string GOZUID) : base(ZUID, GOZUID) {\n" +
-                                  "        var instance = ZSerializer.ZSerialize.idMap[ZSerializer.ZSerialize.CurrentGroupID][ZUID] as " +
-                                  type.FullName +
-                                  ";\n";
-
-                    foreach (var propertyInfo in type
-                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(ZSerialize.PropertyIsSuitableForZSerializer))
-                    {
-                        longScript += $"        " + propertyInfo.Name + " = " + "instance." + propertyInfo.Name +
-                                      ";\n";
-                    }
-
-                    foreach (var fieldInfo in type
-                        .GetFields(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(f => f.GetCustomAttribute<ObsoleteAttribute>() == null))
-                    {
-                        longScript += $"        " + fieldInfo.Name + " = " + "instance." + fieldInfo.Name + ";\n";
-                    }
-
-                    longScript +=
-                        $"        ZSerializerSettings.Instance.unityComponentDataList.FirstOrDefault(data => data.Type == typeof({type.FullName}))?.OnSerialize?.Invoke(this, instance);\n";
-
-
-                    longScript += "    }\n";
-
-
-                    longScript +=
-                        @"    public override void RestoreValues(UnityEngine.Component component)
-    {
-        var instance = component as " + type.FullName + @";
-";
-                    foreach (var propertyInfo in type
-                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(ZSerialize.PropertyIsSuitableForZSerializer))
-                    {
-                        longScript += $"        instance." + propertyInfo.Name + " = " + propertyInfo.Name + ";\n";
-                    }
-
-                    longScript +=
-                        $"        ZSerializerSettings.Instance.unityComponentDataList.FirstOrDefault(data => data.Type == typeof({type.FullName}))?.OnDeserialize?.Invoke(this, instance);\n";
-
-
-                    longScript += "    }\n";
-                    longScript += "}\n";
-                }
-            }
-
-            EditorUtility.ClearProgressBar();
-
-            longScript += "}";
-
-            if (!Directory.Exists(Application.dataPath + "/ZResources/ZSerializer"))
-                Directory.CreateDirectory(Application.dataPath + "/ZResources/ZSerializer");
-
-            FileStream fs = new FileStream(
-                Application.dataPath + "/ZResources/ZSerializer/UnityComponentZSerializers.cs",
-                FileMode.Create);
-            StreamWriter sw = new StreamWriter(fs);
-
-            sw.Write(longScript);
-            sw.Close();
-
-            AssetDatabase.Refresh();
-            Debug.Log("<color=cyan>Unity Component ZSerializers built</color>");
-        }
 
         [DidReloadScripts]
         static void OnReload()

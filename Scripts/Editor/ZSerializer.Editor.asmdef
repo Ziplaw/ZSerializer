@@ -1,5 +1,5 @@
 {
-    "name": "com.Ziplaw.ZSaver.Editor",
+    "name": "ZSerializer.Editor",
     "rootNamespace": "",
     "references": [
         "GUID:c7d027357badef34cbfffba719cd855d"

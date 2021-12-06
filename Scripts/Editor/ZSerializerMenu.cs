@@ -40,6 +40,8 @@ namespace ZSerializer.Editor
         private int selectedType;
         private int selectedGroup;
         private int selectedGroupIndex = -1;
+        private int selectedComponentSettings;
+
         private static ZSerializerStyler styler;
         private static ZSerializerStyler Styler
         {
@@ -130,28 +132,26 @@ namespace ZSerializer.Editor
                         {false,new List<Texture2D> {Resources.Load<Texture2D>("not_made"), Resources.Load<Texture2D>("needs_rebuilding")}}
                     };
                     
-                    bool hasZSerializers = File.Exists(Path.Combine(Application.dataPath,
-                        "ZResources/ZSerializer/UnityComponentZSerializers.cs"));
+                    // bool hasZSerializers = File.Exists(Path.Combine(Application.dataPath,
+                    //     "ZResources/ZSerializer/UnityComponentZSerializers.cs"));
                     bool zuidsAreSetup = !FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable).Any(m => string.IsNullOrEmpty((m as IZSerializable).ZUID) || string.IsNullOrEmpty((m as IZSerializable).ZUID));
                     bool areSampleScenesIn = EditorBuildSettings.scenes.Any(s => s.path.Contains("ZSerializer/Samples/2 - Scene Groups/House/Scenes"));
 
 
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        
-                        
-                        GUILayout.Label(new GUIContent(
-                            icons[hasZSerializers][0]),GUILayout.Width(20), GUILayout.Height(20));
-                        GUILayout.Label("Unity Component ZSerializers Built", GUILayout.Width(200));
-
-                        using (new EditorGUI.DisabledScope(hasZSerializers))
-                        {
-                            if (GUILayout.Button("Solve", GUILayout.Width(50)))
-                            {
-                                ZSerializerEditor.GenerateUnityComponentClasses();
-                            }
-                        }
-                    }
+                    // using (new GUILayout.HorizontalScope())
+                    // {
+                    //     GUILayout.Label(new GUIContent(
+                    //         icons[hasZSerializers][0]),GUILayout.Width(20), GUILayout.Height(20));
+                    //     GUILayout.Label("Unity Component ZSerializers Built", GUILayout.Width(200));
+                    //
+                    //     using (new EditorGUI.DisabledScope(hasZSerializers))
+                    //     {
+                    //         if (GUILayout.Button("Solve", GUILayout.Width(50)))
+                    //         {
+                    //             ZSerializerEditorRuntime.GenerateUnityComponentClasses();
+                    //         }
+                    //     }
+                    // }
                     
                     using (new GUILayout.HorizontalScope())
                     {
@@ -164,7 +164,7 @@ namespace ZSerializer.Editor
                         {
                             if (GUILayout.Button("Solve", GUILayout.Width(50)))
                             {
-                                ZSerializerEditor.GenerateUnityComponentClasses();
+                                ZSerializerEditorRuntime.GenerateUnityComponentClasses();
                             }
                         }
                     }
@@ -184,7 +184,7 @@ namespace ZSerializer.Editor
                         }
                     }
 
-                    using (new EditorGUI.DisabledScope(!zuidsAreSetup && !hasZSerializers))
+                    using (new EditorGUI.DisabledScope(!zuidsAreSetup /*|| !hasZSerializers*/))
                     {
                         if (GUILayout.Button("Finish Setup"))
                         {
@@ -228,7 +228,7 @@ namespace ZSerializer.Editor
 
                         if (editMode)
                         {
-                            ZSerializerEditor.BuildSettingsEditor(Styler, ref selectedMenu, ref selectedType, ref selectedGroup,ref selectedGroupIndex,
+                            ZSerializerEditor.BuildSettingsEditor(Styler, ref selectedMenu, ref selectedType, ref selectedGroup, ref selectedComponentSettings,ref selectedGroupIndex,
                                 position.width);
                         }
                         else

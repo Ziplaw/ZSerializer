@@ -34,8 +34,23 @@ public class PersistentGameObjectEditor : Editor
         GUILayout.Space(-15);
         using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
         {
-            GUILayout.Label($"<color=#{ZSerializerStyler.MainHex}>  Persistent GameObject</color>", styler.header,
+            var unmanagedTypes = manager.serializedComponents.Select(sc => sc.typeFullName)
+                .Except(ZSerializerSettings.Instance.unityComponentTypes).ToList();
+            
+            string color = unmanagedTypes.Any() ? ZSerializerStyler.YellowHex : ZSerializerStyler.MainHex;
+            
+            GUILayout.Label($"<color=#{color}>  Persistent GameObject</color>", styler.header,
                 GUILayout.MinHeight(28));
+            if (unmanagedTypes.Any())
+            {
+                if (GUILayout.Button(styler.refreshWarningImage, GUILayout.Height(28), GUILayout.Width(28)))
+                {
+                    ZSerializerSettings.Instance.unityComponentTypes.AddRange(unmanagedTypes);
+                    EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                    AssetDatabase.SaveAssets();
+                    ZSerializerEditorRuntime.GenerateUnityComponentClasses();
+                }
+            }
             manager.showSettings = ZSerializerEditor.SettingsButton(manager.showSettings, styler, 28);
             PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
         }

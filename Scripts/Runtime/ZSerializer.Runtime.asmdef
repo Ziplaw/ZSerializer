@@ -1,5 +1,5 @@
 {
-    "name": "com.Ziplaw.ZSaver.Runtime",
+    "name": "ZSerializer.Runtime",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [],

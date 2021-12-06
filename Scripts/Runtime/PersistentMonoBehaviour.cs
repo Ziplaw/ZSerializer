@@ -135,8 +135,8 @@ namespace ZSerializer
         {
 #if UNITY_EDITOR
             ZUID = GUID.Generate().ToString();
-            var pg = GetComponent<PersistentGameObject>();
-            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : pg && !string.IsNullOrEmpty(pg.GOZUID) ? pg.GOZUID : GUID.Generate().ToString();
+            var zs = GetComponent<IZSerializable>();
+            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : zs != null && !string.IsNullOrEmpty(zs.GOZUID) ? zs.GOZUID : GUID.Generate().ToString();
 
             EditorUtility.SetDirty(this);
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);

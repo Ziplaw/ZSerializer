@@ -19,7 +19,7 @@ namespace ZSerializer
     [Serializable]
     public class SerializedComponent
     {
-        [SerializeField] private string typeFullName;
+        [SerializeField] internal string typeFullName;
         public Type Type => Type.GetType(typeFullName);
         public PersistentType persistenceType;
         public Component component;
@@ -118,18 +118,33 @@ namespace ZSerializer
 
         private static void ComponentListChanged()
         {
-            PersistentGameObject persistentGameObject =
-                Selection.activeGameObject?.GetComponent<PersistentGameObject>();
-
+            ComponentListChanged(Selection.activeGameObject?.GetComponent<PersistentGameObject>());
+        }
+        
+        private static void ComponentListChanged(PersistentGameObject persistentGameObject)
+        {
             if (!persistentGameObject || Application.isPlaying) return;
 
             persistentGameObject.GenerateComponentZUIDs();
+            
+            var unmanagedTypes = persistentGameObject.serializedComponents.Select(sc => sc.typeFullName)
+                .Except(ZSerializerSettings.Instance.unityComponentTypes).ToList();
+
+            if (unmanagedTypes.Count > 0)
+            {
+                ZSerializerSettings.Instance.unityComponentTypes.AddRange(unmanagedTypes);
+                ZSerializerEditorRuntime.GenerateUnityComponentClasses();
+                
+                EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                AssetDatabase.SaveAssets();
+            }
         }
 
 
         public void Reset()
         {
             GenerateEditorZUIDs(false);
+            ComponentListChanged(this);
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
             EditorUtility.SetDirty(this);
         }
@@ -163,10 +178,10 @@ namespace ZSerializer
             GenerateComponentZUIDs();
             
             ZUID = GUID.Generate().ToString();
-            var pm = GetComponent<PersistentMonoBehaviour>();
+            var zs = GetComponent<IZSerializable>();
 
             GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() :
-                pm && !string.IsNullOrEmpty(pm.GOZUID) ? pm.GOZUID : GUID.Generate().ToString();
+                zs != null && !string.IsNullOrEmpty(zs.GOZUID) ? zs.GOZUID : GUID.Generate().ToString();
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
             EditorUtility.SetDirty(this);
 

@@ -61,7 +61,7 @@ namespace ZSerializer.Editor
                     "<color=cyan>[ZS] Some of your build errors had to do with Editor Only Properties being Serialized, rebuilding Unity Component Serializer</color>");
                 EditorUtility.SetDirty(ZSerializerSettings.Instance);
                 AssetDatabase.SaveAssets();
-                ZSerializerEditor.GenerateUnityComponentClasses();
+                ZSerializerEditorRuntime.GenerateUnityComponentClasses();
 
             }
         }

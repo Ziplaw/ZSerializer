@@ -80,6 +80,7 @@ namespace ZSerializer
         public SerializationType serializationType = SerializationType.Sync;
         public int maxBatchCount = 50;
         [HideInInspector] public List<SceneGroup> sceneGroups;
+        [HideInInspector] public List<string> unityComponentTypes;
 
         public void DefaultComponentData()
         {
@@ -116,8 +117,8 @@ namespace ZSerializer
             string.Empty
         };
 
-        internal ComponentDataDictionary componentDataDictionary = new ComponentDataDictionary();
-
+        [HideInInspector] public ComponentDataDictionary componentDataDictionary = new ComponentDataDictionary();
+        
 
         [Serializable]
         public sealed class ComponentDataDictionary

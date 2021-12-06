@@ -13,6 +13,7 @@ namespace ZSerializer.Editor
         public Texture2D offImage;
         internal Texture2D cogWheel;
         internal Texture2D refreshImage;
+        internal Texture2D refreshWarningImage;
         private Font mainFont;
         internal ZSerializerSettings settings;
         
@@ -21,7 +22,7 @@ namespace ZSerializer.Editor
             get
             {
                 if (_yellow == default)
-                    _yellow = new Color(1f, 0.76f, 0.03f).ToHexadecimal();
+                    _yellow = new Color(1f, 0.83f, 0f).ToHexadecimal();
                 return  _yellow;
             }
         }
@@ -90,6 +91,7 @@ namespace ZSerializer.Editor
             offImage = Resources.Load<Texture2D>("off");
             cogWheel = Resources.Load<Texture2D>("cog");
             refreshImage = Resources.Load<Texture2D>("Refresh");
+            refreshWarningImage = Resources.Load<Texture2D>("RefreshWarning");
 
             mainFont = Resources.Load<Font>("FugazOne");
             settings = Resources.Load<ZSerializerSettings>("ZSerializerSettings");

@@ -19,7 +19,7 @@ using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
-[assembly: InternalsVisibleTo("com.Ziplaw.ZSaver.Editor")]
+[assembly: InternalsVisibleTo("ZSerializer.Editor")]
 // [assembly: InternalsVisibleTo("Assembly-CSharp")]
 
 namespace ZSerializer
@@ -538,7 +538,7 @@ namespace ZSerializer
                 await SerializeComponents(
                     GetComponentsOfGivenType(persistentGameObjectsToSerialize, componentType),
                     Assembly.Load(componentType == typeof(PersistentGameObject)
-                        ? "com.Ziplaw.ZSaver.Runtime"
+                        ? "ZSerializer.Runtime"
                         : mainAssembly).GetType("ZSerializer." + componentType.Name + "ZSerializer"));
             }
         }
@@ -549,7 +549,7 @@ namespace ZSerializer
             if (zSaverType == null)
             {
                 LogError(
-                    $"No ZSerializer found for {components[0].GetType()}, this may be caused by a <color=cyan>{components[0].GetType()}</color> not having a <color=cyan>ZSerializer.</color>\nGo to <color=cyan>Tools/ZSerializer/ZSerializer</color> Menu and ensure all the class names are <color=green>green</color>", DebugMode.Off);
+                    $"No ZSerializer found for {components[0].GetType()}, this may be caused by a <color=cyan>{components[0].GetType()}</color> not having a <color=cyan>ZSerializer.</color>", DebugMode.Off);
                 return;
             }
 
@@ -1133,16 +1133,14 @@ namespace ZSerializer
 
         internal static async Task<string> ReplaceZUIDs(string json)
         {
-            return await RunTask(() =>
-            {
 #if UNITY_EDITOR
-                return Regex.Replace(json, "\"zuid\":\\w+",
-                    match =>
-                    {
-                        if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj))
-                            return "\"instanceID\":" + obj.GetInstanceID();
-                        return "\"instanceID\":0";
-                    });
+            return Regex.Replace(json, "\"zuid\":\\w+",
+                match =>
+                {
+                    if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj))
+                        return "\"instanceID\":" + obj.GetInstanceID();
+                    return "\"instanceID\":0";
+                });
 #else
             return Regex.Replace(json, "\"zuid\":\\w+",
                 match =>
@@ -1152,7 +1150,6 @@ namespace ZSerializer
                     return "\"m_FileID\":0, \"m_PathID\":0";
                 });
 #endif
-            });
         }
 
         static string ReplaceInstanceIDs(string json, Dictionary<string, string> tempIDMap)

@@ -44,8 +44,7 @@ namespace ZSerializer.Editor
 
         private void OnEnable()
         {
-            componentTypes = ZSerialize.UnitySerializableTypes.OrderBy(a => a.Name).ToList();
-            componentTypes.Remove(typeof(PersistentGameObject));
+            componentTypes = ZSerialize.UnitySerializableTypes.Intersect(ZSerializerSettings.Instance.unityComponentTypes.Select(s => Type.GetType(s))).OrderBy(a => a.Name).ToList();
             searchTypes = "";
             searchComponents = "";
         }
@@ -320,7 +319,7 @@ namespace ZSerializer.Editor
 
                         if (GUILayout.Button("Save & Apply"))
                         {
-                            ZSerializerEditor.GenerateUnityComponentClasses();
+                            ZSerializerEditorRuntime.GenerateUnityComponentClasses();
                             EditorUtility.SetDirty(ZSerializerSettings.Instance);
                             AssetDatabase.SaveAssets();
                         }

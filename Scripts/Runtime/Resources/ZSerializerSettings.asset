@@ -25,6 +25,9 @@ MonoBehaviour:
     scenePaths:
     - ZSerializer/Samples/2 - Scene Groups/House/Scenes/Bedroom
     - ZSerializer/Samples/2 - Scene Groups/House/Scenes/Kitchen
+  unityComponentTypes:
+  - UnityEngine.HingeJoint2D, UnityEngine.Physics2DModule, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
   unityComponentDataList:
   - typeFullName: UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
@@ -62,9 +65,7 @@ MonoBehaviour:
         m_Calls: []
   - typeFullName: UnityEngine.HingeJoint2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-    componentNames:
-    - motor
-    - limits
+    componentNames: []
     customVariableEntries:
     - variableType: Vector2
       variableName: serializableLimits
@@ -119,3 +120,37 @@ MonoBehaviour:
   - 
   - 
   - 
+  componentDataDictionary:
+    typeDatas:
+      keys:
+      - B, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - C, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - CustomNamespace.A, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - Anchor, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - NodeSpawner, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - IntegrityTester, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - FrameTester, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - BallMover, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - GameManager, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - Pin, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      values:
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
