@@ -93,10 +93,11 @@ namespace ZSerializer
         #endregion
 
         #region Helper Functions
-
-        internal static string GetRuntimeSafeZUID()
+        
+        static int runtimeIDs = 0;
+        internal static string GetRuntimeSafeZUID(Type type)
         {
-            return ((int)(Random.value * 10000000)).ToString();
+            return $"{runtimeIDs++}{type.Name}";
         }
 
         static int[] GetIDList()
@@ -653,7 +654,7 @@ namespace ZSerializer
                 Log("Deserializing " + realType + "s", DebugMode.Informational);
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(currentTuple.Item1);
-                object[] zSerializerObjects = (object[])await fromJson.InvokeAsync(null, currentTuple.Item2);
+                object[] zSerializerObjects = (object[])fromJson.Invoke(null, new object[] {currentTuple.Item2});
 
                 int currentComponentCount = 0;
 
@@ -675,15 +676,14 @@ namespace ZSerializer
 //Loads all references and fields from already loaded objects, this is done like this to avoid data loss
         static async Task LoadReferences()
         {
-            foreach (var tuple in tempTuples[CurrentGroupID])
+            foreach (var tuple in tempTuples[CurrentGroupID].Where(t => t.Item1 != Type.GetType("ZSerializer.TransformZSerializer")))
             {
                 Type zSerializerType = tuple.Item1;
-                // Type realType = GetTypeFromZSerializerType(zSerializerType);
                 string json = tuple.Item2;
 
                 var fromJson = fromJsonMethod.MakeGenericMethod(zSerializerType);
 
-                object[] jsonObjects = (object[])await fromJson.InvokeAsync(null, json);
+                object[] jsonObjects = (object[])fromJson.Invoke(null, new object[] {json});
 
                 int componentCount = 0;
                 for (var i = 0; i < jsonObjects.Length; i++)

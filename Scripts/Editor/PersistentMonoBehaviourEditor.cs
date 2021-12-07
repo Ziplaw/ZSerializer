@@ -1,27 +1,36 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEditor;
+using UnityEngine;
 using ZSerializer;
 using ZSerializer.Editor;
 
-[CustomEditor(typeof(PersistentMonoBehaviour),true)]
+[CustomEditor(typeof(PersistentMonoBehaviour),true, isFallback = false)]
 public class PersistentMonoBehaviourEditor : Editor
 {
     public PersistentMonoBehaviour manager;
     public Editor editor;
 
-    public virtual void OnEnable()
+    public async void OnEnable()
     {
         manager = target as PersistentMonoBehaviour;
+
+        Type type = null;
         
-        var type = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t =>
+        await Task.Run(() =>
         {
-            var att = t.GetCustomAttribute<CustomEditor>();
-            if (att == null) return false;
-            var type = typeof(CustomEditor).GetField("m_InspectedType", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(att) as Type;
-            return type == manager.GetType();
-        }).FirstOrDefault();
+            type = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t =>
+            {
+                var att = t.GetCustomAttribute<CustomEditor>();
+                if (att == null) return false;
+                var type = typeof(CustomEditor).GetField("m_InspectedType", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(att) as Type;
+                return type == manager.GetType();
+            }).FirstOrDefault();
+        });
+        
+        
         if (type != null)
         {
             editor = CreateEditor(manager, type);
@@ -32,7 +41,15 @@ public class PersistentMonoBehaviourEditor : Editor
         }
         
     }
-    
+
+    private void OnDisable()
+    {
+        if(editor == null || editor == this) return;
+        
+        editor.GetType().GetMethod("OnDisable", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+            ?.Invoke(editor, null);
+    }
+
     public override void OnInspectorGUI()
     {
         DrawPersistentMonoBehaviourInspector();
@@ -57,13 +74,19 @@ public class PersistentMonoBehaviourEditor : Editor
                 }
 
                 if(editor == this) base.OnInspectorGUI();
-                else editor.OnInspectorGUI();
+                else if(editor != null) editor.OnInspectorGUI();
             }
         }
         else
         {
             if(editor == this) base.OnInspectorGUI();
-            else editor.OnInspectorGUI();
+            else if(editor != null) editor.OnInspectorGUI();
+        }
+
+        if (editor == null)
+        {
+            GUILayout.Label("Loading...");
+            Repaint();
         }
     }
 }

@@ -128,7 +128,7 @@ namespace ZSerializer {
                     longScript +=
                         @"    public override void RestoreValues(UnityEngine.Component component)
     {
-        var instance = component as " + type.FullName + @";
+        var instance = (" + type.FullName + @")component;
 ";
                     foreach (var propertyInfo in type
                         .GetProperties(BindingFlags.Public | BindingFlags.Instance)

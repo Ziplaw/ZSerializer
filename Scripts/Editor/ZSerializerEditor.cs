@@ -236,7 +236,7 @@ namespace ZSerializer.Editor
                         ?.GetValue(t.GetCustomAttribute<CustomEditor>()) as Type)
                 .Where(t => t.IsSubclassOf(typeof(MonoBehaviour)))).ToArray();
 
-        
+
         static List<FieldInfo> GetFieldsThatShouldBeSerialized(Type type)
         {
             //keep an eye on this, seems fishy
@@ -498,8 +498,10 @@ namespace ZSerializer.Editor
 
                 var fields = GetFieldsThatShouldBeSerialized(manager.GetType())
                     .Where(f => f.DeclaringType != typeof(PersistentMonoBehaviour)).ToList();
-                
-                fields.AddRange(manager.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => f.GetCustomAttribute<NonZSerialized>() != null && f.DeclaringType != typeof(PersistentMonoBehaviour)));
+
+                fields.AddRange(manager.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f =>
+                    f.GetCustomAttribute<NonZSerialized>() != null &&
+                    f.DeclaringType != typeof(PersistentMonoBehaviour)));
 
                 foreach (var field in fields)
                 {
@@ -508,12 +510,12 @@ namespace ZSerializer.Editor
                         var image = field.GetCustomAttribute<NonZSerialized>() == null && manager.IsOn
                             ? ZSerializerStyler.Instance.validImage
                             : ZSerializerStyler.Instance.offImage;
-                        
+
                         GUILayout.Label(image, GUILayout.Width(30), GUILayout.Height(20));
                         // GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
                         //     new GUIStyle("label") { richText = true },
                         //     GUILayout.Width(EditorGUIUtility.currentViewWidth / 3f));
-                        
+
                         EditorGUILayout.PropertyField(serializedObject.FindProperty(field.Name));
                     }
                 }
@@ -1001,6 +1003,43 @@ namespace ZSerializer.Editor
             }
         }
 
+        [MenuItem("Tools/ZSerializer/Setup Project ZSerializers", priority = 21)]
+        public static void SetupUnityZSerializers()
+        {
+            try
+            {
+                ZSerializerSettings.Instance.unityComponentTypes.Clear();
+                var originalScenePath = SceneManager.GetActiveScene().path;
+                var paths = AssetDatabase.GetAllAssetPaths().Where(s => s.EndsWith(".unity")).ToList();
+
+                foreach (var path in paths)
+                {
+                    var split = path.Split('/').Last();
+
+                    AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<SceneAsset>(path));
+                    foreach (var pg in Object.FindObjectsOfType<PersistentGameObject>())
+                    {
+                        EditorUtility.DisplayProgressBar("Setting up Project ZSerializers", $"{pg}, {split}",
+                            paths.IndexOf(path) / (float)paths.Count);
+                        PersistentGameObject.ComponentListChanged(pg, false);
+                    }
+
+                    EditorSceneManager.SaveOpenScenes();
+                    // EditorSceneManager.LoadScene(SceneManager.GetSceneByPath(path).name);
+                }
+
+                EditorUtility.ClearProgressBar();
+                EditorSceneManager.OpenScene(originalScenePath);
+                ZSerializerEditorRuntime.GenerateUnityComponentClasses();
+            }
+            catch (Exception e)
+            {
+                EditorUtility.ClearProgressBar();
+                throw e;
+            }
+        }
+
+
         [MenuItem("Tools/ZSerializer/Reset Project ZUIDs", priority = 21)]
         public static void RefreshZUIDs()
         {
@@ -1047,9 +1086,6 @@ namespace ZSerializer.Editor
                 EditorUtility.ClearProgressBar();
                 throw e;
             }
-
-
-            // throw new NotImplementedException();
         }
 
 
