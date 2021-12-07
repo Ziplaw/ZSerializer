@@ -415,7 +415,7 @@ namespace ZSerializer
                     string.IsNullOrEmpty(serializable.GOZUID))
                 {
                     LogWarning($"{serializable} found with empty ZUID, if this is not an instanced object, please go to Tools/ZSerializer/Reset Project ZUIDs", DebugMode.Off);
-                    serializable.GenerateRuntimeZUIDs(false);
+                    serializable.GenerateRuntimeZUIDs(false); //used to be false
                 }
 
                 serializable.AddZUIDsToIDMap();

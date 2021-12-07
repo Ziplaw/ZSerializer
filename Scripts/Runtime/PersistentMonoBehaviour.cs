@@ -129,12 +129,11 @@ namespace ZSerializer
         public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
             ZUID = ZSerialize.GetRuntimeSafeZUID(typeof(PersistentGameObject));
-            var zs = GetComponent<IZSerializable>();
-            GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID(typeof(GameObject)) : zs != null && !string.IsNullOrEmpty(zs.GOZUID) ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
-
+            var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
+            GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID(typeof(GameObject)) : zs != null ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
 
             if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<IZSerializable>())
+                foreach (var monoBehaviour in GetComponents<IZSerializable>().Where(c => !ReferenceEquals(c, this)))
                 {
                     (monoBehaviour).GenerateRuntimeZUIDs(false);
                 }
@@ -144,16 +143,16 @@ namespace ZSerializer
         {
 #if UNITY_EDITOR
             ZUID = GUID.Generate().ToString();
-            var zs = GetComponent<IZSerializable>();
-            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : zs != null && !string.IsNullOrEmpty(zs.GOZUID) ? zs.GOZUID : GUID.Generate().ToString();
+            var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
+            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : zs != null ? zs.GOZUID : GUID.Generate().ToString();
 
             EditorUtility.SetDirty(this);
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 
             if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<MonoBehaviour>().Where(c => c != this && c is IZSerializable))
+                foreach (var monoBehaviour in GetComponents<IZSerializable>().Where(c => !ReferenceEquals(c, this)))
                 {
-                    (monoBehaviour as IZSerializable).GenerateEditorZUIDs(false);
+                    monoBehaviour.GenerateEditorZUIDs(false);
                 }
 #endif
         }

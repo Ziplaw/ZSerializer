@@ -106,10 +106,7 @@ namespace ZSerializer
                 EditorUtility.SetDirty(this);
             }
 #endif
-
             serializedComponents = czlist;
-            
-            
         }
 
 #if UNITY_EDITOR
@@ -158,16 +155,16 @@ namespace ZSerializer
         {
             // GenerateComponentZUIDs();
             ZUID = ZSerialize.GetRuntimeSafeZUID(typeof(PersistentGameObject));
-            var zs = GetComponent<IZSerializable>();
+            var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
             GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID(typeof(GameObject)) :
-                zs != null && !string.IsNullOrEmpty(zs.GOZUID) ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
+                zs != null ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
             GenerateComponentZUIDs();
 
             serializedComponents.ForEach(sc => sc.zuid = ZSerialize.GetRuntimeSafeZUID(sc.Type));
 
 
             if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<IZSerializable>())
+                foreach (var monoBehaviour in GetComponents<IZSerializable>().Where(c => !ReferenceEquals(c, this)))
                 {
                     monoBehaviour.GenerateRuntimeZUIDs(false);
                 }
@@ -180,19 +177,18 @@ namespace ZSerializer
             GenerateComponentZUIDs();
             
             ZUID = GUID.Generate().ToString();
-            var zs = GetComponent<IZSerializable>();
-
+            var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
             GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() :
-                zs != null && !string.IsNullOrEmpty(zs.GOZUID) ? zs.GOZUID : GUID.Generate().ToString();
+                zs != null ? zs.GOZUID : GUID.Generate().ToString();
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
             EditorUtility.SetDirty(this);
 
             serializedComponents.ForEach(sc => sc.zuid = GUID.Generate().ToString());
             if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<MonoBehaviour>()
-                    .Where(c => c != this && c is IZSerializable))
+                foreach (var monoBehaviour in GetComponents<IZSerializable>()
+                    .Where(c => !ReferenceEquals(c, this)))
                 {
-                    (monoBehaviour as IZSerializable).GenerateEditorZUIDs(false);
+                    (monoBehaviour).GenerateEditorZUIDs(false);
                 }
 #endif
         }

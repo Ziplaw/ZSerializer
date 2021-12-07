@@ -86,7 +86,7 @@ namespace ZSerializer.Editor
 
         static void GetClasses()
         {
-            var types = ZSerialize.GetPersistentTypes().Where(t => FindObjectOfType(t) != null).ToArray();
+            var types = ZSerialize.GetPersistentTypes().Where(t => FindObjectOfType(t, true) != null).ToArray();
             classes = types.Select(t => new Class(t, ZSerializerEditor.GetClassState(t))).ToArray();
         }
 
