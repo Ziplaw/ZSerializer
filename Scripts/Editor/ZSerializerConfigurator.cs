@@ -13,7 +13,7 @@ namespace ZSerializer.Editor
     public class ZSerializerConfigurator : EditorWindow
     {
         [MenuItem("Tools/ZSerializer/ZSerializer Configurator", priority = 1)]
-        internal static void ShowWindow()
+        public static void ShowWindow()
         {
             var window = GetWindow<ZSerializerConfigurator>();
             window.titleContent = new GUIContent("ZSerializer Configurator");

@@ -15,9 +15,17 @@ namespace ZSerializer
     public sealed class ForceZSerialized : Attribute
     {
     }
+    
 
     public abstract class PersistentMonoBehaviour : MonoBehaviour, IZSerializable
     {
+        [Serializable]
+        private class ZSBanner
+        {
+            
+        }
+
+        
         /// <summary>
         /// OnPreSave is called right before any Save occurs
         /// </summary>
@@ -46,6 +54,7 @@ namespace ZSerializer
         {
         }
 
+        [NonZSerialized, SerializeField] private ZSBanner banner;
         [NonZSerialized, HideInInspector] public bool showSettings;
         [NonZSerialized, HideInInspector] public bool isSaving;
         [NonZSerialized, HideInInspector] public bool isLoading;
@@ -119,15 +128,15 @@ namespace ZSerializer
 
         public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
-            ZUID = ZSerialize.GetRuntimeSafeZUID();
-            var pg = GetComponent<PersistentGameObject>();
-            GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID() : pg && !string.IsNullOrEmpty(pg.GOZUID) ? pg.GOZUID : ZSerialize.GetRuntimeSafeZUID();
+            ZUID = ZSerialize.GetRuntimeSafeZUID(typeof(PersistentGameObject));
+            var zs = GetComponent<IZSerializable>();
+            GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID(typeof(GameObject)) : zs != null && !string.IsNullOrEmpty(zs.GOZUID) ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
 
 
             if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<MonoBehaviour>().Where(c => c != this && c is IZSerializable))
+                foreach (var monoBehaviour in GetComponents<IZSerializable>())
                 {
-                    (monoBehaviour as IZSerializable).GenerateRuntimeZUIDs(false);
+                    (monoBehaviour).GenerateRuntimeZUIDs(false);
                 }
         }
 

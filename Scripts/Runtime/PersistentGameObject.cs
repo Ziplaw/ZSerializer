@@ -86,20 +86,23 @@ namespace ZSerializer
 
                 if (thisComponentZuid != default) czlist.Add(thisComponentZuid);
                 else
+                {
+                    string id;
+#if UNITY_EDITOR
+                    id = Application.isPlaying ? ZSerialize.GetRuntimeSafeZUID(component.GetType()) : GUID.Generate().ToString();
+#else
+                    id = ZSerialize.GetRuntimeSafeZUID(component.GetType());
+#endif
+                    
                     czlist.Add(
-                        new SerializedComponent(component,
-                            #if UNITY_EDITOR
-                            GUID.Generate().ToString(),
-                                #else
-                                ZSerialize.GetRuntimeSafeZUID(),
-                                #endif
+                        new SerializedComponent(component,id,
                             PersistentType.Everything));
+                }
             }
-            
+
 #if UNITY_EDITOR
             if (!serializedComponents.SequenceEqual(czlist))
             {
-                // PrefabUtility.RecordPrefabInstancePropertyModifications(this);
                 EditorUtility.SetDirty(this);
             }
 #endif
@@ -154,20 +157,19 @@ namespace ZSerializer
         public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
             // GenerateComponentZUIDs();
-            ZUID = ZSerialize.GetRuntimeSafeZUID();
-            var pg = GetComponent<PersistentGameObject>();
-            GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID() :
-                pg && !string.IsNullOrEmpty(pg.GOZUID) ? pg.GOZUID : ZSerialize.GetRuntimeSafeZUID();
+            ZUID = ZSerialize.GetRuntimeSafeZUID(typeof(PersistentGameObject));
+            var zs = GetComponent<IZSerializable>();
+            GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID(typeof(GameObject)) :
+                zs != null && !string.IsNullOrEmpty(zs.GOZUID) ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
             GenerateComponentZUIDs();
 
-            serializedComponents.ForEach(sc => sc.zuid = ZSerialize.GetRuntimeSafeZUID());
+            serializedComponents.ForEach(sc => sc.zuid = ZSerialize.GetRuntimeSafeZUID(sc.Type));
 
 
             if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<MonoBehaviour>()
-                    .Where(c => c != this && c is IZSerializable))
+                foreach (var monoBehaviour in GetComponents<IZSerializable>())
                 {
-                    (monoBehaviour as IZSerializable).GenerateRuntimeZUIDs(false);
+                    monoBehaviour.GenerateRuntimeZUIDs(false);
                 }
         }
 
@@ -217,7 +219,7 @@ namespace ZSerializer
             var c = gameObject.AddComponent(type);
             if (ZSerialize.UnitySerializableTypes.Contains(type))
             {
-                string zuid = ZSerialize.GetRuntimeSafeZUID();
+                string zuid = ZSerialize.GetRuntimeSafeZUID(type);
                 serializedComponents.Add(new SerializedComponent(c, zuid,
                     persistentType));
                 // ZSerialize.idMap[ZSerialize.CurrentGroupID][zuid] = c;

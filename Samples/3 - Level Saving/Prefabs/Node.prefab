@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1689612743213554894}
-  - component: {fileID: 1689612743213554895}
   - component: {fileID: 4887565386199015333}
+  - component: {fileID: 1689612743213554895}
   m_Layer: 0
   m_Name: GFX
   m_TagString: Untagged
@@ -28,10 +28,38 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 0.4, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1689612743638498566}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4887565386199015333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689612743213554889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showSettings: 0
+  groupID: 0
+  _zuid: 0444d9aa6c7d7bb46ad0f3790705d03f
+  _gozuid: 54714e1302bcd3c46be95cc234cb6902
+  serializedComponents:
+  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 1689612743213554894}
+    zuid: 36110cc07d7295044ad54c494c12c0b6
+  - typeFullName: UnityEngine.SpriteRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    persistenceType: 0
+    component: {fileID: 1689612743213554895}
+    zuid: 6c356fb3c99ff874fa607de494bdff1d
 --- !u!212 &1689612743213554895
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -43,6 +71,7 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -83,33 +112,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &4887565386199015333
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1689612743213554889}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  showSettings: 0
-  groupID: 0
-  _zuid: 0444d9aa6c7d7bb46ad0f3790705d03f
-  _gozuid: 54714e1302bcd3c46be95cc234cb6902
-  serializedComponents:
-  - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    component: {fileID: 1689612743213554894}
-    zuid: 36110cc07d7295044ad54c494c12c0b6
-  - typeFullName: UnityEngine.SpriteRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    persistenceType: 0
-    component: {fileID: 1689612743213554895}
-    zuid: 6c356fb3c99ff874fa607de494bdff1d
 --- !u!1 &1689612743638498561
 GameObject:
   m_ObjectHideFlags: 0
@@ -139,6 +141,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1689612743213554894}
   m_Father: {fileID: 0}
@@ -156,7 +159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showSettings: 1
+  showSettings: 0
   groupID: 0
   _zuid: 91e887022355839458ffecf3b186e322
   _gozuid: 86af6058e51a9814d8f32e008d9b0937
