@@ -77,9 +77,8 @@ namespace ZSerializer.Editor
 
         public static void CreateZSerializer(Type type, string path)
         {
-            string newPath = new string((new string(path.Reverse().ToArray())).Substring(path.Split('/').Last().Length)
+            string newPath = new string(new string(path.Reverse().ToArray()).Substring(path.Split('/').Last().Length)
                 .Reverse().ToArray());
-            Debug.Log("Editor script being created at " + newPath + "ZSerializers");
             string relativePath = "Assets" + newPath.Substring(Application.dataPath.Length);
 
             var ns = type.Namespace;
@@ -237,50 +236,7 @@ namespace ZSerializer.Editor
                         ?.GetValue(t.GetCustomAttribute<CustomEditor>()) as Type)
                 .Where(t => t.IsSubclassOf(typeof(MonoBehaviour)))).ToArray();
 
-        public static void CreateEditorScript(Type type, string path)
-        {
-            if (typesImplementingCustomEditor.Contains(type))
-            {
-                Debug.Log($"{type} already implements a Custom Editor, and another one won't be created");
-                return;
-            }
-
-            string editorScript =
-                @"using UnityEditor;
-using ZSerializer;
-using ZSerializer.Editor;
-
-[CustomEditor(typeof(" + type.FullName + @"))]
-public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" + type.FullName + @"> 
-{
-    public override void OnInspectorGUI()
-    {
-        DrawPersistentMonoBehaviourInspector();
-    }
-}";
-
-
-            string newPath = new string((new string(path.Reverse().ToArray())).Substring(path.Split('/').Last().Length)
-                .Reverse().ToArray());
-            Debug.Log("Editor script being created at " + newPath + "Editor");
-            string relativePath = "Assets" + newPath.Substring(Application.dataPath.Length);
-
-
-            if (!AssetDatabase.IsValidFolder(relativePath + "Editor"))
-            {
-                Directory.CreateDirectory(newPath + "Editor");
-            }
-
-
-            string newNewPath = newPath + "Editor/Z" + type.Name + "Editor.cs";
-            FileStream fileStream = new FileStream(newNewPath, FileMode.Create, FileAccess.Write);
-            StreamWriter sw = new StreamWriter(fileStream);
-            sw.Write(editorScript);
-            sw.Close();
-
-            AssetDatabase.Refresh();
-        }
-
+        
         static List<FieldInfo> GetFieldsThatShouldBeSerialized(Type type)
         {
             //keep an eye on this, seems fishy
@@ -410,7 +366,7 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
             where T : PersistentMonoBehaviour
         {
             int width = 28;
-            ClassState state = GetClassState(typeof(T));
+            ClassState state = GetClassState(component.GetType());
 
             var textureToUse = GetTextureToUse(state, styler);
 
@@ -480,8 +436,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
 
             CreateZSerializer(componentType, path);
-            if (state == ClassState.NotMade)
-                CreateEditorScript(componentType, path);
             AssetDatabase.Refresh();
         }
 
@@ -504,7 +458,6 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
                            path.Replace('\\', '/');
 
                     CreateZSerializer(c.classType, path);
-                    CreateEditorScript(c.classType, path);
                     AssetDatabase.Refresh();
                 }
             }
@@ -538,23 +491,30 @@ public sealed class " + type.Name + @"Editor : PersistentMonoBehaviourEditor<" +
 
             if (showSettings)
             {
-                toggleOn?.Invoke(typeof(PersistentMonoBehaviour), manager, true);
+                toggleOn?.Invoke(manager.GetType(), manager, true);
 
                 SerializedObject serializedObject = new SerializedObject(manager);
                 serializedObject.Update();
 
-                foreach (var field in typeof(T).GetFields()
-                    .Where(f => f.DeclaringType != typeof(PersistentMonoBehaviour)))
+                var fields = GetFieldsThatShouldBeSerialized(manager.GetType())
+                    .Where(f => f.DeclaringType != typeof(PersistentMonoBehaviour)).ToList();
+                
+                fields.AddRange(manager.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => f.GetCustomAttribute<NonZSerialized>() != null && f.DeclaringType != typeof(PersistentMonoBehaviour)));
+
+                foreach (var field in fields)
                 {
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        string color = field.GetCustomAttribute<NonZSerialized>() == null && manager.IsOn
-                            ? ZSerializerStyler.MainHex
-                            : ZSerializerStyler.OffHex;
-                        GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
-                            new GUIStyle("label") { richText = true },
-                            GUILayout.Width(EditorGUIUtility.currentViewWidth / 3f));
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty(field.Name), GUIContent.none);
+                        var image = field.GetCustomAttribute<NonZSerialized>() == null && manager.IsOn
+                            ? ZSerializerStyler.Instance.validImage
+                            : ZSerializerStyler.Instance.offImage;
+                        
+                        GUILayout.Label(image, GUILayout.Width(30), GUILayout.Height(20));
+                        // GUILayout.Label($"<color=#{color}>{field.Name.FieldNameToInspectorName()}</color>",
+                        //     new GUIStyle("label") { richText = true },
+                        //     GUILayout.Width(EditorGUIUtility.currentViewWidth / 3f));
+                        
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty(field.Name));
                     }
                 }
 

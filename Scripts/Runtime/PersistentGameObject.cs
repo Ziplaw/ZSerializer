@@ -116,12 +116,12 @@ namespace ZSerializer
             EditorApplication.hierarchyChanged += ComponentListChanged;
         }
 
-        private static void ComponentListChanged()
+        internal static void ComponentListChanged()
         {
             ComponentListChanged(Selection.activeGameObject?.GetComponent<PersistentGameObject>());
         }
         
-        private static void ComponentListChanged(PersistentGameObject persistentGameObject)
+        internal static void ComponentListChanged(PersistentGameObject persistentGameObject, bool regenerateComponentSerializers = true)
         {
             if (!persistentGameObject || Application.isPlaying) return;
 
@@ -133,7 +133,7 @@ namespace ZSerializer
             if (unmanagedTypes.Count > 0)
             {
                 ZSerializerSettings.Instance.unityComponentTypes.AddRange(unmanagedTypes);
-                ZSerializerEditorRuntime.GenerateUnityComponentClasses();
+                if(regenerateComponentSerializers) ZSerializerEditorRuntime.GenerateUnityComponentClasses();
                 
                 EditorUtility.SetDirty(ZSerializerSettings.Instance);
                 AssetDatabase.SaveAssets();

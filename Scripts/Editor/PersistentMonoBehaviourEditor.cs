@@ -1,46 +1,69 @@
-﻿using UnityEditor;
-using UnityEngine;
+using System;
+using System.Linq;
+using System.Reflection;
+using UnityEditor;
 using ZSerializer;
+using ZSerializer.Editor;
 
-namespace ZSerializer.Editor
+[CustomEditor(typeof(PersistentMonoBehaviour),true)]
+public class PersistentMonoBehaviourEditor : Editor
 {
-    public abstract class PersistentMonoBehaviourEditor<T> : UnityEditor.Editor where T : PersistentMonoBehaviour
+    public PersistentMonoBehaviour manager;
+    public Editor editor;
+
+    public virtual void OnEnable()
     {
-        public T manager;
-        private static ZSerializerStyler styler;
-
-        public virtual void OnEnable()
+        manager = target as PersistentMonoBehaviour;
+        
+        var type = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t =>
         {
-            manager = target as T;
-            styler = new ZSerializerStyler();
+            var att = t.GetCustomAttribute<CustomEditor>();
+            if (att == null) return false;
+            var type = typeof(CustomEditor).GetField("m_InspectedType", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(att) as Type;
+            return type == manager.GetType();
+        }).FirstOrDefault();
+        if (type != null)
+        {
+            editor = CreateEditor(manager, type);
         }
-
-        public void DrawPersistentMonoBehaviourInspector()
+        else
         {
-            if (manager.IsOn || ZSerializerSettings.Instance.componentDataDictionary[typeof(T)].isOn)
-            {
-                styler ??= new ZSerializerStyler();
-                if (manager is PersistentMonoBehaviour)
-                    ZSerializerEditor.BuildPersistentComponentEditor(manager, styler, ref manager.showSettings,
-                        ZSerializerEditor.ShowGroupIDSettings);
-                if (!manager.showSettings)
-                {
-                    if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
-                    {
-                        using (new EditorGUI.DisabledScope(true))
-                        {
-                            EditorGUILayout.TextField("ZUID", manager.ZUID);
-                            EditorGUILayout.TextField("GameObject ZUID", manager.GOZUID);
-                        }
-                    }
+            editor = this;
+        }
+        
+    }
+    
+    public override void OnInspectorGUI()
+    {
+        DrawPersistentMonoBehaviourInspector();
+    }
 
-                    base.OnInspectorGUI();
-                }
-            }
-            else
+    public void DrawPersistentMonoBehaviourInspector()
+    {
+        if (manager.IsOn || ZSerializerSettings.Instance.componentDataDictionary[typeof(PersistentMonoBehaviour)].isOn)
+        {
+            if (manager is PersistentMonoBehaviour)
+                ZSerializerEditor.BuildPersistentComponentEditor(manager, ZSerializerStyler.Instance, ref manager.showSettings,
+                    ZSerializerEditor.ShowGroupIDSettings);
+            if (!manager.showSettings)
             {
-                base.OnInspectorGUI();
+                if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
+                {
+                    using (new EditorGUI.DisabledScope(true))
+                    {
+                        EditorGUILayout.TextField("ZUID", manager.ZUID);
+                        EditorGUILayout.TextField("GameObject ZUID", manager.GOZUID);
+                    }
+                }
+
+                if(editor == this) base.OnInspectorGUI();
+                else editor.OnInspectorGUI();
             }
+        }
+        else
+        {
+            if(editor == this) base.OnInspectorGUI();
+            else editor.OnInspectorGUI();
         }
     }
 }

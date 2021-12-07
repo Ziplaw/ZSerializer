@@ -967,15 +967,15 @@ namespace ZSerializer
 
                 var assemblyTuple = GetAssemblyTuple(zSerializationType);
 
-                unityComponentAssemblies = (await JsonHelper.FromJson<string>(assemblyTuple?[0].Item2)).ToList();
-                unityComponentNamespaces = (await JsonHelper.FromJson<string>(assemblyTuple?[1].Item2)).ToList();
+                unityComponentAssemblies = (JsonHelper.FromJson<string>(assemblyTuple?[0].Item2)).ToList();
+                unityComponentNamespaces = (JsonHelper.FromJson<string>(assemblyTuple?[1].Item2)).ToList();
 
                 await FillTemporaryJsonTuples(zSerializationType);
                 var persistentGameObjectTuple =
                     tempTuples[idList[i]].FirstOrDefault(t => t.Item1 == typeof(PersistentGameObjectZSerializer));
 
                 var pgList =
-                    await JsonHelper.FromJson<PersistentGameObjectZSerializer>(persistentGameObjectTuple.Item2);
+                    JsonHelper.FromJson<PersistentGameObjectZSerializer>(persistentGameObjectTuple.Item2);
 
                 var gozuidList = pgList.Select(pg => pg.GOZUID).ToList();
                 foreach (var kvp in idMap[CurrentGroupID])
@@ -1131,7 +1131,7 @@ namespace ZSerializer
             // WriteToFile(fileName, json, useGlobalID);
         }
 
-        internal static async Task<string> ReplaceZUIDs(string json)
+        internal static string ReplaceZUIDs(string json)
         {
 #if UNITY_EDITOR
             return Regex.Replace(json, "\"zuid\":\\w+",
@@ -1444,9 +1444,9 @@ namespace ZSerializer
 //Class to help with saving arrays with jsonutility
     static class JsonHelper
     {
-        public static async Task<T[]> FromJson<T>(string json)
+        public static T[] FromJson<T>(string json)
         {
-            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(await ZSerialize.ReplaceZUIDs(json));
+            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(ZSerialize.ReplaceZUIDs(json));
             return wrapper.Items;
         }
 
