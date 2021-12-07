@@ -89,13 +89,15 @@ namespace ZSerializer
                 {
                     string id;
 #if UNITY_EDITOR
-                    id = Application.isPlaying ? ZSerialize.GetRuntimeSafeZUID(component.GetType()) : GUID.Generate().ToString();
+                    id = Application.isPlaying
+                        ? ZSerialize.GetRuntimeSafeZUID(component.GetType())
+                        : GUID.Generate().ToString();
 #else
                     id = ZSerialize.GetRuntimeSafeZUID(component.GetType());
 #endif
-                    
+
                     czlist.Add(
-                        new SerializedComponent(component,id,
+                        new SerializedComponent(component, id,
                             PersistentType.Everything));
                 }
             }
@@ -109,42 +111,55 @@ namespace ZSerializer
             serializedComponents = czlist;
         }
 
-#if UNITY_EDITOR
-        PersistentGameObject()
+        public void UpdateSerializedComponentList()
         {
-            EditorApplication.hierarchyChanged -= ComponentListChanged;
-            EditorApplication.hierarchyChanged += ComponentListChanged;
+            UpdateComponentList(this);
         }
 
-        internal static void ComponentListChanged()
+        internal static void UpdateComponentList(PersistentGameObject persistentGameObject,
+            bool regenerateComponentSerializers = true)
         {
-            ComponentListChanged(Selection.activeGameObject?.GetComponent<PersistentGameObject>());
-        }
-        
-        internal static void ComponentListChanged(PersistentGameObject persistentGameObject, bool regenerateComponentSerializers = true)
-        {
-            if (!persistentGameObject || Application.isPlaying) return;
+            if (!persistentGameObject) return;
 
             persistentGameObject.GenerateComponentZUIDs();
-            
+#if UNITY_EDITOR
+
             var unmanagedTypes = persistentGameObject.serializedComponents.Select(sc => sc.typeFullName)
                 .Except(ZSerializerSettings.Instance.unityComponentTypes).ToList();
 
             if (unmanagedTypes.Count > 0)
             {
                 ZSerializerSettings.Instance.unityComponentTypes.AddRange(unmanagedTypes);
-                if(regenerateComponentSerializers) ZSerializerEditorRuntime.GenerateUnityComponentClasses();
-                
+                if (regenerateComponentSerializers) ZSerializerEditorRuntime.GenerateUnityComponentClasses();
                 EditorUtility.SetDirty(ZSerializerSettings.Instance);
                 AssetDatabase.SaveAssets();
             }
+#endif
+        }
+
+#if UNITY_EDITOR
+        PersistentGameObject()
+        {
+            EditorApplication.hierarchyChanged -= UpdateComponentList;
+            EditorApplication.hierarchyChanged += UpdateComponentList;
+        }
+
+        internal static void UpdateComponentList()
+        {
+            UpdateComponentList(Selection.activeGameObject?.GetComponent<PersistentGameObject>());
+        }
+
+
+        private void Start()
+        {
+            UpdateComponentList(this);
         }
 
 
         public void Reset()
         {
             GenerateEditorZUIDs(false);
-            ComponentListChanged(this);
+            UpdateComponentList(this);
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);
             EditorUtility.SetDirty(this);
         }
@@ -175,7 +190,7 @@ namespace ZSerializer
 #if UNITY_EDITOR
 
             GenerateComponentZUIDs();
-            
+
             ZUID = GUID.Generate().ToString();
             var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
             GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() :
@@ -199,7 +214,7 @@ namespace ZSerializer
             ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAddToDictionary(GOZUID, gameObject);
             foreach (var serializedComponent in serializedComponents)
             {
-                if(!serializedComponent.component) Debug.LogError("Component is null");
+                if (!serializedComponent.component) Debug.LogError("Component is null");
                 ZSerialize.idMap[ZSerialize.CurrentGroupID]
                     .TryAddToDictionary(serializedComponent.zuid, serializedComponent.component);
             }

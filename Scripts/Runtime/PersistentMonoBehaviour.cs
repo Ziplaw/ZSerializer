@@ -135,7 +135,7 @@ namespace ZSerializer
             if (forceGenerateGameObject)
                 foreach (var monoBehaviour in GetComponents<IZSerializable>().Where(c => !ReferenceEquals(c, this)))
                 {
-                    (monoBehaviour).GenerateRuntimeZUIDs(false);
+                    monoBehaviour.GenerateRuntimeZUIDs(false);
                 }
         }
 

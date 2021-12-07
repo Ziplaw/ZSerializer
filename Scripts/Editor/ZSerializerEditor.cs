@@ -1021,7 +1021,7 @@ namespace ZSerializer.Editor
                     {
                         EditorUtility.DisplayProgressBar("Setting up Project ZSerializers", $"{pg}, {split}",
                             paths.IndexOf(path) / (float)paths.Count);
-                        PersistentGameObject.ComponentListChanged(pg, false);
+                        PersistentGameObject.UpdateComponentList(pg, false);
                     }
 
                     EditorSceneManager.SaveOpenScenes();

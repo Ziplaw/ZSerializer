@@ -132,8 +132,15 @@ public class PersistentGameObjectEditor : Editor
                             var serializedComponent = manager.serializedComponents[i];
 
                             GUILayout.FlexibleSpace();
-                            GUILayout.Box(EditorGUIUtility.ObjectContent(null,
-                                    serializedComponent.component.GetType()).image, new GUIStyle("label"),
+                            Texture componentSprite;
+                            if (serializedComponent.component)
+                                componentSprite = EditorGUIUtility.ObjectContent(null,
+                                    serializedComponent.component.GetType()).image;
+                            else componentSprite = ZSerializerStyler.Instance.notMadeImage;
+                            
+                            
+                            
+                                GUILayout.Box(componentSprite, new GUIStyle("label"),
                                 GUILayout.Width(16), GUILayout.Height(16));
                             // GUILayout.Label(serializedComponent.component.GetType().Name,
                             //     new GUIStyle("label") {fontSize = 12});

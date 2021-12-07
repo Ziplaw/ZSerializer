@@ -97,7 +97,7 @@ namespace ZSerializer
         static int runtimeIDs = 0;
         internal static string GetRuntimeSafeZUID(Type type)
         {
-            return $"{runtimeIDs++}{type.Name}";
+            return $"R{runtimeIDs++}{new string(type.Name.Where(c => char.IsUpper(c)).ToArray())}";
         }
 
         static int[] GetIDList()
@@ -584,8 +584,8 @@ namespace ZSerializer
             string zuid = (zSerializerObject as Internal.ZSerializer)!.ZUID;
             string gozuid = (zSerializerObject as Internal.ZSerializer)!.GOZUID;
 
-            bool componentPresentInGameObject = idMap[CurrentGroupID].TryGetValue(zuid, out var componentObj) && idMap[CurrentGroupID][zuid] != null;
-            bool gameObjectPresent = idMap[CurrentGroupID].TryGetValue(gozuid, out var gameObjectObj) && idMap[CurrentGroupID][gozuid] != null;
+            bool componentPresentInGameObject = idMap[CurrentGroupID].TryGetValue(zuid, out var componentObj) && idMap[CurrentGroupID][zuid];
+            bool gameObjectPresent = idMap[CurrentGroupID].TryGetValue(gozuid, out var gameObjectObj) && idMap[CurrentGroupID][gozuid];
             GameObject gameObject = gameObjectObj as GameObject;
             Component component = componentObj as Component;
 
@@ -955,6 +955,7 @@ namespace ZSerializer
                 serializableList.AddRange(persistentGameObjectsInScene);
 
                 await UpdateIDMap(serializableList);
+                
                 foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
                 {
                     persistentMonoBehaviour.OnPreLoad();
@@ -967,8 +968,8 @@ namespace ZSerializer
 
                 var assemblyTuple = GetAssemblyTuple(zSerializationType);
 
-                unityComponentAssemblies = (JsonHelper.FromJson<string>(assemblyTuple?[0].Item2)).ToList();
-                unityComponentNamespaces = (JsonHelper.FromJson<string>(assemblyTuple?[1].Item2)).ToList();
+                unityComponentAssemblies = JsonHelper.FromJson<string>(assemblyTuple?[0].Item2).ToList();
+                unityComponentNamespaces = JsonHelper.FromJson<string>(assemblyTuple?[1].Item2).ToList();
 
                 await FillTemporaryJsonTuples(zSerializationType);
                 var persistentGameObjectTuple =
@@ -978,20 +979,37 @@ namespace ZSerializer
                     JsonHelper.FromJson<PersistentGameObjectZSerializer>(persistentGameObjectTuple.Item2);
 
                 var gozuidList = pgList.Select(pg => pg.GOZUID).ToList();
+                var zuidToDestroyList = new List<string>();
+                
                 foreach (var kvp in idMap[CurrentGroupID])
                 {
-                    if (!gozuidList.Contains(kvp.Key) &&
-                        kvp.Value is GameObject go)
+                    if (kvp.Value is GameObject go && (!gozuidList.Contains(kvp.Key) || kvp.Key.StartsWith('R')))
                     {
                         if (go)
                         {
-                            var pg = go.GetComponent<PersistentGameObject>();
-                            if (pg && pg.GroupID == CurrentGroupID)
+                            var zss = go.GetComponents<IZSerializable>();
+                            foreach (var zs in zss)
                             {
-                                Object.Destroy(kvp.Value);
+                                if (zs != null && zs.GroupID == CurrentGroupID)
+                                {
+                                    zuidToDestroyList.Add(zs.GOZUID);
+                                    zuidToDestroyList.Add(zs.ZUID);
+                                    
+                                    if (zs is PersistentGameObject pg) 
+                                        foreach(var sc in pg.serializedComponents) zuidToDestroyList.Add(sc.zuid);
+                                    
+                                    Object.Destroy(go);
+                                }
                             }
+                            
+                            
                         }
                     }
+                }
+                
+                foreach (var zuid in zuidToDestroyList)
+                {
+                    idMap[currentGroupID][zuid] = null;
                 }
 
                 await LoadComponents(zSerializationType);
@@ -1137,7 +1155,7 @@ namespace ZSerializer
             return Regex.Replace(json, "\"zuid\":\\w+",
                 match =>
                 {
-                    if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj))
+                    if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj) && obj != null)
                         return "\"instanceID\":" + obj.GetInstanceID();
                     return "\"instanceID\":0";
                 });
@@ -1145,7 +1163,7 @@ namespace ZSerializer
             return Regex.Replace(json, "\"zuid\":\\w+",
                 match =>
                 {
-                    if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj))
+                    if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj) && obj != null)
                         return "\"m_FileID\":" + obj.GetInstanceID() + ", \"m_PathID\":0";
                     return "\"m_FileID\":0, \"m_PathID\":0";
                 });
