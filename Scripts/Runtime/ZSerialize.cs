@@ -985,7 +985,7 @@ namespace ZSerializer
                 {
                     if (kvp.Value is GameObject go && (!gozuidList.Contains(kvp.Key) || kvp.Key.StartsWith('R')))
                     {
-                        if (go)
+                        if (go && go.GetComponent<PersistentGameObject>())
                         {
                             var zss = go.GetComponents<IZSerializable>();
                             foreach (var zs in zss)

@@ -20,7 +20,7 @@ public class ButtonInfo : MonoBehaviour
         {
             uiManager.CreateButton(levelName, transform, () =>
             {
-                ZSerialize.LoadLevel(levelName, transform, true);
+                ZSerialize.LoadLevel(levelName, levelParent, true);
             });
         }
     }
