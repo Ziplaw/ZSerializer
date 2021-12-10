@@ -19,11 +19,6 @@ namespace ZSerializer
 
     public abstract class PersistentMonoBehaviour : MonoBehaviour, IZSerializable
     {
-        [Serializable]
-        private class ZSBanner
-        {
-            
-        }
 
         
         /// <summary>
@@ -54,7 +49,6 @@ namespace ZSerializer
         {
         }
 
-        [NonZSerialized, SerializeField] private ZSBanner banner;
         [NonZSerialized, HideInInspector] public bool showSettings;
         [NonZSerialized, HideInInspector] public bool isSaving;
         [NonZSerialized, HideInInspector] public bool isLoading;

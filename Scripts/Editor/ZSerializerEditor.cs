@@ -381,7 +381,7 @@ namespace ZSerializer.Editor
                     GUILayout.MaxWidth(width), GUILayout.Height(width)))
                 {
                     if (state != ClassState.Valid)
-                        GenerateZSerializer(typeof(T), state);
+                        GenerateZSerializer(component.GetType(), state);
                     else
                     {
                         bool componentIsOn = component.IsOn;

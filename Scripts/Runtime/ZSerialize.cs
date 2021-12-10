@@ -983,7 +983,7 @@ namespace ZSerializer
                 
                 foreach (var kvp in idMap[CurrentGroupID])
                 {
-                    if (kvp.Value is GameObject go && (!gozuidList.Contains(kvp.Key) || kvp.Key.StartsWith('R')))
+                    if (kvp.Value is GameObject go && (!gozuidList.Contains(kvp.Key) || kvp.Key.StartsWith("R")))
                     {
                         if (go && go.GetComponent<PersistentGameObject>())
                         {
