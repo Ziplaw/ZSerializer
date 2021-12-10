@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.SceneManagement;
@@ -41,22 +40,24 @@ namespace ZSerializer.Editor
         private int selectedGroup;
         private int selectedGroupIndex = -1;
         private int selectedComponentSettings;
+        private string searchText;
+        static bool searchProject;
 
         private static ZSerializerStyler styler;
+
         private static ZSerializerStyler Styler
         {
             get
             {
-                if(styler == null) GenerateStyler();
+                if (styler == null) GenerateStyler();
                 return styler;
             }
         }
 
         private int selectedTypeToShowSettings = -1;
-        
+
         static ZSerializerMenu window;
         private static Class[] classes;
-
 
 
         [MenuItem("Tools/ZSerializer/ZSerializer Menu", priority = 0)]
@@ -70,13 +71,14 @@ namespace ZSerializer.Editor
 
         void SceneUpdate(Scene prevScene, Scene newScene) => Init();
         void SceneUpdate(Scene prevScene, LoadSceneMode newScene) => Init();
-        
+
         private void OnEnable()
         {
             EditorSceneManager.activeSceneChangedInEditMode += SceneUpdate;
             SceneManager.activeSceneChanged += SceneUpdate;
             SceneManager.sceneLoaded += SceneUpdate;
         }
+
         private void OnDisable()
         {
             EditorSceneManager.activeSceneChangedInEditMode -= SceneUpdate;
@@ -86,7 +88,7 @@ namespace ZSerializer.Editor
 
         static void GetClasses()
         {
-            var types = ZSerialize.GetPersistentTypes().Where(t => FindObjectOfType(t, true) != null).ToArray();
+            var types = ZSerialize.GetPersistentTypes().Where(t => searchProject || FindObjectsOfType(t,true).Length > 0).OrderBy(t => t.Name).ToArray();
             classes = types.Select(t => new Class(t, ZSerializerEditor.GetClassState(t))).ToArray();
         }
 
@@ -99,7 +101,8 @@ namespace ZSerializer.Editor
         [DidReloadScripts]
         private static void Init()
         {
-            if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized && HasOpenInstances<ZSerializerMenu>())
+            if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized &&
+                HasOpenInstances<ZSerializerMenu>())
             {
                 GenerateStyler();
                 GetClasses();
@@ -118,24 +121,39 @@ namespace ZSerializer.Editor
                     GUILayout.MaxHeight(1)))
                 {
                     GUILayout.Label($"<color=#{ZSerializerStyler.MainHex}>ZSerializer Setup Wizard</color>",
-                        new GUIStyle("label") { alignment = TextAnchor.MiddleCenter, fontSize = 32, font = Styler.header.font,richText = true },
+                        new GUIStyle("label")
+                        {
+                            alignment = TextAnchor.MiddleCenter, fontSize = 32, font = Styler.header.font,
+                            richText = true
+                        },
                         GUILayout.MaxHeight(100));
                 }
-                
+
                 GUILayout.Space(-15);
                 using (new GUILayout.VerticalScope(ZSerializerStyler.window,
                     GUILayout.MaxHeight(1)))
                 {
-                    Dictionary<bool,List<Texture2D>> icons = new Dictionary<bool, List<Texture2D>>
+                    Dictionary<bool, List<Texture2D>> icons = new Dictionary<bool, List<Texture2D>>
                     {
-                        {true,new List<Texture2D> {Resources.Load<Texture2D>("valid"), Resources.Load<Texture2D>("valid")}}, //repeated to not cause index out of range
-                        {false,new List<Texture2D> {Resources.Load<Texture2D>("not_made"), Resources.Load<Texture2D>("needs_rebuilding")}}
+                        {
+                            true,
+                            new List<Texture2D>
+                                { Resources.Load<Texture2D>("valid"), Resources.Load<Texture2D>("valid") }
+                        }, //repeated to not cause index out of range
+                        {
+                            false,
+                            new List<Texture2D>
+                                { Resources.Load<Texture2D>("not_made"), Resources.Load<Texture2D>("needs_rebuilding") }
+                        }
                     };
-                    
+
                     // bool hasZSerializers = File.Exists(Path.Combine(Application.dataPath,
                     //     "ZResources/ZSerializer/UnityComponentZSerializers.cs"));
-                    bool zuidsAreSetup = !FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable).Any(m => string.IsNullOrEmpty((m as IZSerializable).ZUID) || string.IsNullOrEmpty((m as IZSerializable).ZUID));
-                    bool areSampleScenesIn = EditorBuildSettings.scenes.Any(s => s.path.Contains("ZSerializer/Samples/2 - Scene Groups/House/Scenes"));
+                    bool zuidsAreSetup = !FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable).Any(m =>
+                        string.IsNullOrEmpty((m as IZSerializable).ZUID) ||
+                        string.IsNullOrEmpty((m as IZSerializable).ZUID));
+                    bool areSampleScenesIn = EditorBuildSettings.scenes.Any(s =>
+                        s.path.Contains("ZSerializer/Samples/2 - Scene Groups/House/Scenes"));
 
 
                     // using (new GUILayout.HorizontalScope())
@@ -152,12 +170,11 @@ namespace ZSerializer.Editor
                     //         }
                     //     }
                     // }
-                    
+
                     using (new GUILayout.HorizontalScope())
                     {
-                        
                         GUILayout.Label(new GUIContent(
-                            icons[zuidsAreSetup][0]),GUILayout.Width(20), GUILayout.Height(20));
+                            icons[zuidsAreSetup][0]), GUILayout.Width(20), GUILayout.Height(20));
                         GUILayout.Label("ZUIDs Are correctly set ", GUILayout.Width(200));
 
                         using (new EditorGUI.DisabledScope(zuidsAreSetup))
@@ -168,11 +185,11 @@ namespace ZSerializer.Editor
                             }
                         }
                     }
-                    
+
                     using (new GUILayout.HorizontalScope())
                     {
                         GUILayout.Label(new GUIContent(
-                            icons[areSampleScenesIn][1]),GUILayout.Width(20), GUILayout.Height(20));
+                            icons[areSampleScenesIn][1]), GUILayout.Width(20), GUILayout.Height(20));
                         GUILayout.Label("Sample Scenes setup ", GUILayout.Width(200));
 
                         using (new EditorGUI.DisabledScope(areSampleScenesIn))
@@ -191,9 +208,7 @@ namespace ZSerializer.Editor
                             ZSerializerSettings.Instance.packageInitialized = true;
                         }
                     }
-                    
                 }
-
 
 
                 // if (GUILayout.Button($"<color=#{ZSerializerStyler.MainHex}>Setup</color>", new GUIStyle("button") { fontSize = 48, font = Styler.header.font, richText = true},
@@ -217,10 +232,26 @@ namespace ZSerializer.Editor
                         }
 
                         if (Styler == null) GenerateStyler();
-                        
+
                         editMode = GUILayout.Toggle(editMode, Styler.cogWheel, new GUIStyle("button"),
                             GUILayout.Height(28), GUILayout.Width(28));
                     }
+
+                    if (!editMode)
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            using (var change = new EditorGUI.ChangeCheckScope())
+                            {
+                                searchText = GUILayout.TextField(searchText,new GUIStyle(EditorStyles.toolbarSearchField){fixedHeight = 20});
+                                if(GUILayout.Button(searchProject ? Styler.hierarchyOnly : Styler.projectOnly, GUILayout.Width(28), GUILayout.Height(20)))
+                                {
+                                    searchProject = !searchProject;
+                                }
+
+                                if (change.changed) GetClasses();
+                            }
+                        }
+
 
                     using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
                     {
@@ -228,13 +259,18 @@ namespace ZSerializer.Editor
 
                         if (editMode)
                         {
-                            ZSerializerEditor.BuildSettingsEditor(Styler, ref selectedMenu, ref selectedType, ref selectedGroup, ref selectedComponentSettings,ref selectedGroupIndex,
+                            ZSerializerEditor.BuildSettingsEditor(Styler, ref selectedMenu, ref selectedType,
+                                ref selectedGroup, ref selectedComponentSettings, ref selectedGroupIndex,
                                 position.width);
                         }
                         else
                         {
                             if (classes == null) GetClasses();
-                            
+
+                            if (!string.IsNullOrEmpty(searchText))
+                                classes = classes.Where(c => c.classType.Name.ToLower().Contains(searchText.ToLower()))
+                                    .ToArray();
+
                             if (classes.Length == 0)
                             {
                                 GUILayout.Label(
@@ -251,7 +287,8 @@ namespace ZSerializer.Editor
                                     var classInstance = classes[i];
                                     GUILayout.Space(-15);
                                     using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
-                                        GUILayout.Height(32),GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth-20)))
+                                        GUILayout.Height(32),
+                                        GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20)))
                                     {
                                         string color = classInstance.state == ClassState.Valid
                                             ? ZSerializerSettings.Instance
@@ -325,22 +362,26 @@ namespace ZSerializer.Editor
                                     }
                                 }
 
-                            GUILayout.Space(5);
-                            if (!Application.isPlaying)
+                            
+                        }
+
+                        
+                    }
+                    if (!editMode)
+                    {
+                        GUILayout.Space(5);
+                        if (!Application.isPlaying)
+                        {
+                            GUILayout.Space(-15);
+                            using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
+                                GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20)))
                             {
-                                GUILayout.Space(-15);
-                                using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
-                                    GUILayout.Height(32),GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth-20)))
-                                {
-                                    EditorGUILayout.LabelField("ZSerialize All",
-                                        new GUIStyle(Styler.header)
-                                            { alignment = TextAnchor.MiddleCenter, fontSize = fontSize },
-                                        GUILayout.Height(classHeight));
+                                EditorGUILayout.LabelField("ZSerialize All",
+                                    new GUIStyle(Styler.header)
+                                        { alignment = TextAnchor.MiddleCenter, fontSize = fontSize },
+                                    GUILayout.Height(classHeight));
 
-                                    ZSerializerEditor.BuildButtonAll(classes, classHeight, Styler);
-                                }
-
-                                GUILayout.Space(15);
+                                ZSerializerEditor.BuildButtonAll(classes, classHeight, Styler);
                             }
                         }
                     }

@@ -73,7 +73,7 @@ namespace ZSerializer
 
         [HideInInspector] public bool packageInitialized;
         public DebugMode debugMode;
-        public bool autoRebuildZSerializers;
+        public bool autoRebuildSerializers;
         public int selectedSaveFile;
         public bool encryptData;
         public bool advancedSerialization;

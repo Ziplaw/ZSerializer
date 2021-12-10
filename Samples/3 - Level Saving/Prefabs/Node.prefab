@@ -47,19 +47,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: 0444d9aa6c7d7bb46ad0f3790705d03f
+  _zuid: 27618fae2b3e0044fba64679d2346f34
   _gozuid: 54714e1302bcd3c46be95cc234cb6902
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743213554894}
-    zuid: 36110cc07d7295044ad54c494c12c0b6
+    zuid: 53b46bbaacf0bd945b80d7536463784c
   - typeFullName: UnityEngine.SpriteRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743213554895}
-    zuid: 6c356fb3c99ff874fa607de494bdff1d
+    zuid: e7132bf7ee66edc4ab3feec28f7c22b8
 --- !u!212 &1689612743213554895
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -161,24 +161,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showSettings: 0
   groupID: 0
-  _zuid: 91e887022355839458ffecf3b186e322
+  _zuid: 5aa4d007fe4f62e4d9c7422426593511
   _gozuid: 86af6058e51a9814d8f32e008d9b0937
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743638498566}
-    zuid: 07e73df744cdb5d4183417b14501e048
+    zuid: a939a12c50819a846a4487bd9f5a402e
   - typeFullName: UnityEngine.Rigidbody2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743638498564}
-    zuid: 913a53ba33472bb4dafce23da2dfcd46
+    zuid: b57920a6d97ee9d48b3a9f34326c997e
   - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1688716198872695089}
-    zuid: 575900f85029ee240bc073f24f1b3790
+    zuid: 61e199395d451dc4697208341cc5e920
 --- !u!50 &1689612743638498564
 Rigidbody2D:
   serializedVersion: 4

@@ -62,6 +62,8 @@ public class PersistentMonoBehaviourEditor : Editor
             if (manager is PersistentMonoBehaviour)
                 ZSerializerEditor.BuildPersistentComponentEditor(manager, ZSerializerStyler.Instance, ref manager.showSettings,
                     ZSerializerEditor.ShowGroupIDSettings);
+            
+            
             if (!manager.showSettings)
             {
                 if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
@@ -73,7 +75,15 @@ public class PersistentMonoBehaviourEditor : Editor
                     }
                 }
 
-                if(editor == this) base.OnInspectorGUI();
+                if(editor == this)
+                    try
+                    {
+                        base.OnInspectorGUI();
+                    }
+                    catch (Exception)
+                    {
+                        return;
+                    }
                 else if(editor != null) editor.OnInspectorGUI();
             }
         }

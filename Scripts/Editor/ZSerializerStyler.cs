@@ -18,6 +18,9 @@ namespace ZSerializer.Editor
         internal Texture2D cogWheel;
         internal Texture2D refreshImage;
         internal Texture2D refreshWarningImage;
+        internal Texture2D hierarchyOnly;
+        internal Texture2D projectOnly;
+
         private Font mainFont;
         internal ZSerializerSettings settings;
         
@@ -96,6 +99,8 @@ namespace ZSerializer.Editor
             cogWheel = Resources.Load<Texture2D>("cog");
             refreshImage = Resources.Load<Texture2D>("Refresh");
             refreshWarningImage = Resources.Load<Texture2D>("RefreshWarning");
+            projectOnly = Resources.Load<Texture2D>("projectOnly");
+            hierarchyOnly = Resources.Load<Texture2D>("hierarchyOnly");
 
             mainFont = Resources.Load<Font>("FugazOne");
             settings = Resources.Load<ZSerializerSettings>("ZSerializerSettings");

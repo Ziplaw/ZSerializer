@@ -30,6 +30,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -4.29, y: 0.5, z: 0.72}
   m_LocalScale: {x: 1, y: 3, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -115,6 +116,6 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 8d7c393a6009bc247842b4e43fd0fccd
+  _zuid: 8e53c7784d03782459583c0d7624f43c
   _gozuid: 2d06ccf81ec53f942a09ecf7ef18420d
   hits: 0
