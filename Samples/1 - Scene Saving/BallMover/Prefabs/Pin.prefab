@@ -111,11 +111,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showSettings: 0
-  isSaving: 0
-  isLoading: 0
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 8e53c7784d03782459583c0d7624f43c
-  _gozuid: 2d06ccf81ec53f942a09ecf7ef18420d
+  _zuid: 
+  _gozuid: 
   hits: 0

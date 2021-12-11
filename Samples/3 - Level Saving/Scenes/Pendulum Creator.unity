@@ -1461,6 +1461,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onPreSave:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPreLoad:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPostSave:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPostLoad:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
   showSettings: 0
   groupID: 0
   _zuid: 454c3d8bb6f8e9e4fa88237d3232bb8b
@@ -1942,12 +1958,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showSettings: 0
-  isSaving: 0
-  isLoading: 0
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 45d8dd99c49043242a0fb2453c2276a4
+  _zuid: 0e00bd4a6f540774186102479dfa128d
   _gozuid: e64ccc49508fd2e43ba0d4048df025fa
   roadPrefab: {fileID: 1689612743638498561, guid: 0a2a4d0472b76104aacfe4e0e7d92a10, type: 3}
   anchorPrefab: {fileID: 4761420894585310049, guid: cf542704a29200d4385b3da3071d854c, type: 3}
@@ -1969,16 +1983,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onPreSave:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPreLoad:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPostSave:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPostLoad:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
   showSettings: 0
   groupID: 0
-  _zuid: 143c1f5921dac5545b9418d2a8ee597a
+  _zuid: fc244135a712e4447a44532bca5a29ec
   _gozuid: e64ccc49508fd2e43ba0d4048df025fa
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1865041213}
-    zuid: 9996013b7d3cd864a928e7451768c3a6
+    zuid: 796527f90c8c01747b1176820ee3cfda
 --- !u!1 &1933510813
 GameObject:
   m_ObjectHideFlags: 0
@@ -2244,7 +2274,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _zuid
-      value: 1246232eca3372841bfb646a69ba6a0a
+      value: 51b3d103758d04e46b66885064ead0ec
       objectReference: {fileID: 0}
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _gozuid
@@ -2252,23 +2282,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: serializedComponents.Array.data[0].zuid
-      value: 902d8c34274219c4aa240d7160924b17
+      value: 089c1c0dc089bc64ca5193edaaac55f5
       objectReference: {fileID: 0}
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: serializedComponents.Array.data[1].zuid
-      value: 82abcd5b364e2d94cb260d3e44a2eece
+      value: c9f98cb997246c741bb166101700cf27
       objectReference: {fileID: 0}
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: serializedComponents.Array.data[2].zuid
-      value: e0f6a445c5cfc5547a367aeafd7e8d1d
+      value: 177e1427fa19d93418f2864a9e442b4e
       objectReference: {fileID: 0}
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: serializedComponents.Array.data[3].zuid
-      value: a62f4f84fe8b6eb44911582da03dbb21
+      value: 146cb1f7572c5044fa5eae8e9c6e05e2
       objectReference: {fileID: 0}
     - target: {fileID: 4095969009253119821, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _zuid
-      value: a9e130a34bb0219479b1284b1c45d590
+      value: 19af5cf0056f2c146ad556ca7a3fec47
       objectReference: {fileID: 0}
     - target: {fileID: 4095969009253119821, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _gozuid

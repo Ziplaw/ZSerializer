@@ -15,6 +15,8 @@ public class PersistentGameObjectEditor : Editor
     private PersistentGameObject manager;
     private static ZSerializerStyler styler;
 
+    private int selectedEventTab = -1;
+
     private void OnEnable()
     {
         manager = target as PersistentGameObject;
@@ -60,6 +62,58 @@ public class PersistentGameObjectEditor : Editor
             if (manager.showSettings)
             {
                 ZSerializerEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager, false);
+
+                
+                GUILayout.Space(-15);
+                using (new GUILayout.VerticalScope(ZSerializerStyler.window))
+                {
+                    if (selectedEventTab == -1)
+                    {
+
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+
+                            if (GUILayout.Button("OnPreSave", new GUIStyle("button"){normal = {textColor = manager.onPreSave.GetPersistentEventCount() > 0 ? ZSerializerStyler.MainColor : new GUIStyle("button").normal.textColor}}))
+                            {
+                                selectedEventTab = 0;
+                            }
+
+                            if (GUILayout.Button("OnPostSave", new GUIStyle("button"){normal = {textColor = manager.onPostSave.GetPersistentEventCount() > 0 ? ZSerializerStyler.MainColor : new GUIStyle("button").normal.textColor}}))
+                            {
+                                selectedEventTab = 1;
+                            }
+                        }
+
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            if (GUILayout.Button("OnPreLoad", new GUIStyle("button"){normal = {textColor = manager.onPreLoad.GetPersistentEventCount() > 0 ? ZSerializerStyler.MainColor : new GUIStyle("button").normal.textColor}}))
+                            {
+                                selectedEventTab = 2;
+                            }
+
+                            if (GUILayout.Button("OnPostLoad", new GUIStyle("button"){normal = {textColor = manager.onPostLoad.GetPersistentEventCount() > 0 ? ZSerializerStyler.MainColor : new GUIStyle("button").normal.textColor}}))
+                            {
+                                selectedEventTab = 3;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var list = new List<string> { "OnPreSave", "OnPostSave", "OnPreLoad", "OnPostLoad" };
+                        var propertyNames = new List<string> { "onPreSave", "onPostSave", "onPreLoad", "onPostLoad" };
+                        var text = list[selectedEventTab];
+                        bool isPressed = true;
+                        isPressed = GUILayout.Toggle(isPressed, text, "button");
+
+                        serializedObject.Update();
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty(propertyNames[selectedEventTab]));
+                        serializedObject.ApplyModifiedProperties();
+                        
+                        if (!isPressed) selectedEventTab = -1;
+                    }
+                }
+                
+                
                 if (ZSerializerSettings.Instance.advancedSerialization)
                 {
                     GUILayout.Space(-15);

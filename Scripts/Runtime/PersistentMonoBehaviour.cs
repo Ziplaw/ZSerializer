@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.SceneManagement;
 #endif
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -15,12 +16,10 @@ namespace ZSerializer
     public sealed class ForceZSerialized : Attribute
     {
     }
-    
+
 
     public abstract class PersistentMonoBehaviour : MonoBehaviour, IZSerializable
     {
-
-        
         /// <summary>
         /// OnPreSave is called right before any Save occurs
         /// </summary>
@@ -50,8 +49,6 @@ namespace ZSerializer
         }
 
         [NonZSerialized, HideInInspector] public bool showSettings;
-        [NonZSerialized, HideInInspector] public bool isSaving;
-        [NonZSerialized, HideInInspector] public bool isLoading;
 
         [NonZSerialized, HideInInspector, SerializeField]
         internal bool isOn = true;
@@ -61,8 +58,12 @@ namespace ZSerializer
 
         [ForceZSerialized, HideInInspector, SerializeField]
         internal bool autoSync = true;
-        [NonZSerialized, SerializeField, HideInInspector] private string _zuid;
-        [NonZSerialized, SerializeField, HideInInspector] private string _gozuid;
+
+        [NonZSerialized, SerializeField, HideInInspector]
+        private string _zuid;
+
+        [NonZSerialized, SerializeField, HideInInspector]
+        private string _gozuid;
 
 
         public int GroupID
@@ -113,6 +114,10 @@ namespace ZSerializer
             set => isOn = value;
         }
 
+        public bool IsSaving { get; set; }
+
+        public bool IsLoading { get; set; }
+
         public virtual void Reset()
         {
             IsOn = ZSerializerSettings.Instance.componentDataDictionary[GetType()].isOn;
@@ -122,9 +127,16 @@ namespace ZSerializer
 
         public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
-            ZUID = ZSerialize.GetRuntimeSafeZUID(typeof(PersistentGameObject));
+            bool isPrefab = false;
+#if UNITY_EDITOR
+            isPrefab = PrefabStageUtility.GetCurrentPrefabStage() != null;
+#endif
+
+            ZUID = isPrefab ? "" : ZSerialize.GetRuntimeSafeZUID(typeof(PersistentGameObject));
             var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
-            GOZUID = forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID(typeof(GameObject)) : zs != null ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
+            GOZUID = isPrefab ? "" : forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID(typeof(GameObject)) :
+                zs != null ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
+
 
             if (forceGenerateGameObject)
                 foreach (var monoBehaviour in GetComponents<IZSerializable>().Where(c => !ReferenceEquals(c, this)))
@@ -136,9 +148,12 @@ namespace ZSerializer
         public void GenerateEditorZUIDs(bool forceGenerateGameObject)
         {
 #if UNITY_EDITOR
-            ZUID = GUID.Generate().ToString();
+            bool isPrefab = PrefabStageUtility.GetCurrentPrefabStage() != null;
+            ZUID = isPrefab ? "" : GUID.Generate().ToString();
             var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
-            GOZUID = forceGenerateGameObject ? GUID.Generate().ToString() : zs != null ? zs.GOZUID : GUID.Generate().ToString();
+            GOZUID = isPrefab ? "" :
+                forceGenerateGameObject ? GUID.Generate().ToString() :
+                zs != null ? zs.GOZUID : GUID.Generate().ToString();
 
             EditorUtility.SetDirty(this);
             PrefabUtility.RecordPrefabInstancePropertyModifications(this);

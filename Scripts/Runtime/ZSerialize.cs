@@ -387,12 +387,12 @@ namespace ZSerializer
             if (ZSerializerSettings.Instance.serializationType == SerializationType.Async) await Task.Yield();
         }
 
-        static void OnPreSave(List<PersistentMonoBehaviour> persistentMonoBehavioursInScene)
+        static void OnPreSave(List<IZSerializable> serializables)
         {
-            foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+            foreach (var zs in serializables)
             {
-                persistentMonoBehaviour.OnPreSave();
-                persistentMonoBehaviour.isSaving = true;
+                zs.OnPreSave();
+                zs.IsSaving = true;
             }
         }
 
@@ -400,7 +400,7 @@ namespace ZSerializer
         {
             foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
             {
-                persistentMonoBehaviour.isSaving = false;
+                persistentMonoBehaviour.IsSaving = false;
                 persistentMonoBehaviour.OnPostSave();
             }
         }
@@ -414,7 +414,7 @@ namespace ZSerializer
                 if (string.IsNullOrEmpty(serializable.ZUID) ||
                     string.IsNullOrEmpty(serializable.GOZUID))
                 {
-                    LogWarning($"{serializable} found with empty ZUID, if this is not an instanced object, please go to Tools/ZSerializer/Reset Project ZUIDs", DebugMode.Off);
+                    LogWarning($"{serializable} found with empty ZUID, if this is not an instanced object, please go to Tools/ZSerializer/Reset Project ZUIDs", DebugMode.Informational);
                     serializable.GenerateRuntimeZUIDs(false); //used to be false
                 }
 
@@ -614,6 +614,45 @@ namespace ZSerializer
                 }
             }
 
+            if (zSerializerObjects[objectIndex] is PersistentGameObjectZSerializer)
+            {
+                var pg = component as PersistentGameObject;
+                var zserializer = zSerializerObjects[objectIndex] as PersistentGameObjectZSerializer;
+                var realSerializableComponentList = pg.serializedComponents;
+                var zserializerComponentList = zserializer.serializedComponents;
+                
+                foreach (var zserializedComponent in zserializerComponentList)
+                {
+                    if (zserializedComponent.component == null &&
+                        (zserializedComponent.persistenceType != PersistentType.None ||
+                         !ZSerializerSettings.Instance.advancedSerialization))
+                    {
+                        Component addedComponent;
+                        if (zserializedComponent.Type == typeof(Transform)) addedComponent = gameObject.transform;
+                        else addedComponent = gameObject.AddComponent(zserializedComponent.Type);
+                        
+                        realSerializableComponentList.Add(new SerializedComponent(addedComponent,zserializedComponent.zuid, zserializedComponent.persistenceType));
+                        idMap[currentGroupID][zserializedComponent.zuid] = addedComponent;
+                    }
+                }
+
+                // foreach (var pgzserializedComponent in new List<SerializedComponent>(pgzs.serializedComponents))
+                // {
+                //     if (pgzserializedComponent.component == null &&
+                //         (pgzserializedComponent.persistenceType != PersistentType.None ||
+                //          !ZSerializerSettings.Instance.advancedSerialization))
+                //     {
+                //         Component addedComponent;
+                //         if (pgzserializedComponent.Type == typeof(Transform)) addedComponent = gameObject.transform;
+                //         else addedComponent = gameObject.AddComponent(pgzserializedComponent.Type);
+                //
+                //         pg.serializedComponents[pgzs.serializedComponents.IndexOf(pgzserializedComponent)].component =
+                //             addedComponent;
+                //         ZSerialize.idMap[ZSerialize.CurrentGroupID][pgzserializedComponent.zuid] = addedComponent;
+                //     }
+                // }
+            }
+
             if (component is PersistentMonoBehaviour persistentMonoBehaviour)
                 persistentMonoBehaviour.IsOn = true;
 
@@ -684,6 +723,7 @@ namespace ZSerializer
                 var fromJson = fromJsonMethod.MakeGenericMethod(zSerializerType);
 
                 object[] jsonObjects = (object[])fromJson.Invoke(null, new object[] {json});
+                // var persistentGameObjectEventSerializationList
 
                 int componentCount = 0;
                 for (var i = 0; i < jsonObjects.Length; i++)
@@ -692,6 +732,7 @@ namespace ZSerializer
                         idMap[CurrentGroupID][(jsonObjects[i] as Internal.ZSerializer).ZUID] as Component;
 
                     (jsonObjects[i] as ZSerializer.Internal.ZSerializer).RestoreValues(componentInGameObject);
+                    if(componentInGameObject is PersistentGameObject persistentGameObject)
 
                     componentCount++;
                     if (ZSerializerSettings.Instance.serializationType == SerializationType.Async &&
@@ -902,7 +943,7 @@ namespace ZSerializer
                     serializables.AddRange(persistentMonoBehavioursInScene);
 
                     await UpdateIDMap(serializables);
-                    OnPreSave(persistentMonoBehavioursInScene);
+                    OnPreSave(serializables);
 
                     LogCurrentSave(zSerializationType);
                     unityComponentAssemblies.Clear();
@@ -956,10 +997,10 @@ namespace ZSerializer
 
                 await UpdateIDMap(serializableList);
                 
-                foreach (var persistentMonoBehaviour in persistentMonoBehavioursInScene)
+                foreach (var zs in serializableList)
                 {
-                    persistentMonoBehaviour.OnPreLoad();
-                    persistentMonoBehaviour.isLoading = true;
+                    zs.OnPreLoad();
+                    zs.IsLoading = true;
                 }
 
                 float startingTime = Time.realtimeSinceStartup;
@@ -1013,17 +1054,24 @@ namespace ZSerializer
                 }
 
                 await LoadComponents(zSerializationType);
+                await FillTemporaryJsonTuples(zSerializationType); // this is here because pg events lose their target if we dont do it
                 await LoadReferences();
 
                 Debug.Log(
                     $"Deserialization of group \"{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}\" ended in: " +
                     (Time.realtimeSinceStartup - startingTime) + " seconds or " +
                     (Time.frameCount - frameCount) + " frames");
+                
+                persistentMonoBehavioursInScene = GetPersistentMonoBehavioursInScene(zSerializationType);
+                persistentGameObjectsInScene = GetPersistentGameObjectsInScene(zSerializationType);
 
-                foreach (var persistentMonoBehaviour in GetPersistentMonoBehavioursInScene(zSerializationType))
+                serializableList = new List<IZSerializable>(persistentMonoBehavioursInScene);
+                serializableList.AddRange(persistentGameObjectsInScene);
+
+                foreach (var zs in serializableList)
                 {
-                    persistentMonoBehaviour.isLoading = false;
-                    persistentMonoBehaviour.OnPostLoad();
+                    zs.IsLoading = false;
+                    zs.OnPostLoad();
                 }
             }
 
@@ -1500,7 +1548,8 @@ namespace ZSerializer
                             IZSerializable)
                         .GOZUID;
                 case Component component:
-                    return component.GetComponent<PersistentGameObject>()?.ComponentZuidMap[component];
+                    var pg = component.GetComponent<PersistentGameObject>();
+                    return pg ? pg.ComponentZuidMap[component] : "-1";
                 default: return null;
             }
         }

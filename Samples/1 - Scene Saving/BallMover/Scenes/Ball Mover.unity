@@ -711,12 +711,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showSettings: 0
-  isSaving: 0
-  isLoading: 0
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 77fa7074e308cb84c83c048dcb67019a
+  _zuid: 929facc7da3ece34385fe5a965fa298a
   _gozuid: 2472f67ce3616424883b1e4429548a83
 --- !u!54 &469202270
 Rigidbody:
@@ -746,41 +744,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onPreSave:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPreLoad:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPostSave:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPostLoad:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
   showSettings: 0
   groupID: 0
-  _zuid: 2942bde9a65c40640af66efa69090ebb
+  _zuid: 2b953063925efb14186b45efbbf0958d
   _gozuid: 2472f67ce3616424883b1e4429548a83
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202268}
-    zuid: f3cc6adc594802849bd62cd534bca34a
+    zuid: 7d16ce8eba009dd449ecd95fcca1535a
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202267}
-    zuid: d0a85ae6a249c2a4b89a4c03f976378b
+    zuid: af81d8cdfd73264498292af0451a841d
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202266}
-    zuid: 0c5c327cfc4abb94f98865e0b38b02fe
+    zuid: b90c5bcd4abdfdb4ab48b688664406d5
   - typeFullName: UnityEngine.SphereCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202265}
-    zuid: 6c0667546159fb54e994aa1c0106945a
+    zuid: 160fbdcb89aaad945a20524f50805c1f
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202270}
-    zuid: 8b75e24961c4ae6428b60083e09d0d97
+    zuid: 1b651da3ff8282c42973cdedb5c0e422
   - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202272}
-    zuid: 9b70f1ae86ae649419974f1752705da2
+    zuid: 5eb120e81e2fb4d4fa706f2aed2d2ae9
 --- !u!108 &469202272
 Light:
   m_ObjectHideFlags: 0
@@ -1044,7 +1058,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: d42626c380ade694395ad09cd5cac43c
+      value: 4830013d4cab6264ab70512a40a98a5c
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
@@ -1118,7 +1132,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 9f30c752b1543b94a8bb734dd243965f
+      value: 9f3148296d50d2541adddd996f022699
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
@@ -1443,12 +1457,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showSettings: 0
-  isSaving: 0
-  isLoading: 0
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 6e567ede5c94ea94c9df86b65e5cac16
+  _zuid: 192ca7cfd9e2b414c8d378a9975232f5
   _gozuid: d089af29a2c270f4981642c51badbda0
   highScore: 0
   currentScore: 0
@@ -1719,7 +1731,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 7e57455be93b7d04c9a2e98cb5031cb4
+      value: 77c0d4967cb21ce41aa899c46a624a42
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid

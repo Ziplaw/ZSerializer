@@ -332,11 +332,11 @@ namespace ZSerializer.Editor
                     if (state == ClassState.Valid)
                     {
                         bool newOnValue = !ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn;
-                        
+
                         if (!EditorUtility.DisplayDialog($"Turning {(newOnValue ? "on" : "off")} {componentType.Name}",
                             $"This will turn {(newOnValue ? "on" : "off")} all other synced versions of this component, even in other Scenes and in Prefabs. \n Are you sure you want to do it?",
                             "Yes", "No")) return;
-                        
+
                         var eligibleTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(ass => ass.GetTypes())
                             .Where(t => t.IsSubclassOf(componentType)).ToList();
 
@@ -347,10 +347,10 @@ namespace ZSerializer.Editor
                                 $"Also turn {(newOnValue ? "on" : "off")} child classes?",
                                 $"This class has {eligibleTypes.Count} classes inheriting from it \n Would you like to turn those {(newOnValue ? "on" : "off")} as well?",
                                 "Yes", "No");
-                        if(!alsoDoChildClasses) eligibleTypes.Clear(); 
-                        
+                        if (!alsoDoChildClasses) eligibleTypes.Clear();
+
                         eligibleTypes.Add(componentType);
-                            
+
                         ExecuteOnAllSerializablesFromScenes(zs =>
                         {
                             if (eligibleTypes.Contains(zs.GetType()) && zs.AutoSync)
@@ -359,7 +359,7 @@ namespace ZSerializer.Editor
                                 EditorUtility.SetDirty(zs as Object);
                             }
                         }, "Turning " + componentType.Name + " " + (newOnValue ? "off" : "on"));
-                            
+
                         ExecuteOnAllSerializablesFromPrefabs(zs =>
                         {
                             if (eligibleTypes.Contains(zs.GetType()) && zs.AutoSync)
@@ -369,9 +369,10 @@ namespace ZSerializer.Editor
                             }
                         }, "Turning " + componentType.Name + " " + (newOnValue ? "off" : "on"));
 
-                        eligibleTypes.ForEach(t => ZSerializerSettings.Instance.componentDataDictionary[t].isOn = newOnValue);
+                        eligibleTypes.ForEach(t =>
+                            ZSerializerSettings.Instance.componentDataDictionary[t].isOn = newOnValue);
 
-                        
+
                         EditorUtility.SetDirty(ZSerializerSettings.Instance);
                         AssetDatabase.SaveAssets();
                     }
@@ -409,11 +410,13 @@ namespace ZSerializer.Editor
 
                         if (component.AutoSync)
                         {
-                            if (!EditorUtility.DisplayDialog($"Turning {(componentIsOn ? "off" : "on")} {component.GetType().Name}",
+                            if (!EditorUtility.DisplayDialog(
+                                $"Turning {(componentIsOn ? "off" : "on")} {component.GetType().Name}",
                                 $"This will turn {(componentIsOn ? "off" : "on")} all other synced versions of this component, even in other Scenes and in Prefabs. \n Are you sure you want to do it?",
                                 "Yes", "No")) return;
-                            
-                            var eligibleTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(ass => ass.GetTypes())
+
+                            var eligibleTypes = AppDomain.CurrentDomain.GetAssemblies()
+                                .SelectMany(ass => ass.GetTypes())
                                 .Where(t => t.IsSubclassOf(component.GetType())).ToList();
 
                             bool alsoDoChildClasses = false;
@@ -423,11 +426,11 @@ namespace ZSerializer.Editor
                                     $"Also turn {(!componentIsOn ? "off" : "on")} child classes?",
                                     $"This class has {eligibleTypes.Count} classes inheriting from it \n Would you like to turn those {(!componentIsOn ? "off" : "on")} as well?",
                                     "Yes", "No");
-                            if(!alsoDoChildClasses) eligibleTypes.Clear(); 
-                        
+                            if (!alsoDoChildClasses) eligibleTypes.Clear();
+
                             eligibleTypes.Add(component.GetType());
-                            
-                            
+
+
                             ExecuteOnAllSerializablesFromScenes(zs =>
                             {
                                 if (eligibleTypes.Contains(zs.GetType()) && zs.AutoSync)
@@ -436,7 +439,7 @@ namespace ZSerializer.Editor
                                     EditorUtility.SetDirty(zs as Object);
                                 }
                             }, "Turning " + component.GetType().Name + " " + (componentIsOn ? "off" : "on"));
-                            
+
                             ExecuteOnAllSerializablesFromPrefabs(zs =>
                             {
                                 if (eligibleTypes.Contains(zs.GetType()) && zs.AutoSync)
@@ -445,8 +448,9 @@ namespace ZSerializer.Editor
                                     EditorUtility.SetDirty(zs as Object);
                                 }
                             }, "Turning " + component.GetType().Name + " " + (componentIsOn ? "off" : "on"));
-                            
-                            eligibleTypes.ForEach(t => ZSerializerSettings.Instance.componentDataDictionary[t].isOn = !componentIsOn);
+
+                            eligibleTypes.ForEach(t =>
+                                ZSerializerSettings.Instance.componentDataDictionary[t].isOn = !componentIsOn);
 
                             component.IsOn = !componentIsOn;
                         }
@@ -455,12 +459,10 @@ namespace ZSerializer.Editor
                             component.IsOn = !componentIsOn;
                         }
 
-                        
+
                         EditorUtility.SetDirty(ZSerializerSettings.Instance);
                     }
                 }
-
-                
             }
         }
 
@@ -542,7 +544,7 @@ namespace ZSerializer.Editor
 
                 BuildInspectorValidityButton(manager, styler);
                 showSettings = SettingsButton(showSettings, styler, 28);
-                if(manager) PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
+                if (manager) PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
             }
 
             if (showSettings)
@@ -1009,6 +1011,7 @@ namespace ZSerializer.Editor
 
                                 break;
                             case 1:
+                                
                                 var list = ZSerializerSettings.Instance.unityComponentTypes
                                     .Select(t => Type.GetType(t).Name).ToList();
 
@@ -1126,12 +1129,14 @@ namespace ZSerializer.Editor
 
             ExecuteOnAllSerializablesFromScenes(serializable =>
             {
-                if (serializable is PersistentGameObject pg) PersistentGameObject.UpdateComponentList(pg,false);
+                if (serializable is PersistentGameObject pg)
+                    PersistentGameObject.UpdateGlobalZSerializerList(pg, false);
             }, "Setting up Project ZSerializers");
-            
+
             ExecuteOnAllSerializablesFromPrefabs(serializable =>
             {
-                if (serializable is PersistentGameObject pg) PersistentGameObject.UpdateComponentList(pg,false);
+                if (serializable is PersistentGameObject pg)
+                    PersistentGameObject.UpdateGlobalZSerializerList(pg, false);
             }, "Setting up Project ZSerializers");
 
             ZSerializerEditorRuntime.GenerateUnityComponentClasses();
@@ -1159,13 +1164,10 @@ namespace ZSerializer.Editor
 
             ExecuteOnAllSerializablesFromPrefabs(serializable =>
             {
-                if (string.IsNullOrEmpty(serializable.ZUID) || updateNonEmptyZUIDs)
-                {
-                    if (serializable is PersistentGameObject pg) pg.Reset();
-                    else serializable.GenerateEditorZUIDs(false);
+                if (serializable is PersistentGameObject pg) pg.Reset();
+                else serializable.GenerateEditorZUIDs(false);
 
-                    numberOfUpdatedZUIDs++;
-                }
+                numberOfUpdatedZUIDs++;
             }, "Refreshing Project ZUIDs");
 
             Debug.Log($"<color=cyan>{numberOfUpdatedZUIDs} ZUIDs have been reset!</color>");

@@ -48,31 +48,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3dbe3a42223b24a8cc44e36ba653fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onPreSave:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPreLoad:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPostSave:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
+  onPostLoad:
+    m_PersistentCalls:
+      m_Calls: []
+    targetZUIDs: []
   showSettings: 0
   groupID: 0
-  _zuid: ee028f1779c7f464f9c4a03857b93864
-  _gozuid: f0054091ecedd7c4cab01a35b0a1f278
+  _zuid: 
+  _gozuid: 
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 4761420894585310051}
-    zuid: 82e750e5c301b5b4d9f57fcfb715f97b
+    zuid: 
   - typeFullName: UnityEngine.SpriteRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 4761420894585310050}
-    zuid: c961c6569351f64438ee446fce4f84f2
+    zuid: 
   - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 4761420894585310061}
-    zuid: fbcc1a41811454b45871a1cd6c9f057f
+    zuid: 
   - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1087470111}
-    zuid: 299cc838d595a824e98a2aaaec3226f8
+    zuid: 
 --- !u!212 &4761420894585310050
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -164,13 +180,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showSettings: 0
-  isSaving: 0
-  isLoading: 0
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: b431126ac0550ba4da3dad44a602ef28
-  _gozuid: f0054091ecedd7c4cab01a35b0a1f278
+  _zuid: 
+  _gozuid: 
   position: {x: 0, y: 0, z: 0}
   nodeTransform: {fileID: 0}
 --- !u!108 &1087470111
