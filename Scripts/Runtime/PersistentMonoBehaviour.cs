@@ -129,7 +129,7 @@ namespace ZSerializer
         {
             bool isPrefab = false;
 #if UNITY_EDITOR
-            isPrefab = PrefabStageUtility.GetCurrentPrefabStage() != null;
+            isPrefab = ZSerialize.IsPrefab(this);
 #endif
 
             ZUID = isPrefab ? "" : ZSerialize.GetRuntimeSafeZUID(typeof(PersistentGameObject));
@@ -148,7 +148,7 @@ namespace ZSerializer
         public void GenerateEditorZUIDs(bool forceGenerateGameObject)
         {
 #if UNITY_EDITOR
-            bool isPrefab = PrefabStageUtility.GetCurrentPrefabStage() != null;
+            bool isPrefab = ZSerialize.IsPrefab(this);
             ZUID = isPrefab ? "" : GUID.Generate().ToString();
             var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
             GOZUID = isPrefab ? "" :

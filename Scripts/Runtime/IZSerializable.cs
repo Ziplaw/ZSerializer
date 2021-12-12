@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ZSerializer
 {
-    internal interface IZSerializable
+    public interface IZSerializable
     {
         public int GroupID { get; set; }
         public bool AutoSync { get; }

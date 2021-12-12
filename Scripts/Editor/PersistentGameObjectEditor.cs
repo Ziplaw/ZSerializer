@@ -215,6 +215,12 @@ public class PersistentGameObjectEditor : Editor
                     {
                         EditorGUILayout.TextField("ZUID", manager.ZUID);
                         EditorGUILayout.TextField("GameObject ZUID", manager.GOZUID);
+                        
+                        GUILayout.Space(5);
+                        foreach (var serializedComponent in manager.serializedComponents)
+                        {
+                            EditorGUILayout.TextField(serializedComponent.Type.Name, serializedComponent.zuid);
+                        }
                     }
                 }
             }

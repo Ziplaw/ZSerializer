@@ -10,6 +10,8 @@ using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
@@ -459,7 +461,9 @@ namespace ZSerializer
             });
         }
 
-        //Load CurrentScenePath
+        internal static bool IsPrefab(IZSerializable zs) => PrefabStageUtility.GetCurrentPrefabStage() != null || PrefabUtility.GetPrefabAssetType(zs as Object) == PrefabAssetType.Regular;
+
+        
         public static string GetLastSavedScenePath(string sceneGroupName)
         {
             var path = GetSceneGroupPathFromName(sceneGroupName) + "/lastScenePath.zsave";
