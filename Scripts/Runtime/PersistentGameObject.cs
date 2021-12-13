@@ -35,7 +35,7 @@ namespace ZSerializer
             this.zuid = zuid;
             this.persistenceType = persistenceType;
         }
-        
+
         public SerializedComponent(SerializedComponent other)
         {
             component = other.component;
@@ -130,17 +130,24 @@ namespace ZSerializer
             {
                 var thisComponentZuid =
                     serializedComponents.FirstOrDefault(cz => cz.component == component);
-                bool isPrefab = ZSerialize.IsPrefab(this);
-                
-                if (thisComponentZuid != default && !string.IsNullOrEmpty(thisComponentZuid.zuid)) czlist.Add(new SerializedComponent(thisComponentZuid) {zuid = isPrefab ? "" : thisComponentZuid.zuid});
+                bool isPrefab = false;
+
+#if UNITY_EDITOR
+                isPrefab = ZSerialize.IsPrefab(this);
+#endif
+
+                if (thisComponentZuid != default && !string.IsNullOrEmpty(thisComponentZuid.zuid))
+                    czlist.Add(new SerializedComponent(thisComponentZuid)
+                        { zuid = isPrefab ? "" : thisComponentZuid.zuid });
                 else
                 {
                     string id = "";
 
 
 #if UNITY_EDITOR
-                        id = isPrefab ? "" : 
-                            Application.isPlaying
+                    id = isPrefab
+                        ? ""
+                        : Application.isPlaying
                             ? ZSerialize.GetRuntimeSafeZUID(component.GetType())
                             : GUID.Generate().ToString();
 #else
@@ -250,8 +257,9 @@ namespace ZSerializer
 
         public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
         {
+            bool isPrefab = false;
 #if UNITY_EDITOR
-            bool isPrefab = ZSerialize.IsPrefab(this);
+            isPrefab = ZSerialize.IsPrefab(this);
 
 #endif
             // GenerateComponentZUIDs();
@@ -317,7 +325,7 @@ namespace ZSerializer
             if (ZSerialize.UnitySerializableTypes.Contains(type))
             {
                 // string zuid = ZSerialize.GetRuntimeSafeZUID(type);
-                serializedComponents.Add(new SerializedComponent(c, ""/*zuid*/,
+                serializedComponents.Add(new SerializedComponent(c, "" /*zuid*/,
                     persistentType));
                 // ZSerialize.idMap[ZSerialize.CurrentGroupID][zuid] = c;
             }
