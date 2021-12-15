@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.SceneManagement;
+using UnityEditor.Experimental.SceneManagement;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -1070,6 +1071,7 @@ namespace ZSerializer.Editor
             {
                 foreach (var prefab in prefabs)
                 {
+                    #if UNITY_2021_2_OR_NEWER
                     foreach (var zs in PrefabStageUtility.OpenPrefab(prefab).prefabContentsRoot
                         .GetComponentsInChildren<IZSerializable>())
                     {
@@ -1077,6 +1079,11 @@ namespace ZSerializer.Editor
                             prefabs.IndexOf(prefab) / (float)prefabs.Count);
                         action(zs);
                     }
+                    #else
+                    break;
+#endif
+
+
                 }
             }
             catch (Exception e)
