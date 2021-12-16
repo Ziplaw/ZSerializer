@@ -810,7 +810,7 @@ namespace ZSerializer
             switch (zSerializationType)
             {
                 case ZSerializationType.Scene:
-#if UNITY_2020_OR_NEWER
+#if UNITY_2020_3_OR_NEWER
                     return Object.FindObjectsOfType<PersistentMonoBehaviour>(true).Where(ShouldBeSerialized).ToList();
 #else
                     return Object.FindObjectsOfType<PersistentMonoBehaviour>().Where(ShouldBeSerialized).ToList();
@@ -828,7 +828,7 @@ namespace ZSerializer
             switch (zSerializationType)
             {
                 case ZSerializationType.Scene:
-#if UNITY_2020_OR_NEWER
+#if UNITY_2020_3_OR_NEWER
                     return Object.FindObjectsOfType<PersistentGameObject>(true).Where(ShouldBeSerialized).ToList();
 #else
                     return Object.FindObjectsOfType<PersistentGameObject>().Where(ShouldBeSerialized).ToList();

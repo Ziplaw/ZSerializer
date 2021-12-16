@@ -88,7 +88,7 @@ namespace ZSerializer.Editor
 
         static void GetClasses()
         {
-#if UNITY_2020_OR_NEWER
+#if UNITY_2020_3_OR_NEWER
                         var types =
  ZSerialize.GetPersistentTypes().Where(t => searchProject || FindObjectsOfType(t,true).Length > 0).OrderBy(t => t.Name).ToArray();
 #else
