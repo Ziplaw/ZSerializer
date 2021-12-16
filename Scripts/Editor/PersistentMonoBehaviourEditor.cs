@@ -25,8 +25,8 @@ public class PersistentMonoBehaviourEditor : Editor
             {
                 var att = t.GetCustomAttribute<CustomEditor>();
                 if (att == null) return false;
-                var type = typeof(CustomEditor).GetField("m_InspectedType", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(att) as Type;
-                return type == manager.GetType();
+                var inspectedType = typeof(CustomEditor).GetField("m_InspectedType", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(att) as Type;
+                return inspectedType == manager.GetType();
             }).FirstOrDefault();
         });
         

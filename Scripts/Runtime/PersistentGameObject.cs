@@ -264,7 +264,7 @@ namespace ZSerializer
 #endif
             // GenerateComponentZUIDs();
             ZUID = isPrefab ? "" : ZSerialize.GetRuntimeSafeZUID(typeof(PersistentGameObject));
-            var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
+            var zs = GetComponents<IZSerializable>().FirstOrDefault(z => !string.IsNullOrEmpty(z.GOZUID));
             GOZUID = isPrefab ? "" :
                 forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID(typeof(GameObject)) :
                 zs != null ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
@@ -286,7 +286,7 @@ namespace ZSerializer
             GenerateComponentZUIDs();
 
             ZUID = isPrefab ? "" : GUID.Generate().ToString();
-            var zs = GetComponents<IZSerializable>().FirstOrDefault(zs => !string.IsNullOrEmpty(zs.GOZUID));
+            var zs = GetComponents<IZSerializable>().FirstOrDefault(z => !string.IsNullOrEmpty(z.GOZUID));
             GOZUID = isPrefab ? "" :
                 forceGenerateGameObject ? GUID.Generate().ToString() :
                 zs != null ? zs.GOZUID : GUID.Generate().ToString();

@@ -88,7 +88,13 @@ namespace ZSerializer.Editor
 
         static void GetClasses()
         {
-            var types = ZSerialize.GetPersistentTypes().Where(t => searchProject || FindObjectsOfType(t,true).Length > 0).OrderBy(t => t.Name).ToArray();
+#if UNITY_2020_OR_NEWER
+                        var types =
+ ZSerialize.GetPersistentTypes().Where(t => searchProject || FindObjectsOfType(t,true).Length > 0).OrderBy(t => t.Name).ToArray();
+#else
+            var types = ZSerialize.GetPersistentTypes().Where(t => searchProject || FindObjectsOfType(t).Length > 0)
+                .OrderBy(t => t.Name).ToArray();
+#endif
             classes = types.Select(t => new Class(t, ZSerializerEditor.GetClassState(t))).ToArray();
         }
 
@@ -242,8 +248,10 @@ namespace ZSerializer.Editor
                         {
                             using (var change = new EditorGUI.ChangeCheckScope())
                             {
-                                searchText = GUILayout.TextField(searchText,new GUIStyle(EditorStyles.toolbarSearchField){fixedHeight = 20});
-                                if(GUILayout.Button(searchProject ? Styler.hierarchyOnly : Styler.projectOnly, GUILayout.Width(28), GUILayout.Height(20)))
+                                searchText = GUILayout.TextField(searchText,
+                                    new GUIStyle(EditorStyles.toolbarSearchField) { fixedHeight = 20 });
+                                if (GUILayout.Button(searchProject ? Styler.hierarchyOnly : Styler.projectOnly,
+                                    GUILayout.Width(28), GUILayout.Height(20)))
                                 {
                                     searchProject = !searchProject;
                                 }
@@ -361,12 +369,9 @@ namespace ZSerializer.Editor
                                         }
                                     }
                                 }
-
-                            
                         }
-
-                        
                     }
+
                     if (!editMode)
                     {
                         GUILayout.Space(5);

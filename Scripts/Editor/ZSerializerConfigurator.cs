@@ -75,22 +75,25 @@ namespace ZSerializer.Editor
             {
                 using (new EditorGUILayout.VerticalScope("helpbox", GUILayout.MaxWidth(200)))
                 {
-                    using var scrollView = new EditorGUILayout.ScrollViewScope(scrollPosComponentTypes);
-                    scrollPosComponentTypes = scrollView.scrollPosition;
-
-                    searchTypes = GUILayout.TextField(searchTypes, GUI.skin.FindStyle("ToolbarSeachTextField"));
-
-                    foreach (var componentType in componentTypes.Where(c =>
-                        c.Name.ToLower().Contains(searchTypes.ToLower())))
+                    using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPosComponentTypes))
                     {
-                        if (GUILayout.Button(componentType.Name))
+                        scrollPosComponentTypes = scrollView.scrollPosition;
+
+                        searchTypes = GUILayout.TextField(searchTypes, GUI.skin.FindStyle("ToolbarSeachTextField"));
+
+                        foreach (var componentType in componentTypes.Where(c =>
+                            c.Name.ToLower().Contains(searchTypes.ToLower())))
                         {
-                            selectedType = componentType;
-                            propertyInfoList = selectedType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                .Where(PropertyIsSuitableForAssignmentNoBlackList).ToList();
-                            _customVariableEntries = ZSerializerSettings.Instance.unityComponentDataList
-                                .FirstOrDefault(s => s.Type == selectedType)?.customVariableEntries;
-                            customVariableEntryEditIndex = -1;
+                            if (GUILayout.Button(componentType.Name))
+                            {
+                                selectedType = componentType;
+                                propertyInfoList = selectedType
+                                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                    .Where(PropertyIsSuitableForAssignmentNoBlackList).ToList();
+                                _customVariableEntries = ZSerializerSettings.Instance.unityComponentDataList
+                                    .FirstOrDefault(s => s.Type == selectedType)?.customVariableEntries;
+                                customVariableEntryEditIndex = -1;
+                            }
                         }
                     }
                 }

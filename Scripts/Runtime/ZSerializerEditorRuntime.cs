@@ -86,8 +86,8 @@ namespace ZSerializer {
                         }
                     }
 
-                    var data = ZSerializerSettings.Instance.unityComponentDataList.FirstOrDefault(data =>
-                        data.Type == type);
+                    var data = ZSerializerSettings.Instance.unityComponentDataList.FirstOrDefault(d =>
+                        d.Type == type);
 
                     if (data != null)
                         foreach (var customVariableEntry in data.customVariableEntries)

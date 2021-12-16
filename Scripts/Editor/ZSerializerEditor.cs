@@ -751,7 +751,7 @@ namespace ZSerializer.Editor
                                             .Where(o => o is IZSerializable))
                                         {
                                             var serialize = monoBehaviour as IZSerializable;
-                                            serialize!.GroupID = 0;
+                                            serialize.GroupID = 0;
                                             EditorUtility.SetDirty(monoBehaviour);
 
                                             // monoBehaviour.GetType().GetField("groupID",
@@ -1189,9 +1189,9 @@ namespace ZSerializer.Editor
             foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
             {
                 var serialize = monoBehaviour as IZSerializable;
-                if (string.IsNullOrEmpty(serialize!.ZUID) || string.IsNullOrEmpty(serialize.GOZUID))
+                if (string.IsNullOrEmpty(serialize.ZUID) || string.IsNullOrEmpty(serialize.GOZUID))
                 {
-                    serialize!.GenerateEditorZUIDs(true);
+                    serialize.GenerateEditorZUIDs(true);
                     EditorUtility.SetDirty(monoBehaviour);
                     PrefabUtility.RecordPrefabInstancePropertyModifications(monoBehaviour);
                 }

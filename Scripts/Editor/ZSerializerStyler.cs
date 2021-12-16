@@ -9,7 +9,14 @@ namespace ZSerializer.Editor
     {
         //singleton 
         private static ZSerializerStyler _instance;
-        public static ZSerializerStyler Instance => _instance ??= new ZSerializerStyler();
+        public static ZSerializerStyler Instance
+        {
+            get
+            {
+                if (_instance == null) _instance = new ZSerializerStyler();
+                return _instance;
+            }
+        }
 
         public Texture2D notMadeImage;
         public Texture2D needsRebuildingImage;
