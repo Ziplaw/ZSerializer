@@ -71,7 +71,7 @@ namespace ZSerializer
         {
             get
             {
-                if (unitySerializableTypes != null) unitySerializableTypes = GetUnitySerializableTypes();
+                if (unitySerializableTypes == null) unitySerializableTypes = GetUnitySerializableTypes();
                 return unitySerializableTypes;
             }
         }
