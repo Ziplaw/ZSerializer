@@ -162,7 +162,7 @@ namespace ZSerializer
             }
 
 #if UNITY_EDITOR
-            if (!serializedComponents.SequenceEqual(czlist))
+            if (!serializedComponents.SerializedComponentListEquals(czlist))
             {
                 EditorUtility.SetDirty(this);
             }
@@ -375,8 +375,21 @@ namespace ZSerializer
         }
     }
 
-    public static class GameObjectExtensions
+    public static class PGExtensions
     {
+        public static bool SerializedComponentListEquals(this List<SerializedComponent> l1,
+            List<SerializedComponent> l2)
+        {
+            if (l1.Count != l2.Count) return false;
+            for (int i = 0; i < l1.Count; i++)
+            {
+                if (l1[i].component != l2[i].component) return false;
+                if (l1[i].zuid != l2[i].zuid) return false;
+                if (l1[i].persistenceType != l2[i].persistenceType) return false;
+            }
+            return true;
+        }
+        
         public static GameObject ApplyValues(this GameObject o, GameObjectData data)
         {
             o.hideFlags = data.hideFlags;
