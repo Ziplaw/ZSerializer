@@ -33,7 +33,8 @@ namespace ZSerializer
         /// OnPostLoad is called right after any Load occurs
         /// </summary>
         void OnPostLoad();
-        
+
+        List<string> GetZUIDList();
         void GenerateRuntimeZUIDs(bool forceGenerateGameObject);
         void GenerateEditorZUIDs(bool forceGenerateGameObject);
         void AddZUIDsToIDMap();

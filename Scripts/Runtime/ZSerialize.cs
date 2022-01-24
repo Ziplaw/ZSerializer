@@ -114,7 +114,16 @@ namespace ZSerializer
 
         internal static string GetRuntimeSafeZUID(Type type)
         {
-            return $"R{runtimeIDs++}{new string(type.Name.Where(c => char.IsUpper(c)).ToArray())}";
+            var serializables = Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable).Select(m => m as IZSerializable);
+            string idCandidate = null;
+
+            while (idCandidate == null || serializables.Any(s => s.GetZUIDList().Contains(idCandidate)))
+            {
+                idCandidate = $"R{runtimeIDs++}{new string(type.Name.Where(c => char.IsUpper(c)).ToArray())}";
+            }
+
+
+            return idCandidate;
         }
 
         static int[] GetIDList()

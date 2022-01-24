@@ -80,6 +80,17 @@ namespace ZSerializer
             onPostLoad?.Invoke();
         }
 
+        public List<string> GetZUIDList()
+        {
+            var list = new List<string> { ZUID, GOZUID };
+            foreach (var serializedComponent in serializedComponents)
+            {
+                list.Add(serializedComponent.zuid);
+            }
+
+            return list;
+        }
+
         [NonZSerialized] public bool showSettings;
         [SerializeField, HideInInspector] private int groupID;
         [SerializeField] private string _zuid;

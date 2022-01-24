@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -47,6 +48,8 @@ namespace ZSerializer
         public virtual void OnPostLoad()
         {
         }
+
+        public List<string> GetZUIDList() => new List<string> { ZUID, GOZUID };
 
         [NonZSerialized, HideInInspector] public bool showSettings;
 
