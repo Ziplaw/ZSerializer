@@ -15,31 +15,37 @@ public class PersistentMonoBehaviourEditor : Editor
 
     public async void OnEnable()
     {
-        manager = target as PersistentMonoBehaviour;
+        try
+        {
+            manager = target as PersistentMonoBehaviour;
 
-        Type type = null;
+            Type type = null;
         
-        await Task.Run(() =>
-        {
-            type = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t =>
+            await Task.Run(() =>
             {
-                var att = t.GetCustomAttribute<CustomEditor>();
-                if (att == null) return false;
-                var inspectedType = typeof(CustomEditor).GetField("m_InspectedType", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(att) as Type;
-                return inspectedType == manager.GetType();
-            }).FirstOrDefault();
-        });
+                type = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t =>
+                {
+                    var att = t.GetCustomAttributes<CustomEditor>().FirstOrDefault();
+                    if (att == null) return false;
+                    var inspectedType = typeof(CustomEditor).GetField("m_InspectedType", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(att) as Type;
+                    return inspectedType == manager.GetType();
+                }).FirstOrDefault();
+            });
         
         
-        if (type != null)
-        {
-            editor = CreateEditor(manager, type);
+            if (type != null)
+            {
+                editor = CreateEditor(manager, type);
+            }
+            else
+            {
+                editor = this;
+            }
         }
-        else
+        catch (Exception e)
         {
-            editor = this;
+            ZSerialize.LogWarning(e, DebugMode.Developer);
         }
-        
     }
 
     private void OnDisable()
