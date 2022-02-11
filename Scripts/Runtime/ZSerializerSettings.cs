@@ -216,9 +216,6 @@ namespace ZSerializer
                 {
                     list.Remove(s);
                 }
-                {
-                    list.Remove(s);
-                }
             }
         }
         

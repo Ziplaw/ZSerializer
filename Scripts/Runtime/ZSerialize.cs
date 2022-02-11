@@ -488,9 +488,16 @@ namespace ZSerializer
         }
 
 #if UNITY_EDITOR
-        internal static bool IsPrefab(IZSerializable zs) => PrefabStageUtility.GetCurrentPrefabStage() != null ||
-                                                            PrefabUtility.GetPrefabAssetType(zs as Object) ==
-                                                            PrefabAssetType.Regular;
+        internal static bool IsPrefab(IZSerializable zs)
+        {
+            // Debug.LogError(PrefabStageUtility.GetCurrentPrefabStage() != null);
+            // Debug.LogError(PrefabUtility.GetPrefabAssetType(zs as Object));
+            // Debug.LogError(PrefabUtility.IsPartOfPrefabAsset((zs as Component).gameObject));
+            
+            // Debug.LogError(PrefabUtility.GetPrefabParent((zs as Component).gameObject) == null && PrefabUtility.GetPrefabObject((zs as Component).gameObject) != null);
+            
+            return PrefabStageUtility.GetCurrentPrefabStage() != null;
+        }
 #endif
 
         public static string GetLastSavedScenePath(string sceneGroupName)
