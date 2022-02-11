@@ -1961,7 +1961,7 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 0e00bd4a6f540774186102479dfa128d
+  _zuid: 80946b3e8ae4409428babf6c449837b2
   _gozuid: e64ccc49508fd2e43ba0d4048df025fa
   roadPrefab: {fileID: 1689612743638498561, guid: 0a2a4d0472b76104aacfe4e0e7d92a10, type: 3}
   anchorPrefab: {fileID: 4761420894585310049, guid: cf542704a29200d4385b3da3071d854c, type: 3}
@@ -2001,7 +2001,7 @@ MonoBehaviour:
     targetZUIDs: []
   showSettings: 0
   groupID: 0
-  _zuid: fc244135a712e4447a44532bca5a29ec
+  _zuid: 75ee7c8ecaa807942a3cc5a6aa6ad04c
   _gozuid: e64ccc49508fd2e43ba0d4048df025fa
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
@@ -2274,11 +2274,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _zuid
-      value: 51b3d103758d04e46b66885064ead0ec
+      value: 123614df8aeed9e4bbf72c3a71de4989
       objectReference: {fileID: 0}
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _gozuid
       value: 3e71ee542bfb0f7428e3aa4c2c8eb990
+      objectReference: {fileID: 0}
+    - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
+      propertyPath: serializedComponents.Array.size
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: serializedComponents.Array.data[0].zuid
@@ -2296,9 +2300,35 @@ PrefabInstance:
       propertyPath: serializedComponents.Array.data[3].zuid
       value: 146cb1f7572c5044fa5eae8e9c6e05e2
       objectReference: {fileID: 0}
+    - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
+      propertyPath: serializedComponents.Array.data[4].zuid
+      value: bba0bb7168d93fa4b9108ed61d155e11
+      objectReference: {fileID: 0}
+    - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
+      propertyPath: serializedComponents.Array.data[5].zuid
+      value: e7119d519c98f61499435cf6b8ddaa2e
+      objectReference: {fileID: 0}
+    - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
+      propertyPath: serializedComponents.Array.data[4].component
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
+      propertyPath: serializedComponents.Array.data[5].component
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
+      propertyPath: serializedComponents.Array.data[4].typeFullName
+      value: UnityEngine.Rigidbody2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      objectReference: {fileID: 0}
+    - target: {fileID: -408583232395929077, guid: cf542704a29200d4385b3da3071d854c, type: 3}
+      propertyPath: serializedComponents.Array.data[5].typeFullName
+      value: UnityEngine.HingeJoint2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      objectReference: {fileID: 0}
     - target: {fileID: 4095969009253119821, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _zuid
-      value: 19af5cf0056f2c146ad556ca7a3fec47
+      value: cd99e962094265141b628c3abe3d10c9
       objectReference: {fileID: 0}
     - target: {fileID: 4095969009253119821, guid: cf542704a29200d4385b3da3071d854c, type: 3}
       propertyPath: _gozuid

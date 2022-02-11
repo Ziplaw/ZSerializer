@@ -551,6 +551,18 @@ namespace ZSerializer.Editor
             if (showSettings)
             {
                 toggleOn?.Invoke(manager.GetType(), manager, true);
+                
+                if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
+                {
+                    GUILayout.Space(-15);
+                    using (new GUILayout.VerticalScope(ZSerializerStyler.window))
+                    {
+                        if (GUILayout.Button("Reset ZUIDs"))
+                        {
+                            manager.GenerateEditorZUIDs(false);
+                        }
+                    }
+                }
 
                 SerializedObject serializedObject = new SerializedObject(manager);
                 serializedObject.Update();
@@ -707,10 +719,10 @@ namespace ZSerializer.Editor
                             {
                                 Process process = new Process();
                                 ProcessStartInfo startInfo = new ProcessStartInfo();
-                                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
                                 startInfo.FileName = "cmd.exe";
                                 string _path = Application.persistentDataPath;
-                                startInfo.Arguments = $"/C start {_path}";
+                                startInfo.Arguments = $"/C \"start {_path}\"";
                                 process.StartInfo = startInfo;
                                 process.Start();
                             }
@@ -1233,6 +1245,10 @@ namespace ZSerializer.Editor
                             map[serializable.ZUID] = serializable as Object;
                         if (monoBehaviour && monoBehaviour.gameObject)
                             map[serializable.GOZUID] = monoBehaviour.gameObject;
+                    }
+                    else
+                    {
+                        serializable.GenerateEditorZUIDs(false);
                     }
                 }
             }

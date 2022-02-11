@@ -63,7 +63,20 @@ public class PersistentGameObjectEditor : Editor
             {
                 ZSerializerEditor.ShowGroupIDSettings(typeof(PersistentGameObject), manager, false);
 
-                
+                if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
+                {
+                    GUILayout.Space(-15);
+                    using (new GUILayout.VerticalScope(ZSerializerStyler.window))
+                    {
+                        if (GUILayout.Button("Reset ZUIDs"))
+                        {
+                            manager.GenerateEditorZUIDs(false);
+                        }
+                    }
+                }
+
+
+
                 GUILayout.Space(-15);
                 using (new GUILayout.VerticalScope(ZSerializerStyler.window))
                 {

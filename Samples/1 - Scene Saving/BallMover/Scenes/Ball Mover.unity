@@ -714,7 +714,7 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 929facc7da3ece34385fe5a965fa298a
+  _zuid: e042fca0dd8e73d4aa497ccc6fc6bfd7
   _gozuid: 2472f67ce3616424883b1e4429548a83
 --- !u!54 &469202270
 Rigidbody:
@@ -762,7 +762,7 @@ MonoBehaviour:
     targetZUIDs: []
   showSettings: 0
   groupID: 0
-  _zuid: 2b953063925efb14186b45efbbf0958d
+  _zuid: 0567020a07d2a6843841b7a507ba343d
   _gozuid: 2472f67ce3616424883b1e4429548a83
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
@@ -1058,7 +1058,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 4830013d4cab6264ab70512a40a98a5c
+      value: 169013d6373bb5a459776631b3b6c2c4
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
@@ -1132,7 +1132,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 9f3148296d50d2541adddd996f022699
+      value: 362320380a681914396be2432d540915
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
@@ -1460,7 +1460,7 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 192ca7cfd9e2b414c8d378a9975232f5
+  _zuid: 0a843d18b02bd6a4a8818e8a7c669384
   _gozuid: d089af29a2c270f4981642c51badbda0
   highScore: 0
   currentScore: 0
@@ -1731,7 +1731,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 77c0d4967cb21ce41aa899c46a624a42
+      value: f8f58dd2af66b0c4ebf1868a8e632a89
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid

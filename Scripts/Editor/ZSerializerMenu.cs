@@ -187,7 +187,7 @@ namespace ZSerializer.Editor
                         {
                             if (GUILayout.Button("Solve", GUILayout.Width(50)))
                             {
-                                ZSerializerEditorRuntime.GenerateUnityComponentClasses();
+                                ZSerializerEditorRuntime.GenerateUnityComponentClasses(); //TODO make this not suck
                             }
                         }
                     }
@@ -207,7 +207,7 @@ namespace ZSerializer.Editor
                         }
                     }
 
-                    using (new EditorGUI.DisabledScope(!zuidsAreSetup /*|| !hasZSerializers*/))
+                    //using (new EditorGUI.DisabledScope(!zuidsAreSetup /*|| !hasZSerializers*/))
                     {
                         if (GUILayout.Button("Finish Setup"))
                         {
