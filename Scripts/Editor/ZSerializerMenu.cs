@@ -187,7 +187,7 @@ namespace ZSerializer.Editor
                         {
                             if (GUILayout.Button("Solve", GUILayout.Width(50)))
                             {
-                                ZSerializerEditorRuntime.GenerateUnityComponentClasses(); //TODO make this not suck
+                                ZSerializerEditorRuntime.GenerateUnityComponentClasses();
                             }
                         }
                     }
@@ -212,6 +212,8 @@ namespace ZSerializer.Editor
                         if (GUILayout.Button("Finish Setup"))
                         {
                             ZSerializerSettings.Instance.packageInitialized = true;
+                            EditorUtility.SetDirty(ZSerializerSettings.Instance);
+                            AssetDatabase.SaveAssets();
                         }
                     }
                 }
