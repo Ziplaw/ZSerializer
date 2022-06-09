@@ -114,7 +114,8 @@ namespace ZSerializer
 
         internal static string GetRuntimeSafeZUID(Type type)
         {
-            var serializables = Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable).Select(m => m as IZSerializable);
+            var serializables = Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable)
+                .Select(m => m as IZSerializable);
             string idCandidate = null;
 
             while (idCandidate == null || serializables.Any(s => s.GetZUIDList().Contains(idCandidate)))
@@ -466,7 +467,7 @@ namespace ZSerializer
                 //     .Select(o => ((IZSerializable)o).GroupID).Distinct().ToList();
                 return ZSerializerSettings.Instance.saveGroups.Where(sg => !string.IsNullOrEmpty(sg))
                     .Select(sg => ZSerializerSettings.Instance.saveGroups.IndexOf(sg)).ToList();
-            return new List<int> { groupID };
+            return new List<int>(ZSerializerSettings.Instance.saveGroups.ToIndexList());
         }
 
 
@@ -493,9 +494,9 @@ namespace ZSerializer
             // Debug.LogError(PrefabStageUtility.GetCurrentPrefabStage() != null);
             // Debug.LogError(PrefabUtility.GetPrefabAssetType(zs as Object));
             // Debug.LogError(PrefabUtility.IsPartOfPrefabAsset((zs as Component).gameObject));
-            
+
             // Debug.LogError(PrefabUtility.GetPrefabParent((zs as Component).gameObject) == null && PrefabUtility.GetPrefabObject((zs as Component).gameObject) != null);
-            
+
             return PrefabStageUtility.GetCurrentPrefabStage() != null;
         }
 #endif
@@ -989,10 +990,19 @@ namespace ZSerializer
 
                 var idList = GetIDListFromGroupID(CurrentGroupID);
 
+                var tempGroupID = CurrentGroupID;
+
+                for (var i = 0; i < idList.Count; i++)
+                {
+                    idMap.Add(new Dictionary<string, Object>());
+                }
+
+
                 for (int i = 0; i < idList.Count; i++)
                 {
+                    if (tempGroupID != -1 && idList[i] != tempGroupID) continue;
+
                     currentGroupID = idList[i];
-                    idMap.Add(new Dictionary<string, Object>());
 
                     var persistentMonoBehavioursInScene = GetPersistentMonoBehavioursInScene(zSerializationType);
                     var persistentGameObjectsInScene = GetPersistentGameObjectsInScene(zSerializationType);
@@ -1038,10 +1048,19 @@ namespace ZSerializer
         private static async Task LoadInternal(ZSerializationType zSerializationType)
         {
             GetSaveFiles(zSerializationType);
-            var idList = CurrentGroupID == -1 ? GetIDList() : new[] { CurrentGroupID };
+            var idList = CurrentGroupID == -1 ? GetIDList() : ZSerializerSettings.Instance.saveGroups.ToIndexArray();
+
+            for (var i = 0; i < idList.Length; i++)
+            {
+                idMap.Add(new Dictionary<string, Object>());
+            }
+
+            int tempGroupID = CurrentGroupID;
 
             foreach (var i in idList)
             {
+                if (tempGroupID != -1 && idList[i] != tempGroupID) continue;
+
                 currentGroupID = idList[i];
                 idMap.Add(new Dictionary<string, Object>());
 
@@ -1665,6 +1684,28 @@ namespace ZSerializer
             await task.ConfigureAwait(false);
             var resultProperty = task.GetType().GetProperty("Result");
             return resultProperty.GetValue(task);
+        }
+
+        public static List<int> ToIndexList<T>(this List<T> list)
+        {
+            var _list = new List<int>();
+            for (var i = 0; i < list.Count; i++)
+            {
+                _list.Add(i);
+            }
+
+            return _list;
+        }
+
+        public static int[] ToIndexArray<T>(this List<T> list)
+        {
+            var arr = new int[list.Count];
+            for (var i = 0; i < list.Count; i++)
+            {
+                arr[i] = i;
+            }
+
+            return arr;
         }
     }
 }
