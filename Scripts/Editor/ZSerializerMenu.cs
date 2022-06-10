@@ -49,7 +49,11 @@ namespace ZSerializer.Editor
         {
             get
             {
-                if (styler == null) GenerateStyler();
+                if (styler == null)
+                {
+                    styler = new ZSerializerStyler();
+                    styler.GetEveryResource();
+                }
                 return styler;
             }
         }
@@ -98,11 +102,6 @@ namespace ZSerializer.Editor
             classes = types.Select(t => new Class(t, ZSerializerEditor.GetClassState(t))).ToArray();
         }
 
-        static void GenerateStyler()
-        {
-            styler = new ZSerializerStyler();
-            Styler.GetEveryResource();
-        }
 
         [DidReloadScripts]
         private static void Init()
@@ -110,7 +109,6 @@ namespace ZSerializer.Editor
             if (ZSerializerSettings.Instance && ZSerializerSettings.Instance.packageInitialized &&
                 HasOpenInstances<ZSerializerMenu>())
             {
-                GenerateStyler();
                 GetClasses();
             }
         }
@@ -238,8 +236,6 @@ namespace ZSerializer.Editor
                         {
                             Init();
                         }
-
-                        if (Styler == null) GenerateStyler();
 
                         editMode = GUILayout.Toggle(editMode, Styler.cogWheel, new GUIStyle("button"),
                             GUILayout.Height(28), GUILayout.Width(28));
