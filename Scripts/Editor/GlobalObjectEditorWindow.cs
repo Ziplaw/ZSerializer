@@ -2,24 +2,39 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.Compilation;
 using UnityEngine;
 using Assembly = System.Reflection.Assembly;
+using Object = UnityEngine.Object;
 
 namespace ZSerializer.Editor
 {
+    class GlobalObjectEditorData
+    {
+        public bool active;
+        public Type type;
+
+        public GlobalObjectEditorData(Type t)
+        {
+            type = t;
+            active = false;
+        }
+    }
+
     public class GlobalObjectEditorWindow : EditorWindow
     {
         private string template;
-        
+        private string template2;
+
         private bool isCreatingObject;
         private string newObjectName;
 
-        private Type[] globalDataTypes;
-        
+        private List<GlobalObjectEditorData> globalDataTypes = new List<GlobalObjectEditorData>();
+
         private Vector2 scrollPos;
 
         private string missingInstanceTypeName;
@@ -29,6 +44,9 @@ namespace ZSerializer.Editor
         private static Assembly BaseAssembly => _baseAssembly ??= Assembly.Load("Assembly-CSharp");
 
         private static ZSerializerStyler styler;
+
+        private Dictionary<Type, List<FieldInfo>> fieldMap = new Dictionary<Type, List<FieldInfo>>();
+
         private static ZSerializerStyler Styler
         {
             get
@@ -38,6 +56,7 @@ namespace ZSerializer.Editor
                     styler = new ZSerializerStyler();
                     styler.GetEveryResource();
                 }
+
                 return styler;
             }
         }
@@ -54,12 +73,21 @@ namespace ZSerializer.Editor
         {
             template = AssetDatabase
                 .LoadAssetAtPath<TextAsset>("Assets/ZSerializer/Scripts/Editor/Templates/NewGlobalObject.cs.txt").text;
+            template2 = AssetDatabase
+                .LoadAssetAtPath<TextAsset>("Assets/ZSerializer/Scripts/Editor/Templates/NewGlobalObjectImpl.cs.txt")
+                .text;
 
-            globalDataTypes = Assembly.Load("Assembly-CSharp").GetTypes().Where(t => t.IsSubclassOf(typeof(GlobalObject))).ToArray();
+
+            foreach (var type in Assembly.Load("Assembly-CSharp").GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(GlobalObject))))
+            {
+                globalDataTypes.Add(new GlobalObjectEditorData(type));
+            }
         }
+
         private void OnGUI()
         {
-            if (globalDataTypes.Length > 0)
+            if (globalDataTypes.Count > 0)
             {
                 using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
                 {
@@ -67,21 +95,53 @@ namespace ZSerializer.Editor
 
                     foreach (var globalDataType in globalDataTypes)
                     {
+                        GUILayout.BeginVertical("box");
                         GUILayout.Space(-15);
-                        using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
-                            GUILayout.Height(32),
-                            GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20)))
+                        GUILayout.BeginHorizontal(ZSerializerStyler.window,
+                            GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20));
+                        string color = globalDataType.type.Name == missingInstanceTypeName
+                            ? ZSerializerStyler.RedHex
+                            : ZSerializerStyler.MainHex;
+
+                        if (GUILayout.Button($"<color=#{color}>{globalDataType.type.Name}</color>",
+                            new GUIStyle(Styler.header) { alignment = TextAnchor.MiddleCenter }))
                         {
-                            string color = globalDataType.Name == missingInstanceTypeName
-                                ? ZSerializerStyler.RedHex
-                                : ZSerializerStyler.MainHex;
-                            
-                            GUILayout.Label($"<color=#{color}>{globalDataType.Name}</color>", new GUIStyle(Styler.header){ alignment = TextAnchor.MiddleCenter });
+                            globalDataType.active = !globalDataType.active;
+                            if(globalDataType.active) Selection.activeObject = GlobalObject.Get(globalDataType.type);
                         }
+
+                        if (GUILayout.Button(Styler.editIcon, GUILayout.MaxWidth(32), GUILayout.MaxHeight(32)))
+                        {
+                            AssetDatabase.OpenAsset(
+                                AssetDatabase.LoadAssetAtPath<TextAsset>(GetScriptPath(globalDataType.type)));
+                            Selection.activeObject = GlobalObject.Get(globalDataType.type);
+                        }
+
+                        GUILayout.EndHorizontal();
+
+                        if (globalDataType.active)
+                            using (new EditorGUI.DisabledScope(true))
+                            {
+                                UnityEditor.Editor.CreateEditor(GlobalObject.Get(globalDataType.type)).OnInspectorGUI();
+                            }
+
+
+                        // var so = new SerializedObject(GlobalObject.Get(globalDataType));
+                        // foreach (var fieldInfo in fieldMap[globalDataType])
+                        // {
+                        //
+                        //     GUILayout.BeginHorizontal();
+                        //     GUILayout.Label($"<color=#{ZSerializerStyler.MainHex}>{fieldInfo.Name}</color>", Styler.richText);
+                        //     EditorGUILayout.PropertyField(so.FindProperty(fieldInfo.Name),GUIContent.none);
+                        //     GUILayout.EndHorizontal();
+                        // }
+                        // so.ApplyModifiedProperties();
+
+                        GUILayout.EndVertical();
                     }
                 }
             }
-            
+
             if (isCreatingObject)
             {
                 GUILayout.BeginHorizontal("box");
@@ -89,44 +149,45 @@ namespace ZSerializer.Editor
                 if (GUILayout.Button("✓", GUILayout.MaxWidth(30)) && !string.IsNullOrEmpty(newObjectName))
                 {
                     isCreatingObject = false;
-                    GenerateNewObject(newObjectName, template);
+                    GenerateNewObject(newObjectName, template, template2);
                     missingInstanceTypeName = newObjectName;
                     newObjectName = String.Empty;
                 }
+
                 if (GUILayout.Button("✕", GUILayout.MaxWidth(30)))
                 {
                     isCreatingObject = false;
                     newObjectName = String.Empty;
+                }
 
-                }
-                GUILayout.EndHorizontal();                
+                GUILayout.EndHorizontal();
             }
-            else
-                if (GUILayout.Button("Create new Global Object"))
-                {
-                    isCreatingObject = true;
-                }
+            else if (GUILayout.Button("Create new Global Object"))
+            {
+                isCreatingObject = true;
+            }
         }
+
         [DidReloadScripts]
         private static void CreateInstanceOfGlobalObject()
         {
             var window = GetWindow<GlobalObjectEditorWindow>();
             if (window.missingInstanceTypeName == String.Empty) return;
-            
-            var type = BaseAssembly.GetType(window.missingInstanceTypeName);//
-            
-            if (!Directory.Exists(Application.dataPath + "/ZResources/ZSerializer/GlobalObjects/Instances"))
-                Directory.CreateDirectory(Application.dataPath + "/ZResources/ZSerializer/GlobalObjects/Instances");
-            
+
+            var type = BaseAssembly.GetType(window.missingInstanceTypeName);
+
+            if (!Directory.Exists(Application.dataPath + "/ZResources/ZSerializer/GlobalObjects/Resources"))
+                Directory.CreateDirectory(Application.dataPath + "/ZResources/ZSerializer/GlobalObjects/Resources");
+
             var so = CreateInstance(type);
-            AssetDatabase.CreateAsset(so, $"Assets/ZResources/ZSerializer/GlobalObjects/Instances/{type.Name}.asset");
-            
+            AssetDatabase.CreateAsset(so, $"Assets/ZResources/ZSerializer/GlobalObjects/Resources/{type.Name}.asset");
+
             window.missingInstanceTypeName = String.Empty;
-            
+
             AssetDatabase.Refresh();
         }
-        
-        private static void GenerateNewObject(string newObjectName, string template)
+
+        private static void GenerateNewObject(string newObjectName, string template, string template2)
         {
             if (!Directory.Exists(Application.dataPath + "/ZResources/ZSerializer/GlobalObjects/Source"))
                 Directory.CreateDirectory(Application.dataPath + "/ZResources/ZSerializer/GlobalObjects/Source");
@@ -139,8 +200,25 @@ namespace ZSerializer.Editor
             sw.Write(template.Replace("#SCRIPTNAME#", newObjectName));
             sw.Close();
 
-            AssetDatabase.Refresh();
+            fs = new FileStream(
+                Application.dataPath + $"/ZResources/ZSerializer/GlobalObjects/Source/{newObjectName}Impl.cs",
+                FileMode.Create);
+            sw = new StreamWriter(fs);
 
+            sw.Write(template2.Replace("#SCRIPTNAME#", newObjectName));
+            sw.Close();
+
+            AssetDatabase.Refresh();
+        }
+
+        static string GetAssetPath(Type type)
+        {
+            return $"Assets/ZResources/ZSerializer/GlobalObjects/Instances/{type.Name}.asset";
+        }
+
+        static string GetScriptPath(Type type)
+        {
+            return $"Assets/ZResources/ZSerializer/GlobalObjects/Source/{type.Name}.cs";
         }
     }
 }

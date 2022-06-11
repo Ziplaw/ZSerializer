@@ -5,7 +5,7 @@ namespace ZSerializer
     [AttributeUsage(AttributeTargets.Class)]
     public class SerializeGlobalDataAttribute : Attribute
     {
-        private readonly GlobalDataType serializationType;
+        public readonly GlobalDataType serializationType;
 
         public SerializeGlobalDataAttribute(GlobalDataType serializationType)
         {

@@ -2,7 +2,7 @@ using System;
 using ZSerializer;
 
 [Serializable, SerializeGlobalData(GlobalDataType.PerSaveFile)]
-public class #SCRIPTNAME# : GlobalObject
+public partial class #SCRIPTNAME# : GlobalObject
 {
-    //  Add public static variables to this object to be able to serialize and access them.
+    //  Add serializable variables to this object to be able to serialize and access them.
 }

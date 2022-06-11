@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 #if UNITY_EDITOR
@@ -1203,6 +1204,81 @@ namespace ZSerializer
         }
 
         /// <summary>
+        /// Save data globally for given Global Object type
+        /// </summary>
+        /// <typeparam name="T">The type of global object to serialize</typeparam>
+        public static async Task SaveGlobal<T>(GlobalObject globalObject) where T : GlobalObject
+        {
+            await SaveGlobal(typeof(T), globalObject);
+        }
+
+        /// <summary>
+        /// Save data globally for given Global Object type
+        /// </summary>
+        /// <param name="t">The type of global object to serialize</param>
+        /// <param name="globalObject"></param>
+        public static async Task SaveGlobal(Type t, GlobalObject globalObject)
+        {
+            var attr = t.GetCustomAttribute<SerializeGlobalDataAttribute>();
+            if (attr == null)
+                throw new SerializationException($"Type {t} must implement SerializeGlobalData Attribute");
+            
+            try
+            {
+                var json = JsonUtility.ToJson(globalObject);
+                await RunTask(async () =>
+                {
+                    // var fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public);
+                    //
+                    // foreach (var fieldInfo in fields)
+                    // {
+                    //     sb.Append($"{fieldInfo.Name}:{fieldInfo.GetValue(null)}\n");
+                    // }
+                
+                    
+                
+                    await WriteToFileGlobal(attr.serializationType, $"{t.Name}.zsave", json);
+                });
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            
+            
+        }
+
+        /// <summary>
+        /// Load data globally for given Global Object type
+        /// </summary>
+        /// <typeparam name="T">The type of global object to deserialize</typeparam>
+        public static async Task LoadGlobal<T>(GlobalObject globalObject) where T : GlobalObject
+        {
+            await LoadGlobal(typeof(T), globalObject);
+        }
+        
+        /// <summary>
+        /// Load data globally for given Global Object type
+        /// </summary>
+        /// <param name="t">The type of global object to deserialize</param>
+        public static async Task LoadGlobal(Type t, GlobalObject globalObject)
+        {
+            var attr = t.GetCustomAttribute<SerializeGlobalDataAttribute>();
+            if (attr == null)
+                throw new SerializationException($"Type {t} must implement SerializeGlobalData Attribute");
+            
+            try
+            {
+                JsonUtility.FromJsonOverwrite(ReadFromFileGlobal(attr.serializationType, $"{t.Name}.zsave"), globalObject);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            
+        }
+
+        /// <summary>
         /// Load all Persistent components and GameObjects from the current scene that have been previously serialized in the given level save file
         /// </summary>
         public static async Task LoadLevel(string levelName, Transform parent, bool destroyChildren = false,
@@ -1264,6 +1340,29 @@ namespace ZSerializer
         #endregion
 
         #region JSON Formatting
+
+        static async Task RunTask(Action action)
+        {
+            try
+            {
+                if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) action();
+                else
+                    await Task.Run(action).ContinueWith(t =>
+                    {
+                        if (t.IsFaulted) throw t.Exception;
+                    });
+            }
+            catch (Exception up)
+            {
+                throw up;
+            }
+        }
+
+        static async Task<T> RunTask<T>(Func<T> action)
+        {
+            if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) return action();
+            return await Task.Run(action);
+        }
 
 //Saves an array of objects to a file
         static void CompileJson<T>(T[] objectsToPersist)
@@ -1345,28 +1444,42 @@ namespace ZSerializer
             });
         }
 
-        static async Task RunTask(Action action)
+        static async Task WriteToFileGlobal(GlobalDataType dataType, string fileName, string json)
         {
-            try
+            await RunTask(() =>
             {
-                if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) action();
+                if (ZSerializerSettings.Instance.encryptData)
+                {
+                    File.WriteAllBytes(GetGlobalDataPath(dataType, fileName),
+                        EncryptStringToBytes(json, key, key));
+                }
                 else
-                    await Task.Run(action).ContinueWith(t =>
-                    {
-                        if (t.IsFaulted) throw t.Exception;
-                    });
-            }
-            catch (Exception up)
-            {
-                throw up;
-            }
+                {
+                    File.WriteAllText(GetGlobalDataPath(dataType, fileName), json);
+                }
+            });
         }
 
-        static async Task<T> RunTask<T>(Func<T> action)
+        static string ReadFromFileGlobal(GlobalDataType dataType, string fileName)
         {
-            if (ZSerializerSettings.Instance.serializationType == SerializationType.Sync) return action();
-            return await Task.Run(action);
+            var path = GetGlobalDataPath(dataType, fileName);
+
+            if (!File.Exists(path))
+            {
+                Debug.LogWarning(
+                    $"You attempted to load a file that didn't exist ({path}), this may be caused by trying to load a save file without having it saved first");
+
+                return null;
+            }
+
+            if (ZSerializerSettings.Instance.encryptData)
+            {
+                return DecryptStringFromBytes(File.ReadAllBytes(path), key, key);
+            }
+
+            return File.ReadAllText(path);
         }
+
 
 //Reads json from file
         static (Type, string)[] ReadFromFile(string fileName)
@@ -1414,6 +1527,18 @@ namespace ZSerializer
         static string GetSceneGroupPath(string scenePath)
         {
             return sceneToLoadingSceneMap.TryGetValue(scenePath, out var sceneGroup) ? sceneGroup.name : "no-group";
+        }
+
+        static string GetGlobalDataPath(GlobalDataType serializationType, string fileName)
+        {
+            var path = Path.Combine(
+                persistentDataPath,
+                serializationType == GlobalDataType.PerSaveFile
+                    ? "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile
+                    : "",
+                "GlobalData");
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            return Path.Combine(path, fileName);
         }
 
         static string GetSceneGroupPathFromName(string sceneGroupName)

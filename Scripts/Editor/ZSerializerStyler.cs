@@ -85,6 +85,8 @@ namespace ZSerializer.Editor
         }
 
         public GUIStyle header;
+        public GUIStyle richText;
+        public Texture editIcon;
 
         public static GUIStyle window
         {
@@ -108,6 +110,7 @@ namespace ZSerializer.Editor
             refreshWarningImage = Resources.Load<Texture2D>("RefreshWarning");
             projectOnly = Resources.Load<Texture2D>("projectOnly");
             hierarchyOnly = Resources.Load<Texture2D>("hierarchyOnly");
+            editIcon = Resources.Load<Texture2D>("editIcon");
 
             mainFont = Resources.Load<Font>("FugazOne");
             settings = Resources.Load<ZSerializerSettings>("ZSerializerSettings");
@@ -120,6 +123,12 @@ namespace ZSerializer.Editor
                 font = mainFont
             };
 
+            richText = new GUIStyle()
+            {
+                richText = true
+            };
+            
+            richText.normal.textColor = Color.white;
             header.normal.textColor = Color.white;
         }
     }
