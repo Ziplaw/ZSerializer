@@ -1222,30 +1222,16 @@ namespace ZSerializer
             var attr = t.GetCustomAttribute<SerializeGlobalDataAttribute>();
             if (attr == null)
                 throw new SerializationException($"Type {t} must implement SerializeGlobalData Attribute");
-            
+
             try
             {
                 var json = JsonUtility.ToJson(globalObject);
-                await RunTask(async () =>
-                {
-                    // var fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public);
-                    //
-                    // foreach (var fieldInfo in fields)
-                    // {
-                    //     sb.Append($"{fieldInfo.Name}:{fieldInfo.GetValue(null)}\n");
-                    // }
-                
-                    
-                
-                    await WriteToFileGlobal(attr.serializationType, $"{t.Name}.zsave", json);
-                });
+                await WriteToFileGlobal(attr.serializationType, $"{t.Name}.zsave", json);
             }
             catch (Exception e)
             {
                 throw e;
             }
-            
-            
         }
 
         /// <summary>
@@ -1256,7 +1242,7 @@ namespace ZSerializer
         {
             await LoadGlobal(typeof(T), globalObject);
         }
-        
+
         /// <summary>
         /// Load data globally for given Global Object type
         /// </summary>
@@ -1266,16 +1252,16 @@ namespace ZSerializer
             var attr = t.GetCustomAttribute<SerializeGlobalDataAttribute>();
             if (attr == null)
                 throw new SerializationException($"Type {t} must implement SerializeGlobalData Attribute");
-            
+
             try
             {
-                JsonUtility.FromJsonOverwrite(ReadFromFileGlobal(attr.serializationType, $"{t.Name}.zsave"), globalObject);
+                JsonUtility.FromJsonOverwrite(ReadFromFileGlobal(attr.serializationType, $"{t.Name}.zsave"),
+                    globalObject);
             }
             catch (Exception e)
             {
                 throw e;
             }
-            
         }
 
         /// <summary>
