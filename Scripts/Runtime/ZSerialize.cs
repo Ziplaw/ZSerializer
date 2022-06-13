@@ -295,17 +295,17 @@ namespace ZSerializer
         //internal functions to Log stuff for Debug Mode
         internal static void Log(object obj, DebugMode debugMode)
         {
-            if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.Log(obj);
+            if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.Log($"<b><color=#7cffed><i>ZS</i> →</color></b> {obj}");
         }
 
         internal static void LogWarning(object obj, DebugMode debugMode)
         {
-            if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.LogWarning(obj);
+            if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.LogWarning($"<b><color=#ffc107><i>ZS</i> →</color></b> {obj}");
         }
 
         internal static void LogError(object obj, DebugMode debugMode)
         {
-            if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.LogError(obj);
+            if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.LogError($"<b><color=#ff625a><i>ZS</i> →</color></b> {obj}");
         }
 
         #endregion
@@ -901,12 +901,12 @@ namespace ZSerializer
             {
                 case ZSerializationType.Scene:
                     Log(
-                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length * .001f} KB</color>",
+                        $"{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath("components.zsave")).Length * .001f} KB",
                         DebugMode.Informational);
                     break;
                 case ZSerializationType.Level:
                     Log(
-                        $"<color=cyan>{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath($"{_currentLevelName}.zsave")).Length * .001f} KB</color>",
+                        $"{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}: {new FileInfo(GetFilePath($"{_currentLevelName}.zsave")).Length * .001f} KB",
                         DebugMode.Informational);
                     break;
                 default: throw new SerializationException("Serialization Type not implemented");
@@ -1031,8 +1031,8 @@ namespace ZSerializer
                     LogFileSize(zSerializationType);
                 }
 
-                Debug.Log("Serialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
-                          (Time.frameCount - frameCount) + " frames.");
+                Log("Serialization ended in: " + (Time.realtimeSinceStartup - startingTime) + " seconds or " +
+                          (Time.frameCount - frameCount) + " frames.", DebugMode.Off);
 
                 jsonToSave = "";
                 currentGroupID = -1;
@@ -1135,10 +1135,10 @@ namespace ZSerializer
                     zSerializationType); // this is here because pg events lose their target if we dont do it
                 await LoadReferences();
 
-                Debug.Log(
+                Log(
                     $"Deserialization of group \"{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}\" ended in: " +
                     (Time.realtimeSinceStartup - startingTime) + " seconds or " +
-                    (Time.frameCount - frameCount) + " frames");
+                    (Time.frameCount - frameCount) + " frames", DebugMode.Off);
 
                 persistentMonoBehavioursInScene = GetPersistentMonoBehavioursInScene(zSerializationType);
                 persistentGameObjectsInScene = GetPersistentGameObjectsInScene(zSerializationType);
@@ -1203,64 +1203,54 @@ namespace ZSerializer
             }
         }
 
-        /// <summary>
-        /// Save data globally for given Global Object type
-        /// </summary>
-        /// <typeparam name="T">The type of global object to serialize</typeparam>
-        public static async Task SaveGlobal<T>(GlobalObject globalObject) where T : GlobalObject
+        public static async Task SaveGlobal(GlobalObject globalObject)
         {
-            await SaveGlobal(typeof(T), globalObject);
-        }
-
-        /// <summary>
-        /// Save data globally for given Global Object type
-        /// </summary>
-        /// <param name="t">The type of global object to serialize</param>
-        /// <param name="globalObject"></param>
-        public static async Task SaveGlobal(Type t, GlobalObject globalObject)
-        {
-            var attr = t.GetCustomAttribute<SerializeGlobalDataAttribute>();
-            if (attr == null)
-                throw new SerializationException($"Type {t} must implement SerializeGlobalData Attribute");
-
             try
             {
+                var t = globalObject.GetType();
+                var attr = t.GetCustomAttribute<SerializeGlobalDataAttribute>();
+                if (attr == null)
+                    throw new SerializationException($"Type {t} must implement SerializeGlobalData Attribute");
+
                 var json = JsonUtility.ToJson(globalObject);
+                
+                Log($"Saving {globalObject.name}", DebugMode.Informational);
+                
+                var time = Time.realtimeSinceStartup;
+                var frameCount = Time.frameCount;
+                
                 await WriteToFileGlobal(attr.serializationType, $"{t.Name}.zsave", json);
+                Log($"{globalObject.name} has been succesfully saved! ({Time.realtimeSinceStartup - time} seconds or ({Time.frameCount - frameCount} frames))", DebugMode.Off);
             }
             catch (Exception e)
             {
-                throw e;
+                LogError($"{globalObject.name} save was interrupted by the following exception: {e.Message}", DebugMode.Off);
+                throw;
             }
         }
 
-        /// <summary>
-        /// Load data globally for given Global Object type
-        /// </summary>
-        /// <typeparam name="T">The type of global object to deserialize</typeparam>
-        public static async Task LoadGlobal<T>(GlobalObject globalObject) where T : GlobalObject
+        public static async Task LoadGlobal(GlobalObject globalObject)
         {
-            await LoadGlobal(typeof(T), globalObject);
-        }
-
-        /// <summary>
-        /// Load data globally for given Global Object type
-        /// </summary>
-        /// <param name="t">The type of global object to deserialize</param>
-        public static async Task LoadGlobal(Type t, GlobalObject globalObject)
-        {
-            var attr = t.GetCustomAttribute<SerializeGlobalDataAttribute>();
-            if (attr == null)
-                throw new SerializationException($"Type {t} must implement SerializeGlobalData Attribute");
-
             try
             {
-                JsonUtility.FromJsonOverwrite(ReadFromFileGlobal(attr.serializationType, $"{t.Name}.zsave"),
+                Type t = globalObject.GetType();
+                var attr = t.GetCustomAttribute<SerializeGlobalDataAttribute>();
+                if (attr == null)
+                    throw new SerializationException($"Type {t} must implement SerializeGlobalData Attribute");
+
+                Log($"Loading {globalObject.name}", DebugMode.Informational);
+                
+                var time = Time.realtimeSinceStartup;
+                var frameCount = Time.frameCount;
+                
+                JsonUtility.FromJsonOverwrite(await ReadFromFileGlobal(attr.serializationType, $"{t.Name}.zsave"),
                     globalObject);
+                Log($"{globalObject.name} has been succesfully loaded! ({Time.realtimeSinceStartup - time} seconds or ({Time.frameCount - frameCount} frames)", DebugMode.Off);
             }
             catch (Exception e)
             {
-                throw e;
+                LogError($"{globalObject.name} load was interrupted by the following exception: {e.Message}", DebugMode.Off);
+                throw;
             }
         }
 
@@ -1446,24 +1436,26 @@ namespace ZSerializer
             });
         }
 
-        static string ReadFromFileGlobal(GlobalDataType dataType, string fileName)
+        static async Task<string> ReadFromFileGlobal(GlobalDataType dataType, string fileName)
         {
-            var path = GetGlobalDataPath(dataType, fileName);
-
-            if (!File.Exists(path))
+            return await RunTask(() =>
             {
-                Debug.LogWarning(
-                    $"You attempted to load a file that didn't exist ({path}), this may be caused by trying to load a save file without having it saved first");
+                var path = GetGlobalDataPath(dataType, fileName);
 
-                return null;
-            }
+                if (!File.Exists(path))
+                {
+                    throw new SerializationException(
+                        $"You attempted to load a file that didn't exist ({path}), this may be caused by trying to load a save file without having it saved first");
+                    
+                }
 
-            if (ZSerializerSettings.Instance.encryptData)
-            {
-                return DecryptStringFromBytes(File.ReadAllBytes(path), key, key);
-            }
+                if (ZSerializerSettings.Instance.encryptData)
+                {
+                    return DecryptStringFromBytes(File.ReadAllBytes(path), key, key);
+                }
 
-            return File.ReadAllText(path);
+                return File.ReadAllText(path);
+            });
         }
 
 

@@ -7,6 +7,6 @@ public partial class #SCRIPTNAME#
     private static #SCRIPTNAME# _instance;
     public static #SCRIPTNAME# Instance => _instance ??= Resources.Load<#SCRIPTNAME#>(MethodBase.GetCurrentMethod().DeclaringType.Name);
     
-    public static void Save() => ZSerialize.SaveGlobal<#SCRIPTNAME#>(Instance);
-    public static void Load() => ZSerialize.LoadGlobal<#SCRIPTNAME#>(Instance);
+    public static void Save() => ZSerialize.SaveGlobal(Instance);
+    public static void Load() => ZSerialize.LoadGlobal(Instance);
 }
