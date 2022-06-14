@@ -17,11 +17,13 @@ namespace ZSerializer.Editor
     {
         public bool active;
         public Type type;
+        public GlobalObject instance;
 
         public GlobalObjectEditorData(Type t)
         {
             type = t;
             active = false;
+            instance = GlobalObject.Get(t);
         }
     }
 
@@ -36,12 +38,6 @@ namespace ZSerializer.Editor
         private List<GlobalObjectEditorData> globalDataTypes = new List<GlobalObjectEditorData>();
 
         private Vector2 scrollPos;
-
-        private string missingInstanceTypeName;
-
-        private static Assembly _baseAssembly;
-
-        private static Assembly BaseAssembly => _baseAssembly ??= Assembly.Load("Assembly-CSharp");
 
         private static ZSerializerStyler styler;
 
@@ -76,13 +72,8 @@ namespace ZSerializer.Editor
             template2 = AssetDatabase
                 .LoadAssetAtPath<TextAsset>("Assets/ZSerializer/Scripts/Editor/Templates/NewGlobalObjectImpl.cs.txt")
                 .text;
-
-
-            foreach (var type in Assembly.Load("Assembly-CSharp").GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(GlobalObject))))
-            {
-                globalDataTypes.Add(new GlobalObjectEditorData(type));
-            }
+            
+            Init();
         }
 
         private void OnGUI()
@@ -99,9 +90,8 @@ namespace ZSerializer.Editor
                         GUILayout.Space(-15);
                         GUILayout.BeginHorizontal(ZSerializerStyler.window,
                             GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20));
-                        string color = globalDataType.type.Name == missingInstanceTypeName
-                            ? ZSerializerStyler.RedHex
-                            : ZSerializerStyler.MainHex;
+                        
+                        string color = ZSerializerStyler.MainHex;
 
                         if (GUILayout.Button($"<color=#{color}>{globalDataType.type.Name}</color>",
                             new GUIStyle(Styler.header) { alignment = TextAnchor.MiddleCenter }))
@@ -150,7 +140,6 @@ namespace ZSerializer.Editor
                 {
                     isCreatingObject = false;
                     GenerateNewObject(newObjectName, template, template2);
-                    missingInstanceTypeName = newObjectName;
                     newObjectName = String.Empty;
                 }
 
@@ -168,22 +157,32 @@ namespace ZSerializer.Editor
             }
         }
 
+        private void Init()
+        {
+            globalDataTypes.Clear();
+            foreach (var type in Assembly.Load("Assembly-CSharp").GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(GlobalObject))))
+            {
+                globalDataTypes.Add(new GlobalObjectEditorData(type));
+            }
+        }
+
         [DidReloadScripts]
         private static void CreateInstanceOfGlobalObject()
         {
-            var window = GetWindow<GlobalObjectEditorWindow>();
-            if (window.missingInstanceTypeName == String.Empty) return;
+            if (!HasOpenInstances<GlobalObjectEditorWindow>()) return;
 
-            var type = BaseAssembly.GetType(window.missingInstanceTypeName);
+            var window = Resources.FindObjectsOfTypeAll<GlobalObjectEditorWindow>().FirstOrDefault();
+            if (window == null) return;
+
+            var globalDataType = window.globalDataTypes.FirstOrDefault(o => o.instance == null);
+            if (globalDataType == null) return;
 
             if (!Directory.Exists(Application.dataPath + "/ZResources/ZSerializer/GlobalObjects/Resources"))
                 Directory.CreateDirectory(Application.dataPath + "/ZResources/ZSerializer/GlobalObjects/Resources");
 
-            var so = CreateInstance(type);
-            AssetDatabase.CreateAsset(so, $"Assets/ZResources/ZSerializer/GlobalObjects/Resources/{type.Name}.asset");
-
-            window.missingInstanceTypeName = String.Empty;
-
+            var so = CreateInstance(globalDataType.type);
+            AssetDatabase.CreateAsset(so, $"Assets/ZResources/ZSerializer/GlobalObjects/Resources/{globalDataType.type.Name}.asset");
             AssetDatabase.Refresh();
         }
 

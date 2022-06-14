@@ -497,8 +497,8 @@ namespace ZSerializer
             // Debug.LogError(PrefabUtility.IsPartOfPrefabAsset((zs as Component).gameObject));
 
             // Debug.LogError(PrefabUtility.GetPrefabParent((zs as Component).gameObject) == null && PrefabUtility.GetPrefabObject((zs as Component).gameObject) != null);
-
-            return PrefabStageUtility.GetCurrentPrefabStage() != null;
+            
+            return PrefabStageUtility.GetCurrentPrefabStage() != null || Selection.activeObject is GameObject && Selection.assetGUIDs.Length > 0;
         }
 #endif
 

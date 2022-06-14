@@ -243,6 +243,16 @@ public class PersistentGameObjectEditor : Editor
 
         }
 
+        if (ZSerialize.IsPrefab(manager) /*&& manager.ZUID != string.Empty*/)
+        {
+            // Debug.Log("ey");
+            manager.ZUID = string.Empty;
+            manager.GOZUID = string.Empty;
+            manager.serializedComponents.ForEach(sc => sc.zuid = string.Empty);
+            
+            EditorUtility.SetDirty(manager);
+        }
+        
         serializedObject.ApplyModifiedProperties();
     }
 }
