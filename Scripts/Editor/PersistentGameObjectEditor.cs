@@ -243,7 +243,7 @@ public class PersistentGameObjectEditor : Editor
 
         }
 
-        if (ZSerialize.IsPrefab(manager) /*&& manager.ZUID != string.Empty*/)
+        if (ZSerialize.IsPrefab(manager) && manager.ZUID != string.Empty)
         {
             // Debug.Log("ey");
             manager.ZUID = string.Empty;
