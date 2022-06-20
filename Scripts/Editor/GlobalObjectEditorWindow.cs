@@ -78,6 +78,8 @@ namespace ZSerializer.Editor
 
         private void OnGUI()
         {
+            GUILayout.BeginVertical("box");
+            
             if (globalDataTypes.Count > 0)
             {
                 using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
@@ -90,14 +92,14 @@ namespace ZSerializer.Editor
                         GUILayout.Space(-15);
                         GUILayout.BeginHorizontal(ZSerializerStyler.window,
                             GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20));
-                        
+
                         string color = ZSerializerStyler.MainHex;
 
                         if (GUILayout.Button($"<color=#{color}>{globalDataType.type.Name}</color>",
                             new GUIStyle(Styler.header) { alignment = TextAnchor.MiddleCenter }))
                         {
                             globalDataType.active = !globalDataType.active;
-                            if(globalDataType.active) Selection.activeObject = GlobalObject.Get(globalDataType.type);
+                            if (globalDataType.active) Selection.activeObject = GlobalObject.Get(globalDataType.type);
                         }
 
                         if (GUILayout.Button(Styler.editIcon, GUILayout.MaxWidth(32), GUILayout.MaxHeight(32)))
@@ -151,10 +153,23 @@ namespace ZSerializer.Editor
 
                 GUILayout.EndHorizontal();
             }
-            else if (GUILayout.Button("Create new Global Object"))
+            else
             {
-                isCreatingObject = true;
+                GUILayout.Space(-15);
+                GUILayout.BeginHorizontal(ZSerializerStyler.window,
+                    GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth));
+
+                GUILayout.Label("New Global Object", new GUIStyle(Styler.header) { alignment = TextAnchor.MiddleCenter });
+                if (GUILayout.Button("+", GUILayout.MaxWidth(32), GUILayout.MaxHeight(32)))
+                {
+                    isCreatingObject = true;
+                }
+
+                GUILayout.EndHorizontal();
             }
+            
+            GUILayout.EndVertical();
+
         }
 
         private void Init()
