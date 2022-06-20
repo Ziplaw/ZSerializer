@@ -159,7 +159,7 @@ namespace ZSerializer.Editor
                 GUILayout.BeginHorizontal(ZSerializerStyler.window,
                     GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth));
 
-                GUILayout.Label("New Global Object", new GUIStyle(Styler.header) { alignment = TextAnchor.MiddleCenter });
+                GUILayout.Label("New Global Object", new GUIStyle(Styler.header) {fixedHeight = 32, alignment = TextAnchor.MiddleCenter });
                 if (GUILayout.Button("+", GUILayout.MaxWidth(32), GUILayout.MaxHeight(32)))
                 {
                     isCreatingObject = true;
