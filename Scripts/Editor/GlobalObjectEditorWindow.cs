@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.Callbacks;
@@ -42,6 +43,7 @@ namespace ZSerializer.Editor
         private static ZSerializerStyler styler;
 
         private Dictionary<Type, List<FieldInfo>> fieldMap = new Dictionary<Type, List<FieldInfo>>();
+        private string searchText;
 
         private static ZSerializerStyler Styler
         {
@@ -72,13 +74,21 @@ namespace ZSerializer.Editor
             template2 = AssetDatabase
                 .LoadAssetAtPath<TextAsset>("Assets/ZSerializer/Scripts/Editor/Templates/NewGlobalObjectImpl.cs.txt")
                 .text;
-            
+
             Init();
         }
 
         private void OnGUI()
         {
             GUILayout.BeginVertical("box");
+
+            using (var change = new EditorGUI.ChangeCheckScope())
+            {
+                searchText = GUILayout.TextField(searchText,
+                    new GUIStyle(EditorStyles.toolbarSearchField) { fixedHeight = 28 });
+                        
+                if(change.changed) Init();
+            }
             
             if (globalDataTypes.Count > 0)
             {
@@ -86,9 +96,11 @@ namespace ZSerializer.Editor
                 {
                     scrollPos = scrollView.scrollPosition;
 
+                    
+
                     foreach (var globalDataType in globalDataTypes)
                     {
-                        GUILayout.BeginVertical("box");
+                        GUILayout.BeginVertical();
                         GUILayout.Space(-15);
                         GUILayout.BeginHorizontal(ZSerializerStyler.window,
                             GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20));
@@ -138,9 +150,19 @@ namespace ZSerializer.Editor
             {
                 GUILayout.BeginHorizontal("box");
                 newObjectName = EditorGUILayout.TextField("Name", newObjectName);
+                var regexified = newObjectName = Regex.Replace(newObjectName, @"[^a-zA-Z0-9_]", String.Empty); // all special caracters
+                if (regexified != newObjectName)
+                {
+                    newObjectName = regexified;
+                    Repaint();
+                }
+
+                
                 if (GUILayout.Button("✓", GUILayout.MaxWidth(30)) && !string.IsNullOrEmpty(newObjectName))
                 {
                     isCreatingObject = false;
+
+
                     GenerateNewObject(newObjectName, template, template2);
                     newObjectName = String.Empty;
                 }
@@ -159,7 +181,8 @@ namespace ZSerializer.Editor
                 GUILayout.BeginHorizontal(ZSerializerStyler.window,
                     GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth));
 
-                GUILayout.Label("New Global Object", new GUIStyle(Styler.header) {fixedHeight = 32, alignment = TextAnchor.MiddleCenter });
+                GUILayout.Label("New Global Object",
+                    new GUIStyle(Styler.header) { fixedHeight = 32, alignment = TextAnchor.MiddleCenter });
                 if (GUILayout.Button("+", GUILayout.MaxWidth(32), GUILayout.MaxHeight(32)))
                 {
                     isCreatingObject = true;
@@ -167,16 +190,15 @@ namespace ZSerializer.Editor
 
                 GUILayout.EndHorizontal();
             }
-            
-            GUILayout.EndVertical();
 
+            GUILayout.EndVertical();
         }
 
         private void Init()
         {
             globalDataTypes.Clear();
             foreach (var type in Assembly.Load("Assembly-CSharp").GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(GlobalObject))))
+                .Where(t => t.Name.ToLower().Contains(searchText.ToLower()) && t.IsSubclassOf(typeof(GlobalObject))))
             {
                 globalDataTypes.Add(new GlobalObjectEditorData(type));
             }
@@ -197,7 +219,8 @@ namespace ZSerializer.Editor
                 Directory.CreateDirectory(Application.dataPath + "/ZResources/ZSerializer/GlobalObjects/Resources");
 
             var so = CreateInstance(globalDataType.type);
-            AssetDatabase.CreateAsset(so, $"Assets/ZResources/ZSerializer/GlobalObjects/Resources/{globalDataType.type.Name}.asset");
+            AssetDatabase.CreateAsset(so,
+                $"Assets/ZResources/ZSerializer/GlobalObjects/Resources/{globalDataType.type.Name}.asset");
             AssetDatabase.Refresh();
         }
 

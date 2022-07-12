@@ -375,12 +375,8 @@ namespace ZSerializer
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(
-                        $"An exception was thrown when trying to create a {ZSerializerType} for {components[i]}. This may be caused by an error derived from a Custom Variable Entry.");
-                    // var st = new StackTrace(e, true);
-                    // var frame = st.GetFrame(0);
-                    // var line = frame.GetFileLineNumber();
-                    // Debug.LogError(line);
+                    LogError(
+                        $"An exception was thrown when trying to create a {ZSerializerType} for {components[i]}.", DebugMode.Off);
                     throw e;
                 }
 
@@ -447,6 +443,12 @@ namespace ZSerializer
                         $"{serializable} found with empty ZUID, if this is not an instanced object, please go to Tools/ZSerializer/Reset Project ZUIDs",
                         DebugMode.Informational);
                     serializable.GenerateRuntimeZUIDs(false); //used to be false
+                }
+
+                if (!serializable.ZUID.StartsWith("R") && (serializable as Component).GetComponents<IZSerializable>()
+                    .Any(c => c.ZUID.StartsWith("R")))
+                {
+                    LogError($"Found non-matching ZUID types. {serializable}'s ZUID is an editor ZUID when it should be a runtime ZUID. Reset the ZUID in the prefab to solve the issue", DebugMode.Off);
                 }
 
                 serializable.AddZUIDsToIDMap();

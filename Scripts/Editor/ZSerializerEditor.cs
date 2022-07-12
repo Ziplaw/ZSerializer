@@ -551,7 +551,7 @@ namespace ZSerializer.Editor
             if (showSettings)
             {
                 toggleOn?.Invoke(manager.GetType(), manager, true);
-                
+
                 if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
                 {
                     GUILayout.Space(-15);
@@ -1024,7 +1024,7 @@ namespace ZSerializer.Editor
 
                                 break;
                             case 1:
-                                
+
                                 var list = ZSerializerSettings.Instance.unityComponentTypes
                                     .Select(t => Type.GetType(t).Name).ToList();
 
@@ -1079,11 +1079,12 @@ namespace ZSerializer.Editor
         {
             var prefabs = AssetDatabase.GetAllAssetPaths().Where(s => s.EndsWith(".prefab")).ToList();
             var originalScenePath = SceneManager.GetActiveScene().path;
-            try
+
+            foreach (var prefab in prefabs)
             {
-                foreach (var prefab in prefabs)
+                try
                 {
-                    #if UNITY_2021_2_OR_NEWER
+#if UNITY_2021_2_OR_NEWER
                     foreach (var zs in PrefabStageUtility.OpenPrefab(prefab).prefabContentsRoot
                         .GetComponentsInChildren<IZSerializable>())
                     {
@@ -1091,19 +1092,16 @@ namespace ZSerializer.Editor
                             prefabs.IndexOf(prefab) / (float)prefabs.Count);
                         action(zs);
                     }
-                    #else
+#else
                     break;
 #endif
-
-
+                }
+                catch (Exception e)
+                {
+                    ZSerialize.LogError($"An exception was thrown while trying to open a prefab. {prefab} hasn't performed operation", DebugMode.Off);
                 }
             }
-            catch (Exception e)
-            {
-                EditorUtility.ClearProgressBar();
-                Debug.LogError("An exception was thrown while trying to open a prefab. Process interrupted");
-                throw e;
-            }
+
 
             EditorUtility.ClearProgressBar();
             EditorSceneManager.OpenScene(originalScenePath);
@@ -1112,10 +1110,12 @@ namespace ZSerializer.Editor
         static void ExecuteOnAllSerializablesFromScenes(Action<IZSerializable> action, string title)
         {
             var originalScenePath = SceneManager.GetActiveScene().path;
-            var paths = AssetDatabase.GetAllAssetPaths().Where(s => s.EndsWith(".unity")).ToList();
-            try
+            var paths = AssetDatabase.GetAllAssetPaths().Where(s => s.StartsWith("Assets") && s.EndsWith(".unity"))
+                .ToList();
+
+            foreach (var path in paths)
             {
-                foreach (var path in paths)
+                try
                 {
                     var split = path.Split('/').Last();
 
@@ -1129,13 +1129,13 @@ namespace ZSerializer.Editor
 
                     EditorSceneManager.SaveOpenScenes();
                 }
+                catch (Exception)
+                {
+                    ZSerialize.LogError(
+                        $"An exception was thrown while trying to open a scene. {path} hasn't performed the operation", DebugMode.Off);
+                }
             }
-            catch (Exception e)
-            {
-                EditorUtility.ClearProgressBar();
-                Debug.LogError("An exception was thrown while trying to open a scene. Process interrupted");
-                throw e;
-            }
+
 
             EditorUtility.ClearProgressBar();
             EditorSceneManager.OpenScene(originalScenePath);

@@ -232,30 +232,34 @@ namespace ZSerializer.Editor
                 {
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        if (GUILayout.Button("Refresh", GUILayout.Height(28)))
+                        using (var change = new EditorGUI.ChangeCheckScope())
                         {
-                            Init();
-                        }
+                            searchText = GUILayout.TextField(searchText,
+                                new GUIStyle(EditorStyles.toolbarSearchField) { fixedHeight = 28 });
+                                
+                            if (GUILayout.Button(searchProject ? Styler.hierarchyOnly : Styler.projectOnly,
+                                GUILayout.Width(28), GUILayout.Height(28)))
+                            {
+                                searchProject = !searchProject;
+                            }
+                                
+                            editMode = GUILayout.Toggle(editMode, Styler.cogWheel, new GUIStyle("button"),
+                                GUILayout.Height(28), GUILayout.Width(28));
+                                
 
-                        editMode = GUILayout.Toggle(editMode, Styler.cogWheel, new GUIStyle("button"),
-                            GUILayout.Height(28), GUILayout.Width(28));
+                            if (change.changed) GetClasses();
+                        }
+                        
+                        // if (GUILayout.Button("Refresh", GUILayout.Height(28)))
+                        // {
+                        //     Init();
+                        // }
                     }
 
                     if (!editMode)
                         using (new EditorGUILayout.HorizontalScope())
                         {
-                            using (var change = new EditorGUI.ChangeCheckScope())
-                            {
-                                searchText = GUILayout.TextField(searchText,
-                                    new GUIStyle(EditorStyles.toolbarSearchField) { fixedHeight = 20 });
-                                if (GUILayout.Button(searchProject ? Styler.hierarchyOnly : Styler.projectOnly,
-                                    GUILayout.Width(28), GUILayout.Height(20)))
-                                {
-                                    searchProject = !searchProject;
-                                }
-
-                                if (change.changed) GetClasses();
-                            }
+                            
                         }
 
 
