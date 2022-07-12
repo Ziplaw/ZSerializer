@@ -29,7 +29,6 @@ using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 [assembly: InternalsVisibleTo("ZSerializer.Editor")]
-// [assembly: InternalsVisibleTo("Assembly-CSharp")]
 
 namespace ZSerializer
 {
@@ -77,6 +76,11 @@ namespace ZSerializer
             }
         }
 
+        public static string PersistentDataPath
+        {
+            get => persistentDataPath ??= Application.persistentDataPath;
+        }
+
 
         private static MethodInfo saveMethod =
             typeof(ZSerialize).GetMethod(nameof(CompileJson), BindingFlags.NonPublic | BindingFlags.Static);
@@ -115,8 +119,7 @@ namespace ZSerializer
 
         internal static string GetRuntimeSafeZUID(Type type)
         {
-            var serializables = Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable)
-                .Select(m => m as IZSerializable);
+            var serializables = Object.FindObjectsOfType<MonoBehaviour>().OfType<IZSerializable>();
             string idCandidate = null;
 
             while (idCandidate == null || serializables.Any(s => s.GetZUIDList().Contains(idCandidate)))
@@ -172,7 +175,7 @@ namespace ZSerializer
         [RuntimeInitializeOnLoadMethod]
         internal static void Init()
         {
-            persistentDataPath = Application.persistentDataPath;
+            Log($"Save-file path: {PersistentDataPath}", DebugMode.Developer);
             unitySerializableTypes = GetUnitySerializableTypes();
 
             foreach (var instanceSceneGroup in ZSerializerSettings.Instance.sceneGroups)
@@ -185,11 +188,11 @@ namespace ZSerializer
 
             OnSceneLoad();
 
-            SceneManager.sceneUnloaded += scene => { OnSceneUnload(); };
+            SceneManager.sceneUnloaded += _ => { OnSceneUnload(); };
 
-            SceneManager.sceneLoaded += (scene, mode) => { OnSceneLoad(); };
+            SceneManager.sceneLoaded += (_, _) => { OnSceneLoad(); };
 
-            SceneManager.activeSceneChanged += (oldScene, newScene) => { UpdateCurrentScene(); };
+            SceneManager.activeSceneChanged += (_, _) => { UpdateCurrentScene(); };
 
             Application.wantsToQuit += () =>
             {
@@ -293,17 +296,17 @@ namespace ZSerializer
         #region Logging
 
         //internal functions to Log stuff for Debug Mode
-        internal static void Log(object obj, DebugMode debugMode)
+        internal static void Log(object obj, DebugMode debugMode = DebugMode.Off)
         {
             if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.Log($"<b><color=#7cffed><i>ZS</i> →</color></b> {obj}");
         }
 
-        internal static void LogWarning(object obj, DebugMode debugMode)
+        internal static void LogWarning(object obj, DebugMode debugMode = DebugMode.Off)
         {
             if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.LogWarning($"<b><color=#ffc107><i>ZS</i> →</color></b> {obj}");
         }
 
-        internal static void LogError(object obj, DebugMode debugMode)
+        internal static void LogError(object obj, DebugMode debugMode = DebugMode.Off)
         {
             if (debugMode <= ZSerializerSettings.Instance.debugMode) Debug.LogError($"<b><color=#ff625a><i>ZS</i> →</color></b> {obj}");
         }
@@ -1481,6 +1484,38 @@ namespace ZSerializer
             return GetTypesAndJsonFromString(File.ReadAllText(GetFilePath(fileName)));
         }
 
+        public static bool DeleteAllSaveFiles()
+        {
+            try
+            {
+                foreach (var dir in Directory.GetDirectories(PersistentDataPath))
+                {
+                    Directory.Delete(dir, true);
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                LogError(e);
+                return false;
+            }
+            
+        }
+
+        public static bool DeleteSaveFile(int saveFile)
+        {
+            try
+            {
+                Directory.Delete(GetSaveFileDataPath(saveFile),true);
+                return true;
+            }
+            catch (Exception e)
+            {
+                LogError(e);
+                return false;
+            } 
+        }
+
         static (Type, string)[] GetTypesAndJsonFromString(string modifiedJson)
         {
             var strings = modifiedJson.Split('\n');
@@ -1509,10 +1544,19 @@ namespace ZSerializer
             return sceneToLoadingSceneMap.TryGetValue(scenePath, out var sceneGroup) ? sceneGroup.name : "no-group";
         }
 
+        internal static string GetSaveFileDataPath(int saveFile)
+        {
+            var path = Path.Combine(
+                PersistentDataPath,
+                "SaveFile-" + saveFile);
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            return path;
+        }
+
         static string GetGlobalDataPath(GlobalDataType serializationType, string fileName)
         {
             var path = Path.Combine(
-                persistentDataPath,
+                PersistentDataPath,
                 serializationType == GlobalDataType.PerSaveFile
                     ? "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile
                     : "",
@@ -1524,7 +1568,7 @@ namespace ZSerializer
         static string GetSceneGroupPathFromName(string sceneGroupName)
         {
             var path = Path.Combine(
-                persistentDataPath,
+                PersistentDataPath,
                 "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile,
                 sceneGroupName);
 
@@ -1537,7 +1581,7 @@ namespace ZSerializer
             string sceneGroupName = GetSceneGroupPath(currentScenePath);
 
             var path = Path.Combine(
-                persistentDataPath,
+                PersistentDataPath,
                 "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile,
                 sceneGroupName);
 
@@ -1550,7 +1594,7 @@ namespace ZSerializer
             string sceneGroupName = GetSceneGroupPath(currentScenePath);
 
             var path = Path.Combine(
-                persistentDataPath,
+                PersistentDataPath,
                 "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile,
                 sceneGroupName,
                 currentSceneName);
@@ -1567,7 +1611,7 @@ namespace ZSerializer
                 : $"levels/{_currentLevelName}";
 
             string path = Path.Combine(
-                persistentDataPath,
+                PersistentDataPath,
                 "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile,
                 sceneGroupName,
                 currentSceneName,
@@ -1587,7 +1631,7 @@ namespace ZSerializer
                 : $"levels/{_currentLevelName}/{ZSerializerSettings.Instance.saveGroups[CurrentGroupID]}";
 
             string path = Path.Combine(
-                persistentDataPath,
+                PersistentDataPath,
                 "SaveFile-" + ZSerializerSettings.Instance.selectedSaveFile,
                 sceneGroupName,
                 currentSceneName,

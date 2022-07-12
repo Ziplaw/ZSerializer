@@ -121,7 +121,7 @@ namespace ZSerializer.Editor
             if (!ZSerializerSettings.Instance.packageInitialized)
             {
                 GUILayout.Space(-15);
-                using (new GUILayout.VerticalScope(ZSerializerStyler.window,
+                using (new GUILayout.VerticalScope(ZSerializerStyler.Window,
                     GUILayout.MaxHeight(1)))
                 {
                     GUILayout.Label($"<color=#{ZSerializerStyler.MainHex}>ZSerializer Setup Wizard</color>",
@@ -134,7 +134,7 @@ namespace ZSerializer.Editor
                 }
 
                 GUILayout.Space(-15);
-                using (new GUILayout.VerticalScope(ZSerializerStyler.window,
+                using (new GUILayout.VerticalScope(ZSerializerStyler.Window,
                     GUILayout.MaxHeight(1)))
                 {
                     Dictionary<bool, List<Texture2D>> icons = new Dictionary<bool, List<Texture2D>>
@@ -296,7 +296,7 @@ namespace ZSerializer.Editor
                                 {
                                     var classInstance = classes[i];
                                     GUILayout.Space(-15);
-                                    using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
+                                    using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.Window,
                                         GUILayout.Height(32),
                                         GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20)))
                                     {
@@ -380,7 +380,7 @@ namespace ZSerializer.Editor
                         if (!Application.isPlaying)
                         {
                             GUILayout.Space(-15);
-                            using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window,
+                            using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.Window,
                                 GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20)))
                             {
                                 EditorGUILayout.LabelField("ZSerialize All",

@@ -102,7 +102,7 @@ namespace ZSerializer.Editor
                     {
                         GUILayout.BeginVertical();
                         GUILayout.Space(-15);
-                        GUILayout.BeginHorizontal(ZSerializerStyler.window,
+                        GUILayout.BeginHorizontal(ZSerializerStyler.Window,
                             GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 20));
 
                         string color = ZSerializerStyler.MainHex;
@@ -150,18 +150,13 @@ namespace ZSerializer.Editor
             {
                 GUILayout.BeginHorizontal("box");
                 newObjectName = EditorGUILayout.TextField("Name", newObjectName);
-                var regexified = newObjectName = Regex.Replace(newObjectName, @"[^a-zA-Z0-9_]", String.Empty); // all special caracters
-                if (regexified != newObjectName)
-                {
-                    newObjectName = regexified;
-                    Repaint();
-                }
 
-                
+
                 if (GUILayout.Button("✓", GUILayout.MaxWidth(30)) && !string.IsNullOrEmpty(newObjectName))
                 {
                     isCreatingObject = false;
 
+                    newObjectName = newObjectName = Regex.Replace(newObjectName, @"[^a-zA-Z0-9_]", String.Empty); // all special caracters
 
                     GenerateNewObject(newObjectName, template, template2);
                     newObjectName = String.Empty;
@@ -178,7 +173,7 @@ namespace ZSerializer.Editor
             else
             {
                 GUILayout.Space(-15);
-                GUILayout.BeginHorizontal(ZSerializerStyler.window,
+                GUILayout.BeginHorizontal(ZSerializerStyler.Window,
                     GUILayout.Height(32), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth));
 
                 GUILayout.Label("New Global Object",

@@ -128,7 +128,7 @@ namespace ZSerializer.Editor
                 int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
                 script +=
-                    $"    public {fieldInfo.FieldType.ToString().Replace('+', '.')} {fieldInfo.Name};\n";
+                    $"    public {CustomSerializables.ParseFieldType(fieldInfo.FieldType).ToString().Replace('+', '.')} {fieldInfo.Name};\n";
 
                 if (genericParameterAmount > 0)
                 {
@@ -160,36 +160,36 @@ namespace ZSerializer.Editor
 
             foreach (var fieldInfo in fieldInfos)
             {
-                var fieldType = fieldInfo.FieldType;
+                // var fieldType = fieldInfo.FieldType;
 
-                if (fieldInfo.FieldType.IsArray)
-                {
-                    fieldType = fieldInfo.FieldType.GetElementType();
-                }
+                // if (fieldInfo.FieldType.IsArray)
+                // {
+                //     fieldType = fieldInfo.FieldType.GetElementType();
+                // }
 
 
-                int genericParameterAmount = fieldType.GenericTypeArguments.Length;
+                // int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
                 script +=
-                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType.ToString().Replace('+', '.')})typeof({fieldInfo.DeclaringType.FullName}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).GetValue(instance);\n";
+                    $"         {fieldInfo.Name} = ({fieldInfo.FieldType.MakeGenericStringInterpretation()})typeof({fieldInfo.DeclaringType.FullName}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).GetValue(instance);\n";
 
-                if (genericParameterAmount > 0)
-                {
-                    string oldString = $"`{genericParameterAmount}[";
-                    string newString = "<";
-
-                    var genericArguments = fieldType.GenericTypeArguments;
-
-                    for (var i = 0; i < genericArguments.Length; i++)
-                    {
-                        oldString += genericArguments[i].ToString().Replace('+', '.') +
-                                     (i == genericArguments.Length - 1 ? "]" : ",");
-                        newString += genericArguments[i].ToString().Replace('+', '.') +
-                                     (i == genericArguments.Length - 1 ? ">" : ",");
-                    }
-
-                    script = script.Replace(oldString, newString);
-                }
+                // if (genericParameterAmount > 0)
+                // {
+                //     string oldString = $"`{genericParameterAmount}[";
+                //     string newString = "<";
+                //
+                //     var genericArguments = fieldType.GenericTypeArguments;
+                //
+                //     for (var i = 0; i < genericArguments.Length; i++)
+                //     {
+                //         oldString += genericArguments[i].ToString().Replace('+', '.') +
+                //                      (i == genericArguments.Length - 1 ? "]" : ",");
+                //         newString += genericArguments[i].ToString().Replace('+', '.') +
+                //                      (i == genericArguments.Length - 1 ? ">" : ",");
+                //     }
+                //
+                //     script = script.Replace(oldString, newString);
+                // }
             }
 
 
@@ -203,8 +203,10 @@ namespace ZSerializer.Editor
 
             foreach (var fieldInfo in fieldInfos)
             {
+                var parsedFieldType = CustomSerializables.ParseFieldType(fieldInfo.FieldType);
+
                 script +=
-                    $"         typeof({fieldInfo.DeclaringType.FullName}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).SetValue(component, {fieldInfo.Name});\n";
+                    $"         typeof({fieldInfo.DeclaringType.FullName}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).SetValue(component, {(parsedFieldType != fieldInfo.FieldType ? $"({fieldInfo.FieldType.MakeGenericStringInterpretation()})" : "")}{fieldInfo.Name});\n";
             }
 
             // script += $"         typeof({type.FullName}).GetProperty(\"GroupID\").SetValue(component, groupID);\n" +
@@ -228,6 +230,47 @@ namespace ZSerializer.Editor
             }
         }
 
+        public static string MakeGenericStringInterpretation(this Type t)
+        {
+            if (!t.IsGenericType) return t.FullName;
+            
+            int genericParameterAmount = t.GenericTypeArguments.Length;
+            var s = $"{t.GetGenericTypeDefinition().FullName!.Replace('+', '.').Replace($"`{genericParameterAmount}","<")}";
+            if (genericParameterAmount > 0)
+            {
+                var genericArguments = t.GenericTypeArguments;
+            
+                for (var i = 0; i < genericArguments.Length; i++)
+                {
+                    s += MakeGenericStringInterpretation(genericArguments[i]) +
+                         (i == genericArguments.Length - 1 ? ">" : ",");
+                }
+            }
+
+            return s;
+
+            // script +=
+            //     $"         {fieldInfo.Name} = ({fieldInfo.FieldType.ToString().Replace('+', '.')})typeof({fieldInfo.DeclaringType.FullName}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).GetValue(instance);\n";
+            //
+            // if (genericParameterAmount > 0)
+            // {
+            //     string oldString = $"`{genericParameterAmount}[";
+            //     string newString = "<";
+            //
+            //     var genericArguments = fieldType.GenericTypeArguments;
+            //
+            //     for (var i = 0; i < genericArguments.Length; i++)
+            //     {
+            //         oldString += genericArguments[i].ToString().Replace('+', '.') +
+            //                      (i == genericArguments.Length - 1 ? "]" : ",");
+            //         newString += genericArguments[i].ToString().Replace('+', '.') +
+            //                      (i == genericArguments.Length - 1 ? ">" : ",");
+            //     }
+            //
+            //     script = script.Replace(oldString, newString);
+        }
+
+
         static Type[] typesImplementingCustomEditor = AppDomain.CurrentDomain.GetAssemblies().SelectMany(ass =>
             ass.GetTypes()
                 .Where(t => t.GetCustomAttributes(typeof(CustomEditor)).Any() && !t.FullName.Contains("UnityEngine.") &&
@@ -248,10 +291,9 @@ namespace ZSerializer.Editor
                     return (f.GetCustomAttribute(typeof(NonZSerialized)) == null ||
                             f.GetCustomAttribute<ForceZSerialized>() != null) &&
                            (f.FieldType.IsSerializable || typeof(Object).IsAssignableFrom(f.FieldType) ||
-                            (f.FieldType.FullName ?? f.FieldType.Name).StartsWith("UnityEngine.")) &&
-                           (f.FieldType.IsGenericType
-                               ? f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>)
-                               : true);
+                            (f.FieldType.FullName ?? f.FieldType.Name).StartsWith("UnityEngine.")) /*&&
+                           (!f.FieldType.IsGenericType || f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>))*/
+                        ;
                 }).ToList();
 
             while (type != typeof(MonoBehaviour))
@@ -293,7 +335,7 @@ namespace ZSerializer.Editor
                 for (int j = 0; j < fieldsZSerializer.Count; j++)
                 {
                     if (fieldsZSerializer[j].Name != fieldTypes[j].Name ||
-                        fieldsZSerializer[j].FieldType != fieldTypes[j].FieldType)
+                        fieldsZSerializer[j].FieldType != CustomSerializables.ParseFieldType(fieldTypes[j].FieldType))
                     {
                         return ClassState.NeedsRebuilding;
                     }
@@ -328,15 +370,15 @@ namespace ZSerializer.Editor
             if (!Application.isPlaying)
             {
                 if (GUILayout.Button(textureToUse,
-                    GUILayout.MaxWidth(width), GUILayout.Height(width)))
+                        GUILayout.MaxWidth(width), GUILayout.Height(width)))
                 {
                     if (state == ClassState.Valid)
                     {
                         bool newOnValue = !ZSerializerSettings.Instance.componentDataDictionary[componentType].isOn;
 
                         if (!EditorUtility.DisplayDialog($"Turning {(newOnValue ? "on" : "off")} {componentType.Name}",
-                            $"This will turn {(newOnValue ? "on" : "off")} all other synced versions of this component, even in other Scenes and in Prefabs. \n Are you sure you want to do it?",
-                            "Yes", "No")) return;
+                                $"This will turn {(newOnValue ? "on" : "off")} all other synced versions of this component, even in other Scenes and in Prefabs. \n Are you sure you want to do it?",
+                                "Yes", "No")) return;
 
                         var eligibleTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(ass => ass.GetTypes())
                             .Where(t => t.IsSubclassOf(componentType)).ToList();
@@ -401,7 +443,7 @@ namespace ZSerializer.Editor
             if (!Application.isPlaying)
             {
                 if (GUILayout.Button(textureToUse,
-                    GUILayout.MaxWidth(width), GUILayout.Height(width)))
+                        GUILayout.MaxWidth(width), GUILayout.Height(width)))
                 {
                     if (state != ClassState.Valid)
                         GenerateZSerializer(component.GetType(), state);
@@ -412,9 +454,9 @@ namespace ZSerializer.Editor
                         if (component.AutoSync)
                         {
                             if (!EditorUtility.DisplayDialog(
-                                $"Turning {(componentIsOn ? "off" : "on")} {component.GetType().Name}",
-                                $"This will turn {(componentIsOn ? "off" : "on")} all other synced versions of this component, even in other Scenes and in Prefabs. \n Are you sure you want to do it?",
-                                "Yes", "No")) return;
+                                    $"Turning {(componentIsOn ? "off" : "on")} {component.GetType().Name}",
+                                    $"This will turn {(componentIsOn ? "off" : "on")} all other synced versions of this component, even in other Scenes and in Prefabs. \n Are you sure you want to do it?",
+                                    "Yes", "No")) return;
 
                             var eligibleTypes = AppDomain.CurrentDomain.GetAssemblies()
                                 .SelectMany(ass => ass.GetTypes())
@@ -503,7 +545,7 @@ namespace ZSerializer.Editor
             Texture2D textureToUse = styler.refreshImage;
 
             if (GUILayout.Button(textureToUse,
-                GUILayout.MaxWidth(width), GUILayout.Height(width)))
+                    GUILayout.MaxWidth(width), GUILayout.Height(width)))
             {
                 string path;
 
@@ -530,12 +572,14 @@ namespace ZSerializer.Editor
             // Texture2D cogwheel = styler.cogWheel;
 
             GUILayout.Space(-15);
-            using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
+            using (new GUILayout.HorizontalScope(ZSerializerStyler.Window))
             {
                 var state = GetClassState(manager.GetType());
-                string color = state == ClassState.Valid ? manager.IsOn ? ZSerializerStyler.MainHex :
-                    ZSerializerStyler.OffHex :
-                    state == ClassState.NeedsRebuilding ? ZSerializerStyler.YellowHex : ZSerializerStyler.RedHex;
+                string color = state == ClassState.Valid
+                    ? manager.IsOn ? ZSerializerStyler.MainHex : ZSerializerStyler.OffHex
+                    : state == ClassState.NeedsRebuilding
+                        ? ZSerializerStyler.YellowHex
+                        : ZSerializerStyler.RedHex;
 
                 GUILayout.Label($"<color=#{color}>  Persistent Component</color>",
                     styler.header, GUILayout.Height(28));
@@ -555,7 +599,7 @@ namespace ZSerializer.Editor
                 if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
                 {
                     GUILayout.Space(-15);
-                    using (new GUILayout.VerticalScope(ZSerializerStyler.window))
+                    using (new GUILayout.VerticalScope(ZSerializerStyler.Window))
                     {
                         if (GUILayout.Button("Reset ZUIDs"))
                         {
@@ -626,7 +670,7 @@ namespace ZSerializer.Editor
         internal static void ShowGroupIDSettings(Type type, IZSerializable data, bool canAutoSync)
         {
             GUILayout.Space(-15);
-            using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
+            using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.Window))
             {
                 GUILayout.Label("Save Group", GUILayout.MaxWidth(80));
                 int newValue = EditorGUILayout.Popup(data.GroupID,
@@ -702,31 +746,61 @@ namespace ZSerializer.Editor
                     case 0:
 
                         GUILayout.Space(-15);
-                        using (new GUILayout.VerticalScope(ZSerializerStyler.window, GUILayout.Height(1)))
+                        using (new GUILayout.VerticalScope(ZSerializerStyler.Window, GUILayout.Height(1)))
                         {
                             serializedObject.Update();
-
-                            foreach (var fieldInfo in fieldInfos)
+                            GUILayout.Space(-15);
+                            using (new GUILayout.VerticalScope(ZSerializerStyler.Window, GUILayout.Height(1)))
                             {
-                                EditorGUI.BeginChangeCheck();
+                                ZSerializerStyler.BigLabel("Settings", ZSerializerStyler.MainColor);
 
-                                EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
-                            }
+                                foreach (var fieldInfo in fieldInfos)
+                                {
+                                    EditorGUI.BeginChangeCheck();
 
-                            serializedObject.ApplyModifiedProperties();
+                                    EditorGUILayout.PropertyField(serializedObject.FindProperty(fieldInfo.Name));
+                                }
+
+                                serializedObject.ApplyModifiedProperties();
 #if UNITY_EDITOR_WIN
-                            if (GUILayout.Button("Open Save file Directory"))
-                            {
-                                Process process = new Process();
-                                ProcessStartInfo startInfo = new ProcessStartInfo();
-                                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                                startInfo.FileName = "cmd.exe";
-                                string _path = Application.persistentDataPath;
-                                startInfo.Arguments = $"/C \"start {_path}\"";
-                                process.StartInfo = startInfo;
-                                process.Start();
+                                if (GUILayout.Button("Open Save file Directory"))
+                                {
+                                    Process process = new Process();
+                                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                                    startInfo.FileName = "cmd.exe";
+                                    string _path = Application.persistentDataPath;
+                                    startInfo.Arguments = $"/C \"start {_path}\"";
+                                    process.StartInfo = startInfo;
+                                    process.Start();
+                                }
                             }
 #endif
+                            GUILayout.Space(10);
+                            // ZSerializerStyler.DangerzoneColor
+
+                            GUILayout.Space(-15);
+
+                            using (new GUILayout.VerticalScope(ZSerializerStyler.Window, GUILayout.Height(1)))
+                            {
+                                ZSerializerStyler.BigLabel("Danger Zone", ZSerializerStyler.Red);
+                                if (GUILayout.Button("Delete Current Save File"))
+                                {
+                                    if (ZSerialize.DeleteSaveFile(ZSerializerSettings.Instance.selectedSaveFile))
+                                    {
+                                        var path = ZSerialize.GetSaveFileDataPath(ZSerializerSettings.Instance
+                                            .selectedSaveFile);
+                                        ZSerialize.Log(
+                                            $"Save file {ZSerializerSettings.Instance.selectedSaveFile} deleted. ({path})");
+                                    }
+                                }
+
+                                if (GUILayout.Button("Delete All Save Files"))
+                                {
+                                    ZSerialize.DeleteAllSaveFiles();
+                                    ZSerialize.Log("All save files have been deleted.");
+                                }
+                            }
                         }
 
                         break;
@@ -734,7 +808,7 @@ namespace ZSerializer.Editor
 
 
                         GUILayout.Space(-15);
-                        using (new GUILayout.VerticalScope(ZSerializerStyler.window, GUILayout.Height(1)))
+                        using (new GUILayout.VerticalScope(ZSerializerStyler.Window, GUILayout.Height(1)))
                         {
                             var groupsNames = new[] { "Serialization Groups", "Scene Groups" };
                             selectedGroup = GUILayout.Toolbar(selectedGroup, groupsNames);
@@ -760,7 +834,7 @@ namespace ZSerializer.Editor
                                         ZSerialize.Log("<color=cyan>Resetting All Group IDs</color>", DebugMode.Off);
 
                                         foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>()
-                                            .Where(o => o is IZSerializable))
+                                                     .Where(o => o is IZSerializable))
                                         {
                                             var serialize = monoBehaviour as IZSerializable;
                                             serialize.GroupID = 0;
@@ -848,11 +922,11 @@ namespace ZSerializer.Editor
                                                                             .Instance.sceneGroups[i].scenePaths[j]) &&
                                                                     sceneAsset != null)
                                                                     if (GUILayout.Button(
-                                                                        new GUIContent(
-                                                                            Resources.Load<Texture2D>("warning"),
-                                                                            "Scene not present in Build Settings"),
-                                                                        new GUIStyle("label"), GUILayout.Width(20),
-                                                                        GUILayout.Height(20)))
+                                                                            new GUIContent(
+                                                                                Resources.Load<Texture2D>("warning"),
+                                                                                "Scene not present in Build Settings"),
+                                                                            new GUIStyle("label"), GUILayout.Width(20),
+                                                                            GUILayout.Height(20)))
                                                                         EditorWindow.GetWindow(
                                                                             Type.GetType(
                                                                                 "UnityEditor.BuildPlayerWindow,UnityEditor"));
@@ -938,26 +1012,26 @@ namespace ZSerializer.Editor
                         {
                             case 0:
                                 if (ZSerializerSettings.Instance
-                                    .unityComponentDataList.Count > 0)
+                                        .unityComponentDataList.Count > 0)
                                 {
                                     using (new GUILayout.HorizontalScope(GUILayout.Width(1)))
                                     {
                                         using (new EditorGUILayout.VerticalScope())
                                         {
                                             GUILayout.Space(-15);
-                                            using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window,
-                                                GUILayout.Height(1),
-                                                GUILayout.Height(Mathf.Max(88,
-                                                    20.6f * ZSerializerSettings.Instance.unityComponentDataList
-                                                        .Count))))
+                                            using (new EditorGUILayout.VerticalScope(ZSerializerStyler.Window,
+                                                       GUILayout.Height(1),
+                                                       GUILayout.Height(Mathf.Max(88,
+                                                           20.6f * ZSerializerSettings.Instance.unityComponentDataList
+                                                               .Count))))
                                             {
                                                 foreach (var serializableComponentBlackList in ZSerializerSettings
-                                                    .Instance
-                                                    .unityComponentDataList
-                                                    .Where(data => data.componentNames.Count > 0))
+                                                             .Instance
+                                                             .unityComponentDataList
+                                                             .Where(data => data.componentNames.Count > 0))
                                                 {
                                                     if (GUILayout.Button(serializableComponentBlackList.Type.Name,
-                                                        GUILayout.Width(150)))
+                                                            GUILayout.Width(150)))
                                                     {
                                                         selectedType =
                                                             ZSerializerSettings.Instance.unityComponentDataList.IndexOf(
@@ -971,25 +1045,28 @@ namespace ZSerializer.Editor
                                         using (new EditorGUILayout.VerticalScope())
                                         {
                                             GUILayout.Space(-15);
-                                            using (new EditorGUILayout.VerticalScope(ZSerializerStyler.window,
-                                                GUILayout.Height(1)))
+                                            using (new EditorGUILayout.VerticalScope(ZSerializerStyler.Window,
+                                                       GUILayout.Height(1)))
                                             {
                                                 using (var scrollView =
-                                                    new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
-                                                        GUILayout.Width(width - 196),
-                                                        GUILayout.Height(Mathf.Max(61.8f,
-                                                            20.6f * ZSerializerSettings.Instance.unityComponentDataList
-                                                                .Count(data => data.componentNames.Count > 0)))))
+                                                       new GUILayout.ScrollViewScope(scrollPos, new GUIStyle(),
+                                                           GUILayout.Width(width - 196),
+                                                           GUILayout.Height(Mathf.Max(61.8f,
+                                                               20.6f * ZSerializerSettings.Instance
+                                                                   .unityComponentDataList
+                                                                   .Count(data => data.componentNames.Count > 0)))))
                                                 {
                                                     scrollPos = scrollView.scrollPosition;
 
                                                     if (selectedType < ZSerializerSettings.Instance
-                                                        .unityComponentDataList.Count && ZSerializerSettings.Instance
-                                                        .unityComponentDataList[selectedType].componentNames != null)
+                                                            .unityComponentDataList.Count && ZSerializerSettings
+                                                            .Instance
+                                                            .unityComponentDataList[selectedType].componentNames !=
+                                                        null)
 
                                                         foreach (var componentName in ZSerializerSettings.Instance
-                                                            .unityComponentDataList[selectedType]
-                                                            .componentNames)
+                                                                     .unityComponentDataList[selectedType]
+                                                                     .componentNames)
                                                         {
                                                             GUILayout.Label(componentName);
                                                         }
@@ -1029,7 +1106,7 @@ namespace ZSerializer.Editor
                                     .Select(t => Type.GetType(t).Name).ToList();
 
                                 GUILayout.Space(-15);
-                                using (new GUILayout.VerticalScope(ZSerializerStyler.window))
+                                using (new GUILayout.VerticalScope(ZSerializerStyler.Window))
                                 {
                                     for (var i = 0; i < list.Count; i++)
                                     {
@@ -1086,7 +1163,7 @@ namespace ZSerializer.Editor
                 {
 #if UNITY_2021_2_OR_NEWER
                     foreach (var zs in PrefabStageUtility.OpenPrefab(prefab).prefabContentsRoot
-                        .GetComponentsInChildren<IZSerializable>())
+                                 .GetComponentsInChildren<IZSerializable>())
                     {
                         EditorUtility.DisplayProgressBar(title, $"{zs}",
                             prefabs.IndexOf(prefab) / (float)prefabs.Count);
@@ -1096,9 +1173,11 @@ namespace ZSerializer.Editor
                     break;
 #endif
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    ZSerialize.LogError($"An exception was thrown while trying to open a prefab. {prefab} hasn't performed operation", DebugMode.Off);
+                    ZSerialize.LogError(
+                        $"An exception was thrown while trying to open a prefab. {prefab} hasn't performed operation",
+                        DebugMode.Off);
                 }
             }
 
@@ -1132,7 +1211,8 @@ namespace ZSerializer.Editor
                 catch (Exception)
                 {
                     ZSerialize.LogError(
-                        $"An exception was thrown while trying to open a scene. {path} hasn't performed the operation", DebugMode.Off);
+                        $"An exception was thrown while trying to open a scene. {path} hasn't performed the operation",
+                        DebugMode.Off);
                 }
             }
 
@@ -1221,7 +1301,7 @@ namespace ZSerializer.Editor
                 Dictionary<string, Object> map = new Dictionary<string, Object>();
 
                 foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable)
-                    .Reverse())
+                             .Reverse())
                 {
                     var serializable = monoBehaviour as IZSerializable;
                     if (!string.IsNullOrEmpty(serializable.ZUID))

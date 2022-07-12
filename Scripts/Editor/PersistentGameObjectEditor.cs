@@ -35,7 +35,7 @@ public class PersistentGameObjectEditor : Editor
         using (var check = new EditorGUI.ChangeCheckScope())
         {
             GUILayout.Space(-15);
-            using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.window))
+            using (new EditorGUILayout.HorizontalScope(ZSerializerStyler.Window))
             {
                 var unmanagedTypes = manager.serializedComponents.Select(sc => sc.typeFullName)
                     .Except(ZSerializerSettings.Instance.unityComponentTypes).ToList();
@@ -66,7 +66,7 @@ public class PersistentGameObjectEditor : Editor
                 if (ZSerializerSettings.Instance.debugMode == DebugMode.Developer)
                 {
                     GUILayout.Space(-15);
-                    using (new GUILayout.VerticalScope(ZSerializerStyler.window))
+                    using (new GUILayout.VerticalScope(ZSerializerStyler.Window))
                     {
                         if (GUILayout.Button("Reset ZUIDs"))
                         {
@@ -78,7 +78,7 @@ public class PersistentGameObjectEditor : Editor
 
 
                 GUILayout.Space(-15);
-                using (new GUILayout.VerticalScope(ZSerializerStyler.window))
+                using (new GUILayout.VerticalScope(ZSerializerStyler.Window))
                 {
                     if (selectedEventTab == -1)
                     {
@@ -130,7 +130,7 @@ public class PersistentGameObjectEditor : Editor
                 if (ZSerializerSettings.Instance.advancedSerialization)
                 {
                     GUILayout.Space(-15);
-                    using (new GUILayout.VerticalScope(ZSerializerStyler.window))
+                    using (new GUILayout.VerticalScope(ZSerializerStyler.Window))
                     {
                         GUILayout.Label("Serialized Components:");
                         if (manager.serializedComponents.Count == 0) GUILayout.Label("None");
@@ -192,7 +192,7 @@ public class PersistentGameObjectEditor : Editor
                 {
                     GUILayout.Space(-15);
 
-                    using (new GUILayout.HorizontalScope(ZSerializerStyler.window))
+                    using (new GUILayout.HorizontalScope(ZSerializerStyler.Window))
                     {
                         for (var i = 0; i < manager.serializedComponents.Count; i++)
                         {
