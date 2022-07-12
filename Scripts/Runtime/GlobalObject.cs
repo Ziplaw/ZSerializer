@@ -9,9 +9,9 @@ namespace ZSerializer
 {
     public abstract class GlobalObject : ScriptableObject
     {
-        public static GlobalObject Get<T>() where T : GlobalObject
+        public static T Get<T>() where T : GlobalObject
         {
-            return Get(typeof(T));
+            return (T)Get(typeof(T));
         }
 
         public static GlobalObject Get(Type globalDataType)

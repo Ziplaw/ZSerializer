@@ -150,18 +150,13 @@ namespace ZSerializer.Editor
             {
                 GUILayout.BeginHorizontal("box");
                 newObjectName = EditorGUILayout.TextField("Name", newObjectName);
-                var regexified = newObjectName = Regex.Replace(newObjectName, @"[^a-zA-Z0-9_]", String.Empty); // all special caracters
-                if (regexified != newObjectName)
-                {
-                    newObjectName = regexified;
-                    Repaint();
-                }
 
-                
+
                 if (GUILayout.Button("✓", GUILayout.MaxWidth(30)) && !string.IsNullOrEmpty(newObjectName))
                 {
                     isCreatingObject = false;
 
+                    newObjectName = newObjectName = Regex.Replace(newObjectName, @"[^a-zA-Z0-9_]", String.Empty); // all special caracters
 
                     GenerateNewObject(newObjectName, template, template2);
                     newObjectName = String.Empty;
