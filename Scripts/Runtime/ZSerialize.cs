@@ -190,9 +190,9 @@ namespace ZSerializer
 
             SceneManager.sceneUnloaded += _ => { OnSceneUnload(); };
 
-            SceneManager.sceneLoaded += (_, _) => { OnSceneLoad(); };
+            SceneManager.sceneLoaded += (arg0, arg1) => { OnSceneLoad(); };
 
-            SceneManager.activeSceneChanged += (_, _) => { UpdateCurrentScene(); };
+            SceneManager.activeSceneChanged += (arg0, arg1) => { UpdateCurrentScene(); };
 
             Application.wantsToQuit += () =>
             {

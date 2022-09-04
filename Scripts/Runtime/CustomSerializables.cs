@@ -46,6 +46,8 @@ namespace ZSerializer
 {
     public interface ICustomSerialize<T> { }
 
+    #if UNITY_2021_3_OR_NEWER
+    
     [Serializable]
     public class ZDictionary<TK, TV> : ICustomSerialize<Dictionary<TK,TV>>
     {
@@ -98,7 +100,7 @@ namespace ZSerializer
         {
             var result = new ZQueue<T>();
             var copy = new Queue<T>(_queue);
-            
+
             while (copy.TryDequeue(out var item))
             {
                 result.backingField.Add(item);
@@ -138,4 +140,5 @@ namespace ZSerializer
             return result;
         }
     }
+#endif
 }
