@@ -34,7 +34,7 @@ namespace ZSerializer.Editor
         private string template2;
 
         private bool isCreatingObject;
-        private string newObjectName;
+        private string newObjectName = String.Empty;
 
         private List<GlobalObjectEditorData> globalDataTypes = new List<GlobalObjectEditorData>();
 
@@ -193,7 +193,7 @@ namespace ZSerializer.Editor
         {
             globalDataTypes.Clear();
             foreach (var type in Assembly.Load("Assembly-CSharp").GetTypes()
-                .Where(t => t.Name.ToLower().Contains(searchText.ToLower()) && t.IsSubclassOf(typeof(GlobalObject))))
+                .Where(t => (string.IsNullOrEmpty(searchText) || t.Name.ToLower().Contains(searchText.ToLower())) && t.IsSubclassOf(typeof(GlobalObject))))
             {
                 globalDataTypes.Add(new GlobalObjectEditorData(type));
             }
