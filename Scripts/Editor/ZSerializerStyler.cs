@@ -32,11 +32,11 @@ namespace ZSerializer.Editor
         private static readonly Font MainFont = Resources.Load<Font>("FugazOne");
         internal ZSerializerSettings settings;
 
-        public static string YellowHex => _yellowHex ??= Yellow.ToHexadecimal();
+        public static string YellowHex => _yellowHex = _yellowHex ?? Yellow.ToHexadecimal();
 
-        public static string RedHex => _redHex ??= _red.ToHexadecimal();
+        public static string RedHex => _redHex = _redHex ?? _red.ToHexadecimal();
 
-        public static string OffHex => _offHex ??= Off.ToHexadecimal();
+        public static string OffHex => _offHex = _offHex ?? Off.ToHexadecimal();
 
         public static string MainHex
         {
@@ -77,13 +77,13 @@ namespace ZSerializer.Editor
 
         private static GUIStyle BigLabelStyle
         {
-            get => _bigLabel ??= new GUIStyle("label")
-                { 
-                    font = MainFont, 
-                    alignment = TextAnchor.MiddleCenter, 
-                    fontSize = 20,
-                    richText = true,
-                };
+            get => _bigLabel = _bigLabel ?? new GUIStyle("label")
+            { 
+                font = MainFont, 
+                alignment = TextAnchor.MiddleCenter, 
+                fontSize = 20,
+                richText = true,
+            };
         }
 
         private static GUIStyle _window;

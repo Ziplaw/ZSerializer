@@ -78,7 +78,7 @@ namespace ZSerializer
 
         public static string PersistentDataPath
         {
-            get => persistentDataPath ??= Application.persistentDataPath;
+            get => persistentDataPath = persistentDataPath ?? Application.persistentDataPath;
         }
 
 

@@ -235,7 +235,7 @@ namespace ZSerializer.Editor
             if (!t.IsGenericType) return t.FullName;
             
             int genericParameterAmount = t.GenericTypeArguments.Length;
-            var s = $"{t.GetGenericTypeDefinition().FullName!.Replace('+', '.').Replace($"`{genericParameterAmount}","<")}";
+            var s = $"{t.GetGenericTypeDefinition().FullName.Replace('+', '.').Replace($"`{genericParameterAmount}","<")}";
             if (genericParameterAmount > 0)
             {
                 var genericArguments = t.GenericTypeArguments;
