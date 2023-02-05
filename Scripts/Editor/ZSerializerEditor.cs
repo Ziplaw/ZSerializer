@@ -247,8 +247,9 @@ namespace ZSerializer.Editor
             var fieldInfos = type.GetFields()
                 .Where(f =>
                 {
-                    return (f.GetCustomAttribute(typeof(NonZSerialized)) == null ||
-                            f.GetCustomAttribute<ForceZSerialized>() != null) &&
+                    return ( !f.IsLiteral &&
+                               f.GetCustomAttribute<NonZSerialized>() == null ||
+                             f.GetCustomAttribute<ForceZSerialized>() != null) &&
                            (f.FieldType.IsSerializable || typeof(Object).IsAssignableFrom(f.FieldType) ||
                             (f.FieldType.FullName ?? f.FieldType.Name).StartsWith("UnityEngine.")) /*&&
                            (!f.FieldType.IsGenericType || f.FieldType.GetGenericTypeDefinition() != typeof(Dictionary<,>))*/

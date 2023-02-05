@@ -23,6 +23,7 @@ using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 [assembly: InternalsVisibleTo( "ZSerializer.Editor" )]
+[assembly: InternalsVisibleTo( "ZSerializer.Tests" )]
 
 namespace ZSerializer
 {
@@ -296,20 +297,40 @@ namespace ZSerializer
 
 		#endregion
 
-		private static void UpdateCurrentScene( )
+		private static async void UpdateCurrentScene( )
 		{
-			currentSceneName = SetCurrentScene( );
-			currentScenePath = SetCurrentScenePath( );
+			currentSceneName = await SetCurrentScene( );
+			currentScenePath = await SetCurrentScenePath( );
 		}
 
-		static string SetCurrentScene( )
+		static async Task<string> SetCurrentScene( )
 		{
-			return SceneManager.GetActiveScene( ).name;
+			string sceneName = String.Empty;
+
+			while ( true )
+			{
+				sceneName = SceneManager.GetActiveScene( ).name;
+
+				if ( string.IsNullOrEmpty( sceneName ) ) await Task.Yield( );
+				else break;
+			} 
+
+			return sceneName;
 		}
 
-		static string SetCurrentScenePath( )
+		static async Task<string> SetCurrentScenePath( )
 		{
-			return SceneManager.GetActiveScene( ).path.ToEditorBuildSettingsPath( );
+			string scenePath = String.Empty;
+
+			while (true)
+			{
+				scenePath = SceneManager.GetActiveScene( ).path;
+
+				if ( string.IsNullOrEmpty( scenePath ) ) await Task.Yield( );
+				else break;
+			}
+
+			return scenePath.ToEditorBuildSettingsPath( );
 		}
 
 		static Object FindObjectFromInstanceID( int instanceID )
@@ -422,10 +443,8 @@ namespace ZSerializer
 			}
 		}
 
-		static async Task UpdateIDMap( List<IZSerializable> serializablesInScene )
+		static void AssertZUIDs( List<IZSerializable> serializablesInScene )
 		{
-			int currentComponentCount = 0;
-
 			foreach ( var serializable in serializablesInScene )
 			{
 				Regex regex = new Regex( GuidRegexPattern );
@@ -449,16 +468,6 @@ namespace ZSerializer
 
 					// serializable.GenerateZUIDs(false); //used to be false
 					continue;
-				}
-
-				// serializable.AddZUIDsToIDMap();
-
-				currentComponentCount++;
-
-				if ( ZSerializerSettings.Instance.serializationType == SerializationType.Async && currentComponentCount >= ZSerializerSettings.Instance.maxBatchCount )
-				{
-					currentComponentCount = 0;
-					await Task.Yield( );
 				}
 			}
 		}
@@ -587,7 +596,7 @@ namespace ZSerializer
 					GetComponentsOfGivenType( persistentGameObjectsToSerialize, componentType ),
 					Assembly.Load( componentType == typeof (PersistentGameObject)
 									   ? "ZSerializer.Runtime"
-									   : mainAssembly )
+									   : mainAssembly ) //TODO look into this, i shouldnt be defaulting to main assembly i think
 							.GetType( "ZSerializer." + componentType.Name + "ZSerializer" ) );
 			}
 		}
@@ -628,6 +637,7 @@ namespace ZSerializer
 		static object[] LoadObjectsDynamically( Type componentType, int objectIndex,
 												object[] zSerializerObjects )
 		{
+		
 			var zSerializerObject = zSerializerObjects[objectIndex];
 			string zuid = ( zSerializerObject as Internal.ZSerializer ).ZUID;
 			string gozuid = ( zSerializerObject as Internal.ZSerializer ).GOZUID;
@@ -737,6 +747,7 @@ namespace ZSerializer
 		{
 			for ( var tupleIndex = 0; tupleIndex < tempTuples[CurrentGroupID].Length; tupleIndex++ )
 			{
+
 				var currentTuple = tempTuples[CurrentGroupID][tupleIndex];
 				Type realType = GetTypeFromZSerializerType( currentTuple.Item1 );
 
@@ -744,12 +755,14 @@ namespace ZSerializer
 					Debug.LogError(
 						"ZSerializer type not found, probably because you added ZSerializer somewhere in the name of the class" );
 
-				Log( "Deserializing " + realType + "s", DebugMode.Informational );
+				Log( $"Deserializing {realType}s", DebugMode.Informational );
 
 				var fromJson = fromJsonMethod.MakeGenericMethod( currentTuple.Item1 );
 				object[] zSerializerObjects = (object[])fromJson.Invoke( null, new object[] { currentTuple.Item2 } );
 
 				int currentComponentCount = 0;
+
+
 
 				for ( var i = 0; i < zSerializerObjects.Length; i++ )
 				{
@@ -1032,7 +1045,7 @@ namespace ZSerializer
 					List<IZSerializable> serializables = new List<IZSerializable>( persistentGameObjectsInScene );
 					serializables.AddRange( persistentMonoBehavioursInScene );
 
-					await UpdateIDMap( serializables );
+					AssertZUIDs( serializables );
 					OnPreSave( serializables );
 
 					LogCurrentSave( zSerializationType );
@@ -1083,7 +1096,7 @@ namespace ZSerializer
 				var serializableList = new List<IZSerializable>( persistentMonoBehavioursInScene );
 				serializableList.AddRange( persistentGameObjectsInScene );
 
-				await UpdateIDMap( serializableList );
+				AssertZUIDs( serializableList );
 
 				foreach ( var zs in serializableList )
 				{
@@ -1379,7 +1392,7 @@ namespace ZSerializer
 									  return "\"instanceID\":0";
 								  } );
 			#else
-            return Regex.Replace(json, GuidRegexPattern,
+            return Regex.Replace(json, ZUIDRegexPattern,
                 match =>
                 {
                     if (idMap[CurrentGroupID].TryGetValue(match.Value.Split(':')[1], out var obj) && obj != null)
@@ -1769,6 +1782,7 @@ namespace ZSerializer
 	{
 		public static T[] FromJson<T>( string json )
 		{
+
 			json = ZSerialize.ReplaceZUIDs( json );
 			Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>( json );
 

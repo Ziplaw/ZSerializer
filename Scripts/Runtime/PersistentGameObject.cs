@@ -293,6 +293,12 @@ namespace ZSerializer
 		public void AddZUIDsToIDMap( )
 		{
 			if ( ZUID == null ) return;
+
+			if ( GroupID > ZSerialize.idMap.Count - 1 )
+			{
+				ZSerialize.LogError( "ID Map not initialized" );
+				return;
+			}
 			
 			ZSerialize.idMap[GroupID].TryAddToDictionary( ZUID, this );
 			ZSerialize.idMap[GroupID].TryAddToDictionary( GOZUID, gameObject );

@@ -197,7 +197,14 @@ MonoBehaviour:
       - CustomSerialization, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       - PersistentMonoBehaviourWithSaving, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
+      - PersistentMonoBehaviourTester, Tests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      - PersistentMonoBehaviourTester, ZSerializer.Tests, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
       values:
+      - isOn: 1
+        groupID: 0
+      - isOn: 1
+        groupID: 0
       - isOn: 1
         groupID: 0
       - isOn: 1

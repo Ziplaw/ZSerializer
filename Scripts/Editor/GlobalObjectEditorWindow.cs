@@ -192,11 +192,16 @@ namespace ZSerializer.Editor
         private void Init()
         {
             globalDataTypes.Clear();
-            foreach (var type in Assembly.Load("Assembly-CSharp").GetTypes()
-                .Where(t => (string.IsNullOrEmpty(searchText) || t.Name.ToLower().Contains(searchText.ToLower())) && t.IsSubclassOf(typeof(GlobalObject))))
+
+            foreach ( var assembly in AppDomain.CurrentDomain.GetAssemblies(  ) )
             {
-                globalDataTypes.Add(new GlobalObjectEditorData(type));
+                foreach ( var type in assembly.GetTypes(  )
+                                              .Where( t => ( string.IsNullOrEmpty( searchText ) || t.Name.ToLower( ).Contains( searchText.ToLower( ) ) ) && t.IsSubclassOf( typeof (GlobalObject) ) ) )
+                {
+                    globalDataTypes.Add( new GlobalObjectEditorData( type ) );
+                }    
             }
+            
         }
 
         [DidReloadScripts]
