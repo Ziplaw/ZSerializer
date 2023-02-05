@@ -106,12 +106,6 @@ namespace ZSerializer.Editor
 
             var currentType = type;
 
-            // while (type.BaseType != typeof(MonoBehaviour))
-            // {
-            //     fieldInfos.AddRange(type.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-            //         .Where(f => f.GetCustomAttribute(typeof(NonZSerialized)) == null).ToList());
-            //     type = type.BaseType;
-            // }
 
             type = currentType;
 
@@ -149,9 +143,6 @@ namespace ZSerializer.Editor
                 }
             }
 
-//             script += @"    public int groupID;
-//     public bool autoSync;
-// ";
 
             script +=
                 $"\n    public {type.Name}ZSerializer(string ZUID, string GOZUID) : base(ZUID, GOZUID)\n" +
@@ -160,42 +151,13 @@ namespace ZSerializer.Editor
 
             foreach (var fieldInfo in fieldInfos)
             {
-                // var fieldType = fieldInfo.FieldType;
 
-                // if (fieldInfo.FieldType.IsArray)
-                // {
-                //     fieldType = fieldInfo.FieldType.GetElementType();
-                // }
-
-
-                // int genericParameterAmount = fieldType.GenericTypeArguments.Length;
 
                 script +=
                     $"         {fieldInfo.Name} = ({fieldInfo.FieldType.MakeGenericStringInterpretation()})typeof({fieldInfo.DeclaringType.FullName}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).GetValue(instance);\n";
 
-                // if (genericParameterAmount > 0)
-                // {
-                //     string oldString = $"`{genericParameterAmount}[";
-                //     string newString = "<";
-                //
-                //     var genericArguments = fieldType.GenericTypeArguments;
-                //
-                //     for (var i = 0; i < genericArguments.Length; i++)
-                //     {
-                //         oldString += genericArguments[i].ToString().Replace('+', '.') +
-                //                      (i == genericArguments.Length - 1 ? "]" : ",");
-                //         newString += genericArguments[i].ToString().Replace('+', '.') +
-                //                      (i == genericArguments.Length - 1 ? ">" : ",");
-                //     }
-                //
-                //     script = script.Replace(oldString, newString);
-                // }
             }
 
-
-            // script += $"         groupID = (int)typeof({type.FullName}).GetProperty(\"GroupID\").GetValue(instance);\n" +
-            //           $"         autoSync = (bool)typeof({type.FullName}).GetProperty(\"AutoSync\").GetValue(instance);\n" +
-            //           "    }";
 
             script += "    }";
 
@@ -208,10 +170,7 @@ namespace ZSerializer.Editor
                 script +=
                     $"         typeof({fieldInfo.DeclaringType.FullName}).GetField(\"{fieldInfo.Name}\"{(!fieldInfo.IsPublic ? ", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic" : "")}).SetValue(component, {(parsedFieldType != fieldInfo.FieldType ? $"({fieldInfo.FieldType.MakeGenericStringInterpretation()})" : "")}{fieldInfo.Name});\n";
             }
-
-            // script += $"         typeof({type.FullName}).GetProperty(\"GroupID\").SetValue(component, groupID);\n" +
-            //           $"         typeof({type.FullName}).GetProperty(\"AutoSync\").SetValue(component, autoSync);\n" +
-            //           "    }";
+            
             script += "    }";
 
             script += "\n}";
@@ -226,7 +185,7 @@ namespace ZSerializer.Editor
 
             foreach (var persistentGameObject in Object.FindObjectsOfType<PersistentMonoBehaviour>())
             {
-                persistentGameObject.GenerateEditorZUIDs(false);
+                persistentGameObject.GenerateZUIDs(false, false, true);
             }
         }
 
@@ -603,7 +562,7 @@ namespace ZSerializer.Editor
                     {
                         if (GUILayout.Button("Reset ZUIDs"))
                         {
-                            manager.GenerateEditorZUIDs(false);
+                            manager.GenerateZUIDs(true, true, false);
                         }
                     }
                 }
@@ -783,7 +742,7 @@ namespace ZSerializer.Editor
 
                             using (new GUILayout.VerticalScope(ZSerializerStyler.Window, GUILayout.Height(1)))
                             {
-                                ZSerializerStyler.BigLabel("Danger Zone", ZSerializerStyler.Red);
+                                ZSerializerStyler.BigLabel("Danger Zone", ZSerializerStyler.MainColor);
                                 if (GUILayout.Button("Delete Current Save File"))
                                 {
                                     if (ZSerialize.DeleteSaveFile(ZSerializerSettings.Instance.selectedSaveFile))
@@ -1163,11 +1122,31 @@ namespace ZSerializer.Editor
                 {
 #if UNITY_2021_2_OR_NEWER
                     foreach (var zs in PrefabStageUtility.OpenPrefab(prefab).prefabContentsRoot
-                                 .GetComponentsInChildren<IZSerializable>())
+                                 .GetComponentsInChildren<IZSerializable>() )
                     {
                         EditorUtility.DisplayProgressBar(title, $"{zs}",
                             prefabs.IndexOf(prefab) / (float)prefabs.Count);
                         action(zs);
+
+                        var component = (Component)zs;
+                        
+                        PrefabUtility.RecordPrefabInstancePropertyModifications( component);
+                        EditorUtility.SetDirty( component);
+                    }
+
+                    foreach ( var zs in PrefabStageUtility.OpenPrefab( prefab )
+                                                          .prefabContentsRoot
+                                                          .GetComponentsInChildren<PersistentGameObject>( ) )
+                    {
+                        EditorUtility.DisplayProgressBar( title, $"{zs}",
+                                                          prefabs.IndexOf( prefab ) / (float)prefabs.Count );
+
+                        action( zs );
+
+                        var component = (Component)zs;
+
+                        PrefabUtility.RecordPrefabInstancePropertyModifications( component );
+                        EditorUtility.SetDirty( component );
                     }
 #else
                     break;
@@ -1199,11 +1178,19 @@ namespace ZSerializer.Editor
                     var split = path.Split('/').Last();
 
                     AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<SceneAsset>(path));
-                    foreach (var zs in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
+                    foreach (var zs in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable && !(m is PersistentGameObject)))
                     {
                         EditorUtility.DisplayProgressBar(title, $"{zs}, {split}",
                             paths.IndexOf(path) / (float)paths.Count);
                         action(zs as IZSerializable);
+                    }
+
+                    foreach ( var zs in Object.FindObjectsOfType<MonoBehaviour>( ).Where( m => m is IZSerializable && ( m is PersistentGameObject ) ) )
+                    {
+                        EditorUtility.DisplayProgressBar( title, $"{zs}, {split}",
+                                                          paths.IndexOf( path ) / (float)paths.Count );
+
+                        action( zs as IZSerializable );
                     }
 
                     EditorSceneManager.SaveOpenScenes();
@@ -1245,26 +1232,25 @@ namespace ZSerializer.Editor
         [MenuItem("Tools/ZSerializer/Reset Project ZUIDs", priority = 21)]
         public static void RefreshZUIDs()
         {
-            var updateNonEmptyZUIDs = EditorUtility.DisplayDialog("Reset ZUIDs",
-                "Would you like to reset your current ZUIDs? This will cause player save files to be unusable", "Yes",
+            var updateZUIDs = EditorUtility.DisplayDialog("Reset ZUIDs",
+                "Would you like to reset your current ZUIDs? This will cause old player save files to be unusable", "Yes",
                 "No");
 
+            if ( !updateZUIDs ) return;
+            
             int numberOfUpdatedZUIDs = 0;
             ExecuteOnAllSerializablesFromScenes(serializable =>
             {
-                if (string.IsNullOrEmpty(serializable.ZUID) || updateNonEmptyZUIDs)
-                {
-                    if (serializable is PersistentGameObject pg) pg.Reset();
-                    else serializable.GenerateEditorZUIDs(false);
+                if ( serializable is PersistentGameObject pg ) pg.Reset( );
+                else serializable.GenerateZUIDs( true, false, true );
 
-                    numberOfUpdatedZUIDs++;
-                }
+                numberOfUpdatedZUIDs++;
             }, "Refreshing Project ZUIDs");
 
             ExecuteOnAllSerializablesFromPrefabs(serializable =>
             {
                 if (serializable is PersistentGameObject pg) pg.Reset();
-                else serializable.GenerateEditorZUIDs(false);
+                else serializable.GenerateZUIDs( true, false, true );
 
                 numberOfUpdatedZUIDs++;
             }, "Refreshing Project ZUIDs");
@@ -1281,12 +1267,12 @@ namespace ZSerializer.Editor
             foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>().Where(m => m is IZSerializable))
             {
                 var serialize = monoBehaviour as IZSerializable;
-                if (string.IsNullOrEmpty(serialize.ZUID) || string.IsNullOrEmpty(serialize.GOZUID))
-                {
-                    serialize.GenerateEditorZUIDs(true);
-                    EditorUtility.SetDirty(monoBehaviour);
-                    PrefabUtility.RecordPrefabInstancePropertyModifications(monoBehaviour);
-                }
+                // if (string.IsNullOrEmpty(serialize.ZUID) || string.IsNullOrEmpty(serialize.GOZUID))
+                // {
+                //     serialize.GenerateZUIDs(true);
+                //     EditorUtility.SetDirty(monoBehaviour);
+                //     PrefabUtility.RecordPrefabInstancePropertyModifications(monoBehaviour);
+                // }
 
                 if (string.IsNullOrEmpty(ZSerializerSettings.Instance.saveGroups[serialize.GroupID]))
                     Debug.LogError(
@@ -1304,32 +1290,28 @@ namespace ZSerializer.Editor
                              .Reverse())
                 {
                     var serializable = monoBehaviour as IZSerializable;
-                    if (!string.IsNullOrEmpty(serializable.ZUID))
-                    {
-                        if (map.TryGetValue(serializable.ZUID, out _))
-                        {
-                            serializable.GenerateEditorZUIDs(map.TryGetValue(serializable.GOZUID, out var go) &&
-                                                             go != monoBehaviour.gameObject);
 
-                            // if (serializable is PersistentGameObject pg)
-                            // {
-                            //     foreach (var pgSerializedComponent in pg.serializedComponents)
-                            //     {
-                            //         ZSerialize.idMap[ZSerialize.currentGroupID].TryAdd(pgSerializedComponent.zuid,
-                            //             pgSerializedComponent.component);
-                            //     }
-                            // }
-                        }
-
-                        if (serializable as Object)
-                            map[serializable.ZUID] = serializable as Object;
-                        if (monoBehaviour && monoBehaviour.gameObject)
-                            map[serializable.GOZUID] = monoBehaviour.gameObject;
-                    }
-                    else
+                    if ( map.TryGetValue( serializable.ZUID, out _ ) )
                     {
-                        serializable.GenerateEditorZUIDs(false);
+                        bool duplicateGOZUIDFound = map.TryGetValue( serializable.GOZUID, out var go ) && go != monoBehaviour.gameObject;
+
+                        serializable.GenerateZUIDs( duplicateGOZUIDFound, false, true );
+
+                        // if (serializable is PersistentGameObject pg)
+                        // {
+                        //     foreach (var pgSerializedComponent in pg.serializedComponents)
+                        //     {
+                        //         ZSerialize.idMap[ZSerialize.currentGroupID].TryAdd(pgSerializedComponent.zuid,
+                        //             pgSerializedComponent.component);
+                        //     }
+                        // }
                     }
+
+                    if ( serializable as Object )
+                        map[serializable.ZUID] = serializable as Object;
+
+                    if ( monoBehaviour && monoBehaviour.gameObject )
+                        map[serializable.GOZUID] = monoBehaviour.gameObject;
                 }
             }
         }

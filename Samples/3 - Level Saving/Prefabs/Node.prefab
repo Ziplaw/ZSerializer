@@ -63,19 +63,19 @@ MonoBehaviour:
     targetZUIDs: []
   showSettings: 0
   groupID: 0
-  _zuid: 
-  _gozuid: 
+  _zuid: 04466bde-610d-4829-a3d5-5bd7e241d149
+  _gozuid: 8acd8746-093c-4474-82f4-59d3bc77c729
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743213554894}
-    zuid: 
+    zuid: 44f79ae8-ec40-4eea-9428-1a9a9c367686
   - typeFullName: UnityEngine.SpriteRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743213554895}
-    zuid: 
+    zuid: b4bd7680-380f-4352-a9e5-8d3e58510e86
 --- !u!212 &1689612743213554895
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -193,24 +193,24 @@ MonoBehaviour:
     targetZUIDs: []
   showSettings: 0
   groupID: 0
-  _zuid: 
-  _gozuid: 
+  _zuid: a7faab43-25de-4c80-857f-d43489b25d70
+  _gozuid: a76d61b6-ceda-45f2-8308-61844bf260ca
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743638498566}
-    zuid: 
+    zuid: 1684d951-2057-456c-94df-b20e865fc90a
   - typeFullName: UnityEngine.Rigidbody2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1689612743638498564}
-    zuid: 
+    zuid: a7396ed3-5ba7-4684-abe9-a2ac410cb1dd
   - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1688716198872695089}
-    zuid: 
+    zuid: b4df40b4-4c3d-4835-9288-8b1c46c92ff9
 --- !u!50 &1689612743638498564
 Rigidbody2D:
   serializedVersion: 4

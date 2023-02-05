@@ -9,10 +9,10 @@ public class ButtonInfo : MonoBehaviour
     public string levelName;
     public Transform levelParent;
     
-    public void SaveLevel()
+    public async void SaveLevel()
     {
         FindObjectOfType<NodeSpawner>().ResetNodes();
-        ZSerialize.SaveLevel(levelName, levelParent);
+        await ZSerialize.SaveLevel(levelName, levelParent);
         var uiManager = FindObjectOfType<UIManager>();
         uiManager.DestroyAllButtons();
         var levelNames = ZSerialize.GetLevelNames();

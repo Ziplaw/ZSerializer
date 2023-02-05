@@ -66,29 +66,29 @@ MonoBehaviour:
     targetZUIDs: []
   showSettings: 0
   groupID: 0
-  _zuid: 
-  _gozuid: 
+  _zuid: 52b64eee-790a-4c3c-b20b-847fa0751377
+  _gozuid: 0bf6f138-5232-4723-acf4-f92e14e619cb
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 4761420894585310051}
-    zuid: 
+    zuid: 4ca0e9c5-250e-4679-92b7-a911552edd60
   - typeFullName: UnityEngine.SpriteRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 4761420894585310050}
-    zuid: 
+    zuid: a426d134-050c-4b58-98b3-8be2679b02b5
   - typeFullName: UnityEngine.BoxCollider2D, UnityEngine.Physics2DModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 4761420894585310061}
-    zuid: 
+    zuid: e0c4c223-4e35-460b-8ee7-1ee503ca262b
   - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 1087470111}
-    zuid: 
+    zuid: 885d1d60-a624-4f95-8852-b649f1a8d32d
 --- !u!212 &4761420894585310050
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -183,8 +183,8 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 
-  _gozuid: 
+  _zuid: 6c5d1028-4fc8-47e7-b2ad-81286bb83f66
+  _gozuid: 0bf6f138-5232-4723-acf4-f92e14e619cb
   position: {x: 0, y: 0, z: 0}
   nodeTransform: {fileID: 0}
 --- !u!108 &1087470111

@@ -19,7 +19,7 @@ public class GameManager : PersistentMonoBehaviour
     private void Start()
     {
         ballMover = FindObjectOfType<BallMover>();
-        ZSerialize.LoadScene();
+        // ZSerialize.LoadScene();
     }
 
 

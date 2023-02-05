@@ -70,7 +70,7 @@ public class PersistentGameObjectEditor : Editor
                     {
                         if (GUILayout.Button("Reset ZUIDs"))
                         {
-                            manager.GenerateEditorZUIDs(false);
+                            manager.GenerateZUIDs(false, true, false);
                         }
                     }
                 }
@@ -241,16 +241,6 @@ public class PersistentGameObjectEditor : Editor
             if(check.changed)
                 EditorUtility.SetDirty(manager);
 
-        }
-
-        if (ZSerialize.IsPrefab(manager) && manager.ZUID != string.Empty)
-        {
-            // Debug.Log("ey");
-            manager.ZUID = string.Empty;
-            manager.GOZUID = string.Empty;
-            manager.serializedComponents.ForEach(sc => sc.zuid = string.Empty);
-            
-            EditorUtility.SetDirty(manager);
         }
         
         serializedObject.ApplyModifiedProperties();

@@ -49,6 +49,7 @@ public class NodeSpawner : PersistentMonoBehaviour
         {
             hingeJoint2D.connectedBody = anchorComponent.nodeTransform.GetComponent<Rigidbody2D>();
         }
+        
     }
     
     

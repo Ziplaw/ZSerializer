@@ -714,8 +714,8 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: e042fca0dd8e73d4aa497ccc6fc6bfd7
-  _gozuid: 2472f67ce3616424883b1e4429548a83
+  _zuid: ff7a0f10-064a-4fd3-ad40-b39a8216a8c5
+  _gozuid: 763ef07e-4a9b-4d36-ba2d-afb299415455
 --- !u!54 &469202270
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -762,39 +762,39 @@ MonoBehaviour:
     targetZUIDs: []
   showSettings: 0
   groupID: 0
-  _zuid: 0567020a07d2a6843841b7a507ba343d
-  _gozuid: 2472f67ce3616424883b1e4429548a83
+  _zuid: 5e311319-9a33-4654-bc0d-40dce00cf0a4
+  _gozuid: 763ef07e-4a9b-4d36-ba2d-afb299415455
   serializedComponents:
   - typeFullName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202268}
-    zuid: 7d16ce8eba009dd449ecd95fcca1535a
+    zuid: 12e9b50d-64d9-4da9-98e9-6b33ed952d23
   - typeFullName: UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202267}
-    zuid: af81d8cdfd73264498292af0451a841d
+    zuid: d6e96e30-a20b-4611-a3ae-951732198d57
   - typeFullName: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202266}
-    zuid: b90c5bcd4abdfdb4ab48b688664406d5
+    zuid: db47d1b9-9724-47a8-86b4-c8d3b1592b7b
   - typeFullName: UnityEngine.SphereCollider, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202265}
-    zuid: 160fbdcb89aaad945a20524f50805c1f
+    zuid: 28770124-1025-4af7-8b57-5e48a987cd1b
   - typeFullName: UnityEngine.Rigidbody, UnityEngine.PhysicsModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202270}
-    zuid: 1b651da3ff8282c42973cdedb5c0e422
+    zuid: 0b073079-bb33-4bff-9329-98c403257ee7
   - typeFullName: UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
     persistenceType: 0
     component: {fileID: 469202272}
-    zuid: 5eb120e81e2fb4d4fa706f2aed2d2ae9
+    zuid: d54dbfb2-c61b-4e01-a45c-f754189c49f4
 --- !u!108 &469202272
 Light:
   m_ObjectHideFlags: 0
@@ -1058,11 +1058,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 169013d6373bb5a459776631b3b6c2c4
+      value: e45d9882-e985-492d-bc99-1fe894f85575
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
-      value: eb54602fdfb5451438e11501f8ebbf24
+      value: 49d0befb-9737-4db8-85d7-c8d718fc1e1e
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
@@ -1132,11 +1132,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: 362320380a681914396be2432d540915
+      value: b01953c8-3985-4369-a6c3-885fd8a4a2a8
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
-      value: 43b0a4099121d9540a31f57dea3abcde
+      value: be2351bf-9029-4c53-ae2f-0c4b4c033480
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
@@ -1460,8 +1460,8 @@ MonoBehaviour:
   isOn: 1
   groupID: 0
   autoSync: 1
-  _zuid: 0a843d18b02bd6a4a8818e8a7c669384
-  _gozuid: d089af29a2c270f4981642c51badbda0
+  _zuid: c8a42c1e-7fc6-405b-9466-e51243c47685
+  _gozuid: 995c71ae-be09-46c0-8972-6a54778169de
   highScore: 0
   currentScore: 0
   playerName: 
@@ -1547,6 +1547,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
   m_HorizontalAxis: Horizontal
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit
@@ -1731,11 +1732,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _zuid
-      value: f8f58dd2af66b0c4ebf1868a8e632a89
+      value: 41c4bfba-ad4d-4aac-b97e-2104b7ebf661
       objectReference: {fileID: 0}
     - target: {fileID: 9127893661354651109, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}
       propertyPath: _gozuid
-      value: 34265ce7cac7763409dfd123579e0c68
+      value: 4a169fe6-04e0-449f-8bb6-f8530eb50125
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ad6d16c7d271e240ab237c6e6dd5034, type: 3}

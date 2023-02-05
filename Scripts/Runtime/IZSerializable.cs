@@ -35,8 +35,7 @@ namespace ZSerializer
         void OnPostLoad();
 
         List<string> GetZUIDList();
-        void GenerateRuntimeZUIDs(bool forceGenerateGameObject);
-        void GenerateEditorZUIDs(bool forceGenerateGameObject);
+        void GenerateZUIDs(bool overrideIDs, bool getGOZUIDFromAttachedZSerializables, bool generateZUIDsForNeighbors);
         void AddZUIDsToIDMap();
     }
 }

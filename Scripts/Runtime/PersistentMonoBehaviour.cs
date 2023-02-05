@@ -10,174 +10,151 @@ using Object = UnityEngine.Object;
 
 namespace ZSerializer
 {
-    public sealed class NonZSerialized : Attribute
-    {
-    }
+	public sealed class NonZSerialized : Attribute { }
 
-    public sealed class ForceZSerialized : Attribute
-    {
-    }
+	public sealed class ForceZSerialized : Attribute { }
 
+	public abstract class PersistentMonoBehaviour : MonoBehaviour, IZSerializable
+	{
+		/// <summary>
+		/// OnPreSave is called right before any Save occurs
+		/// </summary>
+		public virtual void OnPreSave( ) { }
 
-    public abstract class PersistentMonoBehaviour : MonoBehaviour, IZSerializable
-    {
-        /// <summary>
-        /// OnPreSave is called right before any Save occurs
-        /// </summary>
-        public virtual void OnPreSave()
-        {
-        }
+		/// <summary>
+		/// OnPostSave is called right after any Save occurs
+		/// </summary>
+		public virtual void OnPostSave( ) { }
 
-        /// <summary>
-        /// OnPostSave is called right after any Save occurs
-        /// </summary>
-        public virtual void OnPostSave()
-        {
-        }
+		/// <summary>
+		/// OnPreLoad is called right before any Load occurs
+		/// </summary>
+		public virtual void OnPreLoad( ) { }
 
-        /// <summary>
-        /// OnPreLoad is called right before any Load occurs
-        /// </summary>
-        public virtual void OnPreLoad()
-        {
-        }
+		/// <summary>
+		/// OnPostLoad is called right after any Load occurs
+		/// </summary>
+		public virtual void OnPostLoad( ) { }
 
-        /// <summary>
-        /// OnPostLoad is called right after any Load occurs
-        /// </summary>
-        public virtual void OnPostLoad()
-        {
-        }
+		public List<string> GetZUIDList( ) => new List<string> { ZUID, GOZUID };
 
-        public List<string> GetZUIDList() => new List<string> { ZUID, GOZUID };
+		[NonZSerialized, HideInInspector] public bool showSettings;
 
-        [NonZSerialized, HideInInspector] public bool showSettings;
+		[NonZSerialized, HideInInspector, SerializeField]
+		internal bool isOn = true;
 
-        [NonZSerialized, HideInInspector, SerializeField]
-        internal bool isOn = true;
+		[ForceZSerialized, HideInInspector, SerializeField]
+		internal int groupID;
 
-        [ForceZSerialized, HideInInspector, SerializeField]
-        internal int groupID;
+		[ForceZSerialized, HideInInspector, SerializeField]
+		internal bool autoSync = true;
 
-        [ForceZSerialized, HideInInspector, SerializeField]
-        internal bool autoSync = true;
+		[NonZSerialized, SerializeField, HideInInspector]
+		private string _zuid;
 
-        [NonZSerialized, SerializeField, HideInInspector]
-        private string _zuid;
+		[NonZSerialized, SerializeField, HideInInspector]
+		private string _gozuid;
 
-        [NonZSerialized, SerializeField, HideInInspector]
-        private string _gozuid;
+		public int GroupID
+		{
+			get => groupID;
+			set
+			{
+				if ( AutoSync )
+				{
+					ZSerializerSettings.Instance.componentDataDictionary[GetType( )].groupID = value;
 
+					foreach ( var o in FindObjectsOfType( GetType( ) ) )
+					{
+						if ( ( (PersistentMonoBehaviour)o ).AutoSync )
+						{
+							( (PersistentMonoBehaviour)o ).groupID = value;
+							#if UNITY_EDITOR
+							EditorUtility.SetDirty( o );
+							#endif
+						}
+					}
+				}
+				else
+					groupID = value;
+			}
+		}
 
-        public int GroupID
-        {
-            get => groupID;
-            set
-            {
-                if (AutoSync)
-                {
-                    ZSerializerSettings.Instance.componentDataDictionary[GetType()].groupID = value;
-                    foreach (var o in FindObjectsOfType(GetType()))
-                    {
-                        if (((PersistentMonoBehaviour)o).AutoSync)
-                        {
-                            ((PersistentMonoBehaviour)o).groupID = value;
-#if UNITY_EDITOR
-                            EditorUtility.SetDirty(o);
-#endif
-                        }
-                    }
-                }
-                else
-                    groupID = value;
-            }
-        }
+		public bool AutoSync
+		{
+			get => autoSync;
+			set => autoSync = value;
+		}
 
-        public bool AutoSync
-        {
-            get => autoSync;
-            set => autoSync = value;
-        }
+		public string ZUID
+		{
+			get => _zuid;
+			set => _zuid = value;
+		}
 
-        public string ZUID
-        {
-            get => _zuid;
-            set => _zuid = value;
-        }
+		public string GOZUID
+		{
+			get => _gozuid;
+			set => _gozuid = value;
+		}
 
-        public string GOZUID
-        {
-            get => _gozuid;
-            set => _gozuid = value;
-        }
+		public bool IsOn
+		{
+			get => isOn;
+			set => isOn = value;
+		}
 
-        public bool IsOn
-        {
-            get => isOn;
-            set => isOn = value;
-        }
+		public bool IsSaving { get; set; }
 
-        public bool IsSaving { get; set; }
+		public bool IsLoading { get; set; }
 
-        public bool IsLoading { get; set; }
+		protected virtual void Awake( )
+		{
+			GenerateZUIDs( false, true, false );
+			AddZUIDsToIDMap(  );
+		}
 
-        public virtual void Reset()
-        {
-            IsOn = ZSerializerSettings.Instance.componentDataDictionary[GetType()].isOn;
-            GroupID = ZSerializerSettings.Instance.componentDataDictionary[GetType()].groupID;
-            GenerateEditorZUIDs(false);
-        }
+		public virtual void Reset( )
+		{
+			IsOn = ZSerializerSettings.Instance.componentDataDictionary[GetType( )].isOn;
+			GroupID = ZSerializerSettings.Instance.componentDataDictionary[GetType( )].groupID;
+			GenerateZUIDs( false, true, false );
+		}
 
-        public void GenerateRuntimeZUIDs(bool forceGenerateGameObject)
-        {
-            bool isPrefab = false;
-#if UNITY_EDITOR
-            isPrefab = ZSerialize.IsPrefab(this);
-#endif
+		public void GenerateZUIDs( bool overrideIDs, bool getGOZUIDFromAttachedZSerializables, bool generateZUIDsForNeighbors )
+		{
+			if ( overrideIDs || string.IsNullOrEmpty( ZUID ) ) ZUID = Guid.NewGuid( ).ToString( );
 
-            ZUID = isPrefab ? "" : ZSerialize.GetRuntimeSafeZUID(typeof(PersistentGameObject));
-            var zs = GetComponents<IZSerializable>().FirstOrDefault(z => !string.IsNullOrEmpty(z.GOZUID));
-            GOZUID = isPrefab ? "" : forceGenerateGameObject ? ZSerialize.GetRuntimeSafeZUID(typeof(GameObject)) :
-                zs != null ? zs.GOZUID : ZSerialize.GetRuntimeSafeZUID(typeof(GameObject));
+			if ( overrideIDs || string.IsNullOrEmpty( GOZUID ) )
+			{
+				if ( getGOZUIDFromAttachedZSerializables )
+				{
+					var zs = GetComponents<IZSerializable>( ).FirstOrDefault( z => !string.IsNullOrEmpty( z.GOZUID ) && z.GOZUID != GOZUID );
 
+					if ( zs != null ) GOZUID = zs.GOZUID;
+					else GOZUID = ZSerialize.GetZUID( );
+				}
+				else GOZUID = ZSerialize.GetZUID( );
+			}
 
-            if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<IZSerializable>().Where(c => !ReferenceEquals(c, this)))
-                {
-                    monoBehaviour.GenerateRuntimeZUIDs(false);
-                }
-        }
+			#if UNITY_EDITOR
+			EditorUtility.SetDirty( this );
+			PrefabUtility.RecordPrefabInstancePropertyModifications( this );
+			#endif
 
-        public void GenerateEditorZUIDs(bool forceGenerateGameObject)
-        {
-#if UNITY_EDITOR
-            bool isPrefab = ZSerialize.IsPrefab(this);
-            ZUID = isPrefab ? "" : GUID.Generate().ToString();
-            var zs = GetComponents<IZSerializable>().FirstOrDefault(z => !string.IsNullOrEmpty(z.GOZUID));
-            GOZUID = isPrefab ? "" :
-                forceGenerateGameObject ? GUID.Generate().ToString() :
-                zs != null ? zs.GOZUID : GUID.Generate().ToString();
+			if ( generateZUIDsForNeighbors )
+				foreach ( var monoBehaviour in GetComponents<IZSerializable>( ).Where( c => !ReferenceEquals( c, this ) ) )
+				{
+					monoBehaviour.GenerateZUIDs( overrideIDs, true, false );
+				}
+		}
 
-            EditorUtility.SetDirty(this);
-            PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+		public void AddZUIDsToIDMap( )
+		{
+			if ( ZUID == null ) return;
 
-            if (forceGenerateGameObject)
-                foreach (var monoBehaviour in GetComponents<IZSerializable>().Where(c => !ReferenceEquals(c, this)))
-                {
-                    monoBehaviour.GenerateEditorZUIDs(false);
-                }
-#endif
-        }
-
-        public void AddZUIDsToIDMap()
-        {
-            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAddToDictionary(ZUID, this);
-            ZSerialize.idMap[ZSerialize.CurrentGroupID].TryAddToDictionary(GOZUID, gameObject);
-        }
-
-        // public virtual void OnDestroy()
-        // {
-        //     Debug.LogError(name + "GETTING DESTROYED");
-        // }
-    }
+			ZSerialize.idMap[GroupID].TryAddToDictionary( ZUID, this );
+			ZSerialize.idMap[GroupID].TryAddToDictionary( GOZUID, gameObject );
+		}
+	}
 }
