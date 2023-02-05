@@ -183,8 +183,6 @@ namespace ZSerializer
 
 			Application.wantsToQuit += ( ) =>
 			{
-				OnSceneUnload( );
-
 				return true;
 			};
 		}
@@ -193,13 +191,6 @@ namespace ZSerializer
 
 		private static void OnSceneLoad( )
 		{
-			//fill idMap
-			// foreach (var monoBehaviour in Object.FindObjectsOfType<MonoBehaviour>(true).Where(m => m is IZSerializable))
-			// {
-			//     var zs = monoBehaviour as IZSerializable;
-			//     zs!.AddZUIDsToIDMap();
-			// }
-
 			UpdateCurrentScene( );
 		}
 

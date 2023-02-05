@@ -18,7 +18,7 @@ MonoBehaviour:
   selectedSaveFile: 0
   encryptData: 0
   advancedSerialization: 0
-  serializationType: 1
+  serializationType: 0
   maxBatchCount: 50
   sceneGroups:
   - name: Home
